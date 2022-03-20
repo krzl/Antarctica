@@ -13,7 +13,9 @@ Debug/*
 Release/*
 *cmake_install.cmake
 Antarctica/*.dir/*
+Platform/*.dir/*
 Renderer/*.dir/*
+Utilities/*.dir/*
 ThirdParty/*.dir/*
 x64/*
 [B|b]uild/*

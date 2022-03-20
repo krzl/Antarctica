@@ -7,12 +7,11 @@ if (MSVC)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Yustdafx.h /FIstdafx.h")
 endif()
 
-add_library(Renderer STATIC ${SOURCES} ${HEADERS})
+add_library(Utilities STATIC ${SOURCES} ${HEADERS})
 
-target_link_libraries(Renderer assimp imgui terathon-math d3d12 d3dcompiler dxgi stb Platform Utilities)
-target_link_libraries(Renderer debug dxguid)
+target_link_libraries(Utilities terathon-math stb)
 
-target_include_directories(Renderer PUBLIC . )
+target_include_directories(Utilities PUBLIC . )
 
 set_source_files_properties( stdafx.cpp PROPERTIES COMPILE_FLAGS "/Ycstdafx.h" )
 add_definitions(-D_ENABLE_EXTENDED_ALIGNED_STORAGE)

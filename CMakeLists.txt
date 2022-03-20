@@ -14,7 +14,9 @@ set(EXECUTABLE_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 
 add_subdirectory(Antarctica)
+add_subdirectory(Platform)
 add_subdirectory(Renderer)
+add_subdirectory(Utilities)
 add_subdirectory(ThirdParty)
 
 target_link_libraries(Antarctica assimp)

@@ -5,11 +5,12 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/ FILES ${HEADERS} ${SOURCES} )
 
 if (MSVC)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Yustdafx.h /FIstdafx.h")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup")
 endif()
 
 add_executable(Antarctica WIN32 ${SOURCES} ${HEADERS})
 
-target_link_libraries(Antarctica Renderer)
+target_link_libraries(Antarctica Renderer Platform Utilities)
 
 target_include_directories(Antarctica PUBLIC . )
 

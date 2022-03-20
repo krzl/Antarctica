@@ -1,6 +1,3 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
-#include <exception>
+#include "shared_stdafx.h"
