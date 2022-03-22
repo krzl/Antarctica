@@ -20,7 +20,7 @@ public:
 	
 private:
 
-	const std::string SETTINGS_TOKEN = ": ";
+	inline const static std::string SETTINGS_TOKEN = ": ";
 
 	std::string m_filepath;
 

@@ -15,7 +15,9 @@ void Application::Start()
 
 	SetDefaultAppSettings(m_appSettings);
 	m_appSettings.LoadSettings("../Config/AppSettings.ini");
+#if _DEBUG
 	m_appSettings.SaveSettings();
+#endif
 	m_window.Init(m_inputSystem, m_appSettings);
 
 	m_window.OnWindowDestroyed.AddListener([this]()
