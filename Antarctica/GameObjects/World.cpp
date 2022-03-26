@@ -20,6 +20,7 @@ void World::SetupSpawnedGameObject(const std::shared_ptr<GameObject> gameObject)
 {
 	gameObject->m_world = this;
 	gameObject->m_instanceId = GenerateInstanceId();
+	gameObject->m_self = gameObject;
 
 	gameObject->OnCreated();
 	if (gameObject->IsEnabled())
@@ -28,15 +29,15 @@ void World::SetupSpawnedGameObject(const std::shared_ptr<GameObject> gameObject)
 	}
 }
 
-std::weak_ptr<GameObject> World::GetSpawnedObject(const uint64_t instanceId)
+Ref<GameObject> World::GetSpawnedObject(const uint64_t instanceId)
 {
 	const auto it = m_gameObjects.find(instanceId);
 	if (it != m_gameObjects.end())
 	{
-		return std::weak_ptr<GameObject>(it->second);
+		return Ref<GameObject>(it->second);
 	}
 
-	return std::weak_ptr<GameObject>();
+	return Ref<GameObject>();
 }
 
 void World::Update()
@@ -59,9 +60,9 @@ void World::Update()
 	m_pendingDestroyList.clear();
 }
 
-void World::AddToPendingDestroy(std::weak_ptr<GameObject> gameObject)
+void World::AddToPendingDestroy(const Ref<GameObject> gameObject)
 {
-	if (const auto ptr = gameObject.lock())
+	if (GameObject* ptr = *gameObject)
 	{
 		const auto it = m_gameObjects.find(ptr->GetInstanceId());
 		if (it != m_gameObjects.end())

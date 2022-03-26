@@ -13,9 +13,9 @@ public:
 
 	// Dispatchers
 
-	Dispatcher<std::weak_ptr<Component>> OnComponentEnabled;
-	Dispatcher<std::weak_ptr<Component>> OnComponentDisabled;
-	Dispatcher<std::weak_ptr<Component>> OnComponentDestroyed;
+	Dispatcher<Ref<Component>> OnComponentEnabled;
+	Dispatcher<Ref<Component>> OnComponentDisabled;
+	Dispatcher<Ref<Component>> OnComponentDestroyed;
 
 	// Getters
 
@@ -24,7 +24,7 @@ public:
 		return m_class;
 	}
 
-	std::weak_ptr<GameObject> GetOwner() const
+	Ref<GameObject> GetOwner() const
 	{
 		return m_owner;
 	}
@@ -47,10 +47,10 @@ protected:
 	
 private:
 
-	void Init(const std::weak_ptr<GameObject> owner, const std::weak_ptr<Component> weakPtr);
+	void Init(const Ref<GameObject> owner, const Ref<Component> weakPtr);
 
-	std::weak_ptr<GameObject> m_owner;
-	std::weak_ptr<Component> m_self;
+	Ref<GameObject> m_owner;
+	Ref<Component> m_self;
 	Class* m_class;
 
 	bool m_isEnabled = true;
