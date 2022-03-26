@@ -65,12 +65,15 @@ void GameObject::Destroy()
 
 Ref<Component> GameObject::GetComponentFromClass(const Class& clazz)
 {
-	const auto it = m_components.find(clazz.GetId());
-	if (it != m_components.end())
+	const auto [start, end] = m_components.equal_range(clazz.GetId());
+
+	for (auto it = start; it != end; ++it)
 	{
-		return it->second;
+		if (it->second.get() != nullptr)
+		{
+			return Ref<Component>(it->second);
+		}
 	}
-	
 	return Ref<Component>();
 }
 
@@ -78,11 +81,15 @@ std::vector<Ref<Component>> GameObject::GetComponentsFromClass(const Class& claz
 {
 	const auto [start, end] = m_components.equal_range(clazz.GetId());
 	std::vector<Ref<Component>> components(std::distance(start, end));
-	auto test = start;
 	std::transform(start, end, components.begin(), [](auto& it)
 	{
 		return Ref<Component>(it.second);
 	});
+
+	components.erase(std::remove_if(components.begin(), components.end(), [](Ref<Component>& component)
+	{
+		return *component == nullptr;
+	}));
 
 	return components;
 }
@@ -99,6 +106,36 @@ void GameObject::SetEnabled(const bool isEnabled)
 		else
 		{
 			OnObjectDisabled.Dispatch(GetWorld()->GetSpawnedObject(GetInstanceId()));
+		}
+	}
+}
+
+void GameObject::TickComponents()
+{
+	const uint32_t cachedSize = (uint32_t) m_components.size();
+
+	auto it = m_components.begin();
+	for (uint32_t i = 0; i < cachedSize; i++)
+	{
+		if (it->second.get() != nullptr)
+		{
+			auto& component = it->second;
+			component->Tick();
+
+			++it;
+		}
+	}
+
+	it = m_components.begin();
+	for (; it != m_components.end();)
+	{
+		if (it->second.get() == nullptr)
+		{
+			m_components.erase(it);
+		}
+		else
+		{
+			++it;
 		}
 	}
 }

@@ -44,11 +44,12 @@ void World::Update()
 {
 	std::shared_ptr<GameObject> ptr;
 
-	for (auto&[_, gameObject] : m_gameObjects)
+	for (auto& [_, gameObject] : m_gameObjects)
 	{
 		if (!gameObject->IsPendingDestroy())
 		{
 			gameObject->Tick();
+			gameObject->TickComponents();
 		}
 	}
 

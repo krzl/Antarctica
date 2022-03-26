@@ -55,7 +55,7 @@ public:
 		});
 		return ret;
 	}
-	
+
 private:
 	
 	Ref<Component> GetComponentFromClass(const Class& clazz);
@@ -114,6 +114,10 @@ protected:
 	virtual void Tick() {}
 	virtual void OnDisabled() {}
 	virtual void OnDestroy() {}
+
+private:
+	
+	void TickComponents();
 
 	std::unordered_multimap<uint64_t, std::shared_ptr<Component>> m_components;
 
