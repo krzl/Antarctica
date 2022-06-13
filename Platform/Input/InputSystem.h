@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../Utilities/Math/Point.h"
-
 class InputSystem
 {
 	friend class InputHandler;
@@ -40,5 +38,5 @@ private:
 	bool m_isMiddleMousePressed = false;
 	bool m_isRightMousePressed = false;
 
-	PointInt2D m_mousePosition;
+	MousePosition m_mousePosition;
 };

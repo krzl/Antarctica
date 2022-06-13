@@ -61,6 +61,9 @@ private:
 	
 public:
 
+	Dispatcher& operator=(const Dispatcher& other) = delete;
+	Dispatcher& operator=(Dispatcher&& other) noexcept = delete;
+	
 	~Dispatcher()
 	{
 		RemoveAllListeners();

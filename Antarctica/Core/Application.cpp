@@ -1,6 +1,14 @@
 #include "stdafx.h"
 #include "Application.h"
 
+#include <RenderSystem.h>
+
+#include "GameObjects/World.h"
+#include "Rendering/CameraComponent.h"
+#include "Rendering/RenderComponent.h"
+
+Application* gApp = nullptr;
+
 void SetDefaultAppSettings(Settings& appSettings)
 {
 	appSettings.SetValue("window.title", "Antarctica");
@@ -13,6 +21,8 @@ void Application::Start()
 	if (m_isRunning)
 		return;
 
+	gApp = this;
+
 	SetDefaultAppSettings(m_appSettings);
 	m_appSettings.LoadSettings("../Config/AppSettings.ini");
 #if _DEBUG
@@ -24,6 +34,10 @@ void Application::Start()
 	{
 		m_isRunning = false;
 	}, false);
+
+	m_renderSystem.Init(m_window, m_appSettings);
+
+	OnApplicationInitialized.Dispatch();
 	
 	Run();
 }
@@ -41,6 +55,7 @@ void Application::Run()
 		m_window.Update();
 		Render();
 	}
+	m_renderSystem.Cleanup();
 }
 
 void Application::Stop()
@@ -60,10 +75,16 @@ void Application::Unpause()
 
 void Application::Update()
 {
-
+	m_world.Update();
 }
 
 void Application::Render()
 {
+	auto renderQueue = RenderComponent::GetRenderQueue();
+	m_renderSystem.Render(renderQueue, CameraComponent::GetAllCameraData());
+}
 
+Application& Application::Get()
+{
+	return *gApp;
 }

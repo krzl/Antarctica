@@ -5,9 +5,9 @@
 
 bool Component::IsEnabled() const
 {
-	if (GameObject* owner = *GetOwner())
+	if (GetOwner().IsValid())
 	{
-		return owner->IsEnabled() && m_isEnabled;
+		return GetOwner()->IsEnabled() && m_isEnabled;
 	}
 	
 	return false;
@@ -17,16 +17,18 @@ void Component::SetEnabled(const bool isEnabled)
 {
 	if (m_isEnabled != isEnabled)
 	{
-		if (GameObject* owner = *GetOwner())
+		if (GetOwner().IsValid())
 		{
-			if (owner->IsEnabled())
+			if (GetOwner()->IsEnabled())
 			{
 				if (m_isEnabled)
 				{
+					OnEnabled();
 					OnComponentEnabled.Dispatch(m_self);
 				}
 				else
 				{
+					OnDisabled();
 					OnComponentDisabled.Dispatch(m_self);
 				}
 			}
@@ -34,10 +36,10 @@ void Component::SetEnabled(const bool isEnabled)
 	}
 }
 
-void Component::Init(const Ref<GameObject> owner, const Ref<Component> weakPtr)
+void Component::Init(const Ref<GameObject> owner, const Ref<Component> self)
 {
 	m_owner = owner;
-	m_self = weakPtr;
+	m_self = self;
 	
 	if (GameObject* ptr = *GetOwner())
 	{
@@ -45,6 +47,7 @@ void Component::Init(const Ref<GameObject> owner, const Ref<Component> weakPtr)
 		{
 			if (m_isEnabled)
 			{
+				OnEnabled();
 				OnComponentEnabled.Dispatch(m_self);
 			}
 		});
@@ -52,8 +55,27 @@ void Component::Init(const Ref<GameObject> owner, const Ref<Component> weakPtr)
 		{
 			if (m_isEnabled)
 			{
+				OnDisabled();
 				OnComponentDisabled.Dispatch(m_self);
 			}
 		});
+		ptr->OnObjectDestroyed.AddListener([this](Ref<GameObject> object)
+		{
+			if (IsEnabled())
+			{
+				OnDisabled();
+				OnComponentDisabled.Dispatch(m_self);
+			}
+			OnDestroy();
+			OnComponentDestroyed.Dispatch(m_self);
+		});
+	}
+
+	OnCreated();
+
+	if (IsEnabled())
+	{
+		OnEnabled();
+		OnComponentEnabled.Dispatch(m_self);
 	}
 }

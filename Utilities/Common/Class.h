@@ -1,10 +1,6 @@
 #pragma once
 
-class Test
-{
-	
-};
-
+class Component;
 class Class
 {
 	
@@ -21,7 +17,8 @@ public:
 		clazz.m_constructor = [=]()
 		{
 			std::shared_ptr<T> ptr = std::make_shared<T>();
-			ptr->m_clazz = clazz;
+			ptr->m_class = &clazz;
+			return ptr;
 		};
 		
 		return clazz;
@@ -59,11 +56,14 @@ private:
 	DefaultConstructor m_constructor;
 };
 
-#define CREATE_CLASS(clazz)								*\
-public:													*\
-	static const Class& GetClassObject()				*\
-	{													*\
-		static Class clazz = CreateClassObject<Test>();	*\
-		return clazz;									*\
-	}													*\
+#define DEFINE_CLASS()											\
+public:															\
+	static inline const Class& GetClass();						\
 private:
+
+#define CREATE_CLASS(Clazz)										\
+	const Class& Clazz::GetClass()								\
+	{															\
+		static Class clazz = Class::CreateClassObject<Clazz>();	\
+		return clazz;											\
+	}														

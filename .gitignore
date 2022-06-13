@@ -13,6 +13,8 @@ Debug/*
 Release/*
 *cmake_install.cmake
 Antarctica/*.dir/*
+AssetManagement/*.dir/*
+Game/*.dir/*
 Platform/*.dir/*
 Renderer/*.dir/*
 Utilities/*.dir/*

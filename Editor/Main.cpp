@@ -1,6 +1,8 @@
 #include "stdafx.h"
 
-#include "Core/Application.h"
+#include <GameObjects//World.h>
+#include <Core/Application.h>
+#include <Rendering/StaticMesh.h>
 
 void main()
 {
@@ -8,14 +10,7 @@ void main()
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	try
-	{
-		Application app;
-		app.Start();
-	}
-	catch (std::exception e)
-	{
+	World world;
 
-		throw;
-	}
+	world.Spawn<StaticMesh>();
 }

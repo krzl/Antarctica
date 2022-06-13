@@ -8,9 +8,9 @@ if (MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup")
 endif()
 
-add_executable(Antarctica WIN32 ${SOURCES} ${HEADERS})
+add_library(Antarctica STATIC ${SOURCES} ${HEADERS})
 
-target_link_libraries(Antarctica Renderer Platform Utilities)
+target_link_libraries(Antarctica AssetManagement Renderer Platform Utilities)
 
 target_include_directories(Antarctica PUBLIC . )
 

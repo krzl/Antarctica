@@ -74,11 +74,6 @@ void Platform::Window::Update()
 	}
 }
 
-float Platform::Window::GetAspectRatio() const
-{
-	return static_cast<float>(m_width) / static_cast<float>(m_height);
-}
-
 auto Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam, const LPARAM lParam) -> LRESULT
 {
 	switch (msg)

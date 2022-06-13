@@ -39,7 +39,7 @@ void InputHandler::ProcessMouseInput(const UINT msg, const WPARAM wParam, const 
 	const int32_t x = static_cast<int32_t>(GET_X_LPARAM(lParam));
 	const int32_t y = static_cast<int32_t>(GET_Y_LPARAM(lParam));
 	
-	m_inputSystem->m_mousePosition = PointInt2D(x, y);
+	m_inputSystem->m_mousePosition = MousePosition(x, y);
 	
 	switch (msg)
 	{

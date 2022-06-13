@@ -2,27 +2,13 @@
 #include "GameObject.h"
 
 #include "World.h"
-#include "Core/Class.h"
 
 GameObject::GameObject()
 {
-	OnObjectEnabled.AddListener([this](Ref<GameObject> obj)
-	{
-		OnEnabled();
-	}, false);
-
-	OnObjectDisabled.AddListener([this](Ref<GameObject> obj)
-	{
-		OnDisabled();
-	}, false);
-
-	OnObjectDestroyed.AddListener([this](Ref<GameObject> obj)
-	{
-		OnDestroy();
-	}, false);
+	root = AddComponent<SceneComponent>();
 }
 
-Ref<Component> GameObject::AddComponent(const Class& clazz)
+Ref<Component> GameObject::AddComponent(const Class& clazz, const Ref<SceneComponent> parent)
 {
 	const std::shared_ptr<void> object = clazz.CreateObject();
 	if (!object)
@@ -31,15 +17,25 @@ Ref<Component> GameObject::AddComponent(const Class& clazz)
 	if (!component)
 		return Ref<Component>();
 
-	const auto it = m_components.insert(std::make_pair(clazz.GetId(), std::move(component)));
+	const auto it             = m_components.insert(std::make_pair(clazz.GetId(), std::move(component)));
+	it->second->m_componentId = ++m_componentCounter;
 
-	it->second->Init(m_self, it->second);
+	if (std::shared_ptr<SceneComponent> sceneComponent = std::static_pointer_cast<SceneComponent>(it->second))
+	{
+		sceneComponent->m_parent = parent.IsValid() ? parent : root;
+	}
+
+	if (m_self.IsValid())
+	{
+		it->second->Init(m_self, it->second);
+	}
+
 	return it->second;
 }
 
 void GameObject::RemoveComponent(const Ref<Component> component)
 {
-	if (Component* ptr = *component)
+	if (const Component* ptr = *component)
 	{
 		const auto [start, end] = m_components.equal_range(ptr->GetClass()->GetId());
 		for (auto it = start; it == end; ++it)
@@ -55,8 +51,9 @@ void GameObject::RemoveComponent(const Ref<Component> component)
 
 void GameObject::Destroy()
 {
+	OnDestroy();
 	OnObjectDestroyed.Dispatch(m_self);
-	
+
 	if (m_world)
 	{
 		m_world->AddToPendingDestroy(m_self);
@@ -101,11 +98,24 @@ void GameObject::SetEnabled(const bool isEnabled)
 		m_isEnabled = isEnabled;
 		if (m_isEnabled)
 		{
+			OnEnabled();
 			OnObjectEnabled.Dispatch(GetWorld()->GetSpawnedObject(GetInstanceId()));
 		}
 		else
 		{
+			OnDisabled();
 			OnObjectDisabled.Dispatch(GetWorld()->GetSpawnedObject(GetInstanceId()));
+		}
+	}
+}
+
+void GameObject::InitComponents()
+{
+	for (auto [_, component] : m_components)
+	{
+		if (!component->m_self.IsValid())
+		{
+			component->Init(m_self, component);
 		}
 	}
 }

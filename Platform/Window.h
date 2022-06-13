@@ -19,23 +19,40 @@ namespace Platform
 		void Update();
 
 		Dispatcher<> OnWindowDestroyed;
+
+		[[nodiscard]] HWND GetHandle() const
+		{
+			return m_handle;
+		}
+
+		[[nodiscard]] float GetAspectRatio() const
+		{
+			return static_cast<float>(m_width) / static_cast<float>(m_height);
+		}
 		
-		float GetAspectRatio() const;
-		
+		[[nodiscard]] uint32_t GetWidth() const
+		{
+			return m_width;
+		}
+		[[nodiscard]] uint32_t GetHeight() const
+		{
+			return m_height;
+		}
+
 	private:
 
 		LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 		HWND m_handle = nullptr;
 
-		bool m_hasFocus = true;
+		bool m_hasFocus    = true;
 		bool m_isMinimized = false;
 		bool m_isMaximized = false;
-		bool m_isResizing = false;
+		bool m_isResizing  = false;
 
 		bool m_hasResizedLastFrame = false;
-		
-		uint32_t m_width = 0;
+
+		uint32_t m_width  = 0;
 		uint32_t m_height = 0;
 
 		InputHandler inputHandler;
