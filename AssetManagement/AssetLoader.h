@@ -14,8 +14,7 @@ class AssetLoader
 	}
 };
 
-template<>
-std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path);
+#define DEFINE_ASSET_LOADER(Type) template<> std::shared_ptr<Type> AssetLoader::Load(const std::string& path);
 
-template<>
-std::shared_ptr<Shader> AssetLoader::Load(const std::string& path);
+DEFINE_ASSET_LOADER(Mesh)
+DEFINE_ASSET_LOADER(Shader)

@@ -61,7 +61,7 @@ protected:
 
 	float m_fov = 60;
 	float m_farZ = 100;
-	float m_nearZ = 0.01;
+	float m_nearZ = 0.01f;
 	float m_order = 0;
 
 private:

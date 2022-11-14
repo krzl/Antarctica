@@ -2,7 +2,8 @@
 #include "SubmeshBuilder.h"
 
 SubmeshBuilder::SubmeshBuilder(std::vector<Vector3D>&& positions, std::vector<uint32_t>& indices) :
-	m_indices(reinterpret_cast<uint8_t*>(indices.data()), reinterpret_cast<uint8_t*>(indices.data()) + indices.size() * 4),
+	m_indices(reinterpret_cast<uint8_t*>(indices.data()),
+			  reinterpret_cast<uint8_t*>(indices.data()) + indices.size() * 4),
 	m_positions(std::move(positions))
 {
 }
@@ -62,7 +63,7 @@ Renderer::Submesh SubmeshBuilder::Build()
 
 	const Renderer::AttributeUsage attributes = GetAttributeUsage();
 
-	const uint32_t stride = GetStride();
+	const uint32_t stride = GetAttributeOffsets(attributes).m_stride;
 
 	std::vector<uint8_t> vertices(stride * m_positions.size());
 
@@ -125,44 +126,78 @@ Renderer::Submesh SubmeshBuilder::Build()
 	return submesh;
 }
 
-uint32_t SubmeshBuilder::GetStride() const
+const Renderer::AttributeOffsets& SubmeshBuilder::GetAttributeOffsets(
+	const Renderer::AttributeUsage& attributeUsage) const
 {
+	const auto it = Renderer::AttributeUsage::m_attributeOffsets.find(attributeUsage);
+
+	if (it != Renderer::AttributeUsage::m_attributeOffsets.end())
+	{
+		return it->second;
+	}
+
+	Renderer::AttributeOffsets offsets;
+
 	uint32_t stride = 3 * 4;
 
 	if (m_normals.size() != 0)
 	{
+		offsets.m_normalOffset = stride;
 		stride += 3 * 4;
 	}
 	if (m_tangents.size() != 0)
 	{
+		offsets.m_tangentOffset = stride;
 		stride += 3 * 4;
 	}
 	if (m_bitangents.size() != 0)
 	{
+		offsets.m_bitangentOffset = stride;
 		stride += 3 * 4;
 	}
 	if (m_colors.size() != 0)
 	{
-		stride += 4 * (uint32_t) m_colors.size() / (uint32_t) m_positions.size();
+		const uint8_t colorChannelCount = (uint32_t) m_colors.size() / (uint32_t) m_positions.size();
+
+		offsets.m_colorOffset0 = colorChannelCount >= 1 ? stride + 4 * 4 * 0 : 0;
+		offsets.m_colorOffset1 = colorChannelCount >= 2 ? stride + 4 * 4 * 1 : offsets.m_colorOffset0;
+		offsets.m_colorOffset2 = colorChannelCount >= 3 ? stride + 4 * 4 * 2 : offsets.m_colorOffset1;
+		offsets.m_colorOffset3 = colorChannelCount >= 4 ? stride + 4 * 4 * 3 : offsets.m_colorOffset2;
+
+		stride += 4 * 4 * colorChannelCount;
 	}
 	if (m_texcoords0.size() != 0)
 	{
+		offsets.m_texcoordOffset0 = stride;
+		offsets.m_texcoordOffset1 = stride;
+		offsets.m_texcoordOffset2 = stride;
+		offsets.m_texcoordOffset3 = stride;
 		stride += 4 * (uint32_t) m_texcoords0.size() / (uint32_t) m_positions.size();
 	}
 	if (m_texcoords1.size() != 0)
 	{
+		offsets.m_texcoordOffset1 = stride;
+		offsets.m_texcoordOffset2 = stride;
+		offsets.m_texcoordOffset3 = stride;
 		stride += 4 * (uint32_t) m_texcoords1.size() / (uint32_t) m_positions.size();
 	}
 	if (m_texcoords2.size() != 0)
 	{
+		offsets.m_texcoordOffset2 = stride;
+		offsets.m_texcoordOffset3 = stride;
 		stride += 4 * (uint32_t) m_texcoords2.size() / (uint32_t) m_positions.size();
 	}
 	if (m_texcoords3.size() != 0)
 	{
+		offsets.m_texcoordOffset3 = stride;
 		stride += 4 * (uint32_t) m_texcoords3.size() / (uint32_t) m_positions.size();
 	}
 
-	return stride;
+	offsets.m_stride = stride;
+
+	Renderer::AttributeUsage::m_attributeOffsets[attributeUsage] = offsets;
+
+	return Renderer::AttributeUsage::m_attributeOffsets[attributeUsage];
 }
 
 Renderer::AttributeUsage SubmeshBuilder::GetAttributeUsage() const

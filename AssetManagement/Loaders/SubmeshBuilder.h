@@ -18,7 +18,7 @@ public:
 	
 private:
 
-	uint32_t GetStride() const;
+	const Renderer::AttributeOffsets& GetAttributeOffsets(const Renderer::AttributeUsage& attributeUsage) const;
 	Renderer::AttributeUsage GetAttributeUsage() const;
 
 	std::vector<uint8_t> m_indices;

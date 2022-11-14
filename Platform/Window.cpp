@@ -46,13 +46,14 @@ void Platform::Window::Init(InputSystem& inputSystem, const Settings& appSetting
 		(LONG) appSettings.GetInt("window.width").value(),
 		(LONG) appSettings.GetInt("window.height").value()
 	};
+	
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
 	const int windowWidth = rect.right - rect.left;
 	const int windowHeight = rect.bottom - rect.top;
 
 	m_handle = CreateWindow("MainWndClass", appSettings.GetString("window.title").value().c_str(),
-		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, windowWidth, windowHeight, 0, 0,
-		wc.hInstance, 0);
+							WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, windowWidth, windowHeight, 0, 0,
+							wc.hInstance, 0);
 	if (!m_handle)
 	{
 		throw std::exception("CreateWindow Failed.");
@@ -78,94 +79,94 @@ auto Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam, c
 {
 	switch (msg)
 	{
-	case WM_ACTIVATE:
-		if (LOWORD(wParam) == WA_INACTIVE)
-		{
-			m_hasFocus = false;
-		}
-		else
-		{
-			m_hasFocus = true;
-		}
-		return 0;
-
-	case WM_SIZE:
-		m_width = LOWORD(lParam);
-		m_height = HIWORD(lParam);
-		if (wParam == SIZE_MINIMIZED)
-		{
-			m_hasFocus = false;
-			m_isMinimized = true;
-			m_isMaximized = false;
-		}
-		else if (wParam == SIZE_MAXIMIZED)
-		{
-			m_hasFocus = true;
-			m_isMinimized = false;
-			m_isMaximized = true;
-			m_hasResizedLastFrame = true;
-		}
-		else if (wParam == SIZE_RESTORED)
-		{
-			if (m_isMinimized)
+		case WM_ACTIVATE:
+			if (LOWORD(wParam) == WA_INACTIVE)
 			{
-				m_hasFocus = true;
-				m_isMinimized = false;
-				m_hasResizedLastFrame = true;
-			}
-
-			else if (m_isMaximized)
-			{
-				m_hasFocus = true;
-				m_isMaximized = false;
-				m_hasResizedLastFrame = true;
-			}
-			else if (m_isResizing)
-			{
-				// If user is dragging the resize bars, we do not resize 
+				m_hasFocus = false;
 			}
 			else
 			{
+				m_hasFocus = true;
+			}
+			return 0;
+
+		case WM_SIZE:
+			m_width = LOWORD(lParam);
+			m_height = HIWORD(lParam);
+			if (wParam == SIZE_MINIMIZED)
+			{
+				m_hasFocus    = false;
+				m_isMinimized = true;
+				m_isMaximized = false;
+			}
+			else if (wParam == SIZE_MAXIMIZED)
+			{
+				m_hasFocus            = true;
+				m_isMinimized         = false;
+				m_isMaximized         = true;
 				m_hasResizedLastFrame = true;
 			}
-		}
-		return 0;
+			else if (wParam == SIZE_RESTORED)
+			{
+				if (m_isMinimized)
+				{
+					m_hasFocus            = true;
+					m_isMinimized         = false;
+					m_hasResizedLastFrame = true;
+				}
 
-	case WM_ENTERSIZEMOVE:
-		m_hasFocus = false;
-		m_isResizing = true;
-		return 0;
+				else if (m_isMaximized)
+				{
+					m_hasFocus            = true;
+					m_isMaximized         = false;
+					m_hasResizedLastFrame = true;
+				}
+				else if (m_isResizing)
+				{
+					// If user is dragging the resize bars, we do not resize 
+				}
+				else
+				{
+					m_hasResizedLastFrame = true;
+				}
+			}
+			return 0;
 
-	case WM_EXITSIZEMOVE:
-		m_hasFocus = true;
-		m_isResizing = false;
-		m_hasResizedLastFrame = true;
-		return 0;
+		case WM_ENTERSIZEMOVE:
+			m_hasFocus = false;
+			m_isResizing = true;
+			return 0;
 
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		OnWindowDestroyed.Dispatch();
-		return 0;
+		case WM_EXITSIZEMOVE:
+			m_hasFocus = true;
+			m_isResizing          = false;
+			m_hasResizedLastFrame = true;
+			return 0;
 
-	case WM_MENUCHAR:
-		return MAKELRESULT(0, MNC_CLOSE);
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			OnWindowDestroyed.Dispatch();
+			return 0;
 
-	case WM_GETMINMAXINFO:
-		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
-		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;
-		return 0;
+		case WM_MENUCHAR:
+			return MAKELRESULT(0, MNC_CLOSE);
 
-	case WM_LBUTTONDOWN:
-	case WM_MBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-	case WM_LBUTTONUP:
-	case WM_MBUTTONUP:
-	case WM_RBUTTONUP:
-	case WM_MOUSEMOVE:
-	case WM_KEYUP:
-		inputHandler.ProcessMessage(msg, wParam, lParam);
-		return 0;
-	default:
-		return DefWindowProc(hwnd, msg, wParam, lParam);
+		case WM_GETMINMAXINFO:
+			((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
+			((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;
+			return 0;
+
+		case WM_LBUTTONDOWN:
+		case WM_MBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_MBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MOUSEMOVE:
+		case WM_KEYUP:
+			inputHandler.ProcessMessage(msg, wParam, lParam);
+			return 0;
+		default:
+			return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 }

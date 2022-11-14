@@ -4,7 +4,6 @@
 
 class StaticMesh : public GameObject
 {
-DEFINE_CLASS()
 
 public:
 
@@ -18,6 +17,8 @@ public:
 protected:
 
 	Ref<StaticMeshComponent> m_staticMeshComponent;
+	
+DEFINE_CLASS()
 };
 
 CREATE_CLASS(StaticMesh)

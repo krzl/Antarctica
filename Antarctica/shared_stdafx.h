@@ -19,6 +19,8 @@
 #include <cassert>
 #include <iostream>
 
+#include <chrono>
+
 #include "../ThirdParty/terathon-math/TSMath.h"
 #include "../ThirdParty/terathon-math/TSMatrix4D.h"
 #include "../ThirdParty/terathon-math/TSQuaternion.h"

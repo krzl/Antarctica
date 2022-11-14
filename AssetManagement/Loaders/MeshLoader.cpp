@@ -10,9 +10,9 @@
 
 #include "SubmeshBuilder.h"
 
-std::vector<Vector3D> CastToVector(const uint32_t count, const aiVector3D* input)
+std::vector<Vector3D> CastToVector(const uint32_t count, const aiVector3D& input)
 {
-	const Vector3D* inputArray = reinterpret_cast<const Vector3D*>(input);
+	const Vector3D* inputArray = reinterpret_cast<const Vector3D*>(&input);
 	return std::vector<Vector3D>(inputArray, inputArray + count);
 }
 
@@ -42,23 +42,18 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 			memcpy(&indices[i * 3], submesh->mFaces[i].mIndices, sizeof uint32_t * 3);
 		}
 
-		std::vector<Vector3D> vertices = CastToVector(submesh->mNumVertices, submesh->mVertices);
+		std::vector<Vector3D> vertices = CastToVector(submesh->mNumVertices, *submesh->mVertices);
 		
 		SubmeshBuilder builder(std::move(vertices), std::move(indices));
 
 		if (submesh->HasNormals())
 		{
-			builder.SetNormals(CastToVector(submesh->mNumVertices, submesh->mNormals));
+			builder.SetNormals(CastToVector(submesh->mNumVertices, *submesh->mNormals));
 		}
 		if (submesh->HasTangentsAndBitangents())
 		{
-			builder.SetTangents(CastToVector(submesh->mNumVertices, submesh->mTangents));
-			builder.SetNormals(CastToVector(submesh->mNumVertices, submesh->mBitangents));
-		}
-		if (submesh->HasTangentsAndBitangents())
-		{
-			builder.SetTangents(CastToVector(submesh->mNumVertices, submesh->mTangents));
-			builder.SetNormals(CastToVector(submesh->mNumVertices, submesh->mBitangents));
+			builder.SetTangents(CastToVector(submesh->mNumVertices, *submesh->mTangents));
+			builder.SetNormals(CastToVector(submesh->mNumVertices, *submesh->mBitangents));
 		}
 		if (submesh->GetNumColorChannels() > 0)
 		{

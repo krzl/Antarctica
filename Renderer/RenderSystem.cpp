@@ -312,7 +312,7 @@ namespace Renderer
 	{
 		for (const RenderHandle& renderable : renderQueue)
 		{
-			renderable.m_material.GetShaderObject().Bind();
+			renderable.m_material.GetShaderObject().Bind(renderable.m_attributeUsage);
 			renderable.m_material.UpdateAndBind();
 
 			renderable.m_constantBuffer.Bind(m_commandList.Get(), 0);

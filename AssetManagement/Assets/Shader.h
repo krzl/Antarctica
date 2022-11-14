@@ -15,8 +15,8 @@ class Shader : public Asset
 
 public:
 
-	explicit Shader(const Renderer::ShaderObject shaderObject) :
-		m_shaderObject(shaderObject)
+	explicit Shader(const Renderer::ShaderObject&& shaderObject) :
+		m_shaderObject(std::move(shaderObject))
 	{
 	}
 

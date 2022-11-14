@@ -14,7 +14,7 @@ public:
 
 private:
 
-	void ProcessMouseInput(UINT msg, WPARAM wParam, LPARAM lParam);
+	void ProcessMouseInput(UINT msg, WPARAM wParam, LPARAM lParam) const;
 
 	InputSystem* m_inputSystem = nullptr;
 };

@@ -15,11 +15,12 @@ std::vector<Renderer::RenderHandle> StaticMeshComponent::PrepareForRender()
 		if (m_materials.size() > i && m_materials[i])
 		{
 			UpdateConstantBuffer();
-			
+
 			renderHandles.push_back(Renderer::RenderHandle(
 														   submeshObjects[i],
 														   m_materials[i]->GetMaterialObject(),
 														   m_constantBuffer,
+														   m_mesh->GetSubmesh(i).GetAttributes(),
 														   m_materials[i]->GetOrder())
 								   );
 		}

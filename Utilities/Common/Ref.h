@@ -61,7 +61,6 @@ public:
 		return *this;
 	}
 
-	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref& operator=(std::weak_ptr<T> ptr)
 	{
 		m_ptr = ptr;
@@ -71,14 +70,12 @@ public:
 	template<
 		class D,
 		class = std::enable_if_t<std::is_base_of<T, D>::value>>
-	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref& operator=(std::weak_ptr<D> ptr)
 	{
 		m_ptr = std::weak_ptr<T>(ptr);
 		return *this;
 	}
 
-	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref& operator=(std::shared_ptr<T> ptr)
 	{
 		m_ptr = ptr;
@@ -88,7 +85,6 @@ public:
 	template<
 		class D,
 		class = std::enable_if_t<std::is_base_of<T, D>::value>>
-	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref& operator=(std::shared_ptr<D> ptr)
 	{
 		m_ptr = std::weak_ptr<T>(ptr);

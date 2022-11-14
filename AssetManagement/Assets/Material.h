@@ -39,5 +39,5 @@ public:
 private:
 	Renderer::MaterialObject m_materialObject;
 	std::shared_ptr<Shader> m_shader;
-	float m_order;
+	float m_order = 0;
 };

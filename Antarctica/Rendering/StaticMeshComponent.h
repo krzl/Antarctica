@@ -8,8 +8,6 @@
 
 class StaticMeshComponent : public RenderComponent
 {
-	
-	DEFINE_CLASS()
 
 public:
 
@@ -62,6 +60,8 @@ private:
 
 	std::shared_ptr<Mesh> m_mesh;
 	std::vector<std::shared_ptr<Material>> m_materials;
+
+DEFINE_CLASS()
 };
 
 CREATE_CLASS(StaticMeshComponent)

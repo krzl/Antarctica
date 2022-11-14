@@ -1,9 +1,9 @@
 
 struct VertexIn
 {
-	float3 pos		: POSITION;
+	float3 pos		: POSITION0;
     float3 normal	: NORMAL;
-	float2 texcoord	: TEXCOORD;
+	float2 texcoord	: TEXCOORD0;
 };
 
 struct VertexOut
@@ -45,5 +45,5 @@ VertexOut vs(VertexIn vin)
 
 float4 ps(VertexOut pin) : SV_Target
 {
-    return float4(1,1,0,1);
+    return float4(1,0.3,0,1);
 }

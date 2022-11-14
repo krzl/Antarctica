@@ -25,10 +25,10 @@ public:
 	
 private:
 
-	explicit DispatchHandle(DispatcherType& dispatcher, uint32_t id, const bool autoClear = true) :
+	explicit DispatchHandle(DispatcherType& dispatcher, const uint32_t id, const bool autoClear = true) :
 		m_dispatcher(&dispatcher),
-		m_id(id),
-		m_autoClear(autoClear)
+		m_autoClear(autoClear),
+		m_id(id)
 	{
 	}
 

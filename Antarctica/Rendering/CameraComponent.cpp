@@ -23,10 +23,9 @@ void CameraComponent::OnDisabled()
 
 Matrix4D CameraComponent::GetLookAtMatrix() const
 {
-	const Point3D worldPosition = GetWorldPosition();
-	Vector3D forward            = GetWorldRotation().GetDirectionY();
-	Vector3D right              = Cross(forward, Vector3D::z_unit).Normalize();
-	Vector3D up                 = Cross(right, forward);
+	Vector3D forward = GetWorldRotation().GetDirectionY();
+	Vector3D right   = Cross(forward, Vector3D::z_unit).Normalize();
+	Vector3D up      = Cross(right, forward);
 
 	return Matrix4D(
 					Vector4D(right, 0),
@@ -55,9 +54,6 @@ Matrix4D CameraComponent::GetPerspectiveMatrix() const
 void CameraComponent::UpdateConstantBuffer()
 {
 	const auto viewProj = GetPerspectiveMatrix() * GetLookAtMatrix();
-
-	Matrix4D proj = GetPerspectiveMatrix();
-	Matrix4D view = GetLookAtMatrix();
 
 	Renderer::PerCameraBuffer* buffer = m_constantBuffer.GetData<Renderer::PerCameraBuffer>();
 	buffer->m_viewProjMatrix          = viewProj.transpose;

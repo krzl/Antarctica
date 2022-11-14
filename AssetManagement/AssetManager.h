@@ -10,7 +10,7 @@ public:
 	template<
 		typename T,
 		typename = std::enable_if_t<std::is_base_of<Asset, T>::value>>
-	static [[nodiscard]] std::shared_ptr<T> GetAsset(std::string path)
+	static [[nodiscard]] std::shared_ptr<T> GetAsset(const std::string& path)
 	{
 		const uint64_t assetId = GetAssetId(path);
 
@@ -39,10 +39,7 @@ public:
 
 private:
 
-	static void AddToAssetDatabase(const std::weak_ptr<Asset> asset, const uint64_t id)
-	{
-		m_assetDatabase[id] = asset;
-	}
+	static void AddToAssetDatabase(const std::weak_ptr<Asset>& asset, const uint64_t id);
 
 	static uint64_t GetAssetId(const std::string& path);
 

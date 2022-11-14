@@ -3,6 +3,7 @@
 namespace Renderer
 {
 	struct Submesh;
+	
 	class SubmeshObject
 	{
 	public:

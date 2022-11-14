@@ -46,7 +46,7 @@ public:
 
 private:
 
-	Class(const uint64_t id) :
+	explicit Class(const uint64_t id) :
 		m_id(id)
 	{
 	}

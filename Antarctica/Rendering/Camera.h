@@ -5,7 +5,6 @@
 
 class Camera : public GameObject
 {
-DEFINE_CLASS()
 
 public:
 
@@ -14,6 +13,8 @@ public:
 protected:
 
 	Ref<CameraComponent> m_camera;
+
+DEFINE_CLASS()
 };
 
 CREATE_CLASS(Camera)

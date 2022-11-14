@@ -8,7 +8,10 @@ namespace Renderer
 {
 	bool ShaderObject::IsCompiled() const
 	{
-		return m_vsByteCode.Get() != nullptr;
+		struct stat fileStat;
+		stat(m_path.c_str(), &fileStat);
+		
+		return m_lastCompileTime >= fileStat.st_mtime;
 	}
 
 	void ShaderObject::Compile()
@@ -30,6 +33,11 @@ namespace Renderer
 		{
 			OutputDebugStringA((char*) errors->GetBufferPointer());
 			throw "Error compiling vertex shader";
+		}
+
+		if (m_vsByteCode == nullptr)
+		{
+			return;
 		}
 
 		RenderSystem::Get().GetDevice()->CreateRootSignature(0, m_vsByteCode->GetBufferPointer(),
@@ -54,27 +62,23 @@ namespace Renderer
 		D3DCompileFromFile(wPath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "gs",
 						   "gs_5_0", compileFlags, 0, &m_gsByteCode, &errors);
 
-		CreatePipelineState();
 
-		m_vsByteCode->Release();
-		m_psByteCode->Release();
-		if (m_dsByteCode.Get() != nullptr)
-		{
-			m_dsByteCode->Release();
-		}
-		if (m_hsByteCode.Get() != nullptr)
-		{
-			m_hsByteCode->Release();
-		}
-		if (m_gsByteCode.Get() != nullptr)
-		{
-			m_gsByteCode->Release();
-		}
+		D3DReflect(m_vsByteCode->GetBufferPointer(), m_vsByteCode->GetBufferSize(), IID_PPV_ARGS(&m_vsReflector));
+		m_vsReflector->GetDesc(&m_vsDescriptor);
+		
+		D3DReflect(m_psByteCode->GetBufferPointer(), m_psByteCode->GetBufferSize(), IID_PPV_ARGS(&m_psReflector));
+		m_psReflector->GetDesc(&m_psDescriptor);
+		
+		struct stat fileStat;
+		stat(m_path.c_str(), &fileStat);
+		
+		m_lastCompileTime = fileStat.st_mtime;
+		
 	}
 
-	void ShaderObject::CreatePipelineState()
+	ComPtr<ID3D12PipelineState> ShaderObject::CreatePipelineState(const AttributeUsage attributeUsage) const
 	{
-		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElements = GetInputElements();
+		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElements = GetInputElements(attributeUsage);
 		std::vector<DXGI_FORMAT> outputFormats              = GetOutputFormats();
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc = {
@@ -128,36 +132,46 @@ namespace Renderer
 			pipelineStateDesc.RTVFormats[i] = outputFormats[i];
 		}
 
-
+		ComPtr<ID3D12PipelineState> pipelineState;
 		RenderSystem::Get().GetDevice()->
-							CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&m_pipelineState));
-
-
+							CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&pipelineState));
+		
 		for (auto& inputElement : inputElements)
 		{
 			delete[] inputElement.SemanticName;
 		}
+
+		return pipelineState;
+	}
+	
+	ID3D12PipelineState* ShaderObject::GetPipelineState(const AttributeUsage attributeUsage) const
+	{
+		const auto it = m_pipelineStates.find(attributeUsage);
+		if (it != m_pipelineStates.end())
+		{
+			return it->second.Get();
+		}
+
+		const ComPtr<ID3D12PipelineState> pipelineState = CreatePipelineState(attributeUsage);
+		m_pipelineStates[attributeUsage] = pipelineState;
+		return pipelineState.Get();
 	}
 
-	std::vector<D3D12_INPUT_ELEMENT_DESC> ShaderObject::GetInputElements() const
+	std::vector<D3D12_INPUT_ELEMENT_DESC> ShaderObject::GetInputElements(const AttributeUsage attributeUsage) const
 	{
-		ComPtr<ID3D12ShaderReflection> reflector;
-		D3DReflect(m_vsByteCode->GetBufferPointer(), m_vsByteCode->GetBufferSize(), IID_PPV_ARGS(&reflector));
+		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElements(m_vsDescriptor.InputParameters);
 
-		D3D12_SHADER_DESC desc;
-		reflector->GetDesc(&desc);
+		const AttributeOffsets& offsets = AttributeUsage::m_attributeOffsets[attributeUsage];
 
-		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElements(desc.InputParameters);
-
-		for (uint32_t i = 0; i < desc.InputParameters; ++i)
+		for (uint32_t i = 0; i < m_vsDescriptor.InputParameters; ++i)
 		{
 			D3D12_SIGNATURE_PARAMETER_DESC signatureParameter;
-			reflector->GetInputParameterDesc(i, &signatureParameter);
-
+			m_vsReflector->GetInputParameterDesc(i, &signatureParameter);
+			
 			inputElements[i].SemanticName = _strdup(signatureParameter.SemanticName);
 			inputElements[i].SemanticIndex = signatureParameter.SemanticIndex;
 			inputElements[i].Format = GetLayoutElement(signatureParameter.Mask, signatureParameter.ComponentType);
-			inputElements[i].AlignedByteOffset = i == 0 ? 0 : D3D12_APPEND_ALIGNED_ELEMENT;
+			inputElements[i].AlignedByteOffset = offsets.GetOffset(inputElements[i].SemanticName, inputElements[i].SemanticIndex);
 			inputElements[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
 			inputElements[i].InstanceDataStepRate = 0;
 		}
@@ -208,18 +222,12 @@ namespace Renderer
 
 	std::vector<DXGI_FORMAT> ShaderObject::GetOutputFormats() const
 	{
-		ComPtr<ID3D12ShaderReflection> reflector;
-		D3DReflect(m_psByteCode->GetBufferPointer(), m_psByteCode->GetBufferSize(), IID_PPV_ARGS(&reflector));
+		std::vector<DXGI_FORMAT> outputElements(m_psDescriptor.OutputParameters);
 
-		D3D12_SHADER_DESC desc;
-		reflector->GetDesc(&desc);
-
-		std::vector<DXGI_FORMAT> outputElements(desc.OutputParameters);
-
-		for (uint32_t i = 0; i < desc.OutputParameters; ++i)
+		for (uint32_t i = 0; i < m_psDescriptor.OutputParameters; ++i)
 		{
 			D3D12_SIGNATURE_PARAMETER_DESC signatureParameter;
-			reflector->GetOutputParameterDesc(i, &signatureParameter);
+			m_psReflector->GetOutputParameterDesc(i, &signatureParameter);
 
 			outputElements[i] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		}
