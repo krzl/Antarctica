@@ -244,7 +244,7 @@ namespace Renderer
 		FlushCommandQueue();
 	}
 
-	void RenderSystem::Render(std::set<RenderHandle>& renderQueue, const std::set<CameraData>& cameras)
+	void RenderSystem::Render(std::priority_queue<RenderHandle>& renderQueue, std::priority_queue<CameraData>& cameras)
 	{
 		if (m_commandFence->GetCompletedValue() <= m_currentFenceId - BUFFER_COUNT)
 		{
@@ -256,12 +256,16 @@ namespace Renderer
 
 		ResetCommandList();
 
-		for (const CameraData& camera : cameras)
+		while (!cameras.empty())
 		{
+			const CameraData& camera = cameras.top();
+			
 			SetupCamera(camera);
 			SetupRenderTarget(camera);
 			DrawObjects(renderQueue, camera);
 			FinalizeDrawing();
+
+			cameras.pop();
 		}
 
 		ExecuteCommandLists();
@@ -308,19 +312,23 @@ namespace Renderer
 		m_commandList->OMSetRenderTargets(1, &backbufferView, true, &depthStencilView);
 	}
 
-	void RenderSystem::DrawObjects(std::set<RenderHandle>& renderQueue, const CameraData& camera)
+	void RenderSystem::DrawObjects(std::priority_queue<RenderHandle>& renderQueue, const CameraData& camera)
 	{
-		for (const RenderHandle& renderable : renderQueue)
+		while (!renderQueue.empty())
 		{
-			renderable.m_material.GetShaderObject().Bind(renderable.m_attributeUsage);
-			renderable.m_material.UpdateAndBind();
+			const RenderHandle& renderable = renderQueue.top();
+			
+			renderable.m_material->GetShaderObject().Bind(*renderable.m_attributeUsage);
+			renderable.m_material->UpdateAndBind();
 
-			renderable.m_constantBuffer.Bind(m_commandList.Get(), 0);
-			camera.m_constantBuffer.Bind(m_commandList.Get(), 1); //TODO: bind only when it wasn't bound before
+			renderable.m_constantBuffer->Bind(m_commandList.Get(), 0);
+			camera.m_constantBuffer->Bind(m_commandList.Get(), 1); //TODO: bind only when it wasn't bound before
 
-			renderable.m_submesh.Bind();
+			renderable.m_submesh->Bind();
 
-			m_commandList->DrawIndexedInstanced(renderable.m_submesh.m_indexCount, 1, 0, 0, 0);
+			m_commandList->DrawIndexedInstanced(renderable.m_submesh->m_indexCount, 1, 0, 0, 0);
+
+			renderQueue.pop();
 		}
 	}
 

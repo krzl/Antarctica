@@ -54,6 +54,11 @@ void SubmeshBuilder::SetTexcoords(std::vector<float>&& texcoords, const uint8_t 
 	}
 }
 
+void SubmeshBuilder::SetSkeleton(Skeleton&& skeleton)
+{
+	m_skeleton = std::move(skeleton);
+}
+
 Renderer::Submesh SubmeshBuilder::Build()
 {
 	Renderer::MeshBuffer indexBuffer = {
@@ -91,27 +96,27 @@ Renderer::Submesh SubmeshBuilder::Build()
 		}
 		if (m_colors.size() != 0)
 		{
-			memcpy(&vertices[headIndex], &m_colors[i], sizeof m_colors[i] * attributes.m_colorChannelCount);
+			memcpy(&vertices[headIndex], &m_colors[i * attributes.m_colorChannelCount], sizeof m_colors[i] * attributes.m_colorChannelCount);
 			headIndex += sizeof m_colors[i] * attributes.m_colorChannelCount;
 		}
 		if (m_texcoords0.size() != 0)
 		{
-			memcpy(&vertices[headIndex], &m_texcoords0[i], sizeof m_texcoords0[i] * attributes.m_dataSizeTexcoord0);
+			memcpy(&vertices[headIndex], &m_texcoords0[i * attributes.m_dataSizeTexcoord0], sizeof m_texcoords0[i] * attributes.m_dataSizeTexcoord0);
 			headIndex += sizeof m_texcoords0[i] * attributes.m_dataSizeTexcoord0;
 		}
 		if (m_texcoords1.size() != 0)
 		{
-			memcpy(&vertices[headIndex], &m_texcoords1[i], sizeof m_texcoords1[i] * attributes.m_dataSizeTexcoord1);
+			memcpy(&vertices[headIndex], &m_texcoords1[i * attributes.m_dataSizeTexcoord1], sizeof m_texcoords1[i] * attributes.m_dataSizeTexcoord1);
 			headIndex += sizeof m_texcoords1[i] * attributes.m_dataSizeTexcoord1;
 		}
 		if (m_texcoords2.size() != 0)
 		{
-			memcpy(&vertices[headIndex], &m_texcoords2[i], sizeof m_texcoords2[i] * attributes.m_dataSizeTexcoord2);
+			memcpy(&vertices[headIndex], &m_texcoords2[i * attributes.m_dataSizeTexcoord2], sizeof m_texcoords2[i] * attributes.m_dataSizeTexcoord2);
 			headIndex += sizeof m_texcoords2[i] * attributes.m_dataSizeTexcoord2;
 		}
 		if (m_texcoords3.size() != 0)
 		{
-			memcpy(&vertices[headIndex], &m_texcoords3[i], sizeof m_texcoords3[i] * attributes.m_dataSizeTexcoord3);
+			memcpy(&vertices[headIndex], &m_texcoords3[i * attributes.m_dataSizeTexcoord3], sizeof m_texcoords3[i] * attributes.m_dataSizeTexcoord3);
 			headIndex += sizeof m_texcoords3[i] * attributes.m_dataSizeTexcoord3;
 		}
 	}
@@ -122,7 +127,8 @@ Renderer::Submesh SubmeshBuilder::Build()
 	};
 
 	Renderer::Submesh submesh(std::move(vertexBuffer), std::move(indexBuffer), attributes);
-
+	submesh.SetSkeleton(std::move(m_skeleton));
+	
 	return submesh;
 }
 

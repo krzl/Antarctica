@@ -9,10 +9,11 @@ class RenderComponent : public SceneComponent
 {
 public:
 
-	static std::set<Renderer::RenderHandle> GetRenderQueue();
+	static std::priority_queue<Renderer::RenderHandle> GetRenderQueue();
 
 	virtual void OnEnabled() override;
 	virtual void OnDisabled() override;
+	virtual void Tick() override;
 	
 protected:
 

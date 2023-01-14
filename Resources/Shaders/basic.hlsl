@@ -1,4 +1,3 @@
-
 struct VertexIn
 {
 	float3 pos		: POSITION0;
@@ -24,9 +23,14 @@ cbuffer cbCamera : register(b1)
 	float4x4	viewProj;
 };
 
+Texture2D tex : register(t2);
+SamplerState samp : register(s0);
+
 #define RS	"RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT)," \
 			"CBV(b0)," \
-			"CBV(b1)" \
+			"CBV(b1)," \
+			"DescriptorTable( SRV(t2, numDescriptors = unbounded))," \
+			"StaticSampler(s0)"
 			
 [RootSignature(RS)]
 VertexOut vs(VertexIn vin)
@@ -38,12 +42,13 @@ VertexOut vs(VertexIn vin)
 	vout.pos		= mul(worldPos, viewProj);
 	vout.worldPos	= worldPos.xyz;
     vout.normal		= vin.normal;
-	vout.texcoord	= vin.texcoord;
+	vout.texcoord	= float2(vin.texcoord.x, 1.0f - vin.texcoord.y);
     
     return vout;
 }
 
 float4 ps(VertexOut pin) : SV_Target
 {
-    return float4(1,0.3,0,1);
+	return tex.Sample(samp, pin.texcoord);
+    return float4(1,0.2,0.0,1);
 }

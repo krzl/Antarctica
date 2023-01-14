@@ -26,7 +26,7 @@ namespace Renderer
 		void Init(const Platform::Window& window, const Settings& settings);
 		void FlushCommandQueue();
 		void OnResize(const Platform::Window& window);
-		void Render(std::set<RenderHandle>& renderQueue, const std::set<CameraData>& cameras);
+		void Render(std::priority_queue<RenderHandle>& renderQueue, std::priority_queue<CameraData>& cameras);
 		void Present();
 		void Cleanup();
 
@@ -54,12 +54,17 @@ namespace Renderer
 		{
 			return m_currentBackbufferId;
 		}
+		
+		[[nodiscard]] uint32_t GetCurrentFenceId() const
+		{
+			return m_currentFenceId;
+		}
 
 	private:
 		void ResetCommandList();
 		void SetupCamera(const CameraData& camera);
 		void SetupRenderTarget(const CameraData& camera);
-		void DrawObjects(std::set<RenderHandle>& renderQueue, const CameraData& camera);
+		void DrawObjects(std::priority_queue<RenderHandle>& renderQueue, const CameraData& camera);
 		void FinalizeDrawing();
 		void ExecuteCommandLists();
 
@@ -79,7 +84,7 @@ namespace Renderer
 		D3D12_VIEWPORT m_viewport = {};
 		D3D12_RECT m_scissorRect  = {};
 
-
+		
 		uint32_t m_currentFenceId      = 0;
 		uint32_t m_currentBackbufferId = 0;
 

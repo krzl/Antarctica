@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../AssetManagement/Asset.h"
+#include "../Asset.h"
 
 #include "Shaders/ShaderObject.h"
 

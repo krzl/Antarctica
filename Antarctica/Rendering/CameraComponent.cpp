@@ -59,16 +59,16 @@ void CameraComponent::UpdateConstantBuffer()
 	buffer->m_viewProjMatrix          = viewProj.transpose;
 }
 
-std::set<Renderer::CameraData> CameraComponent::GetAllCameraData()
+std::priority_queue<Renderer::CameraData> CameraComponent::GetAllCameraData()
 {
-	std::set<Renderer::CameraData> cameraData;
+	std::priority_queue<Renderer::CameraData> cameraData;
 
 	for (CameraComponent* camera : cameraComponents)
 	{
 		camera->UpdateConstantBuffer();
 		cameraData.emplace(Renderer::CameraData
 						   {
-							   camera->m_constantBuffer,
+							   &camera->m_constantBuffer,
 							   camera->GetOrder()
 						   });
 	}

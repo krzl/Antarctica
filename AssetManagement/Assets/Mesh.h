@@ -1,13 +1,41 @@
 #pragma once
 
-#include <Objects/MeshObject.h>
+#include "../Asset.h"
 
-#include "Asset.h"
+#include <Objects/MeshObject.h>
 
 namespace Renderer
 {
 	struct Submesh;
 }
+
+struct BoneWeight
+{
+	uint32_t m_vertexId = 0;
+	float m_weight      = 0.0f;
+};
+
+struct Bone
+{
+	Bone() :
+		m_parent(nullptr)
+	{
+	}
+
+	Bone(const Bone* parent, std::vector<BoneWeight>&& weights)
+		: m_parent(parent),
+		  m_weights(std::move(weights))
+	{
+	}
+
+	const Bone* m_parent = nullptr;
+	std::vector<BoneWeight> m_weights;
+};
+
+struct Skeleton
+{
+	std::vector<Bone> m_bones;
+};
 
 class Mesh : public Asset
 {
@@ -33,16 +61,27 @@ public:
 
 	[[nodiscard]] Renderer::MeshObject& GetMeshObject()
 	{
-		return meshObject;
+		return m_meshObject;
 	}
 
 	[[nodiscard]] const Renderer::MeshObject& GetMeshObject() const
 	{
-		return meshObject;
+		return m_meshObject;
+	}
+
+	[[nodiscard]] const Transform4D& GetGlobalInverseMatrix() const
+	{
+		return m_globalInverseMatrix;
+	}
+
+	void SetGlobalInverseMatrix(const Transform4D& globalInverseMatrix)
+	{
+		m_globalInverseMatrix = globalInverseMatrix;
 	}
 
 private:
 
-	Renderer::MeshObject meshObject;
+	Renderer::MeshObject m_meshObject;
 	std::vector<Renderer::Submesh> m_submeshes;
+	Transform4D m_globalInverseMatrix = Transform4D::identity;
 };

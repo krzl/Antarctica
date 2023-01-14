@@ -5,9 +5,9 @@
 
 std::unordered_set<RenderComponent*> renderComponents;
 
-std::set<Renderer::RenderHandle> RenderComponent::GetRenderQueue()
+std::priority_queue<Renderer::RenderHandle> RenderComponent::GetRenderQueue()
 {
-	std::set<Renderer::RenderHandle> renderQueue;
+	std::priority_queue<Renderer::RenderHandle> renderQueue;
 
 	for (RenderComponent* component : renderComponents)
 	{
@@ -33,6 +33,11 @@ void RenderComponent::OnEnabled()
 void RenderComponent::OnDisabled()
 {
 	renderComponents.erase(*GetRef().Cast<RenderComponent>());
+}
+
+void RenderComponent::Tick()
+{
+	SetLocalRotation(m_rotation * Quaternion::MakeRotationY(0.00087266462));
 }
 
 void RenderComponent::UpdateConstantBuffer()

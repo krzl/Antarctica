@@ -2,6 +2,7 @@
 
 #include "Assets/Mesh.h"
 #include "Assets/Shader.h"
+#include "Assets/Texture.h"
 
 class AssetLoader
 {
@@ -18,3 +19,4 @@ class AssetLoader
 
 DEFINE_ASSET_LOADER(Mesh)
 DEFINE_ASSET_LOADER(Shader)
+DEFINE_ASSET_LOADER(Texture)

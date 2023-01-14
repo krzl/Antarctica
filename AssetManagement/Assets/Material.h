@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Shaders/MaterialObject.h>
-#include "Asset.h"
+#include "../Asset.h"
 #include "Shader.h"
 
 class Shader;
@@ -36,7 +36,13 @@ public:
 		m_order = order;
 	}
 	
+	void SetTexture(const std::string& name, std::shared_ptr<Texture> texture)
+	{
+		m_materialObject.m_textures[name] = std::move(texture);
+	}
+
 private:
+
 	Renderer::MaterialObject m_materialObject;
 	std::shared_ptr<Shader> m_shader;
 	float m_order = 0;

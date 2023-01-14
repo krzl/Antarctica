@@ -19,22 +19,26 @@ std::vector<Vector3D> CastToVector(const uint32_t count, const aiVector3D& input
 template<>
 std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 {
-	const aiScene* scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
+	const aiScene* scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_PopulateArmatureData);
 
 	std::vector<Renderer::MeshBuffer> indexDataList;
 	std::vector<Renderer::MeshBuffer> vertexDataList;
 
 	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
-
+	
 	if (!scene)
 	{
 		return mesh;
 	}
+	
+	Transform4D globalTransformMatrix;
+	memcpy(globalTransformMatrix.matrix.data, &scene->mRootNode->mTransformation.a1, sizeof(globalTransformMatrix));
+	mesh->SetGlobalInverseMatrix(Inverse(globalTransformMatrix));
 
 	for (uint32_t meshId = 0; meshId < scene->mNumMeshes; ++meshId)
 	{
 		aiMesh* submesh = scene->mMeshes[meshId];
-
+		
 		std::vector<uint32_t> indices(submesh->mNumFaces * 3);
 
 		for (uint32_t i = 0; i < submesh->mNumFaces; i++)
@@ -72,6 +76,36 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 			{
 				memcpy(&texcoords[i * channelCount], &submesh->mTextureCoords[uvChannel][i], sizeof(float) * channelCount);
 			}
+			builder.SetTexcoords(std::move(texcoords), uvChannel);
+		}
+		if (submesh->HasBones())
+		{
+			Skeleton skeleton;
+			skeleton.m_bones.resize(submesh->mNumBones);
+
+			std::unordered_map<aiNode*, Bone*> nodeToBoneMap(submesh->mNumBones);
+			
+			for (uint32_t boneId = 0; boneId < submesh->mNumBones; ++boneId)
+			{
+				Bone& bone = skeleton.m_bones[boneId];
+				const aiBone* mBone = submesh->mBones[boneId];
+				
+				auto it = nodeToBoneMap.find(mBone->mNode->mParent);
+				bone.m_parent = it != nodeToBoneMap.end() ? it->second : nullptr;
+				bone.m_weights.resize(mBone->mNumWeights);
+				
+				for (uint32_t weightId = 0; weightId < mBone->mNumWeights; ++weightId)
+				{
+					bone.m_weights[weightId] = {
+						mBone->mWeights[weightId].mVertexId,
+						mBone->mWeights[weightId].mWeight,
+					};
+				}
+
+				nodeToBoneMap[mBone->mNode] = &bone;
+			}
+
+			builder.SetSkeleton(std::move(skeleton));
 		}
 
 		mesh->AddSubmesh(builder.Build());

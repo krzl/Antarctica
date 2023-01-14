@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MeshObject.h"
+#include "SubmeshData.h"
 
 namespace Renderer
 {

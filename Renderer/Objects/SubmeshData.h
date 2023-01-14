@@ -1,4 +1,5 @@
 #pragma once
+#include "../../AssetManagement/Assets/Mesh.h"
 
 namespace Renderer
 {
@@ -72,10 +73,20 @@ namespace Renderer
 			return m_attributes;
 		}
 
+		[[nodiscard]] const Skeleton& GetSkeleton() const
+		{
+			return m_skeleton;
+		}
+		
+		void SetSkeleton(Skeleton&& skeleton)
+		{
+			m_skeleton = std::move(skeleton);
+		}
+		
 	private:
-
 		MeshBuffer m_vertexBuffer;
 		MeshBuffer m_indexBuffer;
+		Skeleton m_skeleton;
 		AttributeUsage m_attributes;
 	};
 }

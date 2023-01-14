@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../Renderer/Objects/SubmeshObject.h"
-#include "SubmeshData.h"
 
 namespace Renderer
 {

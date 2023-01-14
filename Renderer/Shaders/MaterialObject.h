@@ -1,11 +1,16 @@
 #pragma once
 
 #include "ShaderObject.h"
+#include "../AssetManagement/Assets/Texture.h"
+
+class Material;
 
 namespace Renderer
 {
 	class MaterialObject
 	{
+		friend class Material;
+		
 	public:
 
 		explicit MaterialObject(ShaderObject& shader) :
@@ -23,5 +28,6 @@ namespace Renderer
 	private:
 
 		ShaderObject& m_shader;
+		std::unordered_map<std::string, std::shared_ptr<Texture>> m_textures;
 	};
 }

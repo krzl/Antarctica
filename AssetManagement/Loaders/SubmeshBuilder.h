@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Objects/SubmeshData.h>
+
 #include "Assets/Mesh.h"
 
 class SubmeshBuilder
@@ -13,6 +15,7 @@ public:
 	void SetBitangents(std::vector<Vector3D>&& bitangents);
 	void SetColors(std::vector<Vector4D>&& colors);
 	void SetTexcoords(std::vector<float>&& texcoords, uint8_t channel);
+	void SetSkeleton(Skeleton&& skeleton);
 
 	Renderer::Submesh Build();
 	
@@ -31,4 +34,5 @@ private:
 	std::vector<float> m_texcoords1;
 	std::vector<float> m_texcoords2;
 	std::vector<float> m_texcoords3;
+	Skeleton m_skeleton;
 };

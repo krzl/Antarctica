@@ -31,7 +31,7 @@ public:
 		return m_materials;
 	}
 
-	void SetMaterial(const std::shared_ptr<Material> material, const uint32_t index = 0)
+	void SetMaterial(const std::shared_ptr<Material>& material, const uint32_t index = 0)
 	{
 		assert(index < 8);
 		if (m_materials.size() <= index)

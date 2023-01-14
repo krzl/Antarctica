@@ -7,10 +7,10 @@ namespace Renderer
 	class ConstantBuffer;
 	struct RenderHandle
 	{
-		SubmeshObject& m_submesh;
-		const MaterialObject& m_material;
-		ConstantBuffer& m_constantBuffer;
-		const AttributeUsage& m_attributeUsage;
+		SubmeshObject* m_submesh;
+		const MaterialObject* m_material;
+		ConstantBuffer* m_constantBuffer;
+		const AttributeUsage* m_attributeUsage;
 		float m_order;
 
 		friend bool operator<(const RenderHandle& lhs, const RenderHandle& rhs)
@@ -32,10 +32,10 @@ namespace Renderer
 
 		RenderHandle(SubmeshObject& submesh, const MaterialObject& material,
 					 ConstantBuffer& constantBuffer, const AttributeUsage& attributeUsage, const float order)
-			: m_submesh(submesh),
-			  m_material(material),
-			  m_constantBuffer(constantBuffer),
-			  m_attributeUsage(attributeUsage),
+			: m_submesh(&submesh),
+			  m_material(&material),
+			  m_constantBuffer(&constantBuffer),
+			  m_attributeUsage(&attributeUsage),
 			  m_order(order)
 		{
 		}

@@ -2,6 +2,7 @@
 
 #include <d3d12shader.h>
 #include "Objects/SubmeshData.h"
+#include "ShaderDescriptor.h"
 
 namespace Renderer
 {
@@ -18,12 +19,24 @@ namespace Renderer
 		~ShaderObject();
 
 		void Bind(const AttributeUsage& attributeUsage) const;
-
+		
+		[[nodiscard]] const ShaderDescriptor& GetShaderDescriptor() const
+		{
+			return shaderDescriptor;
+		}
+		
+		[[nodiscard]] ShaderDescriptor& GetShaderDescriptor()
+		{
+			return shaderDescriptor;
+		}
+		
 	private:
 
 		bool IsCompiled() const;
 
 		void Compile();
+		void PopulateShaderDescriptor();
+		
 		ComPtr<ID3D12PipelineState> CreatePipelineState(AttributeUsage attributeUsage) const;	
 
 		ID3D12PipelineState* GetPipelineState(AttributeUsage attributeUsage) const;
@@ -51,5 +64,7 @@ namespace Renderer
 		ComPtr<ID3DBlob> m_dsByteCode = nullptr;
 		ComPtr<ID3DBlob> m_hsByteCode = nullptr;
 		ComPtr<ID3DBlob> m_gsByteCode = nullptr;
+
+		ShaderDescriptor shaderDescriptor;
 	};
 }

@@ -49,7 +49,7 @@ public:
 		m_order = order;
 	}
 
-	static std::set<Renderer::CameraData> GetAllCameraData();
+	static std::priority_queue<Renderer::CameraData> GetAllCameraData();
 
 protected:
 
@@ -61,7 +61,7 @@ protected:
 
 	float m_fov = 60;
 	float m_farZ = 100;
-	float m_nearZ = 0.01f;
+	float m_nearZ = 0.1f;
 	float m_order = 0;
 
 private:

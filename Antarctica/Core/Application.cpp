@@ -38,7 +38,7 @@ void Application::Start()
 	m_renderSystem.Init(m_window, m_appSettings);
 
 	OnApplicationInitialized.Dispatch();
-	
+
 	Run();
 }
 

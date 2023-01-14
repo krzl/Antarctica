@@ -27,6 +27,7 @@ namespace Renderer
 		uint32_t m_indexCount = 0;
 
 	private:
+		
 		const Submesh* m_submesh   = nullptr;
 		bool m_isInitialized = false;
 	};
