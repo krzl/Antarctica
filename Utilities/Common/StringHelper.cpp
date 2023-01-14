@@ -13,6 +13,6 @@ std::vector<std::string> StringHelper::Split(std::string input, const std::strin
 	}
 
 	output.push_back(input);
-	
+
 	return output;
 }

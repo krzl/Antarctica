@@ -4,12 +4,12 @@
 namespace Renderer
 {
 	void ConstantBuffer::Init(const uint32_t elementCount, const uint32_t elementSize,
-							  const void* initialData)
+							  const void*    initialData)
 	{
 		this->m_elementCount      = elementCount;
 		this->m_bufferElementSize = (elementSize + 255) & ~255;
-		CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
-		CD3DX12_RESOURCE_DESC bufferInfo = CD3DX12_RESOURCE_DESC::Buffer(m_bufferElementSize * elementCount);
+		const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
+		const CD3DX12_RESOURCE_DESC   bufferInfo = CD3DX12_RESOURCE_DESC::Buffer(m_bufferElementSize * elementCount);
 
 		for (uint32_t i = 0; i < RenderSystem::BUFFER_COUNT; ++i)
 		{
@@ -17,7 +17,7 @@ namespace Renderer
 																	 &bufferInfo, D3D12_RESOURCE_STATE_GENERIC_READ,
 																	 nullptr,
 																	 IID_PPV_ARGS(&m_buffers[i])
-																	);
+			);
 		}
 
 		m_bufferData.resize(elementSize * elementCount);

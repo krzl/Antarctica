@@ -8,15 +8,15 @@ namespace Renderer
 		struct TextureDescriptor
 		{
 			const std::string m_name;
-			const uint16_t m_id;
+			const uint16_t    m_id;
 		};
 
 		struct VariableDescriptor
 		{
 			const std::string m_name;
-			const uint16_t m_bufferId;
-			const uint16_t m_offset;
-			const uint16_t m_byteSize;
+			const uint16_t    m_bufferId;
+			const uint16_t    m_offset;
+			const uint16_t    m_byteSize;
 		};
 
 		struct BufferDescriptor
@@ -38,18 +38,18 @@ namespace Renderer
 		{
 			return m_variables;
 		}
-		
+
 		[[nodiscard]] const std::vector<BufferDescriptor>& GetBuffers() const
 		{
 			return m_buffers;
 		}
 
 		~ShaderDescriptor();
-		
+
 	private:
 
-		std::vector<TextureDescriptor> m_textures;
+		std::vector<TextureDescriptor>  m_textures;
 		std::vector<VariableDescriptor> m_variables;
-		std::vector<BufferDescriptor> m_buffers;
+		std::vector<BufferDescriptor>   m_buffers;
 	};
 }

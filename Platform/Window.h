@@ -29,11 +29,12 @@ namespace Platform
 		{
 			return static_cast<float>(m_width) / static_cast<float>(m_height);
 		}
-		
+
 		[[nodiscard]] uint32_t GetWidth() const
 		{
 			return m_width;
 		}
+
 		[[nodiscard]] uint32_t GetHeight() const
 		{
 			return m_height;

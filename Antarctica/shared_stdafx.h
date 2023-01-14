@@ -1,23 +1,23 @@
 #pragma once
 
-#include <string>
 #include <array>
-#include <vector>
 #include <map>
-#include <unordered_set>
-#include <set>
 #include <queue>
+#include <set>
+#include <string>
+#include <unordered_set>
+#include <vector>
 
-#include <optional>
-#include <functional>
 #include <algorithm>
+#include <functional>
+#include <optional>
 
 #include <fstream>
 #include <sstream>
 
-#include <exception>
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
+#include <exception>
 #include <iostream>
 
 #include <chrono>
@@ -37,17 +37,17 @@ using Terathon::Matrix4D;
 using Terathon::Transform4D;
 using Terathon::Quaternion;
 
-#include "../Utilities/Common/Logger.h"
 #include "../Utilities/Common/Dispatcher.h"
+#include "../Utilities/Common/Logger.h"
+#include "../Utilities/Common/MathHelpers.h"
 #include "../Utilities/Common/Random.h"
 #include "../Utilities/Common/Ref.h"
-#include "../Utilities/Common/MathHelpers.h"
 #include "../Utilities/Math/MathFunctions.h"
 
 #define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <dxgi1_6.h>
 #include <d3d12.h>
+#include <dxgi1_6.h>
+#include <Windows.h>
 #include "../Renderer/d3dx12.h"
 
 using Microsoft::WRL::ComPtr;
@@ -56,4 +56,4 @@ using Microsoft::WRL::ComPtr;
 #include <dxgidebug.h>
 #endif
 
-using MousePosition = std::pair<uint32_t, uint32_t>;
+typedef std::pair<uint32_t, uint32_t> MousePosition;

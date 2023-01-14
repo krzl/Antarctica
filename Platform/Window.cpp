@@ -23,15 +23,15 @@ void Platform::Window::Init(InputSystem& inputSystem, const Settings& appSetting
 	inputHandler.Init(inputSystem);
 
 	WNDCLASS wc;
-	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc = MainWndProc;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
-	wc.hInstance = GetModuleHandle(NULL);
-	wc.hIcon = LoadIcon(0, IDI_APPLICATION);
-	wc.hCursor = LoadCursor(0, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
-	wc.lpszMenuName = 0;
+	wc.style         = CS_HREDRAW | CS_VREDRAW;
+	wc.lpfnWndProc   = MainWndProc;
+	wc.cbClsExtra    = 0;
+	wc.cbWndExtra    = 0;
+	wc.hInstance     = GetModuleHandle(NULL);
+	wc.hIcon         = LoadIcon(0, IDI_APPLICATION);
+	wc.hCursor       = LoadCursor(0, IDC_ARROW);
+	wc.hbrBackground = (HBRUSH) GetStockObject(NULL_BRUSH);
+	wc.lpszMenuName  = 0;
 	wc.lpszClassName = "MainWndClass";
 
 	if (!RegisterClass(&wc))
@@ -46,9 +46,9 @@ void Platform::Window::Init(InputSystem& inputSystem, const Settings& appSetting
 		(LONG) appSettings.GetInt("window.width").value(),
 		(LONG) appSettings.GetInt("window.height").value()
 	};
-	
+
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
-	const int windowWidth = rect.right - rect.left;
+	const int windowWidth  = rect.right - rect.left;
 	const int windowHeight = rect.bottom - rect.top;
 
 	m_handle = CreateWindow("MainWndClass", appSettings.GetString("window.title").value().c_str(),
@@ -75,7 +75,7 @@ void Platform::Window::Update()
 	}
 }
 
-auto Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam, const LPARAM lParam) -> LRESULT
+LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam, const LPARAM lParam)
 {
 	switch (msg)
 	{
@@ -152,8 +152,8 @@ auto Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam, c
 			return MAKELRESULT(0, MNC_CLOSE);
 
 		case WM_GETMINMAXINFO:
-			((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
-			((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;
+			((MINMAXINFO*) lParam)->ptMinTrackSize.x = 200;
+			((MINMAXINFO*) lParam)->ptMinTrackSize.y = 200;
 			return 0;
 
 		case WM_LBUTTONDOWN:

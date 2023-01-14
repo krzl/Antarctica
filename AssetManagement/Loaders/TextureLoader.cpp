@@ -7,10 +7,10 @@
 template<>
 std::shared_ptr<Texture> AssetLoader::Load(const std::string& path)
 {
-	int32_t width, height, channels;
+	int32_t        width, height, channels;
 	const uint8_t* textureData = stbi_load(path.c_str(), &width, &height, &channels, 4);
 
-	std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureData, width, height, channels);
+	auto texture = std::make_shared<Texture>(textureData, width, height, channels);
 
 	return texture;
 }

@@ -10,6 +10,7 @@ void InputHandler::Init(InputSystem& inputSystem)
 	m_inputSystem = &inputSystem;
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void InputHandler::ProcessMessage(const UINT msg, const WPARAM wParam, const LPARAM lParam)
 {
 	if (!m_inputSystem)
@@ -34,6 +35,7 @@ void InputHandler::ProcessMessage(const UINT msg, const WPARAM wParam, const LPA
 			return;
 	}
 }
+
 void InputHandler::ProcessMouseInput(const UINT msg, const WPARAM wParam, const LPARAM lParam) const
 {
 	const int32_t x = static_cast<int32_t>(GET_X_LPARAM(lParam));

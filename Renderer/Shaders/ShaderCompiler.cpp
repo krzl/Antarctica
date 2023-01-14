@@ -43,7 +43,7 @@ namespace Renderer
 		RenderSystem::Get().GetDevice()->CreateRootSignature(0, m_vsByteCode->GetBufferPointer(),
 															 m_vsByteCode->GetBufferSize(),
 															 IID_PPV_ARGS(m_rootSignature.ReleaseAndGetAddressOf()));
-		
+
 		D3DCompileFromFile(wPath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "ps",
 						   "ps_5_0", compileFlags, 0, &m_psByteCode, &errors);
 
@@ -70,7 +70,7 @@ namespace Renderer
 		m_psReflector->GetDesc(&m_psDescriptor);
 
 		PopulateShaderDescriptor();
-		
+
 		struct stat fileStat;
 		stat(m_path.c_str(), &fileStat);
 
@@ -78,25 +78,26 @@ namespace Renderer
 
 		m_pipelineStates.clear();
 	}
-	
+
 	void ShaderObject::PopulateShaderDescriptor()
 	{
 		shaderDescriptor.Clear();
-		
+
 		shaderDescriptor.AddFromReflector(m_vsReflector.Get(), m_vsDescriptor);
 		shaderDescriptor.AddFromReflector(m_psReflector.Get(), m_psDescriptor);
 
-		std::vector<ID3DBlob**> additionalShadersToParse = { &m_dsByteCode, &m_hsByteCode, &m_gsByteCode };
+		const std::vector<ID3DBlob**> additionalShadersToParse = { &m_dsByteCode, &m_hsByteCode, &m_gsByteCode };
 		for (ID3DBlob** shaderCode : additionalShadersToParse)
 		{
 			if (*shaderCode != nullptr)
 			{
-				D3D12_SHADER_DESC descriptor = {};
+				D3D12_SHADER_DESC              descriptor      = {};
 				ComPtr<ID3D12ShaderReflection> shaderReflector = nullptr;
-				
-				D3DReflect((*shaderCode)->GetBufferPointer(), (*shaderCode)->GetBufferSize(), IID_PPV_ARGS(&shaderReflector));
+
+				D3DReflect((*shaderCode)->GetBufferPointer(), (*shaderCode)->GetBufferSize(),
+						   IID_PPV_ARGS(&shaderReflector));
 				shaderReflector->GetDesc(&descriptor);
-				
+
 				shaderDescriptor.AddFromReflector(shaderReflector.Get(), descriptor);
 			}
 		}
@@ -105,7 +106,7 @@ namespace Renderer
 	ComPtr<ID3D12PipelineState> ShaderObject::CreatePipelineState(const AttributeUsage attributeUsage) const
 	{
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElements = GetInputElements(attributeUsage);
-		std::vector<DXGI_FORMAT> outputFormats              = GetOutputFormats();
+		std::vector<DXGI_FORMAT>              outputFormats = GetOutputFormats();
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc = {
 			m_rootSignature.Get(),
@@ -152,7 +153,7 @@ namespace Renderer
 			{},
 			D3D12_PIPELINE_STATE_FLAG_NONE
 		};
-		
+
 		for (uint32_t i = 0; i < outputFormats.size(); i++)
 		{
 			pipelineStateDesc.RTVFormats[i] = outputFormats[i];
@@ -164,6 +165,7 @@ namespace Renderer
 		RenderSystem::Get().GetDevice()->
 							CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&pipelineState));
 
+		// ReSharper disable once CppUseStructuredBinding
 		for (auto& inputElement : inputElements)
 		{
 			delete[] inputElement.SemanticName;

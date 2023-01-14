@@ -6,7 +6,4 @@ void TimeSystem::Init()
 	m_timer.Start();
 }
 
-void TimeSystem::Update()
-{
-	
-}
+void TimeSystem::Update() {}

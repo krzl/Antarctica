@@ -18,21 +18,21 @@ public:
 	void SetSkeleton(Skeleton&& skeleton);
 
 	Renderer::Submesh Build();
-	
+
 private:
 
 	const Renderer::AttributeOffsets& GetAttributeOffsets(const Renderer::AttributeUsage& attributeUsage) const;
-	Renderer::AttributeUsage GetAttributeUsage() const;
+	Renderer::AttributeUsage          GetAttributeUsage() const;
 
-	std::vector<uint8_t> m_indices;
+	std::vector<uint8_t>  m_indices;
 	std::vector<Vector3D> m_positions;
 	std::vector<Vector3D> m_normals;
 	std::vector<Vector3D> m_tangents;
 	std::vector<Vector3D> m_bitangents;
 	std::vector<Vector4D> m_colors;
-	std::vector<float> m_texcoords0;
-	std::vector<float> m_texcoords1;
-	std::vector<float> m_texcoords2;
-	std::vector<float> m_texcoords3;
-	Skeleton m_skeleton;
+	std::vector<float>    m_texcoords0;
+	std::vector<float>    m_texcoords1;
+	std::vector<float>    m_texcoords2;
+	std::vector<float>    m_texcoords3;
+	Skeleton              m_skeleton;
 };

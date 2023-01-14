@@ -6,14 +6,12 @@
 
 class TimeSystem : public System
 {
-
 protected:
-	
-	virtual void Init() override;
-	virtual void Update() override;
+
+	void Init() override;
+	void Update() override;
 
 private:
 
 	Timer m_timer;
 };
-

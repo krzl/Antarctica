@@ -3,9 +3,9 @@
 
 #include <RenderSystem.h>
 
+#include "Entities/CameraComponent.h"
+#include "Entities/RenderComponent.h"
 #include "GameObjects/World.h"
-#include "Rendering/CameraComponent.h"
-#include "Rendering/RenderComponent.h"
 
 Application* gApp = nullptr;
 
@@ -80,8 +80,10 @@ void Application::Update()
 
 void Application::Render()
 {
-	auto renderQueue = RenderComponent::GetRenderQueue();
-	m_renderSystem.Render(renderQueue, CameraComponent::GetAllCameraData());
+	auto renderQueue = Renderer::RenderComponent::GetRenderQueue();
+	Renderer::CameraComponent::SetAspectRatio(GetWindow().GetAspectRatio());
+	auto cameraData = Renderer::CameraComponent::GetAllCameraData();
+	m_renderSystem.Render(renderQueue, cameraData);
 }
 
 Application& Application::Get()

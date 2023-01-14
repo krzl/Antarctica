@@ -6,28 +6,28 @@ namespace Renderer
 	struct MeshBuffer
 	{
 		std::vector<uint8_t> m_data;
-		uint32_t m_elementSize;
+		uint32_t             m_elementSize;
 	};
 
 	struct AttributeOffsets
 	{
-		uint16_t m_positionOffset = 0;
-		uint16_t m_normalOffset = 0;
-		uint16_t m_tangentOffset = 0;
+		uint16_t m_positionOffset  = 0;
+		uint16_t m_normalOffset    = 0;
+		uint16_t m_tangentOffset   = 0;
 		uint16_t m_bitangentOffset = 0;
-		uint16_t m_colorOffset0 = 0;
-		uint16_t m_colorOffset1 = 0;
-		uint16_t m_colorOffset2 = 0;
-		uint16_t m_colorOffset3 = 0;
+		uint16_t m_colorOffset0    = 0;
+		uint16_t m_colorOffset1    = 0;
+		uint16_t m_colorOffset2    = 0;
+		uint16_t m_colorOffset3    = 0;
 		uint16_t m_texcoordOffset0 = 0;
 		uint16_t m_texcoordOffset1 = 0;
 		uint16_t m_texcoordOffset2 = 0;
 		uint16_t m_texcoordOffset3 = 0;
-		uint16_t m_stride = 0;
+		uint16_t m_stride          = 0;
 
 		uint32_t GetOffset(const char* name, uint32_t index) const;
 	};
-	
+
 	struct AttributeUsage
 	{
 		uint8_t m_hasNormals : 1;
@@ -41,7 +41,7 @@ namespace Renderer
 
 		// ReSharper disable once CppNonExplicitConversionOperator
 		operator uint16_t() const;
-		
+
 		static std::unordered_map<uint16_t, AttributeOffsets> m_attributeOffsets;
 	};
 
@@ -49,14 +49,12 @@ namespace Renderer
 	{
 	public:
 
-		explicit Submesh(const MeshBuffer&& vertexBuffer,
-						 const MeshBuffer&& indexBuffer,
+		explicit Submesh(const MeshBuffer&&   vertexBuffer,
+						 const MeshBuffer&&   indexBuffer,
 						 const AttributeUsage attributes) :
 			m_vertexBuffer(vertexBuffer),
 			m_indexBuffer(indexBuffer),
-			m_attributes(attributes)
-		{
-		}
+			m_attributes(attributes) { }
 
 		[[nodiscard]] const MeshBuffer& GetVertexBuffer() const
 		{
@@ -77,16 +75,17 @@ namespace Renderer
 		{
 			return m_skeleton;
 		}
-		
+
 		void SetSkeleton(Skeleton&& skeleton)
 		{
 			m_skeleton = std::move(skeleton);
 		}
-		
+
 	private:
-		MeshBuffer m_vertexBuffer;
-		MeshBuffer m_indexBuffer;
-		Skeleton m_skeleton;
+
+		MeshBuffer     m_vertexBuffer;
+		MeshBuffer     m_indexBuffer;
+		Skeleton       m_skeleton;
 		AttributeUsage m_attributes;
 	};
 }

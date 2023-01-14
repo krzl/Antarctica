@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "SceneComponent.h"
 
-#include "GameObjects/GameObject.h"
-
 Point3D SceneComponent::GetWorldPosition() const
 {
 	if (GetParent().IsValid())

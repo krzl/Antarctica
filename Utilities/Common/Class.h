@@ -1,26 +1,26 @@
 #pragma once
 
 class Component;
+
 class Class
 {
-	
-	using DefaultConstructor = std::function<std::shared_ptr<void>()>;
-	
+	typedef std::function<std::shared_ptr<void>()> DefaultConstructor;
+
 public:
 
 	template<
 		typename T,
-		class = std::enable_if_t<std::is_default_constructible<T>::value>>
+		class = std::enable_if_t<std::is_default_constructible_v<T>>>
 	static Class CreateClassObject()
 	{
-		Class clazz = Class(typeid(T).hash_code());
+		auto clazz          = Class(typeid(T).hash_code());
 		clazz.m_constructor = [=]()
 		{
 			std::shared_ptr<T> ptr = std::make_shared<T>();
-			ptr->m_class = &clazz;
+			ptr->m_class           = &clazz;
 			return ptr;
 		};
-		
+
 		return clazz;
 	}
 
@@ -38,7 +38,7 @@ public:
 	{
 		return m_constructor();
 	}
-	
+
 	uint64_t GetId() const
 	{
 		return m_id;
@@ -47,9 +47,7 @@ public:
 private:
 
 	explicit Class(const uint64_t id) :
-		m_id(id)
-	{
-	}
+		m_id(id) { }
 
 	const uint64_t m_id;
 
@@ -66,4 +64,4 @@ private:
 	{															\
 		static Class clazz = Class::CreateClassObject<Clazz>();	\
 		return clazz;											\
-	}														
+	}

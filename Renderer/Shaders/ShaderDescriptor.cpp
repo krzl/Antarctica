@@ -5,6 +5,7 @@ namespace Renderer
 {
 	static bool IsElementIdPresent(const std::vector<ShaderDescriptor::TextureDescriptor>& list, const uint8_t id)
 	{
+		// ReSharper disable once CppUseStructuredBinding
 		for (const ShaderDescriptor::TextureDescriptor& element : list)
 		{
 			if (element.m_id == id)
@@ -15,29 +16,29 @@ namespace Renderer
 
 		return false;
 	}
-	
+
 	void ShaderDescriptor::AddFromReflector(ID3D12ShaderReflection* reflector, const D3D12_SHADER_DESC& descriptor)
 	{
 		for (uint32_t i = 0; i < descriptor.ConstantBuffers; ++i)
 		{
 			ID3D12ShaderReflectionConstantBuffer* constantBuffer = reflector->GetConstantBufferByIndex(0);
-			D3D12_SHADER_BUFFER_DESC bufferDesc;
+			D3D12_SHADER_BUFFER_DESC              bufferDesc;
 			constantBuffer->GetDesc(&bufferDesc);
 
-			uint8_t* defaultBufferValue = new uint8_t[bufferDesc.Size];
+			const auto defaultBufferValue = new uint8_t[bufferDesc.Size];
 
 			for (uint32_t j = 0; j < bufferDesc.Variables; ++j)
 			{
 				ID3D12ShaderReflectionVariable* variable = constantBuffer->GetVariableByIndex(j);
-				D3D12_SHADER_VARIABLE_DESC variableDesc;
+				D3D12_SHADER_VARIABLE_DESC      variableDesc;
 				variable->GetDesc(&variableDesc);
 
 				m_variables.emplace_back(VariableDescriptor{
-											 std::string(variableDesc.Name),
-											 (uint16_t) i,
-											 (uint16_t) variableDesc.StartOffset,
-											 (uint16_t) variableDesc.Size
-										 });
+					std::string(variableDesc.Name),
+					(uint16_t) i,
+					(uint16_t) variableDesc.StartOffset,
+					(uint16_t) variableDesc.Size
+				});
 
 
 				if (variableDesc.DefaultValue != nullptr)
@@ -51,12 +52,12 @@ namespace Renderer
 			}
 
 			m_buffers.emplace_back(BufferDescriptor{
-									   (uint16_t) i,
-									   (uint16_t) bufferDesc.Size,
-									   defaultBufferValue
-								   });
+				(uint16_t) i,
+				(uint16_t) bufferDesc.Size,
+				defaultBufferValue
+			});
 		}
-		
+
 		for (uint32_t i = 0; i < descriptor.BoundResources; ++i)
 		{
 			D3D12_SHADER_INPUT_BIND_DESC desc;
@@ -71,15 +72,16 @@ namespace Renderer
 			}
 		}
 	}
-	
+
 	void ShaderDescriptor::Clear()
 	{
 		m_textures.clear();
 	}
-	
+
 	ShaderDescriptor::~ShaderDescriptor()
 	{
-		for (BufferDescriptor& bufferInfo : m_buffers)
+		// ReSharper disable once CppUseStructuredBinding
+		for (const BufferDescriptor& bufferInfo : m_buffers)
 		{
 			delete[] bufferInfo.m_defaultValue;
 		}

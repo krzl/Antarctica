@@ -8,9 +8,10 @@ class Component
 	friend class GameObject;
 
 public:
+
 	virtual ~Component() = default;
 
-	Component(const Component& other) = delete;
+	Component(const Component& other)            = delete;
 	Component& operator=(const Component& other) = delete;
 
 	// Dispatchers
@@ -43,7 +44,7 @@ public:
 	void SetEnabled(bool isEnabled);
 
 protected:
-	
+
 	Component() = default;
 
 	// Virtual functions
@@ -53,16 +54,16 @@ protected:
 	virtual void Tick() {}
 	virtual void OnDisabled() {}
 	virtual void OnDestroy() {}
-	
+
 private:
 
 	void Init(const Ref<GameObject> owner, const Ref<Component> self);
 
 	Ref<GameObject> m_owner;
-	Ref<Component> m_self;
-	const Class* m_class;
+	Ref<Component>  m_self;
+	const Class*    m_class;
 
 	uint32_t m_componentId = 0;
-	
+
 	bool m_isEnabled = true;
 };

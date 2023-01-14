@@ -35,10 +35,10 @@ namespace Renderer
 		static constexpr uint8_t DIRTY_UPDATE_MASK = (1 << RenderSystem::BUFFER_COUNT) - 1;
 
 		std::array<ComPtr<ID3D12Resource>, RenderSystem::BUFFER_COUNT> m_buffers;
-		std::vector<uint8_t> m_bufferData;
+		std::vector<uint8_t>                                           m_bufferData;
 
-		uint32_t m_elementCount      = 0;
-		uint32_t m_bufferElementSize = 0;
-		mutable uint8_t m_updateMask = DIRTY_UPDATE_MASK;
+		uint32_t        m_elementCount      = 0;
+		uint32_t        m_bufferElementSize = 0;
+		mutable uint8_t m_updateMask        = DIRTY_UPDATE_MASK;
 	};
 }

@@ -29,7 +29,7 @@ namespace Renderer
 			}
 		}
 	};
-	
+
 	uint32_t AttributeOffsets::GetOffset(const char* name, const uint32_t index) const
 	{
 		for (const auto& [semanticName, offsets] : semanticsToOffsetMap)
@@ -42,14 +42,14 @@ namespace Renderer
 
 		return 0x0;
 	}
-	
+
 	AttributeUsage::operator uint16_t() const
 	{
 		union CastHelper
 		{
 			AttributeUsage m_usage;
-			uint16_t m_value;
-		} helper;
+			uint16_t       m_value;
+		}                  helper;
 
 		helper.m_usage = *this;
 

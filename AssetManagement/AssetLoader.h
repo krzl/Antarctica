@@ -7,7 +7,7 @@
 class AssetLoader
 {
 	friend class AssetManager;
-	
+
 	template<typename T>
 	static std::shared_ptr<T> Load(const std::string& path)
 	{

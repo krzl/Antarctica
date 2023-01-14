@@ -6,52 +6,40 @@ class Ref
 public:
 
 	// Constructors
-	
+
 	Ref() :
-		m_ptr(std::weak_ptr<T>())
-	{
-	}
+		m_ptr(std::weak_ptr<T>()) { }
 
 	Ref(const Ref& other) = default;
 
 	template<
 		class D,
-		class = std::enable_if_t<std::is_base_of<T, D>::value>>
+		class = std::enable_if_t<std::is_base_of_v<T, D>>>
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref(const Ref<D>& other) :
-		Ref(other.m_ptr)
-	{
-	}
-	
+		Ref(other.m_ptr) { }
+
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref(std::weak_ptr<T> ptr) :
-		m_ptr(ptr)
-	{
-	}
+		m_ptr(ptr) { }
 
 	template<
 		class D,
-		class = std::enable_if_t<std::is_base_of<T, D>::value>>
+		class = std::enable_if_t<std::is_base_of_v<T, D>>>
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref(std::weak_ptr<D> ptr) :
-		m_ptr(std::weak_ptr<T>(ptr))
-	{
-	}
+		m_ptr(std::weak_ptr<T>(ptr)) { }
 
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref(std::shared_ptr<T> ptr) :
-		m_ptr(std::weak_ptr<T>(ptr))
-	{
-	}
+		m_ptr(std::weak_ptr<T>(ptr)) { }
 
 	template<
 		class D,
-		class = std::enable_if_t<std::is_base_of<T, D>::value>>
+		class = std::enable_if_t<std::is_base_of_v<T, D>>>
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref(std::shared_ptr<D> ptr) :
-		m_ptr(std::weak_ptr<T>(ptr))
-	{
-	}
+		m_ptr(std::weak_ptr<T>(ptr)) { }
 
 	// Assignment operators
 
@@ -69,7 +57,7 @@ public:
 
 	template<
 		class D,
-		class = std::enable_if_t<std::is_base_of<T, D>::value>>
+		class = std::enable_if_t<std::is_base_of_v<T, D>>>
 	Ref& operator=(std::weak_ptr<D> ptr)
 	{
 		m_ptr = std::weak_ptr<T>(ptr);
@@ -84,7 +72,7 @@ public:
 
 	template<
 		class D,
-		class = std::enable_if_t<std::is_base_of<T, D>::value>>
+		class = std::enable_if_t<std::is_base_of_v<T, D>>>
 	Ref& operator=(std::shared_ptr<D> ptr)
 	{
 		m_ptr = std::weak_ptr<T>(ptr);
@@ -102,7 +90,7 @@ public:
 	}
 
 	// Dereferencing
-	
+
 	T* operator*()
 	{
 		return IsValid() ? m_ptr.lock().get() : nullptr;
@@ -112,7 +100,7 @@ public:
 	{
 		return IsValid() ? m_ptr.lock().get() : nullptr;
 	}
-	
+
 	const T* operator*() const
 	{
 		return IsValid() ? m_ptr.lock().get() : nullptr;

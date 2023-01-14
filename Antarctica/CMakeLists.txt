@@ -10,7 +10,7 @@ endif()
 
 add_library(Antarctica STATIC ${SOURCES} ${HEADERS})
 
-target_link_libraries(Antarctica Animator AssetManagement Renderer Platform Utilities)
+target_link_libraries(Antarctica Animator AssetManagement Entities Renderer Platform Utilities)
 
 target_include_directories(Antarctica PUBLIC . )
 

@@ -16,9 +16,7 @@ class Shader : public Asset
 public:
 
 	explicit Shader(const Renderer::ShaderObject&& shaderObject) :
-		m_shaderObject(std::move(shaderObject))
-	{
-	}
+		m_shaderObject(std::move(shaderObject)) { }
 
 	[[nodiscard]] const Renderer::ShaderObject& GetShaderObject() const
 	{
@@ -29,8 +27,8 @@ public:
 	{
 		return m_shaderObject;
 	}
-	
+
 private:
-	
+
 	Renderer::ShaderObject m_shaderObject;
 };

@@ -6,11 +6,11 @@ class Dispatcher;
 template<typename... _Args>
 class DispatchHandle
 {
-	using FunctionType = std::function<void(_Args...)>;
-	using DispatcherType = Dispatcher<_Args...>;
-	
+	typedef std::function<void(_Args...)> FunctionType;
+	typedef Dispatcher<_Args...>          DispatcherType;
+
 	friend class Dispatcher<_Args...>;
-	
+
 public:
 
 	~DispatchHandle()
@@ -22,26 +22,24 @@ public:
 	}
 
 	void Clear();
-	
+
 private:
 
 	explicit DispatchHandle(DispatcherType& dispatcher, const uint32_t id, const bool autoClear = true) :
 		m_dispatcher(&dispatcher),
 		m_autoClear(autoClear),
-		m_id(id)
-	{
-	}
+		m_id(id) { }
 
 	DispatcherType* m_dispatcher;
-	bool m_autoClear;
-	uint32_t m_id;
+	bool            m_autoClear;
+	uint32_t        m_id;
 };
 
 template<typename... _Args>
 class Dispatcher
 {
-	using FunctionType = std::function<void(_Args...)>;
-	using HandleType = DispatchHandle<_Args...>;
+	typedef std::function<void(_Args...)> FunctionType;
+	typedef DispatchHandle<_Args...>      HandleType;
 
 	friend class DispatchHandle<_Args...>;
 
@@ -50,20 +48,18 @@ private:
 	struct DispatchListElem
 	{
 		FunctionType m_function;
-		uint32_t m_id;
+		uint32_t     m_id;
 
 		DispatchListElem(FunctionType&& function, const uint32_t id) :
 			m_function(std::move(function)),
-			m_id(id)
-		{
-		}
+			m_id(id) { }
 	};
-	
+
 public:
 
-	Dispatcher& operator=(const Dispatcher& other) = delete;
+	Dispatcher& operator=(const Dispatcher& other)     = delete;
 	Dispatcher& operator=(Dispatcher&& other) noexcept = delete;
-	
+
 	~Dispatcher()
 	{
 		RemoveAllListeners();
@@ -72,7 +68,7 @@ public:
 	HandleType AddListener(FunctionType listener, const bool autoClear = true)
 	{
 		const uint32_t listenerId = counter++;
-		
+
 		m_dispatchList.emplace_back(std::move(listener), listenerId);
 		return HandleType(*this, listenerId, autoClear);
 	}
@@ -89,7 +85,7 @@ public:
 			dispatchElement.m_function(std::forward<_Args>(arguments)...);
 		}
 	}
-	
+
 private:
 
 	void RemoveListener(HandleType& handle)

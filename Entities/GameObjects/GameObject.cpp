@@ -20,7 +20,7 @@ Ref<Component> GameObject::AddComponent(const Class& clazz, const Ref<SceneCompo
 	const auto it             = m_components.insert(std::make_pair(clazz.GetId(), std::move(component)));
 	it->second->m_componentId = ++m_componentCounter;
 
-	if (std::shared_ptr<SceneComponent> sceneComponent = std::static_pointer_cast<SceneComponent>(it->second))
+	if (const std::shared_ptr<SceneComponent> sceneComponent = std::static_pointer_cast<SceneComponent>(it->second))
 	{
 		sceneComponent->m_parent = parent.IsValid() ? parent : root;
 	}
@@ -77,7 +77,9 @@ Ref<Component> GameObject::GetComponentFromClass(const Class& clazz)
 std::vector<Ref<Component>> GameObject::GetComponentsFromClass(const Class& clazz)
 {
 	const auto [start, end] = m_components.equal_range(clazz.GetId());
+
 	std::vector<Ref<Component>> components(std::distance(start, end));
+
 	std::transform(start, end, components.begin(), [](auto& it)
 	{
 		return Ref<Component>(it.second);
@@ -129,7 +131,7 @@ void GameObject::TickComponents()
 	{
 		if (it->second.get() != nullptr)
 		{
-			auto& component = it->second;
+			const auto& component = it->second;
 			component->Tick();
 
 			++it;
@@ -137,7 +139,7 @@ void GameObject::TickComponents()
 	}
 
 	it = m_components.begin();
-	for (; it != m_components.end();)
+	while (it != m_components.end())
 	{
 		if (it->second.get() == nullptr)
 		{

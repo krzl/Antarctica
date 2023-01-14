@@ -9,7 +9,7 @@ public:
 
 	template<
 		typename T,
-		typename = std::enable_if_t<std::is_base_of<Asset, T>::value>>
+		typename = std::enable_if_t<std::is_base_of_v<Asset, T>>>
 	static [[nodiscard]] std::shared_ptr<T> GetAsset(const std::string& path)
 	{
 		const uint64_t assetId = GetAssetId(path);

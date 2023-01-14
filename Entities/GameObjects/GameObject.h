@@ -15,13 +15,13 @@ public:
 	GameObject();
 	//GameObject(const GameObject& other)            = delete;
 	//GameObject& operator=(const GameObject& other) = delete;
-	virtual ~GameObject()                          = default;
+	virtual ~GameObject() = default;
 
 	// Add Component
 
 	template<
 		typename T,
-		class = std::enable_if_t<std::is_base_of<Component, T>::value>>
+		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
 	Ref<T> AddComponent(const Ref<SceneComponent> parent = Ref<SceneComponent>())
 	{
 		const Class& clazz = T::GetClass();
@@ -34,7 +34,7 @@ public:
 
 	template<
 		typename T,
-		class = std::enable_if_t<std::is_base_of<Component, T>::value>>
+		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
 	Ref<T> GetComponent()
 	{
 		const Class& clazz = T::GetClass();
@@ -43,13 +43,14 @@ public:
 
 	template<
 		typename T,
-		class = std::enable_if_t<std::is_base_of<Component, T>::value>>
+		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
 	std::vector<Ref<T>> GetComponents()
 	{
-		const Class& clazz                           = T::GetClass();
+		const Class&                      clazz      = T::GetClass();
 		const std::vector<Ref<Component>> components = GetComponentsFromClass(clazz);
 
 		std::vector<Ref<T>> ret(components.size());
+		
 		std::transform(components.begin(), components.end(), ret.begin(), [](Ref<Component> ptr)
 		{
 			return Ref<T>(ptr);
@@ -59,10 +60,11 @@ public:
 
 protected:
 
-	Ref<Component> GetComponentFromClass(const Class& clazz);
+	Ref<Component>              GetComponentFromClass(const Class& clazz);
 	std::vector<Ref<Component>> GetComponentsFromClass(const Class& clazz);
 
 public:
+
 	// Remove
 
 	void RemoveComponent(Ref<Component> component);
@@ -160,21 +162,11 @@ protected:
 
 	// Virtual functions
 
-	virtual void OnCreated()
-	{
-	}
-	virtual void OnEnabled()
-	{
-	}
-	virtual void Tick()
-	{
-	}
-	virtual void OnDisabled()
-	{
-	}
-	virtual void OnDestroy()
-	{
-	}
+	virtual void OnCreated() { }
+	virtual void OnEnabled() { }
+	virtual void Tick() { }
+	virtual void OnDisabled() { }
+	virtual void OnDestroy() { }
 
 	void InitComponents();
 
@@ -185,8 +177,8 @@ private:
 	std::unordered_multimap<uint64_t, std::shared_ptr<Component>> m_components;
 
 	const Class* m_class;
-	uint64_t m_instanceId;
-	World* m_world;
+	uint64_t     m_instanceId;
+	World*       m_world;
 
 	Ref<GameObject> m_self;
 

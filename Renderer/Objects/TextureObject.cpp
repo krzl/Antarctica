@@ -7,7 +7,7 @@
 namespace Renderer
 {
 	ComPtr<ID3D12DescriptorHeap> TextureObject::m_heap;
-	uint32_t TextureObject::m_counter = 0;
+	uint32_t                     TextureObject::m_counter = 0;
 
 	void TextureObject::InitHeap()
 	{
@@ -51,7 +51,8 @@ namespace Renderer
 		m_id = m_counter++;
 
 		const uint64_t incrementSize = RenderSystem::Get().GetDevice()->
-														   GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+														   GetDescriptorHandleIncrementSize(
+															   D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		D3D12_CPU_DESCRIPTOR_HANDLE handle = m_heap->GetCPUDescriptorHandleForHeapStart();
 		handle.ptr += incrementSize * m_id;
 
@@ -78,7 +79,8 @@ namespace Renderer
 		}
 
 		const uint64_t incrementSize = RenderSystem::Get().GetDevice()->
-														   GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+														   GetDescriptorHandleIncrementSize(
+															   D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		D3D12_GPU_DESCRIPTOR_HANDLE handle(m_heap->GetGPUDescriptorHandleForHeapStart());
 		handle.ptr += incrementSize * m_id;
 

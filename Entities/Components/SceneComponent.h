@@ -4,16 +4,14 @@
 
 class SceneComponent : public Component
 {
-DEFINE_CLASS()
+	DEFINE_CLASS()
 
 	friend class GameObject;
 
 public:
 
 	SceneComponent() :
-		m_parent(Ref<SceneComponent>())
-	{
-	}
+		m_parent(Ref<SceneComponent>()) { }
 
 	Point3D GetLocalPosition() const
 	{
@@ -26,7 +24,7 @@ public:
 	}
 
 	Point3D GetWorldPosition() const;
-	void SetWorldPosition(const Point3D position);
+	void    SetWorldPosition(const Point3D position);
 
 	Quaternion GetLocalRotation() const
 	{
@@ -42,9 +40,9 @@ public:
 	void SetLocalRotation(const float x, const float y, const float z);
 
 	Quaternion GetWorldRotation() const;
-	void SetWorldRotation(const Quaternion rotation);
-	void SetWorldRotation(const Vector3D axis);
-	void SetWorldRotation(const float x, const float y, const float z);
+	void       SetWorldRotation(const Quaternion rotation);
+	void       SetWorldRotation(const Vector3D axis);
+	void       SetWorldRotation(const float x, const float y, const float z);
 
 	Vector3D GetLocalScale() const
 	{
@@ -57,7 +55,7 @@ public:
 	}
 
 	Vector3D GetWorldScale() const;
-	void SetWorldScale(const Vector3D scale);
+	void     SetWorldScale(const Vector3D scale);
 
 	Transform4D GetWorldTransform() const;
 	Transform4D GetLocalTransform() const;
@@ -69,9 +67,9 @@ public:
 
 protected:
 
-	Point3D m_position    = Point3D::origin;
+	Point3D    m_position = Point3D::origin;
 	Quaternion m_rotation = Quaternion::identity;
-	Vector3D m_scale      = { 1.0f, 1.0f, 1.0f };
+	Vector3D   m_scale    = { 1.0f, 1.0f, 1.0f };
 
 	Ref<SceneComponent> m_parent;
 };

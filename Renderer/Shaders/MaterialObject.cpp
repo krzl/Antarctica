@@ -7,12 +7,12 @@ void Renderer::MaterialObject::UpdateAndBind() const
 {
 	const ShaderDescriptor& descriptor = GetShaderObject().GetShaderDescriptor();
 
-	for (auto& elem : descriptor.GetTextures())
+	for (const auto& [name, id] : descriptor.GetTextures())
 	{
-		auto it = m_textures.find(elem.m_name);
+		auto it = m_textures.find(name);
 		if (it != m_textures.end())
 		{
-			it->second->GetTextureObject().Bind(elem.m_id);
+			it->second->GetTextureObject().Bind(id);
 		}
 	}
 }

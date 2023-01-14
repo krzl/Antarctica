@@ -47,7 +47,7 @@ bool Settings::SaveSettings()
 	{
 		file << key << SETTINGS_TOKEN << m_settings.find(key)->second << std::endl;
 	}
-	
+
 	return true;
 }
 

@@ -54,37 +54,38 @@ namespace Renderer
 		{
 			return m_currentBackbufferId;
 		}
-		
+
 		[[nodiscard]] uint32_t GetCurrentFenceId() const
 		{
 			return m_currentFenceId;
 		}
 
 	private:
-		void ResetCommandList();
-		void SetupCamera(const CameraData& camera);
-		void SetupRenderTarget(const CameraData& camera);
-		void DrawObjects(std::priority_queue<RenderHandle>& renderQueue, const CameraData& camera);
-		void FinalizeDrawing();
-		void ExecuteCommandLists();
+
+		void ResetCommandList() const;
+		void SetupCamera(const CameraData& camera) const;
+		void SetupRenderTarget(const CameraData& camera) const;
+		void DrawObjects(std::priority_queue<RenderHandle>& renderQueue, const CameraData& camera) const;
+		void FinalizeDrawing() const;
+		void ExecuteCommandLists() const;
 
 		ComPtr<IDXGIFactory4> m_dxgiFactory;
-		ComPtr<ID3D12Device> m_device;
+		ComPtr<ID3D12Device>  m_device;
 
-		ComPtr<ID3D12Fence> m_commandFence;
-		ComPtr<ID3D12CommandQueue> m_commandQueue;
-		ComPtr<ID3D12CommandAllocator> m_directCommandAllocator;
+		ComPtr<ID3D12Fence>               m_commandFence;
+		ComPtr<ID3D12CommandQueue>        m_commandQueue;
+		ComPtr<ID3D12CommandAllocator>    m_directCommandAllocator;
 		ComPtr<ID3D12GraphicsCommandList> m_commandList;
 
 		std::array<ComPtr<ID3D12CommandAllocator>, BUFFER_COUNT> m_frameCommandAllocators;
 
-		ComPtr<IDXGISwapChain> m_swapchain;
+		ComPtr<IDXGISwapChain>                           m_swapchain;
 		std::array<ComPtr<ID3D12Resource>, BUFFER_COUNT> m_swapchainBuffers;
 
-		D3D12_VIEWPORT m_viewport = {};
-		D3D12_RECT m_scissorRect  = {};
+		D3D12_VIEWPORT m_viewport    = {};
+		D3D12_RECT     m_scissorRect = {};
 
-		
+
 		uint32_t m_currentFenceId      = 0;
 		uint32_t m_currentBackbufferId = 0;
 

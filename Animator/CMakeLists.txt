@@ -9,6 +9,7 @@ endif()
 
 add_library(Animator STATIC ${SOURCES} ${HEADERS})
 
+target_link_libraries(Animator Entities Platform Utilities)
 target_include_directories(Animator PUBLIC . )
 
 set_source_files_properties( stdafx.cpp PROPERTIES COMPILE_FLAGS "/Ycstdafx.h" )

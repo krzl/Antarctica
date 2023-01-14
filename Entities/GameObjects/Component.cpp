@@ -9,7 +9,7 @@ bool Component::IsEnabled() const
 	{
 		return GetOwner()->IsEnabled() && m_isEnabled;
 	}
-	
+
 	return false;
 }
 
@@ -39,8 +39,8 @@ void Component::SetEnabled(const bool isEnabled)
 void Component::Init(const Ref<GameObject> owner, const Ref<Component> self)
 {
 	m_owner = owner;
-	m_self = self;
-	
+	m_self  = self;
+
 	if (GameObject* ptr = *GetOwner())
 	{
 		ptr->OnObjectEnabled.AddListener([this](Ref<GameObject> object)

@@ -8,9 +8,7 @@ class Texture : public Asset
 {
 public:
 
-	Texture()
-	{
-	}
+	Texture() { }
 
 	Texture(const uint8_t* data, const int32_t width, const int32_t height, const int32_t channels)
 	{

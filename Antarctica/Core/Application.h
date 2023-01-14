@@ -38,12 +38,12 @@ public:
 	{
 		return m_renderSystem;
 	}
-	
+
 	[[nodiscard]] Platform::Window& GetWindow()
 	{
 		return m_window;
 	}
-	
+
 	[[nodiscard]] World& GetWorld()
 	{
 		return m_world;
@@ -56,13 +56,13 @@ private:
 	void Run();
 
 	InputSystem m_inputSystem;
-	Settings m_appSettings;
+	Settings    m_appSettings;
 
 	bool m_isRunning = false;
 	bool m_isPaused  = false;
 
 
-	World m_world;
+	World            m_world;
 	Platform::Window m_window;
 
 	Renderer::RenderSystem m_renderSystem;

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "World.h"
 
-
 #include "GameObject.h"
 
 uint64_t World::GenerateInstanceId()
@@ -9,7 +8,8 @@ uint64_t World::GenerateInstanceId()
 	while (true)
 	{
 		const uint64_t candidate = Random::GetRandomUInt64();
-		if (m_gameObjects.find(candidate) == m_gameObjects.end() && m_pendingSpawnObjects.find(candidate) == m_pendingSpawnObjects.end())
+		if (m_gameObjects.find(candidate) == m_gameObjects.end() && m_pendingSpawnObjects.find(candidate) ==
+			m_pendingSpawnObjects.end())
 		{
 			return candidate;
 		}
@@ -18,9 +18,9 @@ uint64_t World::GenerateInstanceId()
 
 void World::SetupSpawnedGameObject(const std::shared_ptr<GameObject> gameObject, const uint64_t instanceId)
 {
-	gameObject->m_world = this;
+	gameObject->m_world      = this;
 	gameObject->m_instanceId = instanceId;
-	gameObject->m_self = gameObject;
+	gameObject->m_self       = gameObject;
 
 	gameObject->InitComponents();
 
@@ -79,7 +79,7 @@ void World::AddToPendingDestroy(Ref<GameObject> gameObject)
 		if (it != m_gameObjects.end())
 		{
 			it->second.reset();
-			
+
 			m_pendingDestroyList.insert(ptr->GetInstanceId());
 			ptr->m_isPendingDestroy = true;
 		}

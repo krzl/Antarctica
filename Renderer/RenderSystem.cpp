@@ -55,7 +55,7 @@ namespace Renderer
 
 		m_msNumQualityLevels = msQualityLevels.NumQualityLevels;
 
-		D3D12_COMMAND_QUEUE_DESC commandQueueInfo = {
+		constexpr D3D12_COMMAND_QUEUE_DESC commandQueueInfo = {
 			D3D12_COMMAND_LIST_TYPE_DIRECT,
 			0,
 			D3D12_COMMAND_QUEUE_FLAG_NONE,
@@ -99,7 +99,7 @@ namespace Renderer
 
 		m_dxgiFactory->CreateSwapChain(m_commandQueue.Get(), &swapChainInfo, m_swapchain.GetAddressOf());
 
-		D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapInfo = {
+		constexpr D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapInfo = {
 			D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 			BUFFER_COUNT,
 			D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
@@ -108,7 +108,7 @@ namespace Renderer
 
 		m_device->CreateDescriptorHeap(&rtvDescriptorHeapInfo, IID_PPV_ARGS(&m_rtvDescriptorHeap));
 
-		D3D12_DESCRIPTOR_HEAP_DESC dsvDescriptorHeapInfo = {
+		constexpr D3D12_DESCRIPTOR_HEAP_DESC dsvDescriptorHeapInfo = {
 			D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 			1,
 			D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
@@ -169,7 +169,7 @@ namespace Renderer
 			rtvDescriptorHandle.Offset(1, m_rtvDescriptorSize);
 		}
 
-		D3D12_RESOURCE_DESC depthStencilInfo = {
+		const D3D12_RESOURCE_DESC depthStencilInfo = {
 			D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 			0,
 			window.GetWidth(),
@@ -194,15 +194,15 @@ namespace Renderer
 			0
 		};
 
-		CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+		const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
 		m_device->CreateCommittedResource(
-										  &heapProperties,
-										  D3D12_HEAP_FLAG_NONE,
-										  &depthStencilInfo,
-										  D3D12_RESOURCE_STATE_COMMON,
-										  &depthStencilClearValue,
-										  IID_PPV_ARGS(&m_depthStencilBuffer)
-										 );
+			&heapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&depthStencilInfo,
+			D3D12_RESOURCE_STATE_COMMON,
+			&depthStencilClearValue,
+			IID_PPV_ARGS(&m_depthStencilBuffer)
+		);
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvInfo = {
 			DXGI_FORMAT_D24_UNORM_S8_UINT,
@@ -217,9 +217,9 @@ namespace Renderer
 		m_device->CreateDepthStencilView(m_depthStencilBuffer.Get(), &dsvInfo,
 										 m_dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
-		D3D12_RESOURCE_BARRIER depthTransition = CD3DX12_RESOURCE_BARRIER::Transition(m_depthStencilBuffer.Get(),
-																					  D3D12_RESOURCE_STATE_COMMON,
-																					  D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		const D3D12_RESOURCE_BARRIER depthTransition = CD3DX12_RESOURCE_BARRIER::Transition(m_depthStencilBuffer.Get(),
+																							D3D12_RESOURCE_STATE_COMMON,
+																							D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_commandList->ResourceBarrier(1, &depthTransition);
 
 		m_viewport = {
@@ -259,7 +259,7 @@ namespace Renderer
 		while (!cameras.empty())
 		{
 			const CameraData& camera = cameras.top();
-			
+
 			SetupCamera(camera);
 			SetupRenderTarget(camera);
 			DrawObjects(renderQueue, camera);
@@ -273,7 +273,7 @@ namespace Renderer
 		Present();
 	}
 
-	void RenderSystem::ResetCommandList()
+	void RenderSystem::ResetCommandList() const
 	{
 		m_frameCommandAllocators[m_currentBackbufferId]->Reset();
 		m_commandList->Reset(m_frameCommandAllocators[m_currentBackbufferId].Get(), nullptr);
@@ -282,28 +282,29 @@ namespace Renderer
 		//m_commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	}
 
-	void RenderSystem::SetupCamera(const CameraData& camera)
+	void RenderSystem::SetupCamera(const CameraData& camera) const
 	{
 		m_commandList->RSSetViewports(1, &m_viewport);
 		m_commandList->RSSetScissorRects(1, &m_scissorRect);
 	}
 
-	void RenderSystem::SetupRenderTarget(const CameraData& camera)
+	void RenderSystem::SetupRenderTarget(const CameraData& camera) const
 	{
-		D3D12_RESOURCE_BARRIER transitionToRender =
+		const D3D12_RESOURCE_BARRIER transitionToRender =
 			CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainBuffers[m_currentBackbufferId].Get(),
 												 D3D12_RESOURCE_STATE_PRESENT,
 												 D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_commandList->ResourceBarrier(1, &transitionToRender);
 
-		auto backbufferView = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-															m_currentBackbufferId,
-															m_rtvDescriptorSize);
+		const auto backbufferView = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			m_rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+			m_currentBackbufferId,
+			m_rtvDescriptorSize);
 
-		const float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		constexpr float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		m_commandList->ClearRenderTargetView(backbufferView, clearColor, 0, nullptr);
 
-		auto depthStencilView =
+		const auto depthStencilView =
 			CD3DX12_CPU_DESCRIPTOR_HANDLE(m_dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 		m_commandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f,
 											 0, 0,
@@ -312,12 +313,12 @@ namespace Renderer
 		m_commandList->OMSetRenderTargets(1, &backbufferView, true, &depthStencilView);
 	}
 
-	void RenderSystem::DrawObjects(std::priority_queue<RenderHandle>& renderQueue, const CameraData& camera)
+	void RenderSystem::DrawObjects(std::priority_queue<RenderHandle>& renderQueue, const CameraData& camera) const
 	{
 		while (!renderQueue.empty())
 		{
 			const RenderHandle& renderable = renderQueue.top();
-			
+
 			renderable.m_material->GetShaderObject().Bind(*renderable.m_attributeUsage);
 			renderable.m_material->UpdateAndBind();
 
@@ -332,15 +333,15 @@ namespace Renderer
 		}
 	}
 
-	void RenderSystem::FinalizeDrawing()
+	void RenderSystem::FinalizeDrawing() const
 	{
-		D3D12_RESOURCE_BARRIER transitionToPresent =
+		const D3D12_RESOURCE_BARRIER transitionToPresent =
 			CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainBuffers[m_currentBackbufferId].Get(),
 												 D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 		m_commandList->ResourceBarrier(1, &transitionToPresent);
 	}
 
-	void RenderSystem::ExecuteCommandLists()
+	void RenderSystem::ExecuteCommandLists() const
 	{
 		m_commandList->Close();
 		ID3D12CommandList* commandLists[] = { m_commandList.Get() };

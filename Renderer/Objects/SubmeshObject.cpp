@@ -13,7 +13,7 @@ namespace Renderer
 		{
 			return;
 		}
-		
+
 		D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_submesh->GetVertexBuffer().m_data.size());
 		std::vector<D3D12_SUBRESOURCE_DATA> subresourceData = {
 			{
@@ -62,7 +62,7 @@ namespace Renderer
 			Init();
 			m_isInitialized = true;
 		}
-		
+
 		RenderSystem::Get().GetCommandList()->IASetVertexBuffers(0u, 1, &m_vertexBufferView);
 		RenderSystem::Get().GetCommandList()->IASetIndexBuffer(&m_indexBufferView);
 		RenderSystem::Get().GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
