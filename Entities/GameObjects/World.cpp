@@ -18,9 +18,9 @@ uint64_t World::GenerateInstanceId()
 
 void World::SetupSpawnedGameObject(const std::shared_ptr<GameObject> gameObject, const uint64_t instanceId)
 {
+	gameObject->m_self       = gameObject;
 	gameObject->m_world      = this;
 	gameObject->m_instanceId = instanceId;
-	gameObject->m_self       = gameObject;
 
 	gameObject->InitComponents();
 
@@ -36,20 +36,20 @@ Ref<GameObject> World::GetSpawnedObject(const uint64_t instanceId)
 	auto it = m_gameObjects.find(instanceId);
 	if (it != m_gameObjects.end())
 	{
-		return Ref<GameObject>(it->second);
+		return Ref(it->second);
 	}
 	it = m_pendingSpawnObjects.find(instanceId);
 	if (it != m_pendingSpawnObjects.end())
 	{
-		return Ref<GameObject>(it->second);
+		return Ref(it->second);
 	}
 
 	return Ref<GameObject>();
 }
 
-void World::Update()
+void World::Update(float deltaTime)
 {
-	for (auto [instanceId, object] : m_pendingSpawnObjects)
+	for (auto& [instanceId, object] : m_pendingSpawnObjects)
 	{
 		m_gameObjects[instanceId] = object;
 	}
@@ -65,8 +65,8 @@ void World::Update()
 	{
 		if (!gameObject->IsPendingDestroy())
 		{
-			gameObject->Tick();
-			gameObject->TickComponents();
+			gameObject->Tick(deltaTime);
+			gameObject->TickComponents(deltaTime);
 		}
 	}
 }

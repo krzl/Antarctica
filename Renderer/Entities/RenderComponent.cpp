@@ -1,19 +1,19 @@
 #include "stdafx.h"
 #include "RenderComponent.h"
 
-#include <Buffers/PerObjectBuffer.h>
+#include <Buffers/Types/PerObjectBuffer.h>
 
 namespace Renderer
 {
 	std::unordered_set<RenderComponent*> renderComponents;
 
-	std::priority_queue<Renderer::RenderHandle> RenderComponent::GetRenderQueue()
+	std::priority_queue<RenderHandle> RenderComponent::GetRenderQueue()
 	{
-		std::priority_queue<Renderer::RenderHandle> renderQueue;
+		std::priority_queue<RenderHandle> renderQueue;
 
 		for (RenderComponent* component : renderComponents)
 		{
-			std::vector<Renderer::RenderHandle> handles = component->PrepareForRender();
+			std::vector<RenderHandle> handles = component->PrepareForRender();
 			for (auto& handle : handles)
 			{
 				renderQueue.emplace(handle);
@@ -25,31 +25,26 @@ namespace Renderer
 
 	void RenderComponent::OnEnabled()
 	{
-		renderComponents.insert(*GetRef().Cast<RenderComponent>());
+		renderComponents.insert(this);
 		if (!m_constantBuffer.IsInitialized())
 		{
-			m_constantBuffer.Init(1, sizeof(Renderer::PerObjectBuffer), &Renderer::PerObjectBuffer::DEFAULT_BUFFER);
+			m_constantBuffer.Init(1, sizeof(PerObjectBuffer), &PerObjectBuffer::DEFAULT_BUFFER);
 		}
 	}
 
 	void RenderComponent::OnDisabled()
 	{
-		renderComponents.erase(*GetRef().Cast<RenderComponent>());
-	}
-
-	void RenderComponent::Tick()
-	{
-		SetLocalRotation(m_rotation * Quaternion::MakeRotationY(0.00087266462f));
+		renderComponents.erase(this);
 	}
 
 	void RenderComponent::UpdateConstantBuffer()
 	{
-		const auto                 worldMatrix = GetWorldTransform();
-		Renderer::PerObjectBuffer* buffer      = m_constantBuffer.GetData<Renderer::PerObjectBuffer>();
-		buffer->m_transform                    = worldMatrix.transpose;
+		const auto       worldMatrix = GetWorldTransform();
+		PerObjectBuffer* buffer      = m_constantBuffer.GetData<PerObjectBuffer>();
+		buffer->m_transform          = worldMatrix.transpose;
 	}
 
-	std::vector<Renderer::RenderHandle> RenderComponent::PrepareForRender()
+	std::vector<RenderHandle> RenderComponent::PrepareForRender()
 	{
 		return {};
 	}

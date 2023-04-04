@@ -9,7 +9,7 @@ endif()
 
 add_library(AssetManagement STATIC ${SOURCES} ${HEADERS})
 
-target_link_libraries(AssetManagement Platform Renderer Utilities assimp)
+target_link_libraries(AssetManagement Platform Utilities assimp)
 
 target_include_directories(AssetManagement PUBLIC . )
 

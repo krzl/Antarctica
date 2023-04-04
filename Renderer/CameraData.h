@@ -16,17 +16,17 @@ namespace Renderer
 
 		friend bool operator<=(const CameraData& lhs, const CameraData& rhs)
 		{
-			return !(rhs < lhs);
+			return lhs <= rhs;
 		}
 
 		friend bool operator>(const CameraData& lhs, const CameraData& rhs)
 		{
-			return rhs < lhs;
+			return lhs > rhs;
 		}
 
 		friend bool operator>=(const CameraData& lhs, const CameraData& rhs)
 		{
-			return !(lhs < rhs);
+			return lhs >= rhs;
 		}
 	};
 }

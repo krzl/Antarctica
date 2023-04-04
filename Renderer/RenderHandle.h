@@ -1,18 +1,21 @@
 #pragma once
-#include "Objects/SubmeshObject.h"
-#include "Shaders/MaterialObject.h"
+
+#include "Assets/Material.h"
+
+struct Submesh;
 
 namespace Renderer
 {
+	class DynamicBuffer;
 	class ConstantBuffer;
 
 	struct RenderHandle
 	{
-		SubmeshObject*        m_submesh;
-		const MaterialObject* m_material;
-		ConstantBuffer*       m_constantBuffer;
-		const AttributeUsage* m_attributeUsage;
-		float                 m_order;
+		const ::Submesh*            m_submesh;
+		const Material*             m_material;
+		ConstantBuffer*             m_constantBuffer;
+		std::vector<DynamicBuffer>* m_skinningBuffers;
+		float                       m_order;
 
 		friend bool operator<(const RenderHandle& lhs, const RenderHandle& rhs)
 		{
@@ -34,12 +37,12 @@ namespace Renderer
 			return !(lhs < rhs);
 		}
 
-		RenderHandle(SubmeshObject&  submesh, const MaterialObject&        material,
-					 ConstantBuffer& constantBuffer, const AttributeUsage& attributeUsage, const float order)
+		RenderHandle(const ::Submesh& submesh, const Material& material,
+					 ConstantBuffer&  constantBuffer)
 			: m_submesh(&submesh),
 			  m_material(&material),
 			  m_constantBuffer(&constantBuffer),
-			  m_attributeUsage(&attributeUsage),
-			  m_order(order) { }
+			  m_skinningBuffers(nullptr),
+			  m_order(material.GetOrder()) { }
 	};
 }

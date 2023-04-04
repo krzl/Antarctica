@@ -1,8 +1,6 @@
 #pragma once
 
-#include <Objects/SubmeshData.h>
-
-#include "Assets/Mesh.h"
+#include <Assets/SubmeshData.h>
 
 class SubmeshBuilder
 {
@@ -17,12 +15,12 @@ public:
 	void SetTexcoords(std::vector<float>&& texcoords, uint8_t channel);
 	void SetSkeleton(Skeleton&& skeleton);
 
-	Renderer::Submesh Build();
+	Submesh Build();
 
 private:
 
-	const Renderer::AttributeOffsets& GetAttributeOffsets(const Renderer::AttributeUsage& attributeUsage) const;
-	Renderer::AttributeUsage          GetAttributeUsage() const;
+	const AttributeOffsets& GetAttributeOffsets(const AttributeUsage& attributeUsage) const;
+	AttributeUsage          GetAttributeUsage() const;
 
 	std::vector<uint8_t>  m_indices;
 	std::vector<Vector3D> m_positions;

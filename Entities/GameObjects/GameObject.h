@@ -13,8 +13,6 @@ class GameObject
 public:
 
 	GameObject();
-	//GameObject(const GameObject& other)            = delete;
-	//GameObject& operator=(const GameObject& other) = delete;
 	virtual ~GameObject() = default;
 
 	// Add Component
@@ -50,7 +48,7 @@ public:
 		const std::vector<Ref<Component>> components = GetComponentsFromClass(clazz);
 
 		std::vector<Ref<T>> ret(components.size());
-		
+
 		std::transform(components.begin(), components.end(), ret.begin(), [](Ref<Component> ptr)
 		{
 			return Ref<T>(ptr);
@@ -106,57 +104,68 @@ public:
 
 	[[nodiscard]] const Ref<SceneComponent>& GetRoot() const
 	{
-		return root;
+		return m_root;
 	}
 
 	Point3D GetPosition() const
 	{
-		return root->GetWorldPosition();
-	}
-
-	void SetPosition(const Point3D position)
-	{
-		root->SetWorldPosition(position);
+		return m_root->GetWorldPosition();
 	}
 
 	Quaternion GetRotation() const
 	{
-		return root->GetWorldRotation();
-	}
-
-	void SetRotation(const Quaternion rotation)
-	{
-		root->SetWorldRotation(rotation);
-	}
-
-	void SetRotation(const Vector3D axis)
-	{
-		root->SetWorldRotation(axis);
-	}
-
-	void SetRotation(const float x, const float y, const float z)
-	{
-		root->SetWorldRotation(x, y, z);
+		return m_root->GetWorldRotation();
 	}
 
 	Vector3D GetScale() const
 	{
-		return root->GetWorldScale();
-	}
-
-	void SetScale(const Vector3D scale)
-	{
-		root->SetWorldScale(scale);
+		return m_root->GetWorldScale();
 	}
 
 	Transform4D GetTransform() const
 	{
-		return root->GetWorldTransform();
+		return m_root->GetWorldTransform();
+	}
+
+	// ReSharper disable once CppConstValueFunctionReturnType
+	[[nodiscard]] const Ref<GameObject> GetRef() const
+	{
+		return const_cast<GameObject*>(this)->GetRef();
+	}
+
+	[[nodiscard]] Ref<GameObject> GetRef()
+	{
+		return m_self;
 	}
 
 	// Setters
 
 	void SetEnabled(bool isEnabled);
+
+	void SetPosition(const Point3D position)
+	{
+		m_root->SetWorldPosition(position);
+	}
+
+	void SetRotation(const Quaternion rotation)
+	{
+		m_root->SetWorldRotation(rotation);
+	}
+
+	void SetRotation(const Vector3D axis)
+	{
+		m_root->SetWorldRotation(axis);
+	}
+
+	void SetRotation(const float x, const float y, const float z)
+	{
+		m_root->SetWorldRotation(x, y, z);
+	}
+
+	void SetScale(const Vector3D scale)
+	{
+		m_root->SetWorldScale(scale);
+	}
 
 protected:
 
@@ -164,7 +173,7 @@ protected:
 
 	virtual void OnCreated() { }
 	virtual void OnEnabled() { }
-	virtual void Tick() { }
+	virtual void Tick(float deltaTime) { }
 	virtual void OnDisabled() { }
 	virtual void OnDestroy() { }
 
@@ -172,7 +181,7 @@ protected:
 
 private:
 
-	void TickComponents();
+	void TickComponents(float deltaTime);
 
 	std::unordered_multimap<uint64_t, std::shared_ptr<Component>> m_components;
 
@@ -182,7 +191,7 @@ private:
 
 	Ref<GameObject> m_self;
 
-	Ref<SceneComponent> root;
+	Ref<SceneComponent> m_root;
 
 	bool m_isEnabled        = true;
 	bool m_isPendingDestroy = false;

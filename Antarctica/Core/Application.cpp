@@ -6,6 +6,8 @@
 #include "Entities/CameraComponent.h"
 #include "Entities/RenderComponent.h"
 #include "GameObjects/World.h"
+#include "Systems/System.h"
+#include "Systems/TimeSystem.h"
 
 Application* gApp = nullptr;
 
@@ -37,6 +39,12 @@ void Application::Start()
 
 	m_renderSystem.Init(m_window, m_appSettings);
 
+	m_systems = SystemCreator::CreateSystems();
+	for (System* system : m_systems)
+	{
+		system->Init();
+	}
+
 	OnApplicationInitialized.Dispatch();
 
 	Run();
@@ -50,10 +58,15 @@ void Application::Run()
 	{
 		if (!m_isPaused)
 		{
-			Update();
+			for (System* system : m_systems)
+			{
+				system->Update();
+			}
+			Update(TimeSystem::GetInstance()->GetDeltaTime());
 		}
 		m_window.Update();
-		Render();
+		Renderer::CameraComponent::SetAspectRatio(GetWindow().GetAspectRatio());
+		m_renderSystem.Render();
 	}
 	m_renderSystem.Cleanup();
 }
@@ -73,17 +86,9 @@ void Application::Unpause()
 	m_isPaused = false;
 }
 
-void Application::Update()
+void Application::Update(const float deltaTime)
 {
-	m_world.Update();
-}
-
-void Application::Render()
-{
-	auto renderQueue = Renderer::RenderComponent::GetRenderQueue();
-	Renderer::CameraComponent::SetAspectRatio(GetWindow().GetAspectRatio());
-	auto cameraData = Renderer::CameraComponent::GetAllCameraData();
-	m_renderSystem.Render(renderQueue, cameraData);
+	m_world.Update(deltaTime);
 }
 
 Application& Application::Get()

@@ -17,7 +17,7 @@ add_subdirectory(Antarctica)
 add_subdirectory(Game)
 add_subdirectory(Entities)
 
-add_subdirectory(Animator)
+add_subdirectory(Animation)
 add_subdirectory(AssetManagement)
 add_subdirectory(Platform)
 add_subdirectory(Renderer)

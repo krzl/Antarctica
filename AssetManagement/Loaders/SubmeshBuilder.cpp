@@ -57,14 +57,27 @@ void SubmeshBuilder::SetSkeleton(Skeleton&& skeleton)
 	m_skeleton = std::move(skeleton);
 }
 
-Renderer::Submesh SubmeshBuilder::Build()
+template<typename T>
+static void AppendVertexData(std::vector<T>& newData, std::vector<uint8_t>& vertexData, uint32_t& headIndex)
 {
-	Renderer::MeshBuffer indexBuffer = {
+	if (newData.size() > 0)
+	{
+		const uint64_t byteSize = sizeof T * newData.size();
+		memcpy(&vertexData[headIndex], &newData[0], byteSize);
+		headIndex += byteSize;
+	}
+}
+
+Submesh SubmeshBuilder::Build()
+{
+	const uint32_t indexCount  = static_cast<uint32_t>(m_indices.size() / sizeof(uint32_t));
+	MeshBuffer     indexBuffer = {
 		std::move(m_indices),
-		sizeof(uint32_t)
+		sizeof(uint32_t),
+		indexCount
 	};
 
-	const Renderer::AttributeUsage attributes = GetAttributeUsage();
+	const AttributeUsage attributes = GetAttributeUsage();
 
 	const uint32_t stride = GetAttributeOffsets(attributes).m_stride;
 
@@ -72,80 +85,64 @@ Renderer::Submesh SubmeshBuilder::Build()
 
 	uint32_t headIndex = 0;
 
-	for (uint32_t i = 0; i < m_positions.size(); i++)
-	{
-		memcpy(&vertices[headIndex], &m_positions[i], sizeof m_positions[i]);
-		headIndex += sizeof m_positions[i];
+	AppendVertexData(m_positions, vertices, headIndex);
 
-		if (m_normals.size() != 0)
-		{
-			memcpy(&vertices[headIndex], &m_normals[i], sizeof m_normals[i]);
-			headIndex += sizeof m_normals[i];
-		}
-		if (m_tangents.size() != 0)
-		{
-			memcpy(&vertices[headIndex], &m_tangents[i], sizeof m_tangents[i]);
-			headIndex += sizeof m_tangents[i];
-		}
-		if (m_bitangents.size() != 0)
-		{
-			memcpy(&vertices[headIndex], &m_bitangents[i], sizeof m_bitangents[i]);
-			headIndex += sizeof m_bitangents[i];
-		}
-		if (m_colors.size() != 0)
-		{
-			memcpy(&vertices[headIndex], &m_colors[i * attributes.m_colorChannelCount],
-				   sizeof m_colors[i] * attributes.m_colorChannelCount);
-			headIndex += sizeof m_colors[i] * attributes.m_colorChannelCount;
-		}
-		if (m_texcoords0.size() != 0)
-		{
-			memcpy(&vertices[headIndex], &m_texcoords0[i * attributes.m_dataSizeTexcoord0],
-				   sizeof m_texcoords0[i] * attributes.m_dataSizeTexcoord0);
-			headIndex += sizeof m_texcoords0[i] * attributes.m_dataSizeTexcoord0;
-		}
-		if (m_texcoords1.size() != 0)
-		{
-			memcpy(&vertices[headIndex], &m_texcoords1[i * attributes.m_dataSizeTexcoord1],
-				   sizeof m_texcoords1[i] * attributes.m_dataSizeTexcoord1);
-			headIndex += sizeof m_texcoords1[i] * attributes.m_dataSizeTexcoord1;
-		}
-		if (m_texcoords2.size() != 0)
-		{
-			memcpy(&vertices[headIndex], &m_texcoords2[i * attributes.m_dataSizeTexcoord2],
-				   sizeof m_texcoords2[i] * attributes.m_dataSizeTexcoord2);
-			headIndex += sizeof m_texcoords2[i] * attributes.m_dataSizeTexcoord2;
-		}
-		if (m_texcoords3.size() != 0)
-		{
-			memcpy(&vertices[headIndex], &m_texcoords3[i * attributes.m_dataSizeTexcoord3],
-				   sizeof m_texcoords3[i] * attributes.m_dataSizeTexcoord3);
-			headIndex += sizeof m_texcoords3[i] * attributes.m_dataSizeTexcoord3;
-		}
+	if (m_normals.size() != 0)
+	{
+		AppendVertexData(m_normals, vertices, headIndex);
+	}
+	if (m_tangents.size() != 0)
+	{
+		AppendVertexData(m_tangents, vertices, headIndex);
+	}
+	if (m_bitangents.size() != 0)
+	{
+		AppendVertexData(m_bitangents, vertices, headIndex);
+	}
+	if (m_colors.size() != 0)
+	{
+		AppendVertexData(m_colors, vertices, headIndex);
+	}
+	if (m_texcoords0.size() != 0)
+	{
+		AppendVertexData(m_texcoords0, vertices, headIndex);
+	}
+	if (m_texcoords1.size() != 0)
+	{
+		AppendVertexData(m_texcoords1, vertices, headIndex);
+	}
+	if (m_texcoords2.size() != 0)
+	{
+		AppendVertexData(m_texcoords2, vertices, headIndex);
+	}
+	if (m_texcoords3.size() != 0)
+	{
+		AppendVertexData(m_texcoords3, vertices, headIndex);
 	}
 
-	Renderer::MeshBuffer vertexBuffer = {
+	MeshBuffer vertexBuffer = {
 		std::move(vertices),
-		stride
+		stride,
+		static_cast<uint32_t>(m_positions.size())
 	};
 
-	Renderer::Submesh submesh(std::move(vertexBuffer), std::move(indexBuffer), attributes);
+	Submesh submesh(std::move(vertexBuffer), std::move(indexBuffer), attributes);
 	submesh.SetSkeleton(std::move(m_skeleton));
 
 	return submesh;
 }
 
-const Renderer::AttributeOffsets& SubmeshBuilder::GetAttributeOffsets(
-	const Renderer::AttributeUsage& attributeUsage) const
+const AttributeOffsets& SubmeshBuilder::GetAttributeOffsets(
+	const AttributeUsage& attributeUsage) const
 {
-	const auto it = Renderer::AttributeUsage::m_attributeOffsets.find(attributeUsage);
+	const auto it = AttributeUsage::m_attributeOffsets.find(attributeUsage);
 
-	if (it != Renderer::AttributeUsage::m_attributeOffsets.end())
+	if (it != AttributeUsage::m_attributeOffsets.end())
 	{
 		return it->second;
 	}
 
-	Renderer::AttributeOffsets offsets;
+	AttributeOffsets offsets;
 
 	uint32_t stride = 3 * 4;
 
@@ -204,14 +201,14 @@ const Renderer::AttributeOffsets& SubmeshBuilder::GetAttributeOffsets(
 
 	offsets.m_stride = stride;
 
-	Renderer::AttributeUsage::m_attributeOffsets[attributeUsage] = offsets;
+	AttributeUsage::m_attributeOffsets[attributeUsage] = offsets;
 
-	return Renderer::AttributeUsage::m_attributeOffsets[attributeUsage];
+	return AttributeUsage::m_attributeOffsets[attributeUsage];
 }
 
-Renderer::AttributeUsage SubmeshBuilder::GetAttributeUsage() const
+AttributeUsage SubmeshBuilder::GetAttributeUsage() const
 {
-	return Renderer::AttributeUsage
+	return AttributeUsage
 	{
 		m_normals.size() != 0,
 		m_tangents.size() != 0,

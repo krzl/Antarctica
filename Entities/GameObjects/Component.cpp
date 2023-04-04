@@ -24,12 +24,12 @@ void Component::SetEnabled(const bool isEnabled)
 				if (m_isEnabled)
 				{
 					OnEnabled();
-					OnComponentEnabled.Dispatch(m_self);
+					OnComponentEnabled.Dispatch(GetRef());
 				}
 				else
 				{
 					OnDisabled();
-					OnComponentDisabled.Dispatch(m_self);
+					OnComponentDisabled.Dispatch(GetRef());
 				}
 			}
 		}
@@ -48,7 +48,7 @@ void Component::Init(const Ref<GameObject> owner, const Ref<Component> self)
 			if (m_isEnabled)
 			{
 				OnEnabled();
-				OnComponentEnabled.Dispatch(m_self);
+				OnComponentEnabled.Dispatch(GetRef());
 			}
 		});
 		ptr->OnObjectDisabled.AddListener([this](Ref<GameObject> object)
@@ -56,7 +56,7 @@ void Component::Init(const Ref<GameObject> owner, const Ref<Component> self)
 			if (m_isEnabled)
 			{
 				OnDisabled();
-				OnComponentDisabled.Dispatch(m_self);
+				OnComponentDisabled.Dispatch(GetRef());
 			}
 		});
 		ptr->OnObjectDestroyed.AddListener([this](Ref<GameObject> object)
@@ -64,10 +64,10 @@ void Component::Init(const Ref<GameObject> owner, const Ref<Component> self)
 			if (IsEnabled())
 			{
 				OnDisabled();
-				OnComponentDisabled.Dispatch(m_self);
+				OnComponentDisabled.Dispatch(GetRef());
 			}
 			OnDestroy();
-			OnComponentDestroyed.Dispatch(m_self);
+			OnComponentDestroyed.Dispatch(GetRef());
 		});
 	}
 
@@ -76,6 +76,6 @@ void Component::Init(const Ref<GameObject> owner, const Ref<Component> self)
 	if (IsEnabled())
 	{
 		OnEnabled();
-		OnComponentEnabled.Dispatch(m_self);
+		OnComponentEnabled.Dispatch(GetRef());
 	}
 }

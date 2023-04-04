@@ -3,74 +3,43 @@
 
 namespace Renderer
 {
-	static bool IsElementIdPresent(const std::vector<ShaderDescriptor::TextureDescriptor>& list, const uint8_t id)
+	void ShaderDescriptor::AddTextureDescriptor(TextureDescriptor&& descriptor)
 	{
-		// ReSharper disable once CppUseStructuredBinding
-		for (const ShaderDescriptor::TextureDescriptor& element : list)
+		m_textures.push_back(std::move(descriptor));
+	}
+
+	void ShaderDescriptor::AddVariableDescriptor(VariableDescriptor&& descriptor)
+	{
+		m_variables.push_back(std::move(descriptor));
+	}
+
+	void ShaderDescriptor::AddBufferDescriptor(BufferDescriptor&& descriptor)
+	{
+		m_buffers.push_back(std::move(descriptor));
+	}
+
+	bool ShaderDescriptor::ContainsBuffer(const std::string& name) const
+	{
+		for (const auto& [bufferName, bufferSize, defaultValue] : m_buffers)
 		{
-			if (element.m_id == id)
+			if (bufferName == name)
 			{
 				return true;
 			}
 		}
-
 		return false;
 	}
 
-	void ShaderDescriptor::AddFromReflector(ID3D12ShaderReflection* reflector, const D3D12_SHADER_DESC& descriptor)
+	bool ShaderDescriptor::ContainsTextureId(const uint32_t id) const
 	{
-		for (uint32_t i = 0; i < descriptor.ConstantBuffers; ++i)
+		for (const auto& [name, textureId] : m_textures)
 		{
-			ID3D12ShaderReflectionConstantBuffer* constantBuffer = reflector->GetConstantBufferByIndex(0);
-			D3D12_SHADER_BUFFER_DESC              bufferDesc;
-			constantBuffer->GetDesc(&bufferDesc);
-
-			const auto defaultBufferValue = new uint8_t[bufferDesc.Size];
-
-			for (uint32_t j = 0; j < bufferDesc.Variables; ++j)
+			if (textureId == id)
 			{
-				ID3D12ShaderReflectionVariable* variable = constantBuffer->GetVariableByIndex(j);
-				D3D12_SHADER_VARIABLE_DESC      variableDesc;
-				variable->GetDesc(&variableDesc);
-
-				m_variables.emplace_back(VariableDescriptor{
-					std::string(variableDesc.Name),
-					(uint16_t) i,
-					(uint16_t) variableDesc.StartOffset,
-					(uint16_t) variableDesc.Size
-				});
-
-
-				if (variableDesc.DefaultValue != nullptr)
-				{
-					memcpy(defaultBufferValue + variableDesc.StartOffset, variableDesc.DefaultValue, variableDesc.Size);
-				}
-				else
-				{
-					memset(defaultBufferValue + variableDesc.StartOffset, 0, variableDesc.Size);
-				}
-			}
-
-			m_buffers.emplace_back(BufferDescriptor{
-				(uint16_t) i,
-				(uint16_t) bufferDesc.Size,
-				defaultBufferValue
-			});
-		}
-
-		for (uint32_t i = 0; i < descriptor.BoundResources; ++i)
-		{
-			D3D12_SHADER_INPUT_BIND_DESC desc;
-			reflector->GetResourceBindingDesc(i, &desc);
-
-			if (desc.Type == D3D_SIT_TEXTURE)
-			{
-				if (!IsElementIdPresent(m_textures, desc.BindPoint))
-				{
-					m_textures.emplace_back(TextureDescriptor{ std::string(desc.Name), (uint16_t) desc.BindPoint });
-				}
+				return true;
 			}
 		}
+		return false;
 	}
 
 	void ShaderDescriptor::Clear()

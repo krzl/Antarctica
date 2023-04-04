@@ -12,16 +12,16 @@ public:
 
 	Ref(const Ref& other) = default;
 
+	// ReSharper disable once CppNonExplicitConvertingConstructor
+	Ref(std::weak_ptr<T> ptr) :
+		m_ptr(ptr) { }
+
 	template<
 		class D,
 		class = std::enable_if_t<std::is_base_of_v<T, D>>>
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref(const Ref<D>& other) :
 		Ref(other.m_ptr) { }
-
-	// ReSharper disable once CppNonExplicitConvertingConstructor
-	Ref(std::weak_ptr<T> ptr) :
-		m_ptr(ptr) { }
 
 	template<
 		class D,

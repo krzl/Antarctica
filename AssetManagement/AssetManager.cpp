@@ -10,5 +10,5 @@ void AssetManager::AddToAssetDatabase(const std::weak_ptr<Asset>& asset, const u
 
 uint64_t AssetManager::GetAssetId(const std::string& path)
 {
-	return static_cast<uint64_t>(std::hash<std::string>()(path));
+	return std::hash<std::string>()(path);
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <RenderHandle.h>
-#include <Objects/ConstantBuffer.h>
+#include <Buffers/ConstantBuffer.h>
 
 #include "Components/SceneComponent.h"
 
@@ -11,17 +11,16 @@ namespace Renderer
 	{
 	public:
 
-		static std::priority_queue<Renderer::RenderHandle> GetRenderQueue();
+		static std::priority_queue<RenderHandle> GetRenderQueue();
 
 		void OnEnabled() override;
 		void OnDisabled() override;
-		void Tick() override;
 
 	protected:
 
-		Renderer::ConstantBuffer m_constantBuffer;
+		ConstantBuffer m_constantBuffer;
 
-		void                                        UpdateConstantBuffer();
-		virtual std::vector<Renderer::RenderHandle> PrepareForRender();
+		void                              UpdateConstantBuffer();
+		virtual std::vector<RenderHandle> PrepareForRender();
 	};
 }

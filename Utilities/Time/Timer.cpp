@@ -35,5 +35,5 @@ void Timer::Restart()
 
 float Timer::GetTime() const
 {
-	return m_accumulator + (std::chrono::steady_clock::now() - m_startTime) / 1us / 10000000.0f;
+	return m_accumulator + (std::chrono::steady_clock::now() - m_startTime) / 1us / 1000000.0f;
 }

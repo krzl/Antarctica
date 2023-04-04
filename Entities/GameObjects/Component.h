@@ -32,7 +32,13 @@ public:
 		return m_owner;
 	}
 
-	[[nodiscard]] const Ref<Component>& GetRef() const
+	// ReSharper disable once CppConstValueFunctionReturnType
+	[[nodiscard]] const Ref<Component> GetRef() const
+	{
+		return const_cast<Component*>(this)->GetRef();
+	}
+
+	[[nodiscard]] Ref<Component> GetRef()
 	{
 		return m_self;
 	}
@@ -51,7 +57,7 @@ protected:
 
 	virtual void OnCreated() {}
 	virtual void OnEnabled() {}
-	virtual void Tick() {}
+	virtual void Tick(float deltaTime) {}
 	virtual void OnDisabled() {}
 	virtual void OnDestroy() {}
 
@@ -60,8 +66,9 @@ private:
 	void Init(const Ref<GameObject> owner, const Ref<Component> self);
 
 	Ref<GameObject> m_owner;
-	Ref<Component>  m_self;
 	const Class*    m_class;
+
+	Ref<Component> m_self;
 
 	uint32_t m_componentId = 0;
 

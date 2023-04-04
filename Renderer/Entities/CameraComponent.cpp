@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CameraComponent.h"
 
-#include <Buffers/PerCameraBuffer.h>
+#include <Buffers/Types/PerCameraBuffer.h>
 
 namespace Renderer
 {
@@ -12,7 +12,7 @@ namespace Renderer
 		cameraComponents.insert(*GetRef().Cast<CameraComponent>());
 		if (!m_constantBuffer.IsInitialized())
 		{
-			m_constantBuffer.Init(1, sizeof(Renderer::PerCameraBuffer), &Renderer::PerCameraBuffer::DEFAULT_BUFFER);
+			m_constantBuffer.Init(1, sizeof(PerCameraBuffer), &PerCameraBuffer::DEFAULT_BUFFER);
 		}
 	}
 
@@ -55,8 +55,8 @@ namespace Renderer
 	{
 		const auto viewProj = GetPerspectiveMatrix() * GetLookAtMatrix();
 
-		Renderer::PerCameraBuffer* buffer = m_constantBuffer.GetData<Renderer::PerCameraBuffer>();
-		buffer->m_viewProjMatrix          = viewProj.transpose;
+		PerCameraBuffer* buffer  = m_constantBuffer.GetData<PerCameraBuffer>();
+		buffer->m_viewProjMatrix = viewProj.transpose;
 	}
 
 	void CameraComponent::SetAspectRatio(const float aspectRatio)
@@ -64,14 +64,14 @@ namespace Renderer
 		m_aspectRatio = aspectRatio;
 	}
 
-	std::priority_queue<Renderer::CameraData> CameraComponent::GetAllCameraData()
+	std::priority_queue<CameraData> CameraComponent::GetAllCameraData()
 	{
-		std::priority_queue<Renderer::CameraData> cameraData;
+		std::priority_queue<CameraData> cameraData;
 
 		for (CameraComponent* camera : cameraComponents)
 		{
 			camera->UpdateConstantBuffer();
-			cameraData.emplace(Renderer::CameraData
+			cameraData.emplace(CameraData
 				{
 					&camera->m_constantBuffer,
 					camera->GetOrder()

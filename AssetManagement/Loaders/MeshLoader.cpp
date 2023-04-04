@@ -6,8 +6,9 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <Objects/SubmeshData.h>
+#include <Assets/SubmeshData.h>
 
+#include "AnimationLoader.h"
 #include "SubmeshBuilder.h"
 
 std::vector<Vector3D> CastToVector(const uint32_t count, const aiVector3D& input)
@@ -22,8 +23,8 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 	const aiScene* scene = aiImportFile(path.c_str(),
 										aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_PopulateArmatureData);
 
-	std::vector<Renderer::MeshBuffer> indexDataList;
-	std::vector<Renderer::MeshBuffer> vertexDataList;
+	std::vector<MeshBuffer> indexDataList;
+	std::vector<MeshBuffer> vertexDataList;
 
 	auto mesh = std::make_shared<Mesh>();
 
@@ -85,27 +86,42 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 		{
 			Skeleton skeleton;
 			skeleton.m_bones.resize(submesh->mNumBones);
+			skeleton.m_vertexWeights.resize(submesh->mNumVertices);
+			skeleton.m_globalInverseTransform = Inverse(AIMatrixCast(scene->mRootNode->mTransformation));
 
 			std::unordered_map<aiNode*, Bone*> nodeToBoneMap(submesh->mNumBones);
 
+			std::vector<uint8_t> weightCounters(submesh->mNumVertices);
+			
 			for (uint32_t boneId = 0; boneId < submesh->mNumBones; ++boneId)
 			{
-				Bone&         bone  = skeleton.m_bones[boneId];
-				const aiBone* mBone = submesh->mBones[boneId];
+				Bone&         bone   = skeleton.m_bones[boneId];
+				const aiBone* aiBone = submesh->mBones[boneId];
 
-				auto it       = nodeToBoneMap.find(mBone->mNode->mParent);
-				bone.m_parent = it != nodeToBoneMap.end() ? it->second : nullptr;
-				bone.m_weights.resize(mBone->mNumWeights);
-
-				for (uint32_t weightId = 0; weightId < mBone->mNumWeights; ++weightId)
+				Bone*   parentBone        = nullptr;
+				aiNode* currentSearchNode = aiBone->mNode->mParent;
+				while (parentBone == nullptr && currentSearchNode != nullptr)
 				{
-					bone.m_weights[weightId] = {
-						mBone->mWeights[weightId].mVertexId,
-						mBone->mWeights[weightId].mWeight,
+					auto it           = nodeToBoneMap.find(currentSearchNode);
+					parentBone        = it != nodeToBoneMap.end() ? it->second : nullptr;
+					currentSearchNode = currentSearchNode->mParent;
+				}
+
+				bone.m_skeleton = &skeleton;
+				bone.m_parent   = parentBone;
+				bone.m_boneName = aiBone->mName.C_Str();
+				bone.m_offsetMatrix = AIMatrixCast(aiBone->mOffsetMatrix);
+
+				for (uint32_t weightId = 0; weightId < aiBone->mNumWeights; ++weightId)
+				{
+					const uint32_t vertexId                                    = aiBone->mWeights[weightId].mVertexId;
+					skeleton.m_vertexWeights[vertexId].m_boneWeights[weightCounters[vertexId]++] = BoneWeight{
+						boneId,
+						aiBone->mWeights[weightId].mWeight,
 					};
 				}
 
-				nodeToBoneMap[mBone->mNode] = &bone;
+				nodeToBoneMap[aiBone->mNode] = &bone;
 			}
 
 			builder.SetSkeleton(std::move(skeleton));
@@ -114,9 +130,13 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 		mesh->AddSubmesh(builder.Build());
 	}
 
-	aiReleaseImport(scene);
+	for (uint32_t animationId = 0; animationId < scene->mNumAnimations; ++animationId)
+	{
+		aiAnimation* animation = scene->mAnimations[animationId];
+		mesh->AddAnimation(ImportAnimation(animation, scene->mRootNode));
+	}
 
-	mesh->GetMeshObject().Init(mesh->GetSubmeshes());
+	aiReleaseImport(scene);
 
 	return mesh;
 }

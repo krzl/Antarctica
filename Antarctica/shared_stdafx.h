@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <bitset>
 
 #include <algorithm>
 #include <functional>
@@ -48,9 +49,6 @@ using Terathon::Quaternion;
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <Windows.h>
-#include "../Renderer/d3dx12.h"
-
-using Microsoft::WRL::ComPtr;
 
 #if defined(DEBUG) | defined(_DEBUG)
 #include <dxgidebug.h>

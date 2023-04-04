@@ -1,68 +1,51 @@
 #pragma once
 
-#include "../Asset.h"
+#include "Asset.h"
 
-#include <Objects/MeshObject.h>
-
-namespace Renderer
-{
-	struct Submesh;
-}
-
-struct BoneWeight
-{
-	uint32_t m_vertexId = 0;
-	float    m_weight   = 0.0f;
-};
-
-struct Bone
-{
-	Bone() :
-		m_parent(nullptr) { }
-
-	Bone(const Bone* parent, std::vector<BoneWeight>&& weights)
-		: m_parent(parent),
-		  m_weights(std::move(weights)) { }
-
-	const Bone*             m_parent = nullptr;
-	std::vector<BoneWeight> m_weights;
-};
-
-struct Skeleton
-{
-	std::vector<Bone> m_bones;
-};
+#include "Animation.h"
+#include "SubmeshData.h"
 
 class Mesh : public Asset
 {
 public:
 
-	void AddSubmesh(Renderer::Submesh&& submesh);
+	void AddSubmesh(Submesh&& submesh);
+
+	void AddAnimation(const std::shared_ptr<Animation> animation)
+	{
+		m_animations.push_back(animation);
+	}
+
+	[[nodiscard]] uint32_t GetAnimationCount() const
+	{
+		return (uint32_t) m_animations.size();
+	}
+
+	[[nodiscard]] std::shared_ptr<Animation> GetAnimation(const uint32_t i) const
+	{
+		assert(i < GetAnimationCount());
+		return m_animations[i];
+	}
+
+	[[nodiscard]] const std::vector<std::shared_ptr<Animation>>& GetAnimations() const
+	{
+		return m_animations;
+	}
 
 	[[nodiscard]] uint32_t GetSubmeshCount() const
 	{
 		return (uint32_t) m_submeshes.size();
 	}
 
-	[[nodiscard]] const Renderer::Submesh& GetSubmesh(const uint32_t i) const
+	[[nodiscard]] const Submesh& GetSubmesh(const uint32_t i) const
 	{
 		assert(i < GetSubmeshCount());
 		return m_submeshes[i];
 	}
 
-	[[nodiscard]] const std::vector<Renderer::Submesh>& GetSubmeshes() const
+	[[nodiscard]] const std::vector<Submesh>& GetSubmeshes() const
 	{
 		return m_submeshes;
-	}
-
-	[[nodiscard]] Renderer::MeshObject& GetMeshObject()
-	{
-		return m_meshObject;
-	}
-
-	[[nodiscard]] const Renderer::MeshObject& GetMeshObject() const
-	{
-		return m_meshObject;
 	}
 
 	[[nodiscard]] const Transform4D& GetGlobalInverseMatrix() const
@@ -77,7 +60,7 @@ public:
 
 private:
 
-	Renderer::MeshObject           m_meshObject;
-	std::vector<Renderer::Submesh> m_submeshes;
-	Transform4D                    m_globalInverseMatrix = Transform4D::identity;
+	std::vector<Submesh>                    m_submeshes;
+	std::vector<std::shared_ptr<Animation>> m_animations;
+	Transform4D                             m_globalInverseMatrix = Transform4D::identity;
 };

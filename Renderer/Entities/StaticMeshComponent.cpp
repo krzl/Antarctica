@@ -3,14 +3,12 @@
 
 namespace Renderer
 {
-	std::vector<Renderer::RenderHandle> StaticMeshComponent::PrepareForRender()
+	std::vector<RenderHandle> StaticMeshComponent::PrepareForRender()
 	{
 		if (!m_mesh)
 			return {};
 
-		std::vector<Renderer::RenderHandle> renderHandles;
-
-		auto& submeshObjects = m_mesh->GetMeshObject().GetSubmeshObjects();
+		std::vector<RenderHandle> renderHandles;
 
 		for (uint32_t i = 0; i < m_mesh->GetSubmeshCount(); ++i)
 		{
@@ -18,12 +16,10 @@ namespace Renderer
 			{
 				UpdateConstantBuffer();
 
-				renderHandles.push_back(Renderer::RenderHandle(
-						submeshObjects[i],
-						m_materials[i]->GetMaterialObject(),
-						m_constantBuffer,
-						m_mesh->GetSubmesh(i).GetAttributes(),
-						m_materials[i]->GetOrder())
+				renderHandles.push_back(RenderHandle(
+						m_mesh->GetSubmesh(i),
+						*m_materials[i],
+						m_constantBuffer)
 				);
 			}
 		}

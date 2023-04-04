@@ -29,7 +29,7 @@ SamplerState samp : register(s0);
 #define RS	"RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT)," \
 			"CBV(b0)," \
 			"CBV(b1)," \
-			"DescriptorTable( SRV(t2, numDescriptors = unbounded))," \
+			"DescriptorTable( SRV(t2, numDescriptors = 1))," \
 			"StaticSampler(s0)"
 			
 [RootSignature(RS)]
@@ -39,7 +39,7 @@ VertexOut vs(VertexIn vin)
 
 	float4 worldPos = mul(float4(vin.pos.xyz, 1.0f), world);
 
-	vout.pos		= mul(worldPos, viewProj);
+	vout.pos		= mul(worldPos,    viewProj);
 	vout.worldPos	= worldPos.xyz;
     vout.normal		= vin.normal;
 	vout.texcoord	= float2(vin.texcoord.x, 1.0f - vin.texcoord.y);

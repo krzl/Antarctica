@@ -5,7 +5,7 @@
 
 GameObject::GameObject()
 {
-	root = AddComponent<SceneComponent>();
+	m_root = AddComponent<SceneComponent>();
 }
 
 Ref<Component> GameObject::AddComponent(const Class& clazz, const Ref<SceneComponent> parent)
@@ -22,12 +22,12 @@ Ref<Component> GameObject::AddComponent(const Class& clazz, const Ref<SceneCompo
 
 	if (const std::shared_ptr<SceneComponent> sceneComponent = std::static_pointer_cast<SceneComponent>(it->second))
 	{
-		sceneComponent->m_parent = parent.IsValid() ? parent : root;
+		sceneComponent->m_parent = parent.IsValid() ? parent : m_root;
 	}
 
-	if (m_self.IsValid())
+	if (GetRef().IsValid())
 	{
-		it->second->Init(m_self, it->second);
+		it->second->Init(GetRef(), it->second);
 	}
 
 	return it->second;
@@ -52,11 +52,11 @@ void GameObject::RemoveComponent(const Ref<Component> component)
 void GameObject::Destroy()
 {
 	OnDestroy();
-	OnObjectDestroyed.Dispatch(m_self);
+	OnObjectDestroyed.Dispatch(GetRef());
 
 	if (m_world)
 	{
-		m_world->AddToPendingDestroy(m_self);
+		m_world->AddToPendingDestroy(GetRef());
 	}
 }
 
@@ -115,14 +115,14 @@ void GameObject::InitComponents()
 {
 	for (auto [_, component] : m_components)
 	{
-		if (!component->m_self.IsValid())
+		if (!component->GetRef().IsValid())
 		{
-			component->Init(m_self, component);
+			component->Init(GetRef(), component);
 		}
 	}
 }
 
-void GameObject::TickComponents()
+void GameObject::TickComponents(const float deltaTime)
 {
 	const uint32_t cachedSize = (uint32_t) m_components.size();
 
@@ -132,7 +132,7 @@ void GameObject::TickComponents()
 		if (it->second.get() != nullptr)
 		{
 			const auto& component = it->second;
-			component->Tick();
+			component->Tick(deltaTime);
 
 			++it;
 		}

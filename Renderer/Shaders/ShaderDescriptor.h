@@ -1,5 +1,4 @@
 #pragma once
-#include <d3d12shader.h>
 
 namespace Renderer
 {
@@ -21,12 +20,18 @@ namespace Renderer
 
 		struct BufferDescriptor
 		{
-			const uint16_t m_id;
-			const uint16_t m_bufferSize;
-			const uint8_t* m_defaultValue;
+			const std::string m_name;
+			const uint16_t    m_bufferSize;
+			const uint8_t*    m_defaultValue;
 		};
 
-		void AddFromReflector(ID3D12ShaderReflection* reflector, const D3D12_SHADER_DESC& descriptor);
+		void AddTextureDescriptor(TextureDescriptor&& descriptor);
+		void AddVariableDescriptor(VariableDescriptor&& descriptor);
+		void AddBufferDescriptor(BufferDescriptor&& descriptor);
+
+		bool ContainsBuffer(const std::string& name) const;
+		bool ContainsTextureId(uint32_t id) const;
+
 		void Clear();
 
 		[[nodiscard]] const std::vector<TextureDescriptor>& GetTextures() const

@@ -1,34 +1,40 @@
 #pragma once
 
-#include "../Asset.h"
-
-#include "Shaders/ShaderObject.h"
-
-namespace Renderer
-{
-	class MaterialObject;
-}
+#include "Asset.h"
+#include "Types.h"
 
 class Shader : public Asset
 {
-	friend class Renderer::MaterialObject;
+	typedef std::unique_ptr<Renderer::IShader, void(*)(Renderer::IShader*)> NativePtr;
 
 public:
 
-	explicit Shader(const Renderer::ShaderObject&& shaderObject) :
-		m_shaderObject(std::move(shaderObject)) { }
+	explicit Shader(std::string path) :
+		m_path(std::move(path)) { }
 
-	[[nodiscard]] const Renderer::ShaderObject& GetShaderObject() const
+	[[nodiscard]] const Renderer::IShader* GetNativeObject() const
 	{
-		return m_shaderObject;
+		return m_nativeObject.get();
 	}
 
-	[[nodiscard]] Renderer::ShaderObject& GetShaderObject()
+	[[nodiscard]] Renderer::IShader* GetNativeObject()
 	{
-		return m_shaderObject;
+		return m_nativeObject.get();
+	}
+
+	void SetNativeObject(Renderer::IShader* nativePtr)
+	{
+		m_nativeObject = NativePtr(nativePtr, Renderer::Deleter);
+	}
+
+	[[nodiscard]] const std::string& GetPath() const
+	{
+		return m_path;
 	}
 
 private:
 
-	Renderer::ShaderObject m_shaderObject;
+	std::string m_path;
+
+	NativePtr m_nativeObject = NativePtr(nullptr, Renderer::Deleter);
 };

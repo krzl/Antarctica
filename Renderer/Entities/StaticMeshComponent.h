@@ -55,12 +55,12 @@ namespace Renderer
 
 	protected:
 
-		std::vector<Renderer::RenderHandle> PrepareForRender() override;
-
-	private:
+		std::vector<RenderHandle> PrepareForRender() override;
 
 		std::shared_ptr<Mesh>                  m_mesh;
 		std::vector<std::shared_ptr<Material>> m_materials;
+
+	private:
 
 		DEFINE_CLASS()
 	};

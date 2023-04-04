@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Asset.h"
 #include "AssetLoader.h"
+#include "Assets/Asset.h"
 
 class AssetManager
 {

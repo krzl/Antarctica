@@ -6,7 +6,9 @@
 #include <Settings/Settings.h>
 
 #include "GameObjects/World.h"
+#include "Systems/TimeSystem.h"
 
+class System;
 class World;
 
 class Application
@@ -19,8 +21,7 @@ public:
 	void Pause();
 	void Unpause();
 
-	void Update();
-	void Render();
+	void Update(float deltaTime);
 
 	static Application& Get();
 
@@ -52,7 +53,7 @@ public:
 	Dispatcher<> OnApplicationInitialized;
 
 private:
-
+	
 	void Run();
 
 	InputSystem m_inputSystem;
@@ -66,4 +67,6 @@ private:
 	Platform::Window m_window;
 
 	Renderer::RenderSystem m_renderSystem;
+
+	std::vector<System*> m_systems;
 };

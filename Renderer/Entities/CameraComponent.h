@@ -1,7 +1,7 @@
 #pragma once
 
 #include <CameraData.h>
-#include <Objects/ConstantBuffer.h>
+#include <Buffers/ConstantBuffer.h>
 
 #include "Components/SceneComponent.h"
 
@@ -53,7 +53,7 @@ namespace Renderer
 			m_order = order;
 		}
 
-		static std::priority_queue<Renderer::CameraData> GetAllCameraData();
+		static std::priority_queue<CameraData> GetAllCameraData();
 
 	protected:
 
@@ -74,7 +74,7 @@ namespace Renderer
 
 		static void SetAspectRatio(const float aspectRatio);
 
-		Renderer::ConstantBuffer m_constantBuffer;
+		ConstantBuffer m_constantBuffer;
 
 		inline static float m_aspectRatio = 1.0f;
 
