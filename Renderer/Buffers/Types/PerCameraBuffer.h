@@ -8,8 +8,4 @@ namespace Renderer
 
 		static const PerCameraBuffer DEFAULT_BUFFER;
 	};
-
-	const PerCameraBuffer PerCameraBuffer::DEFAULT_BUFFER = {
-		Transform4D::identity
-	};
 }

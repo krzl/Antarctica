@@ -112,7 +112,7 @@ namespace Renderer::Dx12
 		m_indexCount = submesh->GetIndexBuffer().m_elementCount;
 	}
 
-	void Submesh::Bind(const Shader* shader, const std::vector<DynamicBuffer>& skinningBuffers) const
+	void Submesh::Bind(const Shader* shader, const std::vector<DynamicBuffer>* skinningBuffers) const
 	{
 		for (auto& [inputSlot, attribute] : shader->GetInputSlotBindings())
 		{
@@ -123,10 +123,10 @@ namespace Renderer::Dx12
 			}
 			const D3D12_VERTEX_BUFFER_VIEW* bufferView = &it->second;
 
-			if ((uint8_t) attribute < 4)
+			if ((uint8_t) attribute < 4 && skinningBuffers != nullptr && skinningBuffers->size() != 0)
 			{
-				const DynamicBuffer& buffer = skinningBuffers[(int) attribute];
-				if (skinningBuffers[(int) attribute].IsInitialized())
+				const DynamicBuffer& buffer = (*skinningBuffers)[(int) attribute];
+				if ((*skinningBuffers)[(int) attribute].IsInitialized())
 				{
 					D3D12_VERTEX_BUFFER_VIEW skinningBufferView =
 					{

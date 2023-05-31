@@ -18,9 +18,10 @@ namespace Renderer
 
 	protected:
 
-		ConstantBuffer m_constantBuffer;
+		std::vector<ConstantBuffer> m_constantBuffers;
 
-		void                              UpdateConstantBuffer();
+		virtual Transform4D               GetAttachmentTransform(uint32_t id);
+		void                              UpdateConstantBuffer(uint32_t id);
 		virtual std::vector<RenderHandle> PrepareForRender();
 	};
 }

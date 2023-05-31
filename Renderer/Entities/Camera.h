@@ -11,6 +11,9 @@ namespace Renderer
 
 		Camera();
 
+		[[nodiscard]] const Ref<CameraComponent>& GetCameraComponent() const { return m_camera; }
+		[[nodiscard]] Ref<CameraComponent>& GetCameraComponent() { return m_camera; }
+
 	protected:
 
 		Ref<CameraComponent> m_camera;

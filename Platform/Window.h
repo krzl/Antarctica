@@ -15,10 +15,11 @@ namespace Platform
 
 	public:
 
-		void Init(InputSystem& inputSystem, const Settings& appSettings);
+		void Init(const Settings& appSettings);
+		void SetupInputSystem(InputSystem& inputSystem);
 		void Update();
 
-		Dispatcher<> OnWindowDestroyed;
+		Dispatcher<> OnDestroyed;
 
 		[[nodiscard]] HWND GetHandle() const
 		{
@@ -40,6 +41,8 @@ namespace Platform
 			return m_height;
 		}
 
+		Dispatcher<> OnResized;
+		
 	private:
 
 		LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -56,6 +59,6 @@ namespace Platform
 		uint32_t m_width  = 0;
 		uint32_t m_height = 0;
 
-		InputHandler inputHandler;
+		InputHandler m_inputHandler;
 	};
 }

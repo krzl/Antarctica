@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "SubmeshBuilder.h"
 
-SubmeshBuilder::SubmeshBuilder(std::vector<Vector3D>&& positions, std::vector<uint32_t>& indices) :
+SubmeshBuilder::SubmeshBuilder(std::string&& name, std::vector<Vector3D>&& positions, std::vector<uint32_t>& indices) :
+	m_name(std::move(name)),
 	m_indices(reinterpret_cast<uint8_t*>(indices.data()),
 			  reinterpret_cast<uint8_t*>(indices.data()) + indices.size() * 4),
 	m_positions(std::move(positions)) {}
@@ -126,7 +127,7 @@ Submesh SubmeshBuilder::Build()
 		static_cast<uint32_t>(m_positions.size())
 	};
 
-	Submesh submesh(std::move(vertexBuffer), std::move(indexBuffer), attributes);
+	Submesh submesh(std::move(m_name), std::move(vertexBuffer), std::move(indexBuffer), attributes);
 	submesh.SetSkeleton(std::move(m_skeleton));
 
 	return submesh;

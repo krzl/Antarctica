@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iosfwd>
+#include <vector>
+
 #include "Skeleton.h"
 #include "Types.h"
 
@@ -52,13 +55,14 @@ struct Submesh
 {
 	typedef std::unique_ptr<Renderer::ISubmesh, void(*)(Renderer::ISubmesh*)> NativePtr;
 
-public:
-
-	explicit Submesh(const MeshBuffer&&   vertexBuffer,
+	explicit Submesh(std::string&&        name,
+					 const MeshBuffer&&   vertexBuffer,
 					 const MeshBuffer&&   indexBuffer,
 					 const AttributeUsage attributes) :
+		m_name(std::move(name)),
 		m_vertexBuffer(vertexBuffer),
 		m_indexBuffer(indexBuffer),
+		m_skeleton(),
 		m_attributes(attributes) { }
 
 	[[nodiscard]] const MeshBuffer& GetVertexBuffer() const
@@ -96,11 +100,30 @@ public:
 		m_nativeObject = NativePtr(nativePtr, Renderer::Deleter);
 	}
 
+	const std::string& GetName() const
+	{
+		return m_name;
+	}
+
+	void SetupNodeAttachment(int32_t nodeId, bool ignoreRotation) const;
+
+	int32_t GetAttachmentNodeId() const
+	{
+		return m_attachNodeId;
+	}
+
+	[[nodiscard]] bool GetIgnoreAttachmentRotation() const { return m_ignoreAttachmentRotation; }
+
 private:
 
-	MeshBuffer        m_vertexBuffer;
-	MeshBuffer        m_indexBuffer;
-	Skeleton          m_skeleton;
-	AttributeUsage    m_attributes;
+	std::string     m_name;
+	MeshBuffer      m_vertexBuffer;
+	MeshBuffer      m_indexBuffer;
+	Skeleton        m_skeleton;
+	AttributeUsage  m_attributes;
+	mutable int32_t m_attachNodeId = -1;
+	mutable bool    m_ignoreAttachmentRotation;
+
+
 	mutable NativePtr m_nativeObject = NativePtr(nullptr, Renderer::Deleter);
 };

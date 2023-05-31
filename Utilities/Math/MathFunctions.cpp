@@ -27,6 +27,11 @@ Quaternion EulerToQuaternion(const float x, const float y, const float z)
 		   Quaternion::MakeRotationZ(DegToRad(z));
 }
 
+float LerpClamped(const float a, const float b, const float alpha)
+{
+	return a * (1.0f - alpha) + b * alpha;
+}
+
 float DegToRad(const float deg)
 {
 	return deg * Terathon::Math::pi / 180.0f;

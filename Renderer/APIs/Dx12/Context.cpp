@@ -323,7 +323,7 @@ namespace Renderer::Dx12
 				submesh->SetNativeObject(Submesh::Create(submesh));
 			}
 			
-			renderable.m_submesh->GetNativeObject()->Bind(shader->GetNativeObject(), *renderable.m_skinningBuffers);
+			renderable.m_submesh->GetNativeObject()->Bind(shader->GetNativeObject(), renderable.m_skinningBuffers);
 
 			m_commandList->DrawIndexedInstanced(renderable.m_submesh->GetNativeObject()->GetIndexCount(), 1, 0, 0, 0);
 

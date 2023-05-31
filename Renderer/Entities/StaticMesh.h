@@ -12,7 +12,7 @@ namespace Renderer
 
 		Ref<StaticMeshComponent> GetStaticMeshComponent() const
 		{
-			return m_staticMeshComponent;
+			return m_staticMeshComponent->GetRef().Cast<StaticMeshComponent>();
 		}
 
 	protected:

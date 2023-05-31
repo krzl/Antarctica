@@ -92,6 +92,10 @@ namespace Renderer::Dx12
 
 	void Buffer::SetData(const void* data, const uint32_t offset, uint32_t count)
 	{
+		if (data == nullptr)
+		{
+			return;
+		}
 		if (count == 0)
 		{
 			count = m_elementCount - offset;

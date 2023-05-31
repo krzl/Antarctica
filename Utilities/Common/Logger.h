@@ -1,20 +1,81 @@
 #pragma once
 
+enum LogLevel
+{
+	DEBUG,
+	INFO,
+	WARNING,
+	ERROR
+};
+
 class Logger
 {
 public:
 
-	template<typename... Args>
-	static void Log(const std::string& text, Args... args)
+	static Logger& Get()
 	{
-		const uint32_t size_s = std::snprintf(nullptr, 0, text.c_str(), args...) + 1; // Extra space for '\0'
-		if (size_s <= 0)
+		static Logger logger;
+		return logger;
+	}
+
+	void SetLogLevel(const LogLevel level)
+	{
+		m_level = level;
+	}
+
+	void SetFilename(const std::string filename)
+	{
+		m_filename = filename;
+	}
+
+	template<typename... Args>
+	void Log(LogLevel level, std::string category, std::string file, int line, const char* format, Args&&... args)
+	{
+		if (level < m_level)
 		{
-			throw std::runtime_error("Error during formatting.");
+			return;
 		}
-		const size_t                  size = static_cast<size_t>(size_s);
-		const std::unique_ptr<char[]> buf(new char[size]);
-		std::snprintf(buf.get(), size, text.c_str(), args...);
-		std::cout << std::string(buf.get(), buf.get() + size - 1) << std::endl;
+
+		std::stringstream ss;
+		ss << category << " - " << file << ":" << line << " - " << format;
+		std::string full_message = FormatMessage(ss.str(), std::forward<Args>(args)...);
+
+		std::cout << full_message << std::endl;
+
+		std::ofstream outfile(m_filename, std::ios::app);
+		outfile << full_message << std::endl;
+		outfile.close();
+	}
+
+private:
+
+	Logger() : m_level(DEBUG),
+			   m_filename("log.txt") {}
+
+	LogLevel    m_level;
+	std::string m_filename;
+
+	template<typename T, typename... Args>
+	std::string FormatMessage(std::string format, T&& arg, Args&&... args)
+	{
+		std::stringstream ss;
+		const size_t      pos = format.find("{}");
+		if (pos != std::string::npos)
+		{
+			ss << format.substr(0, pos) << arg;
+			ss << FormatMessage(format.substr(pos + 2), std::forward<Args>(args)...);
+		}
+		else
+		{
+			ss << format;
+		}
+		return ss.str();
+	}
+
+	static std::string FormatMessage(std::string format)
+	{
+		return format;
 	}
 };
+
+#define LOG(level, category, format, ...) Logger::Get().Log(level, category, __FILE__, __LINE__, format, ##__VA_ARGS__)

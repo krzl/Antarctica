@@ -16,11 +16,9 @@ LRESULT CALLBACK Platform::MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 	return windowPtr->MsgProc(hwnd, msg, wParam, lParam);
 }
 
-void Platform::Window::Init(InputSystem& inputSystem, const Settings& appSettings)
+void Platform::Window::Init(const Settings& appSettings)
 {
 	windowPtr = this;
-
-	inputHandler.Init(inputSystem);
 
 	WNDCLASS wc;
 	wc.style         = CS_HREDRAW | CS_VREDRAW;
@@ -61,6 +59,11 @@ void Platform::Window::Init(InputSystem& inputSystem, const Settings& appSetting
 
 	ShowWindow(m_handle, SW_SHOW);
 	UpdateWindow(m_handle);
+}
+
+void Platform::Window::SetupInputSystem(InputSystem& inputSystem)
+{
+	m_inputHandler.Init(inputSystem);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
@@ -104,7 +107,7 @@ LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam
 				m_hasFocus            = true;
 				m_isMinimized         = false;
 				m_isMaximized         = true;
-				m_hasResizedLastFrame = true;
+				OnResized.Dispatch();
 			}
 			else if (wParam == SIZE_RESTORED)
 			{
@@ -112,14 +115,14 @@ LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam
 				{
 					m_hasFocus            = true;
 					m_isMinimized         = false;
-					m_hasResizedLastFrame = true;
+					OnResized.Dispatch();
 				}
 
 				else if (m_isMaximized)
 				{
 					m_hasFocus            = true;
 					m_isMaximized         = false;
-					m_hasResizedLastFrame = true;
+					OnResized.Dispatch();
 				}
 				else if (m_isResizing)
 				{
@@ -127,7 +130,7 @@ LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam
 				}
 				else
 				{
-					m_hasResizedLastFrame = true;
+					OnResized.Dispatch();
 				}
 			}
 			return 0;
@@ -140,12 +143,12 @@ LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam
 		case WM_EXITSIZEMOVE:
 			m_hasFocus = true;
 			m_isResizing          = false;
-			m_hasResizedLastFrame = true;
+			OnResized.Dispatch();
 			return 0;
 
 		case WM_DESTROY:
 			PostQuitMessage(0);
-			OnWindowDestroyed.Dispatch();
+			OnDestroyed.Dispatch();
 			return 0;
 
 		case WM_MENUCHAR:
@@ -164,7 +167,7 @@ LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam
 		case WM_RBUTTONUP:
 		case WM_MOUSEMOVE:
 		case WM_KEYUP:
-			inputHandler.ProcessMessage(msg, wParam, lParam);
+			m_inputHandler.ProcessMessage(msg, wParam, lParam);
 			return 0;
 		default:
 			return DefWindowProc(hwnd, msg, wParam, lParam);

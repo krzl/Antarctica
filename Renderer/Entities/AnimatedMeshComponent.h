@@ -30,7 +30,11 @@ namespace Renderer
 			return m_animator;
 		}
 
+		void SetMesh(const std::shared_ptr<Mesh>& mesh) override;
+
 		void SetAnimator(const std::shared_ptr<Anim::Animator> animator);
+
+		void SetTrigger(int32_t id, bool value);
 
 		static std::vector<SkinningData> GetAllSkinningData();
 
@@ -38,9 +42,13 @@ namespace Renderer
 
 		std::shared_ptr<Anim::Animator> m_animator;
 
+		Transform4D GetAttachedNodeTransform(int32_t nodeId, bool ignoreAttachmentRotation) override;
+
 	private:
 
 		Anim::Solver m_animationSolver;
+
+		std::vector<Transform4D> m_animatedTransforms;
 
 		NativeBufferPtr                         m_weightsBuffer = NativeBufferPtr(nullptr, Renderer::Deleter);
 		DynamicBuffer                           m_transformBuffer;
@@ -49,8 +57,6 @@ namespace Renderer
 	protected:
 
 		std::vector<RenderHandle> PrepareForRender() override;
-
-	private:
 
 		DEFINE_CLASS()
 	};

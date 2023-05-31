@@ -1,6 +1,10 @@
 #pragma once
 
+#include <iosfwd>
+#include <vector>
+
 #include "Types.h"
+#include "Assets/Mesh.h"
 
 struct Skeleton;
 
@@ -20,9 +24,9 @@ namespace Anim
 		explicit StateMachine(std::vector<std::shared_ptr<State>>&& states) :
 			m_states(std::move(states)) { }
 
-		MeshBoneTransforms CalculateMatrices(StateMachineData&            stateMachineData,
-											 std::set<int>&               triggerState,
-											 std::vector<const Skeleton*> skeletons) const;
+		std::vector<Transform4D> CalculateMatrices(StateMachineData&            stateMachineData,
+												   std::set<int>&               triggerState,
+												   const std::vector<MeshNode>& meshNodes) const;
 
 	private:
 

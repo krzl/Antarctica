@@ -8,7 +8,7 @@ if (MSVC)
 endif()
 
 add_library(Entities STATIC ${SOURCES} ${HEADERS})
-target_link_libraries(Entities AssetManagement Platform Utilities)
+target_link_libraries(Entities AssetManagement Utilities)
 
 target_include_directories(Entities PUBLIC . )
 

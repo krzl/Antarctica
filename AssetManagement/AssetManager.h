@@ -31,7 +31,7 @@ public:
 		}
 		else
 		{
-			Logger::Log("Could not load asset: %s", path);
+			LOG(DEBUG, "AssetManager", "Could not load asset: {}", path);
 		}
 
 		return asset;

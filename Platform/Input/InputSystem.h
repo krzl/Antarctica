@@ -1,26 +1,40 @@
 #pragma once
 
-class InputSystem
+#include "Systems/System.h"
+
+class InputSystem : public System
 {
+	REGISTER_SYSTEM(InputSystem);
+
 	friend class InputHandler;
 
 public:
 
 	InputSystem();
 
-	bool IsLeftMousePressed() const
+	[[nodiscard]] bool IsLeftMousePressed() const
 	{
 		return m_isLeftMousePressed;
 	}
 
-	bool IsMiddleMousePressed() const
+	[[nodiscard]] bool IsMiddleMousePressed() const
 	{
 		return m_isMiddleMousePressed;
 	}
 
-	bool IsRightMousePressed() const
+	[[nodiscard]] bool IsRightMousePressed() const
 	{
 		return m_isRightMousePressed;
+	}
+
+	[[nodiscard]] const MousePosition& GetMousePosition() const
+	{
+		return m_mousePosition;
+	}
+
+	[[nodiscard]] const std::pair<int32_t, int32_t>& GetMouseDelta() const
+	{
+		return m_mouseDelta;
 	}
 
 	Dispatcher<> OnLeftMouseButtonPressed;
@@ -33,6 +47,10 @@ public:
 
 	Dispatcher<int, int> OnMouseMove;
 
+protected:
+
+	void Update() override;
+
 private:
 
 	bool m_isLeftMousePressed   = false;
@@ -40,4 +58,7 @@ private:
 	bool m_isRightMousePressed  = false;
 
 	MousePosition m_mousePosition;
+	MousePosition m_oldMousePosition;
+
+	std::pair<int32_t, int32_t> m_mouseDelta = std::pair(0, 0);
 };

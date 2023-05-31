@@ -12,8 +12,8 @@ namespace Anim
 		explicit AnimationState(std::shared_ptr<Animation> animation)
 			: m_animation(std::move(animation)) {}
 
-		MeshBoneTransforms CalculateBones(std::vector<const Skeleton*> skeletons,
-										  float                        currentTime) const override;
+		std::vector<Transform4D> CalculateBones(
+			const std::vector<MeshNode>& meshNodes, const float currentTime) const override;
 
 		bool m_isLooping = true;
 		

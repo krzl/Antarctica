@@ -5,11 +5,10 @@
 
 namespace Anim
 {
-	MeshBoneTransforms AnimationState::CalculateBones(
-		const std::vector<const Skeleton*> skeletons,
-		const float                        currentTime) const
+	std::vector<Transform4D> AnimationState::CalculateBones(const std::vector<MeshNode>& meshNodes,
+															const float                  currentTime) const
 	{
 		const float animationTime = m_isLooping ? fmod(currentTime, m_animation->m_duration) : currentTime;
-		return Solver::Calculate(m_animation, skeletons, animationTime);
+		return Solver::Calculate(m_animation, meshNodes, animationTime);
 	}
 }

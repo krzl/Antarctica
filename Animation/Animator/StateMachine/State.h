@@ -13,12 +13,15 @@ namespace Anim
 
 		virtual ~State() = default;
 
+		void AddTransition(Transition&& transition, bool isReversible);
+
+		
 		virtual bool IsFinished(float currentTime) const { return true; }
 
 	protected:
 
-		virtual MeshBoneTransforms CalculateBones(std::vector<const Skeleton*> skeletons,
-												  float                        currentTime) const = 0;
+		virtual std::vector<Transform4D> CalculateBones(
+			const std::vector<MeshNode>& meshNodes, const float currentTime) const = 0;
 
 	private:
 

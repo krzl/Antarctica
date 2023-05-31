@@ -3,8 +3,10 @@
 Quaternion DirectionToQuaternion(Vector3D direction);
 Quaternion EulerToQuaternion(float x, float y, float z);
 
-Vector3D    LerpClamped(const Vector3D& a, const Vector3D& b, float alpha);
-Quaternion  SlerpClamped(const Quaternion& a, const Quaternion& b, float alpha);
+float LerpClamped(float a, float b, float alpha);
+
+Vector3D   LerpClamped(const Vector3D& a, const Vector3D& b, float alpha);
+Quaternion SlerpClamped(const Quaternion& a, const Quaternion& b, float alpha);
 
 float DegToRad(float deg);
 float RadToDeg(float rad);
@@ -15,4 +17,10 @@ template<typename T>
 float InverseLerp(T a, T b, T currentTime)
 {
 	return (float) (currentTime - a) / (b - a);
+}
+
+template<typename T>
+T Clamp(const T& a, const T& b, const T& value)
+{
+	return value < a ? a : (value > b ? b : value);
 }

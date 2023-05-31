@@ -5,6 +5,14 @@
 #include "Animation.h"
 #include "SubmeshData.h"
 
+struct MeshNode
+{
+	std::string m_name;
+	int32_t     m_parentNodeId;
+	Transform4D m_globalTransform;
+	Transform4D m_localTransform;
+};
+
 class Mesh : public Asset
 {
 public:
@@ -48,6 +56,11 @@ public:
 		return m_submeshes;
 	}
 
+	[[nodiscard]] const std::vector<MeshNode>& GetNodes() const
+	{
+		return m_nodes;
+	}
+
 	[[nodiscard]] const Transform4D& GetGlobalInverseMatrix() const
 	{
 		return m_globalInverseMatrix;
@@ -58,9 +71,15 @@ public:
 		m_globalInverseMatrix = globalInverseMatrix;
 	}
 
+	void  SetMeshNodeData(const std::vector<MeshNode>& nodes)
+	{
+		m_nodes = nodes;
+	}
+
 private:
 
 	std::vector<Submesh>                    m_submeshes;
 	std::vector<std::shared_ptr<Animation>> m_animations;
+	std::vector<MeshNode>                   m_nodes;
 	Transform4D                             m_globalInverseMatrix = Transform4D::identity;
 };

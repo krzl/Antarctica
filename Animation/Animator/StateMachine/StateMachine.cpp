@@ -8,18 +8,18 @@
 
 namespace Anim
 {
-	bool Transition::CanTransition(const std::set<int>& triggerState,
-								   const bool           isCurrentStateFinished) const
+	bool Transition::CanTransition(const std::set<int32_t>& triggerState,
+								   const bool               isCurrentStateFinished) const
 	{
 		if (!isCurrentStateFinished && !m_canInterrupt)
 		{
 			return false;
 		}
 
-		for (int trigger : m_transitionConditions)
+		for (const TriggerCondition& triggerCondition : m_triggerConditions)
 		{
-			auto it = triggerState.find(trigger);
-			if (it == triggerState.end())
+			const bool isTriggerSet = triggerState.find(triggerCondition.m_triggerId) != triggerState.end();
+			if (isTriggerSet == triggerCondition.m_invertCondition)
 			{
 				return false;
 			}
@@ -28,9 +28,9 @@ namespace Anim
 		return true;
 	}
 
-	MeshBoneTransforms StateMachine::CalculateMatrices(StateMachineData&                  stateMachineData,
-													   std::set<int>&                     triggerState,
-													   const std::vector<const Skeleton*> skeletons) const
+	std::vector<Transform4D> StateMachine::CalculateMatrices(StateMachineData&            stateMachineData,
+															 std::set<int32_t>&           triggerState,
+															 const std::vector<MeshNode>& meshNodes) const
 	{
 		if (stateMachineData.m_currentState == nullptr)
 		{
@@ -63,15 +63,15 @@ namespace Anim
 			}
 		}
 
-		MeshBoneTransforms transforms = stateMachineData.m_currentState->CalculateBones(
-			skeletons, stateMachineData.m_currentTime);
+		std::vector<Transform4D> transforms = stateMachineData.m_currentState->CalculateBones(
+			meshNodes, stateMachineData.m_currentTime);
 
 		if (stateMachineData.m_previousState)
 		{
-			const MeshBoneTransforms oldStateTransforms = stateMachineData.m_previousState->
-																		   CalculateBones(skeletons,
-																					      stateMachineData.
-																					      m_previousTime);
+			const std::vector<Transform4D> oldStateTransforms = stateMachineData.m_previousState->
+																				 CalculateBones(meshNodes,
+																							    stateMachineData.
+																							    m_previousTime);
 
 			const float alpha = stateMachineData.m_currentTime / stateMachineData.m_transitionTime;
 

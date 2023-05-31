@@ -36,9 +36,9 @@ namespace Renderer
 
 	void RenderSystem::Render()
 	{
+		std::vector<SkinningData>         skinningData = AnimatedMeshComponent::GetAllSkinningData();
 		std::priority_queue<RenderHandle> renderQueue  = RenderComponent::GetRenderQueue();
 		std::priority_queue<CameraData>   cameras      = CameraComponent::GetAllCameraData();
-		std::vector<SkinningData>         skinningData = AnimatedMeshComponent::GetAllSkinningData();
 
 		m_context->WaitForFrameCompletion();
 		

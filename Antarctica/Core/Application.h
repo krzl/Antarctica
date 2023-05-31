@@ -25,11 +25,6 @@ public:
 
 	static Application& Get();
 
-	[[nodiscard]] InputSystem& GetInputSystem()
-	{
-		return m_inputSystem;
-	}
-
 	[[nodiscard]] Settings& GetAppSettings()
 	{
 		return m_appSettings;

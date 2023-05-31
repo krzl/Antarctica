@@ -30,7 +30,7 @@ namespace Renderer::Dx12
 
 	public:
 
-		void Init();
+		void        Init();
 		static void OnFrameStart();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUStartHandle() const;

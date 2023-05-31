@@ -107,6 +107,11 @@ public:
 		return m_root;
 	}
 
+	[[nodiscard]] Ref<SceneComponent> GetRoot()
+	{
+		return m_root;
+	}
+
 	Point3D GetPosition() const
 	{
 		return m_root->GetWorldPosition();

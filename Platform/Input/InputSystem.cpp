@@ -33,3 +33,10 @@ InputSystem::InputSystem()
 		m_isRightMousePressed = false;
 	}, false);
 }
+
+void InputSystem::Update()
+{
+	m_mouseDelta = std::pair(m_mousePosition.first - m_oldMousePosition.first,
+							 m_mousePosition.second - m_oldMousePosition.second);
+	m_oldMousePosition = m_mousePosition;
+}

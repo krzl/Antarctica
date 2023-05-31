@@ -29,7 +29,7 @@ namespace Renderer::Dx12
 
 		D3D12_SUBRESOURCE_DATA textureData = {};
 		textureData.pData                  = texture->GetData();
-		textureData.RowPitch               = (uint64_t) texture->GetWidth() * texture->GetChannels();
+		textureData.RowPitch               = (uint64_t) texture->GetWidth() * 4;
 		textureData.SlicePitch             = textureData.RowPitch * texture->GetHeight();
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -38,10 +38,10 @@ namespace Renderer::Dx12
 		srvDesc.ViewDimension                   = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels             = 1;
 
-		
+
 		ResourceUploader::UploadResource(textureDesc, { textureData }, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-			m_textureUploadBuffer, m_texture);
-		
+										 m_textureUploadBuffer, m_texture);
+
 		m_heapHandle = Dx12Context::Get().CreateHeapHandle();
 
 		Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_texture.Get(), &srvDesc,

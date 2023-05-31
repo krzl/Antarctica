@@ -4,44 +4,35 @@
 #include <ctime>
 #include <random>
 
-int32_t Random::GetRandomInt32()
+static std::random_device rd;
+static std::mt19937 generator(rd());
+
+int32_t Random::GetRandomInt32(const int32_t min, const int32_t max)
 {
-	std::default_random_engine             generator(time(nullptr));
-	std::uniform_int_distribution<int32_t> distribution(INT32_MIN, INT32_MAX);
+	std::uniform_int_distribution distribution(min, max);
 	return distribution(generator);
 }
 
-int64_t Random::GetRandomInt64()
+int64_t Random::GetRandomInt64(const int64_t min, const int64_t max)
 {
-	std::default_random_engine             generator(time(nullptr));
-	std::uniform_int_distribution<int64_t> distribution(INT64_MIN, INT64_MAX);
+	std::uniform_int_distribution distribution(min, max);
 	return distribution(generator);
 }
 
-uint32_t Random::GetRandomUInt32()
+uint32_t Random::GetRandomUInt32(const uint32_t min, const uint32_t max)
 {
-	std::default_random_engine              generator(time(nullptr));
-	std::uniform_int_distribution<uint32_t> distribution(0, UINT32_MAX);
+	std::uniform_int_distribution distribution(min, max);
 	return distribution(generator);
 }
 
-uint64_t Random::GetRandomUInt64()
+uint64_t Random::GetRandomUInt64(const uint64_t min, const uint64_t max)
 {
-	std::default_random_engine              generator(time(nullptr));
-	std::uniform_int_distribution<uint64_t> distribution(0, UINT64_MAX);
+	std::uniform_int_distribution distribution(min, max);
 	return distribution(generator);
 }
 
-float Random::GetRandomFloat()
+float Random::GetRandomFloat(const float min, const float max)
 {
-	union
-	{
-		// ReSharper disable CppInconsistentNaming
-		float    f;
-		uint32_t n;
-		// ReSharper restore CppInconsistentNaming
-	} caster;
-	caster.n = GetRandomUInt32();
-
-	return caster.f;
+	std::uniform_real_distribution distribution(min, max);
+	return distribution(generator);
 }

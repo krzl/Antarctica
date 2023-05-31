@@ -17,10 +17,7 @@ namespace Renderer
 			return m_mesh;
 		}
 
-		void SetMesh(const std::shared_ptr<Mesh>& mesh)
-		{
-			m_mesh = mesh;
-		}
+		virtual void SetMesh(const std::shared_ptr<Mesh>& mesh);
 
 		[[nodiscard]] std::shared_ptr<Material> GetMaterial()
 		{
@@ -54,6 +51,9 @@ namespace Renderer
 		}
 
 	protected:
+
+		virtual Transform4D GetAttachedNodeTransform(int32_t nodeId, bool ignoreAttachmentRotation);
+		Transform4D         GetAttachmentTransform(uint32_t submeshId) override;
 
 		std::vector<RenderHandle> PrepareForRender() override;
 

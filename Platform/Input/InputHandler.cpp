@@ -38,8 +38,8 @@ void InputHandler::ProcessMessage(const UINT msg, const WPARAM wParam, const LPA
 
 void InputHandler::ProcessMouseInput(const UINT msg, const WPARAM wParam, const LPARAM lParam) const
 {
-	const int32_t x = static_cast<int32_t>(GET_X_LPARAM(lParam));
-	const int32_t y = static_cast<int32_t>(GET_Y_LPARAM(lParam));
+	const int32_t x = GET_X_LPARAM(lParam);
+	const int32_t y = GET_Y_LPARAM(lParam);
 
 	m_inputSystem->m_mousePosition = MousePosition(x, y);
 

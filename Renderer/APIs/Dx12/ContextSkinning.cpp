@@ -19,6 +19,11 @@ namespace Renderer::Dx12
 			const Skeleton&   skeleton     = data.m_submesh.GetSkeleton();
 			const MeshBuffer& vertexBuffer = data.m_submesh.GetVertexBuffer();
 
+			if (skeleton.m_bones.size() == 0)
+			{
+				continue;
+			}
+
 			if (data.m_submesh.GetNativeObject() == nullptr)
 			{
 				data.m_submesh.SetNativeObject(Submesh::Create(&data.m_submesh));

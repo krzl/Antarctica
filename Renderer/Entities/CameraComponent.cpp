@@ -23,16 +23,8 @@ namespace Renderer
 
 	Matrix4D CameraComponent::GetLookAtMatrix() const
 	{
-		Vector3D forward = GetWorldRotation().GetDirectionY();
-		Vector3D right   = Cross(forward, Vector3D::z_unit).Normalize();
-		Vector3D up      = Cross(right, forward);
-
-		return Matrix4D(
-			Vector4D(right, 0),
-			Vector4D(forward, 0),
-			Vector4D(up, 0),
-			Vector4D(0.0f, 0.0f, 0.0f, 1.0f)
-		).transpose;
+		return GetWorldRotation().GetRotationMatrix() *
+			   Transform4D::MakeTranslation(GetWorldPosition());
 	}
 
 	Matrix4D CameraComponent::GetPerspectiveMatrix() const
@@ -53,7 +45,7 @@ namespace Renderer
 
 	void CameraComponent::UpdateConstantBuffer()
 	{
-		const auto viewProj = GetPerspectiveMatrix() * GetLookAtMatrix();
+		const Matrix4D viewProj = GetPerspectiveMatrix() * GetLookAtMatrix();
 
 		PerCameraBuffer* buffer  = m_constantBuffer.GetData<PerCameraBuffer>();
 		buffer->m_viewProjMatrix = viewProj.transpose;

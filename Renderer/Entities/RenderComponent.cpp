@@ -26,10 +26,6 @@ namespace Renderer
 	void RenderComponent::OnEnabled()
 	{
 		renderComponents.insert(this);
-		if (!m_constantBuffer.IsInitialized())
-		{
-			m_constantBuffer.Init(1, sizeof(PerObjectBuffer), &PerObjectBuffer::DEFAULT_BUFFER);
-		}
 	}
 
 	void RenderComponent::OnDisabled()
@@ -37,10 +33,15 @@ namespace Renderer
 		renderComponents.erase(this);
 	}
 
-	void RenderComponent::UpdateConstantBuffer()
+	Transform4D RenderComponent::GetAttachmentTransform(uint32_t id)
 	{
-		const auto       worldMatrix = GetWorldTransform();
-		PerObjectBuffer* buffer      = m_constantBuffer.GetData<PerObjectBuffer>();
+		return Transform4D::identity;
+	}
+
+	void RenderComponent::UpdateConstantBuffer(const uint32_t id)
+	{
+		const auto       worldMatrix = GetWorldTransform() * GetAttachmentTransform(id);
+		PerObjectBuffer* buffer      = m_constantBuffers[id].GetData<PerObjectBuffer>();
 		buffer->m_transform          = worldMatrix.transpose;
 	}
 

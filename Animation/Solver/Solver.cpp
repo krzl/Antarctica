@@ -5,6 +5,18 @@
 
 namespace Anim
 {
+	void Solver::SetTrigger(const int32_t id, const bool value)
+	{
+		if (value)
+		{
+			m_triggerState.emplace(id);
+		}
+		else
+		{
+			m_triggerState.erase(id);
+		}
+	}
+
 	void Solver::ResetSolver(const std::shared_ptr<Animator>& animator)
 	{
 		m_animator = animator;
@@ -18,50 +30,30 @@ namespace Anim
 		}
 	}
 
-	static std::vector<std::vector<Matrix4D>> TransposeTransforms(const MeshBoneTransforms& transforms)
+	static int32_t FindNodeId(const std::vector<MeshNode>& nodes, const std::string& name)
 	{
-		std::vector<std::vector<Matrix4D>> transposed(transforms.size());
-
-		for (uint32_t i = 0; i < transforms.size(); ++i)
+		for (uint32_t i = 0; i < nodes.size(); ++i)
 		{
-			transposed[i].resize(transforms[i].size());
-			for (uint32_t j = 0; j < transforms[i].size(); ++j)
+			if (nodes[i].m_name == name)
 			{
-				transposed[i][j] = transforms[i][j].transpose;
+				return i;
 			}
 		}
-		return transposed;
+		return -1;
 	}
 
-
-	std::vector<std::vector<Matrix4D>> Solver::UpdateAnimation(const std::shared_ptr<Mesh>& mesh)
+	void CalculateNode(const AnimationNode*      node, const std::vector<MeshNode>& meshNodes, float currentTime,
+					   std::vector<Transform4D>& transforms, const Transform4D&     parentTransform)
 	{
-		std::vector<const Skeleton*> skeletons(mesh->GetSubmeshCount());
+		int32_t meshNodeId = FindNodeId(meshNodes, node->m_nodeName);
 
-		for (uint32_t i = 0; i < mesh->GetSubmeshCount(); ++i)
+		Transform4D nodeTransform = node->m_baseTransform;
+		if (meshNodeId != -1)
 		{
-			skeletons[i] = &mesh->GetSubmesh(i).GetSkeleton();
+			nodeTransform = meshNodes[meshNodeId].m_localTransform;
 		}
 
-		for (uint32_t i = 0; i < m_animator->m_stateMachines.size(); ++i)
-		{
-			std::shared_ptr<StateMachine> stateMachine = m_animator->m_stateMachines[i];
-
-			const MeshBoneTransforms boneTransforms = m_animator->m_stateMachines[i]->CalculateMatrices(
-				m_stateMachineData[i], m_triggerState, skeletons);
-			//TODO: Support multiple layers
-
-			return TransposeTransforms(boneTransforms);
-		}
-		return {};
-	}
-
-	void CalculateNode(const AnimationNode* node, const std::vector<const Skeleton*>& skeletons, float currentTime,
-					   MeshBoneTransforms&  transforms, const Transform4D&            parentTransform)
-	{
-		Transform4D nodeTransform = Transform4D::identity;// node->m_baseTransform; TODO: remove??
-
-		if (node->m_positionKeys.size() != 0)
+		if (node->m_positionKeys.size() != 0 || node->m_rotationKeys.size() != 0 || node->m_scaleKeys.size() != 0)
 		{
 			Vector3D   translation;
 			Quaternion rotation;
@@ -113,7 +105,8 @@ namespace Anim
 				{
 					if (node->m_scaleKeys[i].m_time > currentTime)
 					{
-						const float alpha = InverseLerp(node->m_scaleKeys[i - 1].m_time, node->m_scaleKeys[i].m_time, currentTime);
+						const float alpha = InverseLerp(node->m_scaleKeys[i - 1].m_time, node->m_scaleKeys[i].m_time,
+														currentTime);
 						scale = LerpClamped(node->m_scaleKeys[i - 1].m_scale, node->m_scaleKeys[i].m_scale, alpha);
 						break;
 					}
@@ -126,79 +119,114 @@ namespace Anim
 
 			nodeTransform = Transform4D::MakeTranslation(translation) * rotation.GetRotationMatrix() *
 							Transform4D::MakeScale(scale.x, scale.y, scale.z);
+
+			Vector3D x = rotation.GetDirectionX();
+
 		}
 
 		Transform4D globalTransformation = parentTransform * nodeTransform;
 
-		for (uint32_t i = 0; i < skeletons.size(); ++i)
+		
+		if (meshNodeId != -1)
 		{
-			const Skeleton* skeleton = skeletons[i];
-
-			int32_t boneId = skeleton->GetBoneId(node);
-			if (boneId != -1)
-			{
-				transforms[i][boneId] = skeleton->m_globalInverseTransform * globalTransformation *
-										skeleton->m_bones[boneId].m_offsetMatrix;
-			}
+			transforms[meshNodeId] = globalTransformation;
 		}
 
 		for (AnimationNode* children : node->m_children)
 		{
-			CalculateNode(children, skeletons, currentTime, transforms, globalTransformation);
+			CalculateNode(children, meshNodes, currentTime, transforms, globalTransformation);
 		}
 	}
 
-	MeshBoneTransforms Solver::Calculate(const std::shared_ptr<Animation>&   animation,
-										 const std::vector<const Skeleton*>& skeletons,
-										 const float                         currentTime)
+	std::vector<Transform4D> Solver::Calculate(const std::shared_ptr<Animation>& animation,
+											   const std::vector<MeshNode>&      meshNodes,
+											   const float                       currentTime)
 	{
-		MeshBoneTransforms transforms(skeletons.size());
-		for (uint32_t i = 0; i < skeletons.size(); ++i)
+		std::vector<Transform4D> transforms(meshNodes.size());
+		const Transform4D        initialTransform = Transform4D::identity;
+		CalculateNode(animation->m_rootNode, meshNodes, currentTime, transforms, initialTransform);
+
+		for (uint32_t i = 0; i < meshNodes.size(); ++i)
 		{
-			std::vector<Transform4D>& transform = transforms[i];
-			transform.resize(skeletons[0]->m_bones.size());
+			if (transforms[i].m33 == 0.0f && meshNodes[i].m_parentNodeId >= 0)
+			{
+				transforms[i] = transforms[meshNodes[i].m_parentNodeId] * meshNodes[i].m_localTransform;
+			}
 		}
-		const Transform4D initialTransform = Transform4D::identity;
-		CalculateNode(animation->m_rootNode, skeletons, currentTime, transforms, initialTransform);
 		return transforms;
 	}
 
-	MeshBoneTransforms Solver::Interpolate(const MeshBoneTransforms& aTransforms,
-										   const MeshBoneTransforms& bTransforms,
-										   const float               alpha)
+	std::vector<std::vector<Matrix4D>> Solver::UpdateAnimation(const std::shared_ptr<Mesh>& mesh)
 	{
-		assert(aTransforms.size() == bTransforms.size());
+		std::vector<std::vector<Matrix4D>> finalMatrices(mesh->GetSubmeshCount());
 
-		MeshBoneTransforms meshTransforms(aTransforms.size());
-
-		for (uint32_t i = 0; i < aTransforms.size(); ++i)
+		for (uint32_t i = 0; i < m_animator->m_stateMachines.size(); ++i)
 		{
-			assert(aTransforms[i].size() == bTransforms[i].size());
+			std::shared_ptr<StateMachine> stateMachine = m_animator->m_stateMachines[i];
 
-			std::vector<Transform4D>& transforms = meshTransforms[i];
+			//TODO: Support multiple layers
+			m_nodeTransforms = m_animator->m_stateMachines[i]->CalculateMatrices(
+				m_stateMachineData[i], m_triggerState, mesh->GetNodes());
 
-			for (uint32_t j = 0; j < aTransforms.size(); ++j)
+			break;
+		}
+
+		for (uint32_t i = 0; i < mesh->GetSubmeshCount(); ++i)
+		{
+			const Skeleton& skeleton = mesh->GetSubmesh(i).GetSkeleton();
+
+			finalMatrices[i].resize(skeleton.m_bones.size());
+
+			for (uint32_t j = 0; j < skeleton.m_bones.size(); ++j)
 			{
-				Vector3D   aTranslation;
-				Quaternion aRotation;
-				Vector3D   aScale;
-
-				Vector3D   bTranslation;
-				Quaternion bRotation;
-				Vector3D   bScale;
-
-				DecomposeTransform(aTransforms[i][j], aTranslation, aRotation, aScale);
-				DecomposeTransform(bTransforms[i][j], bTranslation, bRotation, bScale);
-
-				const Vector3D   translation = LerpClamped(aTranslation, bTranslation, alpha);
-				const Quaternion rotation    = SlerpClamped(aRotation, bRotation, alpha);
-				const Vector3D   scale       = LerpClamped(aScale, bScale, alpha);
-
-				transforms[j] = Transform4D::MakeTranslation(translation) * rotation.GetRotationMatrix() *
-								Transform4D::MakeScale(scale.x, scale.y, scale.z);
+				Matrix4D      finalMatrix;
+				const int32_t id = FindNodeId(mesh->GetNodes(), skeleton.m_bones[j].m_boneName);
+				if (id != -1)
+				{
+					finalMatrix = skeleton.m_globalInverseTransform * m_nodeTransforms[id] * skeleton.m_bones[j].
+								  m_offsetMatrix;
+				}
+				else
+				{
+					finalMatrix = Transform4D::identity;
+				}
+				finalMatrices[i][j] = finalMatrix.transpose;
 			}
 		}
 
-		return meshTransforms;
+		return finalMatrices;
+	}
+
+	std::vector<Transform4D> Solver::Interpolate(const std::vector<Transform4D>& aTransforms,
+												 const std::vector<Transform4D>& bTransforms,
+												 const float                     alpha)
+	{
+		assert(aTransforms.size() == bTransforms.size());
+
+		std::vector<Transform4D> interpolated;
+		interpolated.resize(aTransforms.size());
+
+		for (uint32_t i = 0; i < aTransforms.size(); ++i)
+		{
+			Vector3D   aTranslation;
+			Quaternion aRotation;
+			Vector3D   aScale;
+
+			Vector3D   bTranslation;
+			Quaternion bRotation;
+			Vector3D   bScale;
+
+			DecomposeTransform(aTransforms[i], aTranslation, aRotation, aScale);
+			DecomposeTransform(bTransforms[i], bTranslation, bRotation, bScale);
+
+			const Vector3D   translation = LerpClamped(aTranslation, bTranslation, alpha);
+			const Quaternion rotation    = SlerpClamped(aRotation, bRotation, alpha);
+			const Vector3D   scale       = LerpClamped(aScale, bScale, alpha);
+
+			interpolated[i] = Transform4D::MakeTranslation(translation) * rotation.GetRotationMatrix() *
+							  Transform4D::MakeScale(scale.x, scale.y, scale.z);
+		}
+
+		return interpolated;
 	}
 }

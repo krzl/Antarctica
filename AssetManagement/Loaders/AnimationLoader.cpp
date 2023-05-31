@@ -21,7 +21,9 @@ Vector3D AIVectorCast(const aiVector3D& vector)
 
 Transform4D AIMatrixCast(const aiMatrix4x4& matrix)
 {
-	return Transform4D(Matrix3D(matrix.a1, matrix.a2, matrix.a3, matrix.b1, matrix.b2, matrix.b3, matrix.c1, matrix.c2, matrix.c3), Vector3D(matrix.a4, matrix.b4, matrix.c4));
+	return Transform4D(
+		Matrix3D(matrix.a1, matrix.a2, matrix.a3, matrix.b1, matrix.b2, matrix.b3, matrix.c1, matrix.c2, matrix.c3),
+		Vector3D(matrix.a4, matrix.b4, matrix.c4));
 }
 
 const aiNodeAnim* FindNode(const aiAnimation* animation, const std::string nodeName)
@@ -52,11 +54,18 @@ uint32_t GetChildNodeCount(const aiNode* aiNode)
 AnimationNode& ImportNode(std::vector<AnimationNode>& nodes, float&     duration, const aiAnimation* aiAnimation,
 						  const aiNode*               aiNode, uint32_t& currentIndex)
 {
-	AnimationNodeBuilder builder(std::string(aiNode->mName.C_Str()), Inverse(AIMatrixCast(aiNode->mTransformation)));
-	
+	AnimationNodeBuilder builder(std::string(aiNode->mName.C_Str()), AIMatrixCast(aiNode->mTransformation));
+
 	const double tickScale = aiAnimation->mTicksPerSecond != 0 ? 1.0f / aiAnimation->mTicksPerSecond : 1;
+
+	bool useRotation = true;
+	if (aiNode->mMetaData)
+	{
+		aiNode->mMetaData->Get("Show", useRotation);
+	}
 	
-	if (const aiNodeAnim* nodeAnim = FindNode(aiAnimation, builder.GetNodeName()))
+	const aiNodeAnim* nodeAnim = FindNode(aiAnimation, builder.GetNodeName());
+	if (nodeAnim && useRotation)
 	{
 		std::vector<PositionKey> positionKeys;
 		positionKeys.reserve(nodeAnim->mNumPositionKeys);
@@ -65,7 +74,7 @@ AnimationNode& ImportNode(std::vector<AnimationNode>& nodes, float&     duration
 			positionKeys.emplace_back(
 				PositionKey{
 					AIVectorCast(nodeAnim->mPositionKeys[i].mValue),
-					(float) (nodeAnim->mPositionKeys[i].mTime * tickScale)
+					(float)(nodeAnim->mPositionKeys[i].mTime * tickScale)
 				});
 		}
 
@@ -78,7 +87,7 @@ AnimationNode& ImportNode(std::vector<AnimationNode>& nodes, float&     duration
 					AIQuaternionCast(nodeAnim->mRotationKeys[i].mValue),
 					(float) (nodeAnim->mRotationKeys[i].mTime * tickScale)
 				});
-		}
+		};
 
 		std::vector<ScaleKey> scaleKeys;
 		scaleKeys.reserve(nodeAnim->mNumScalingKeys);
@@ -109,15 +118,17 @@ AnimationNode& ImportNode(std::vector<AnimationNode>& nodes, float&     duration
 		builder.SetScaleKeys(std::move(scaleKeys));
 	}
 
+	const uint32_t id = currentIndex++;
+
 	for (uint32_t i = 0; i < aiNode->mNumChildren; ++i)
 	{
 		AnimationNode& child = ImportNode(nodes, duration, aiAnimation, aiNode->mChildren[i], currentIndex);
 		builder.AddChildren(child);
 	}
 
-	nodes[currentIndex] = builder.Build();
+	nodes[id] = builder.Build();
 
-	return nodes[currentIndex++];
+	return nodes[id];
 }
 
 std::shared_ptr<Animation> ImportAnimation(const aiAnimation* aiAnimation, const aiNode* rootNode)

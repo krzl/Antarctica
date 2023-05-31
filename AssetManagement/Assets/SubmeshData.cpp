@@ -21,3 +21,9 @@ const AttributeOffsets& AttributeUsage::GetAttributeOffsets() const
 	const uint16_t id = *this;
 	return m_attributeOffsets[id];
 }
+
+void Submesh::SetupNodeAttachment(const int32_t nodeId, bool ignoreRotation) const
+{
+	m_attachNodeId = nodeId;
+	m_ignoreAttachmentRotation = ignoreRotation;
+}

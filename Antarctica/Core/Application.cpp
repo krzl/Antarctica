@@ -4,7 +4,6 @@
 #include <RenderSystem.h>
 
 #include "Entities/CameraComponent.h"
-#include "Entities/RenderComponent.h"
 #include "GameObjects/World.h"
 #include "Systems/System.h"
 #include "Systems/TimeSystem.h"
@@ -30,9 +29,14 @@ void Application::Start()
 #if _DEBUG
 	m_appSettings.SaveSettings();
 #endif
-	m_window.Init(m_inputSystem, m_appSettings);
+	m_window.Init(m_appSettings);
 
-	m_window.OnWindowDestroyed.AddListener([this]()
+	m_window.OnResized.AddListener([this]()
+	{
+		m_renderSystem.OnResize(m_window);
+	}, false);
+
+	m_window.OnDestroyed.AddListener([this]()
 	{
 		m_isRunning = false;
 	}, false);
@@ -44,6 +48,8 @@ void Application::Start()
 	{
 		system->Init();
 	}
+
+	m_window.SetupInputSystem(*InputSystem::GetInstance());
 
 	OnApplicationInitialized.Dispatch();
 

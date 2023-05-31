@@ -12,15 +12,15 @@ Ref<Component> GameObject::AddComponent(const Class& clazz, const Ref<SceneCompo
 {
 	const std::shared_ptr<void> object = clazz.CreateObject();
 	if (!object)
-		return Ref<Component>();
+		return Ref<Component>(nullptr);
 	std::shared_ptr<Component> component = std::static_pointer_cast<Component>(object);
 	if (!component)
-		return Ref<Component>();
+		return Ref<Component>(nullptr);
 
 	const auto it             = m_components.insert(std::make_pair(clazz.GetId(), std::move(component)));
 	it->second->m_componentId = ++m_componentCounter;
 
-	if (const std::shared_ptr<SceneComponent> sceneComponent = std::static_pointer_cast<SceneComponent>(it->second))
+	if (const std::shared_ptr<SceneComponent> sceneComponent = std::dynamic_pointer_cast<SceneComponent>(it->second))
 	{
 		sceneComponent->m_parent = parent.IsValid() ? parent : m_root;
 	}

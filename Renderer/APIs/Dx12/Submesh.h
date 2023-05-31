@@ -38,7 +38,7 @@ namespace Renderer::Dx12
 
 		~Submesh();
 
-		void Bind(const Shader* shader, const std::vector<DynamicBuffer>& skinningBuffers) const;
+		void Bind(const Shader* shader, const std::vector<DynamicBuffer>* skinningBuffers) const;
 
 		const D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferViewForAttribute(MeshAttribute attribute) const;
 

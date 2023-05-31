@@ -17,6 +17,41 @@ std::vector<Vector3D> CastToVector(const uint32_t count, const aiVector3D& input
 	return std::vector<Vector3D>(inputArray, inputArray + count);
 }
 
+static void ProcessMeshNodeData(Mesh& mesh, const aiNode* node, const int32_t parentNodeId, std::vector<MeshNode>& nodes, Transform4D globalTransform)
+{
+	const uint32_t index = static_cast<uint32_t>(nodes.size());
+
+	const Transform4D localTransform = AIMatrixCast(node->mTransformation);
+	globalTransform = globalTransform * localTransform;
+
+	const MeshNode& meshNode = nodes.emplace_back(MeshNode
+		{
+			node->mName.C_Str(),
+			parentNodeId,
+			globalTransform,
+			localTransform
+		}
+	);
+
+	for (const Submesh& submesh : mesh.GetSubmeshes())
+	{
+		if (submesh.GetName() == meshNode.m_name)
+		{
+			bool ignoreRotation = false;
+			if (node->mMetaData)
+			{
+				node->mMetaData->Get("RotationActive", ignoreRotation);
+			}
+			submesh.SetupNodeAttachment(index, ignoreRotation);
+		}
+	}
+
+	for (uint32_t i = 0; i < node->mNumChildren; ++i)
+	{
+		ProcessMeshNodeData(mesh, node->mChildren[i], index, nodes, globalTransform);
+	}
+}
+
 template<>
 std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 {
@@ -33,14 +68,13 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 		return mesh;
 	}
 
-	Transform4D globalTransformMatrix;
-	memcpy(globalTransformMatrix.matrix.data, &scene->mRootNode->mTransformation.a1, sizeof(globalTransformMatrix));
+	Transform4D globalTransformMatrix = AIMatrixCast(scene->mRootNode->mTransformation);
 	mesh->SetGlobalInverseMatrix(Inverse(globalTransformMatrix));
 
 	for (uint32_t meshId = 0; meshId < scene->mNumMeshes; ++meshId)
 	{
 		aiMesh* submesh = scene->mMeshes[meshId];
-
+		
 		std::vector<uint32_t> indices(submesh->mNumFaces * 3);
 
 		for (uint32_t i = 0; i < submesh->mNumFaces; i++)
@@ -50,7 +84,7 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 
 		std::vector<Vector3D> vertices = CastToVector(submesh->mNumVertices, *submesh->mVertices);
 
-		SubmeshBuilder builder(std::move(vertices), indices);
+		SubmeshBuilder builder(submesh->mName.C_Str(), std::move(vertices), indices);
 
 		if (submesh->HasNormals())
 		{
@@ -87,34 +121,24 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 			Skeleton skeleton;
 			skeleton.m_bones.resize(submesh->mNumBones);
 			skeleton.m_vertexWeights.resize(submesh->mNumVertices);
-			skeleton.m_globalInverseTransform = Inverse(AIMatrixCast(scene->mRootNode->mTransformation));
+			skeleton.m_globalInverseTransform = AIMatrixCast(scene->mRootNode->mTransformation);
 
 			std::unordered_map<aiNode*, Bone*> nodeToBoneMap(submesh->mNumBones);
 
 			std::vector<uint8_t> weightCounters(submesh->mNumVertices);
-			
+
 			for (uint32_t boneId = 0; boneId < submesh->mNumBones; ++boneId)
 			{
 				Bone&         bone   = skeleton.m_bones[boneId];
 				const aiBone* aiBone = submesh->mBones[boneId];
 
-				Bone*   parentBone        = nullptr;
-				aiNode* currentSearchNode = aiBone->mNode->mParent;
-				while (parentBone == nullptr && currentSearchNode != nullptr)
-				{
-					auto it           = nodeToBoneMap.find(currentSearchNode);
-					parentBone        = it != nodeToBoneMap.end() ? it->second : nullptr;
-					currentSearchNode = currentSearchNode->mParent;
-				}
-
-				bone.m_skeleton = &skeleton;
-				bone.m_parent   = parentBone;
-				bone.m_boneName = aiBone->mName.C_Str();
+				bone.m_skeleton     = &skeleton;
+				bone.m_boneName     = aiBone->mName.C_Str();
 				bone.m_offsetMatrix = AIMatrixCast(aiBone->mOffsetMatrix);
 
 				for (uint32_t weightId = 0; weightId < aiBone->mNumWeights; ++weightId)
 				{
-					const uint32_t vertexId                                    = aiBone->mWeights[weightId].mVertexId;
+					const uint32_t vertexId = aiBone->mWeights[weightId].mVertexId;
 					skeleton.m_vertexWeights[vertexId].m_boneWeights[weightCounters[vertexId]++] = BoneWeight{
 						boneId,
 						aiBone->mWeights[weightId].mWeight,
@@ -136,7 +160,10 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 		mesh->AddAnimation(ImportAnimation(animation, scene->mRootNode));
 	}
 
-	aiReleaseImport(scene);
+	std::vector<MeshNode> meshNodes;
+	ProcessMeshNodeData(*mesh.get(), scene->mRootNode, -1, meshNodes, Transform4D::identity);
+	mesh->SetMeshNodeData(meshNodes);
 
+	aiReleaseImport(scene);
 	return mesh;
 }

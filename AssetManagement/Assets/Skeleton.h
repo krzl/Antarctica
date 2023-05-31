@@ -1,5 +1,4 @@
 #pragma once
-#include "assimp/matrix4x4.h"
 
 struct Skeleton;
 struct AnimationNode;
@@ -17,10 +16,9 @@ struct VertexWeights
 
 struct Bone
 {
-	const Bone* m_parent = nullptr;
 	std::string m_boneName;
 	Skeleton*   m_skeleton = nullptr;
-	Transform4D m_offsetMatrix;
+	Matrix4D m_offsetMatrix;
 };
 
 struct Skeleton

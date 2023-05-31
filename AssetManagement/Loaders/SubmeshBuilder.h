@@ -6,7 +6,7 @@ class SubmeshBuilder
 {
 public:
 
-	explicit SubmeshBuilder(std::vector<Vector3D>&& positions, std::vector<uint32_t>& indices);
+	explicit SubmeshBuilder(std::string&& name, std::vector<Vector3D>&& positions, std::vector<uint32_t>& indices);
 
 	void SetNormals(std::vector<Vector3D>&& normals);
 	void SetTangents(std::vector<Vector3D>&& tangents);
@@ -22,6 +22,7 @@ private:
 	const AttributeOffsets& GetAttributeOffsets(const AttributeUsage& attributeUsage) const;
 	AttributeUsage          GetAttributeUsage() const;
 
+	std::string           m_name;
 	std::vector<uint8_t>  m_indices;
 	std::vector<Vector3D> m_positions;
 	std::vector<Vector3D> m_normals;
