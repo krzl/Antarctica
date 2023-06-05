@@ -10,12 +10,12 @@ namespace Renderer
 {
 	struct SkinningData
 	{
-		std::vector<Matrix4D>       m_boneTransforms;
-		NativeBufferPtr&            m_weightsBuffer;
-		DynamicBuffer&              m_transformBuffer;
-		std::vector<DynamicBuffer>& m_outputBuffers;
-		const Submesh&              m_submesh;
-		uint32_t                    m_offset;
+		std::vector<Matrix4D> m_boneTransforms;
+		NativeBufferPtr&      m_weightsBuffer;
+		DynamicBuffer&        m_transformBuffer;
+		DynamicBuffer&        m_outputBuffer;
+		const Submesh&        m_submesh;
+		uint32_t              m_offset;
 	};
 
 	class AnimatedMeshComponent : public StaticMeshComponent
@@ -50,9 +50,9 @@ namespace Renderer
 
 		std::vector<Transform4D> m_animatedTransforms;
 
-		NativeBufferPtr                         m_weightsBuffer = NativeBufferPtr(nullptr, Renderer::Deleter);
-		DynamicBuffer                           m_transformBuffer;
-		std::vector<std::vector<DynamicBuffer>> m_skinningOutputBuffers;
+		NativeBufferPtr            m_weightsBuffer = NativeBufferPtr(nullptr, Renderer::Deleter);
+		DynamicBuffer              m_transformBuffer;
+		std::vector<DynamicBuffer> m_skinningOutputBuffers;
 
 	protected:
 

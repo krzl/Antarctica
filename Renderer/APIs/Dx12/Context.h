@@ -31,10 +31,10 @@ namespace Renderer::Dx12
 
 		uint32_t GetCurrentBackbufferId() override;
 
-		void ExecuteAndPresent() override;
-		void Cleanup() override;
+		void                                  ExecuteAndPresent() override;
+		void                                  Cleanup() override;
 
-		std::shared_ptr<DescriptorHeapHandle> CreateHeapHandle();
+		std::shared_ptr<DescriptorHeapHandle> CreateHeapHandle(uint32_t size = 1, D3D12_DESCRIPTOR_HEAP_FLAGS flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
 		ID3D12Device* GetDevice() const
 		{

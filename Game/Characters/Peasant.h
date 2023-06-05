@@ -20,6 +20,8 @@ protected:
 	Ref<Renderer::AnimatedMeshComponent> m_animatedMeshComponent;
 	Ref<MovementComponent>               m_movementComponent;
 
+	bool m_isWalking = false;
+	
 	DEFINE_CLASS()
 };
 

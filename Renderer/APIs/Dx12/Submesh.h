@@ -38,7 +38,7 @@ namespace Renderer::Dx12
 
 		~Submesh();
 
-		void Bind(const Shader* shader, const std::vector<DynamicBuffer>* skinningBuffers) const;
+		void Bind(const Shader* shader, const DynamicBuffer* skinningBuffer) const;
 
 		const D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferViewForAttribute(MeshAttribute attribute) const;
 
@@ -47,10 +47,12 @@ namespace Renderer::Dx12
 			return m_indexCount;
 		}
 
-		std::shared_ptr<DescriptorHeapHandle> GetAttributeHeapHandle(MeshAttribute attribute);
+		std::shared_ptr<DescriptorHeapHandle> GetSkinningHeapHandle();
+
+		uint32_t GetSkinnedAttributeCount() const;
 
 		static ISubmesh* Create(const ::Submesh* submesh);
-
+		
 	private:
 
 		Submesh() = default;
@@ -63,7 +65,7 @@ namespace Renderer::Dx12
 
 
 		void CreateShaderResourceViews(const ::Submesh* submesh);
-		void AddShaderResourceView(const ::Submesh* submesh, MeshAttribute attribute, uint16_t offset);
+		void AddShaderResourceViews(const ::Submesh* submesh, MeshAttribute attribute, uint16_t offset);
 
 		D3D12_INDEX_BUFFER_VIEW m_indexBufferView = {};
 		ComPtr<ID3D12Resource>  m_indexBuffer;
@@ -73,7 +75,10 @@ namespace Renderer::Dx12
 		ComPtr<ID3D12Resource>                            m_vertexBuffer;
 		ComPtr<ID3D12Resource>                            m_vertexUploadBuffer;
 
-		std::map<MeshAttribute, std::shared_ptr<DescriptorHeapHandle>> m_attributeHeapHandles;
+		std::shared_ptr<DescriptorHeapHandle>                          m_skinningHeapHandle;
+		uint32_t                                                       m_skinnedAttributesCount = 0;
+
+	private:
 
 		uint32_t m_indexCount = 0;
 	};

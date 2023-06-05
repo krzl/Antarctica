@@ -37,16 +37,18 @@ namespace Renderer
 				for (uint32_t i = 0; i < component->m_mesh->GetSubmeshCount(); ++i)
 				{
 					const uint32_t bonesCount = static_cast<uint32_t>(boneTransforms[i].size());
-
-					skinningData.emplace_back(SkinningData{
-						boneTransforms[i],
-						component->m_weightsBuffer,
-						component->m_transformBuffer,
-						component->m_skinningOutputBuffers[i],
-						component->m_mesh->GetSubmesh(i),
-						offset
-					});
-					offset += bonesCount;
+					if (component->m_mesh->GetSubmesh(i).GetSkeleton().m_bones.size() != 0)
+					{
+						skinningData.emplace_back(SkinningData{
+							boneTransforms[i],
+							component->m_weightsBuffer,
+							component->m_transformBuffer,
+							component->m_skinningOutputBuffers[i],
+							component->m_mesh->GetSubmesh(i),
+							offset
+						});
+						offset += bonesCount;
+					}
 				}
 			}
 		}
@@ -79,7 +81,7 @@ namespace Renderer
 		for (uint32_t i = 0; i < handles.size(); ++i)
 		{
 			RenderHandle& handle     = handles[i];
-			handle.m_skinningBuffers = &m_skinningOutputBuffers[i];
+			handle.m_skinningBuffer = &m_skinningOutputBuffers[i];
 		}
 		m++;
 

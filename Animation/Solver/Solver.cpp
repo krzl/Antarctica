@@ -121,12 +121,11 @@ namespace Anim
 							Transform4D::MakeScale(scale.x, scale.y, scale.z);
 
 			Vector3D x = rotation.GetDirectionX();
-
 		}
 
 		Transform4D globalTransformation = parentTransform * nodeTransform;
 
-		
+
 		if (meshNodeId != -1)
 		{
 			transforms[meshNodeId] = globalTransformation;

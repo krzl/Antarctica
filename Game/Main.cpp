@@ -33,10 +33,14 @@ void main()
 			actor->SetScale(Vector3D(1.0f, 1.0f, 1.0f));
 			actor->GetStaticMeshComponent()->SetMesh(mesh);
 
-			Ref peasant = Application::Get().GetWorld().Spawn<Peasant>();
-			peasant->SetPosition(Point3D(-0.0, 0.0f, 2.0f));
-			peasant->SetScale(Vector3D(0.01f, 0.01f, 0.01f));
-			//peasant->SetRotation(90.0, 0.0f, 0.0f);
+			for (uint32_t i = 0; i < 10; i++)
+			{
+				for (uint32_t j = 0; j < 10; j++)
+				{
+					Ref peasant = Application::Get().GetWorld().Spawn<Peasant>();
+					peasant->SetPosition(Point3D(i/2.0f, j/2.0f, 2.0f));
+				}
+			}
 			
 			const std::shared_ptr<Texture> ground = AssetManager::GetAsset<Texture>(
 				"../Resources/Textures/ground.png");
@@ -54,7 +58,6 @@ void main()
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>();
 			camera->SetPosition(Point3D(0, 0, -10));
 			camera->SetRotation(70.0f, 0.0f, 0.0f);
-			camera->GetCameraComponent()->SetFOV(10.0f);
 		}
 	}, false);
 

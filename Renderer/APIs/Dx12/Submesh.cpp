@@ -112,8 +112,10 @@ namespace Renderer::Dx12
 		m_indexCount = submesh->GetIndexBuffer().m_elementCount;
 	}
 
-	void Submesh::Bind(const Shader* shader, const std::vector<DynamicBuffer>* skinningBuffers) const
+	void Submesh::Bind(const Shader* shader, const DynamicBuffer* skinningBuffer) const
 	{
+		uint32_t i = 0;
+
 		for (auto& [inputSlot, attribute] : shader->GetInputSlotBindings())
 		{
 			auto it = m_vertexBufferViews.find(attribute);
@@ -123,24 +125,21 @@ namespace Renderer::Dx12
 			}
 			const D3D12_VERTEX_BUFFER_VIEW* bufferView = &it->second;
 
-			if ((uint8_t) attribute < 4 && skinningBuffers != nullptr && skinningBuffers->size() != 0)
+			if ((uint8_t) attribute < 4 && skinningBuffer != nullptr && skinningBuffer->IsInitialized())
 			{
-				const DynamicBuffer& buffer = (*skinningBuffers)[(int) attribute];
-				if ((*skinningBuffers)[(int) attribute].IsInitialized())
+				D3D12_VERTEX_BUFFER_VIEW skinningBufferView =
 				{
-					D3D12_VERTEX_BUFFER_VIEW skinningBufferView =
-					{
-						buffer.GetCurrentBuffer()->GetGPUAddress(),
-						bufferView->SizeInBytes,
-						bufferView->StrideInBytes
-					};
+					skinningBuffer->GetCurrentBuffer()->GetGPUAddress() + i * bufferView->SizeInBytes,
+					bufferView->SizeInBytes,
+					bufferView->StrideInBytes
+				};
 
-					Dx12Context::Get().GetCommandList()->IASetVertexBuffers(inputSlot, 1, &skinningBufferView);
-					continue;
-				}
+				Dx12Context::Get().GetCommandList()->IASetVertexBuffers(inputSlot, 1, &skinningBufferView);
+				continue;
 			}
 
 			Dx12Context::Get().GetCommandList()->IASetVertexBuffers(inputSlot, 1, bufferView);
+			++i;
 		}
 
 		Dx12Context::Get().GetCommandList()->IASetIndexBuffer(&m_indexBufferView);
@@ -224,13 +223,15 @@ namespace Renderer::Dx12
 	{
 		const AttributeOffsets& offsets = submesh->GetAttributes().GetAttributeOffsets();
 
-		AddShaderResourceView(submesh, MeshAttribute::POSITION, offsets.m_positionOffset);
-		AddShaderResourceView(submesh, MeshAttribute::NORMAL, offsets.m_normalOffset);
-		AddShaderResourceView(submesh, MeshAttribute::TANGENT, offsets.m_tangentOffset);
-		AddShaderResourceView(submesh, MeshAttribute::BINORMAL, offsets.m_bitangentOffset);
+		m_skinningHeapHandle = Dx12Context::Get().CreateHeapHandle(4);
+
+		AddShaderResourceViews(submesh, MeshAttribute::POSITION, offsets.m_positionOffset);
+		AddShaderResourceViews(submesh, MeshAttribute::NORMAL, offsets.m_normalOffset);
+		AddShaderResourceViews(submesh, MeshAttribute::TANGENT, offsets.m_tangentOffset);
+		AddShaderResourceViews(submesh, MeshAttribute::BINORMAL, offsets.m_bitangentOffset);
 	}
 
-	void Submesh::AddShaderResourceView(const ::Submesh* submesh, MeshAttribute attribute, uint16_t offset)
+	void Submesh::AddShaderResourceViews(const ::Submesh* submesh, const MeshAttribute attribute, const uint16_t offset)
 	{
 		if (offset != 0 || attribute == MeshAttribute::POSITION)
 		{
@@ -248,17 +249,22 @@ namespace Renderer::Dx12
 				D3D12_BUFFER_SRV_FLAG_NONE
 			};
 
-			m_attributeHeapHandles[attribute] = Dx12Context::Get().CreateHeapHandle();
-
 			Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_vertexBuffer.Get(), &desc,
-																	 m_attributeHeapHandles[attribute]->GetCPUHandle());
+																	 m_skinningHeapHandle->GetCPUHandle(
+																		 m_skinnedAttributesCount));
+
+			m_skinnedAttributesCount++;
 		}
 	}
 
-
-	std::shared_ptr<DescriptorHeapHandle> Submesh::GetAttributeHeapHandle(const MeshAttribute attribute)
+	std::shared_ptr<DescriptorHeapHandle> Submesh::GetSkinningHeapHandle()
 	{
-		return m_attributeHeapHandles[attribute];
+		return m_skinningHeapHandle;
+	}
+
+	uint32_t Submesh::GetSkinnedAttributeCount() const
+	{
+		return m_skinnedAttributesCount;
 	}
 
 	ISubmesh* Submesh::Create(const ::Submesh* submesh)

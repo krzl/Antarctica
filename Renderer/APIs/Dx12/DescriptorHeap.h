@@ -10,10 +10,13 @@ namespace Renderer::Dx12
 	{
 		friend DescriptorHeap;
 
+		DescriptorHeapHandle(DescriptorHeapHandle const&)            = delete;
+		DescriptorHeapHandle& operator=(DescriptorHeapHandle const&) = delete;
+
 		~DescriptorHeapHandle();
 
-		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle() const;
-		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() const;
+		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(uint32_t offset = 0) const;
+		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(uint32_t offset = 0) const;
 
 	private:
 
@@ -30,16 +33,15 @@ namespace Renderer::Dx12
 
 	public:
 
-		void        Init();
+		void        Init(D3D12_DESCRIPTOR_HEAP_FLAGS flags);
 		static void OnFrameStart();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUStartHandle() const;
 		void                        ActivateDescriptorHeap();
 		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUStartHandle() const;
 
-		bool IsFilled() const;
-
-		std::shared_ptr<DescriptorHeapHandle> GetNextHandle();
+		int32_t                               GetNextId(uint32_t size) const;
+		std::shared_ptr<DescriptorHeapHandle> GetNextHandle(uint32_t size);
 
 		void FreeHandle(const DescriptorHeapHandle* descriptorHeapHandle);
 
@@ -47,11 +49,14 @@ namespace Renderer::Dx12
 
 	private:
 
-		const uint32_t HEAP_SIZE = 128;
+		const uint32_t HEAP_SIZE = 65536;
 
 		ComPtr<ID3D12DescriptorHeap> m_heap;
-		uint32_t                     m_nextId = 0;
-		std::bitset<128>             m_usedHandles;
+		std::bitset<65536>           m_usedHandles;
+
+		mutable uint32_t m_firstUnusedIndex = 0;
+
+		D3D12_DESCRIPTOR_HEAP_FLAGS m_flags;
 
 		static uint32_t                      m_incrementSize;
 		static std::weak_ptr<DescriptorHeap> m_currentlySetDescriptorHeap;

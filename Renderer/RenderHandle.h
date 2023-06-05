@@ -11,11 +11,11 @@ namespace Renderer
 
 	struct RenderHandle
 	{
-		const ::Submesh*            m_submesh;
-		const Material*             m_material;
-		ConstantBuffer*             m_constantBuffer;
-		std::vector<DynamicBuffer>* m_skinningBuffers;
-		float                       m_order;
+		const ::Submesh* m_submesh;
+		const Material*  m_material;
+		ConstantBuffer*  m_constantBuffer;
+		DynamicBuffer*   m_skinningBuffer;
+		float            m_order;
 
 		friend bool operator<(const RenderHandle& lhs, const RenderHandle& rhs)
 		{
@@ -42,7 +42,7 @@ namespace Renderer
 			: m_submesh(&submesh),
 			  m_material(&material),
 			  m_constantBuffer(&constantBuffer),
-			  m_skinningBuffers(nullptr),
+			  m_skinningBuffer(nullptr),
 			  m_order(material.GetOrder()) { }
 	};
 }

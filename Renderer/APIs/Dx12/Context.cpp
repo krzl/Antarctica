@@ -323,7 +323,7 @@ namespace Renderer::Dx12
 				submesh->SetNativeObject(Submesh::Create(submesh));
 			}
 			
-			renderable.m_submesh->GetNativeObject()->Bind(shader->GetNativeObject(), renderable.m_skinningBuffers);
+			renderable.m_submesh->GetNativeObject()->Bind(shader->GetNativeObject(), renderable.m_skinningBuffer);
 
 			m_commandList->DrawIndexedInstanced(renderable.m_submesh->GetNativeObject()->GetIndexCount(), 1, 0, 0, 0);
 
@@ -376,20 +376,24 @@ namespace Renderer::Dx12
 		m_currentBackbufferId = (m_currentBackbufferId + 1) % RenderSystem::BUFFER_COUNT;
 	}
 
-	std::shared_ptr<DescriptorHeapHandle> Dx12Context::CreateHeapHandle()
+	std::shared_ptr<DescriptorHeapHandle> Dx12Context::CreateHeapHandle(const uint32_t size, D3D12_DESCRIPTOR_HEAP_FLAGS flags)
 	{
-		for (std::shared_ptr<DescriptorHeap>& heap : m_srvDescriptorHeaps)
+		for (const std::shared_ptr<DescriptorHeap>& heap : m_srvDescriptorHeaps)
 		{
-			if (!heap->IsFilled())
+			if (heap->m_flags == flags)
 			{
-				return heap->GetNextHandle();
+				std::shared_ptr<DescriptorHeapHandle> handle = heap->GetNextHandle(size);
+				if (handle != nullptr)
+				{
+					return handle;
+				}
 			}
 		}
 
-		std::shared_ptr<DescriptorHeap>& heap = m_srvDescriptorHeaps.emplace_back(new DescriptorHeap());
-		heap->Init();
+		const std::shared_ptr<DescriptorHeap>& heap = m_srvDescriptorHeaps.emplace_back(new DescriptorHeap());
+		heap->Init(flags);
 
-		return heap->GetNextHandle();
+		return heap->GetNextHandle(size);
 	}
 
 	void Dx12Context::Cleanup()

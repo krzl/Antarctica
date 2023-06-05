@@ -19,6 +19,9 @@ Peasant::Peasant()
 {
 	m_animatedMeshComponent = AddComponent<Renderer::AnimatedMeshComponent>();
 	m_movementComponent     = AddComponent<MovementComponent>();
+	
+	m_animatedMeshComponent->SetLocalScale(Vector3D(0.01f, 0.01f, 0.01f));
+	m_animatedMeshComponent->SetLocalRotation(90.0, 0.0f, 0.0f);
 
 	const std::shared_ptr<Mesh> mesh = AssetManager::GetAsset<Mesh>(
 		"../Resources/Meshes/TT_RTS_Demo_Character.FBX");
@@ -40,7 +43,7 @@ Peasant::Peasant()
 
 		const std::shared_ptr<Animation> workAnim = AssetManager::GetAsset<Animation>(
 			"../Resources/Animations/infantry_04_attack_A.fbx");
-		const std::shared_ptr<AnimationState> workState = stateMachineBuilder.AddState<AnimationState>(walkAnim);
+		const std::shared_ptr<AnimationState> workState = stateMachineBuilder.AddState<AnimationState>(workAnim);
 
 		idleState->AddTransition({
 									 true,
@@ -77,13 +80,12 @@ Peasant::Peasant()
 	m_animatedMeshComponent->SetMaterial(material, 2);
 	m_animatedMeshComponent->SetMaterial(material, 3);
 
-
 	InputSystem::GetInstance()->OnLeftMouseButtonPressed.AddListener([this]()
 	{
 		using namespace Anim;
 
-		static bool t = false;
-		t             = !t;
-		m_animatedMeshComponent->SetTrigger(WALK, t);
+		m_isWalking = !m_isWalking;
+		
+		m_animatedMeshComponent->SetTrigger(WALK, m_isWalking);
 	}, false);
 }
