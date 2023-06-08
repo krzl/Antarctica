@@ -56,7 +56,7 @@ void main()
 
 			
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>();
-			camera->SetPosition(Point3D(0, 0, -10));
+			camera->SetPosition(Point3D(0, 0, -15));
 			camera->SetRotation(70.0f, 0.0f, 0.0f);
 		}
 	}, false);

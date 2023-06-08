@@ -109,12 +109,23 @@ namespace Renderer::Dx12
 			DXGI_FORMAT_R32_UINT
 		};
 
-		m_indexCount = submesh->GetIndexBuffer().m_elementCount;
+		m_vertexCount = submesh->GetVertexBuffer().m_elementCount;
+		m_indexCount  = submesh->GetIndexBuffer().m_elementCount;
 	}
 
-	void Submesh::Bind(const Shader* shader, const DynamicBuffer* skinningBuffer) const
+	void Submesh::Bind(const Shader* shader, const IBuffer* skinningBuffer) const
 	{
 		uint32_t i = 0;
+
+		if (skinningBuffer)
+		{
+			const CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+				skinningBuffer->GetBuffer().Get(),
+				D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+				D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+
+			Dx12Context::Get().GetCommandList()->ResourceBarrier(1, &barrier);
+		}
 
 		for (auto& [inputSlot, attribute] : shader->GetInputSlotBindings())
 		{
@@ -125,11 +136,11 @@ namespace Renderer::Dx12
 			}
 			const D3D12_VERTEX_BUFFER_VIEW* bufferView = &it->second;
 
-			if ((uint8_t) attribute < 4 && skinningBuffer != nullptr && skinningBuffer->IsInitialized())
+			if ((uint8_t) attribute < 4 && skinningBuffer)
 			{
 				D3D12_VERTEX_BUFFER_VIEW skinningBufferView =
 				{
-					skinningBuffer->GetCurrentBuffer()->GetGPUAddress() + i * bufferView->SizeInBytes,
+					skinningBuffer->GetGPUAddress() + i * bufferView->SizeInBytes,
 					bufferView->SizeInBytes,
 					bufferView->StrideInBytes
 				};
@@ -273,6 +284,8 @@ namespace Renderer::Dx12
 		nativeSubmesh->Init(submesh);
 		return static_cast<ISubmesh*>(nativeSubmesh);
 	}
+
+	Submesh::Submesh() {}
 }
 
 namespace Renderer

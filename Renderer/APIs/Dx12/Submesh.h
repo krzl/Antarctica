@@ -1,10 +1,12 @@
 #pragma once
 
-#include <iosfwd>
-#include <vector>
-
 #include "Common.h"
 #include "Buffers/DynamicBuffer.h"
+
+namespace Renderer
+{
+	struct ScratchBufferHandle;
+}
 
 struct Submesh;
 
@@ -38,24 +40,22 @@ namespace Renderer::Dx12
 
 		~Submesh();
 
-		void Bind(const Shader* shader, const DynamicBuffer* skinningBuffer) const;
+		void Bind(const Shader* shader, const IBuffer* skinningBuffer) const;
 
 		const D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferViewForAttribute(MeshAttribute attribute) const;
 
-		[[nodiscard]] uint32_t GetIndexCount() const
-		{
-			return m_indexCount;
-		}
+		[[nodiscard]] uint32_t GetIndexCount() const { return m_indexCount; }
+		[[nodiscard]] uint32_t GetVertexCount() const { return m_vertexCount; }
 
 		std::shared_ptr<DescriptorHeapHandle> GetSkinningHeapHandle();
 
 		uint32_t GetSkinnedAttributeCount() const;
 
 		static ISubmesh* Create(const ::Submesh* submesh);
-		
+
 	private:
 
-		Submesh() = default;
+		Submesh();
 
 		void Init(const ::Submesh* submesh);
 
@@ -75,12 +75,11 @@ namespace Renderer::Dx12
 		ComPtr<ID3D12Resource>                            m_vertexBuffer;
 		ComPtr<ID3D12Resource>                            m_vertexUploadBuffer;
 
-		std::shared_ptr<DescriptorHeapHandle>                          m_skinningHeapHandle;
-		uint32_t                                                       m_skinnedAttributesCount = 0;
+		std::shared_ptr<DescriptorHeapHandle> m_skinningHeapHandle;
+		uint32_t                              m_skinnedAttributesCount = 0;
 
-	private:
-
-		uint32_t m_indexCount = 0;
+		uint32_t m_vertexCount = 0;
+		uint32_t m_indexCount  = 0;
 	};
 }
 

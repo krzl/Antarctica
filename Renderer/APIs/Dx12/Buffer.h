@@ -18,7 +18,9 @@ namespace Renderer::Dx12
 
 		bool IsInitialized() const;
 
-		D3D12_GPU_VIRTUAL_ADDRESS GetGPUAddress();
+		[[nodiscard]] const ComPtr<ID3D12Resource>& GetBuffer() const { return m_buffer; }
+
+		D3D12_GPU_VIRTUAL_ADDRESS GetGPUAddress() const;
 
 		~Buffer();
 

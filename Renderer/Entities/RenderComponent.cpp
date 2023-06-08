@@ -7,13 +7,13 @@ namespace Renderer
 {
 	std::unordered_set<RenderComponent*> renderComponents;
 
-	std::priority_queue<RenderHandle> RenderComponent::GetRenderQueue()
+	std::multiset<QueuedRenderObject> RenderComponent::GetObjectsToRender()
 	{
-		std::priority_queue<RenderHandle> renderQueue;
+		std::multiset<QueuedRenderObject> renderQueue;
 
 		for (RenderComponent* component : renderComponents)
 		{
-			std::vector<RenderHandle> handles = component->PrepareForRender();
+			std::vector<QueuedRenderObject> handles = component->PrepareForRender();
 			for (auto& handle : handles)
 			{
 				renderQueue.emplace(handle);
@@ -38,14 +38,19 @@ namespace Renderer
 		return Transform4D::identity;
 	}
 
-	void RenderComponent::UpdateConstantBuffer(const uint32_t id)
+	std::vector<uint8_t> RenderComponent::GetConstantBuffer(const uint32_t id)
 	{
-		const auto       worldMatrix = GetWorldTransform() * GetAttachmentTransform(id);
-		PerObjectBuffer* buffer      = m_constantBuffers[id].GetData<PerObjectBuffer>();
-		buffer->m_transform          = worldMatrix.transpose;
+		const auto worldMatrix = GetWorldTransform() * GetAttachmentTransform(id);
+
+		PerObjectBuffer buffer = PerObjectBuffer::DEFAULT_BUFFER;
+		buffer.m_transform     = worldMatrix.transpose;
+
+		std::vector<uint8_t> array(sizeof(buffer));
+		memcpy(array.data(), &buffer, sizeof(buffer));
+		return array;
 	}
 
-	std::vector<RenderHandle> RenderComponent::PrepareForRender()
+	std::vector<QueuedRenderObject> RenderComponent::PrepareForRender()
 	{
 		return {};
 	}

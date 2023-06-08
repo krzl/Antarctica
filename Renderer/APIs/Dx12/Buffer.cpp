@@ -119,7 +119,7 @@ namespace Renderer::Dx12
 		return m_buffer.GetAddressOf() != nullptr;
 	}
 
-	D3D12_GPU_VIRTUAL_ADDRESS Buffer::GetGPUAddress()
+	D3D12_GPU_VIRTUAL_ADDRESS Buffer::GetGPUAddress() const
 	{
 		return m_buffer->GetGPUVirtualAddress();
 	}

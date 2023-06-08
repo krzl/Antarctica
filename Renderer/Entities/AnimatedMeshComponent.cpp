@@ -17,45 +17,6 @@ namespace Renderer
 		animatedMeshComponents.erase(this);
 	}
 
-	std::vector<SkinningData> AnimatedMeshComponent::GetAllSkinningData()
-	{
-		std::vector<SkinningData> skinningData;
-
-		for (AnimatedMeshComponent* component : animatedMeshComponents)
-		{
-			if (component->m_mesh && component->m_animator)
-			{
-				if (component->m_skinningOutputBuffers.size() != component->m_mesh->GetSubmeshCount())
-				{
-					component->m_skinningOutputBuffers.resize(component->m_mesh->GetSubmeshCount());
-				}
-				
-				std::vector<std::vector<Matrix4D>> boneTransforms = component->m_animationSolver.UpdateAnimation(
-					component->m_mesh);
-				uint32_t offset = 0;
-
-				for (uint32_t i = 0; i < component->m_mesh->GetSubmeshCount(); ++i)
-				{
-					const uint32_t bonesCount = static_cast<uint32_t>(boneTransforms[i].size());
-					if (component->m_mesh->GetSubmesh(i).GetSkeleton().m_bones.size() != 0)
-					{
-						skinningData.emplace_back(SkinningData{
-							boneTransforms[i],
-							component->m_weightsBuffer,
-							component->m_transformBuffer,
-							component->m_skinningOutputBuffers[i],
-							component->m_mesh->GetSubmesh(i),
-							offset
-						});
-						offset += bonesCount;
-					}
-				}
-			}
-		}
-
-		return skinningData;
-	}
-
 	Transform4D AnimatedMeshComponent::GetAttachedNodeTransform(const int32_t nodeId, bool ignoreAttachmentRotation)
 	{
 		Transform4D transform = m_animationSolver.GetNodeTransforms()[nodeId];
@@ -64,26 +25,54 @@ namespace Renderer
 			Vector3D   translation;
 			Quaternion rotation;
 			Vector3D   scale;
-			
+
 			DecomposeTransform(transform, translation, rotation, scale);
 
 			transform = Transform4D::MakeTranslation(translation) * Transform4D::MakeScale(scale.x, scale.y, scale.z);
 		}
-		
+
 		return transform;
 	}
 
-	std::vector<RenderHandle> AnimatedMeshComponent::PrepareForRender()
+	std::vector<QueuedRenderObject> AnimatedMeshComponent::PrepareForRender()
 	{
-		std::vector<RenderHandle> handles = StaticMeshComponent::PrepareForRender();
-
-		static uint32_t m = 0;
-		for (uint32_t i = 0; i < handles.size(); ++i)
+		std::vector<std::vector<Matrix4D>> boneTransforms;
+		if (m_mesh && m_animator)
 		{
-			RenderHandle& handle     = handles[i];
-			handle.m_skinningBuffer = &m_skinningOutputBuffers[i];
+			boneTransforms = m_animationSolver.UpdateAnimation(m_mesh);
 		}
-		m++;
+
+		std::vector<QueuedRenderObject> handles = StaticMeshComponent::PrepareForRender();
+
+		if (handles.size() == 0 || !m_mesh || !m_animator)
+		{
+			return handles;
+		}
+
+		uint32_t handleId = 0;
+
+		for (uint32_t i = 0; i < m_mesh->GetSubmeshCount(); ++i)
+		{
+			const Submesh& submesh    = m_mesh->GetSubmesh(i);
+			const uint32_t bonesCount = static_cast<uint32_t>(boneTransforms[i].size());
+
+			if (submesh.GetSkeleton().m_bones.size() == 0)
+			{
+				continue;
+			}
+			
+			handles[i].m_skinningBuffer = &m_skinningBuffers[i];
+
+			if (bonesCount != 0)
+			{
+				handles[i].m_boneTransforms = std::move(boneTransforms[i]);
+			}
+
+			if (handles[i].m_submesh == &submesh)
+			{
+				handleId++;
+			}
+		}
 
 		return handles;
 	}
@@ -93,13 +82,15 @@ namespace Renderer
 		StaticMeshComponent::SetMesh(mesh);
 
 		const std::vector<MeshNode>& meshNodes = mesh->GetNodes();
-		
+
 		m_animatedTransforms.resize(meshNodes.size());
 
 		for (uint32_t i = 0; i < meshNodes.size(); ++i)
 		{
 			m_animatedTransforms[i] = meshNodes[i].m_globalTransform;
 		}
+
+		m_skinningBuffers.resize(m_mesh->GetSubmeshCount());
 	}
 
 	void AnimatedMeshComponent::SetAnimator(const std::shared_ptr<Anim::Animator> animator)

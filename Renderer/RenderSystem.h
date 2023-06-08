@@ -30,7 +30,5 @@ namespace Renderer
 	private:
 
 		IContext* m_context = nullptr;
-
-		std::shared_ptr<ComputeShader> m_skinningShader;
 	};
 }

@@ -8,16 +8,6 @@ typedef std::unique_ptr<Renderer::IBuffer, void(*)(Renderer::IBuffer*)> NativeBu
 
 namespace Renderer
 {
-	struct SkinningData
-	{
-		std::vector<Matrix4D> m_boneTransforms;
-		NativeBufferPtr&      m_weightsBuffer;
-		DynamicBuffer&        m_transformBuffer;
-		DynamicBuffer&        m_outputBuffer;
-		const Submesh&        m_submesh;
-		uint32_t              m_offset;
-	};
-
 	class AnimatedMeshComponent : public StaticMeshComponent
 	{
 	public:
@@ -36,11 +26,10 @@ namespace Renderer
 
 		void SetTrigger(int32_t id, bool value);
 
-		static std::vector<SkinningData> GetAllSkinningData();
-
 	protected:
 
 		std::shared_ptr<Anim::Animator> m_animator;
+		std::vector<DynamicBuffer>      m_skinningBuffers;
 
 		Transform4D GetAttachedNodeTransform(int32_t nodeId, bool ignoreAttachmentRotation) override;
 
@@ -50,13 +39,9 @@ namespace Renderer
 
 		std::vector<Transform4D> m_animatedTransforms;
 
-		NativeBufferPtr            m_weightsBuffer = NativeBufferPtr(nullptr, Renderer::Deleter);
-		DynamicBuffer              m_transformBuffer;
-		std::vector<DynamicBuffer> m_skinningOutputBuffers;
-
 	protected:
 
-		std::vector<RenderHandle> PrepareForRender() override;
+		std::vector<QueuedRenderObject> PrepareForRender() override;
 
 		DEFINE_CLASS()
 	};

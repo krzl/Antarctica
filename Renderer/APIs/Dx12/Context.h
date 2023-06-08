@@ -3,38 +3,56 @@
 #include "Common.h"
 #include "DescriptorHeap.h"
 #include "RenderSystem.h"
+#include "ScratchBuffer.h"
 #include "APIs/IContext.h"
 
 class Material;
 
 namespace Renderer::Dx12
 {
+	struct RenderObject
+	{
+		IShader*                      m_shader;
+		ISubmesh*                     m_submesh;
+		ScratchBufferHandle           m_constantBuffer;
+		std::map<uint32_t, ITexture*> m_textures;
+		uint32_t                      m_instanceCount;
+
+		IBuffer*                              m_skinningBuffer;
+		std::shared_ptr<DescriptorHeapHandle> m_boneTransforms;
+		std::shared_ptr<DescriptorHeapHandle> m_weightsBuffer;
+	};
+
 	class Dx12Context final : public IContext
 	{
 	public:
 
 		static Dx12Context& Get();
-
-		explicit Dx12Context();
+		explicit            Dx12Context();
 
 		void Init(const Platform::Window& window, const Settings& settings) override;
 		void FlushCommandQueue() override;
 		void OnResize(const Platform::Window& window) override;
 
-		void        WaitForFrameCompletion() const override;
+		void WaitForFrameCompletion() override;
+
+		void CreateRenderQueue(std::multiset<QueuedRenderObject>& objectsToRender) override;
+
 		void        SetupCamera(const Renderer::CameraData& camera) const override;
 		void        SetupRenderTarget(const CameraData& camera) const override;
-		void        DrawObjects(std::priority_queue<RenderHandle>& renderQueue, const CameraData& camera) override;
+		void        DrawObjects(const CameraData& camera) override;
 		void        FinalizeDrawing() override;
-		void        UpdateSkinning(IComputeShader* computeShader, std::vector<SkinningData>& skinningData) override;
-		static void UpdateAndBindMaterial(const Material* material);
+		void        UpdateSkinning() override;
+		static void UpdateMaterial(const Material* material, RenderObject& renderObject);
 
 		uint32_t GetCurrentBackbufferId() override;
 
-		void                                  ExecuteAndPresent() override;
-		void                                  Cleanup() override;
+		void ExecuteAndPresent() override;
+		void Cleanup() override;
 
-		std::shared_ptr<DescriptorHeapHandle> CreateHeapHandle(uint32_t size = 1, D3D12_DESCRIPTOR_HEAP_FLAGS flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+		std::shared_ptr<DescriptorHeapHandle> CreateHeapHandle(uint32_t                    size  = 1,
+															   D3D12_DESCRIPTOR_HEAP_FLAGS flags =
+																   D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
 		ID3D12Device* GetDevice() const
 		{
@@ -66,6 +84,11 @@ namespace Renderer::Dx12
 			return m_currentFenceId;
 		}
 
+		[[nodiscard]] ScratchBuffer& GetScratchBuffer()
+		{
+			return m_scratchBuffer;
+		}
+
 	private:
 
 		ComPtr<IDXGIFactory4> m_dxgiFactory;
@@ -89,9 +112,14 @@ namespace Renderer::Dx12
 		uint32_t m_rtvDescriptorSize = 0;
 		uint32_t m_dsvDescriptorSize = 0;
 
-		std::vector<std::shared_ptr<DescriptorHeap>>  m_srvDescriptorHeaps;
-		ComPtr<ID3D12DescriptorHeap> m_rtvDescriptorHeap;
-		ComPtr<ID3D12DescriptorHeap> m_dsvDescriptorHeap;
+		std::vector<std::shared_ptr<DescriptorHeap>> m_srvDescriptorHeaps;
+		ComPtr<ID3D12DescriptorHeap>                 m_rtvDescriptorHeap;
+		ComPtr<ID3D12DescriptorHeap>                 m_dsvDescriptorHeap;
+
+
+		std::vector<RenderObject> m_renderQueue;
+
+		ScratchBuffer m_scratchBuffer;
 
 		uint32_t m_msNumQualityLevels = 0;
 

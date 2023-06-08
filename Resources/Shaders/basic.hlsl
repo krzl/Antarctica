@@ -3,6 +3,7 @@ struct VertexIn
 	float3 pos		: POSITION0;
     float3 normal	: NORMAL;
 	float2 texcoord	: TEXCOORD0;
+	uint instanceId	: SV_InstanceID;
 };
 
 struct VertexOut
@@ -15,7 +16,10 @@ struct VertexOut
 
 cbuffer cbObject : register(b0)
 {
-	float4x4	world;
+	struct
+	{
+		float4x4	world;
+	} perObjectBuffer[2];
 };
 
 cbuffer cbCamera : register(b1)
@@ -37,7 +41,7 @@ VertexOut vs(VertexIn vin)
 {
 	VertexOut vout;
 
-	float4 worldPos = mul(float4(vin.pos.xyz, 1.0f), world);
+	float4 worldPos = mul(float4(vin.pos.xyz, 1.0f), perObjectBuffer[vin.instanceId].world);
 
 	vout.pos		= mul(worldPos,    viewProj);
 	vout.worldPos	= worldPos.xyz;

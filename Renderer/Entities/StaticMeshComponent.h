@@ -55,7 +55,7 @@ namespace Renderer
 		virtual Transform4D GetAttachedNodeTransform(int32_t nodeId, bool ignoreAttachmentRotation);
 		Transform4D         GetAttachmentTransform(uint32_t submeshId) override;
 
-		std::vector<RenderHandle> PrepareForRender() override;
+		std::vector<QueuedRenderObject> PrepareForRender() override;
 
 		std::shared_ptr<Mesh>                  m_mesh;
 		std::vector<std::shared_ptr<Material>> m_materials;

@@ -5,7 +5,6 @@
 
 namespace Renderer
 {
-
 	Transform4D StaticMeshComponent::GetAttachmentTransform(const uint32_t submeshId)
 	{
 		const Submesh& submesh = m_mesh->GetSubmesh(submeshId);
@@ -14,7 +13,7 @@ namespace Renderer
 			return GetAttachedNodeTransform(submesh.GetAttachmentNodeId(), submesh.GetIgnoreAttachmentRotation());
 		}
 		else
-		{	
+		{
 			return RenderComponent::GetAttachmentTransform(submeshId);
 		}
 	}
@@ -22,13 +21,6 @@ namespace Renderer
 	void StaticMeshComponent::SetMesh(const std::shared_ptr<Mesh>& mesh)
 	{
 		m_mesh = mesh;
-
-		m_constantBuffers.clear();
-		m_constantBuffers.resize(mesh->GetSubmeshCount());
-		for (uint32_t i = 0; i < m_constantBuffers.size(); ++i)
-		{
-			m_constantBuffers[i].Init(1, sizeof(PerObjectBuffer), &PerObjectBuffer::DEFAULT_BUFFER);
-		}
 	}
 
 	Transform4D StaticMeshComponent::GetAttachedNodeTransform(const int32_t nodeId, bool ignoreAttachmentRotation)
@@ -36,23 +28,24 @@ namespace Renderer
 		return m_mesh->GetNodes()[nodeId].m_globalTransform;
 	}
 
-	std::vector<RenderHandle> StaticMeshComponent::PrepareForRender()
+	std::vector<QueuedRenderObject> StaticMeshComponent::PrepareForRender()
 	{
 		if (!m_mesh)
 			return {};
 
-		std::vector<RenderHandle> renderHandles;
+		std::vector<QueuedRenderObject> renderHandles;
 
 		for (uint32_t i = 0; i < m_mesh->GetSubmeshCount(); ++i)
 		{
 			if (m_materials.size() > i && m_materials[i])
 			{
-				UpdateConstantBuffer(i);
+				std::vector<uint8_t> constantBuffer = GetConstantBuffer(i);
 
-				renderHandles.push_back(RenderHandle(
+				renderHandles.push_back(QueuedRenderObject(
 						m_mesh->GetSubmesh(i),
 						*m_materials[i],
-						m_constantBuffers[i])
+						std::move(constantBuffer)
+					)
 				);
 			}
 		}
