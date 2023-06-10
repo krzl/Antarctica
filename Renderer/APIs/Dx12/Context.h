@@ -12,13 +12,13 @@ namespace Renderer::Dx12
 {
 	struct RenderObject
 	{
-		IShader*                      m_shader;
-		ISubmesh*                     m_submesh;
-		ScratchBufferHandle           m_perObjectBuffer;
-		ScratchBufferHandle           m_perCallBuffer;
-		std::map<uint32_t, ITexture*> m_textures;
-		uint32_t                      m_instanceCount;
-		
+		IShader*                              m_shader;
+		ISubmesh*                             m_submesh;
+		std::shared_ptr<DescriptorHeapHandle> m_perObjectBuffer;
+		ScratchBufferHandle                   m_perCallBuffer;
+		std::map<uint32_t, ITexture*>         m_textures;
+		uint32_t                              m_instanceCount;
+
 		std::shared_ptr<DescriptorHeapHandle> m_skinningBufferHandle;
 		std::shared_ptr<DescriptorHeapHandle> m_boneTransforms;
 		std::shared_ptr<DescriptorHeapHandle> m_weightsBuffer;

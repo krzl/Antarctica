@@ -32,12 +32,17 @@ void main()
 			actor->SetScale(Vector3D(1.0f, 1.0f, 1.0f));
 			actor->GetStaticMeshComponent()->SetMesh(mesh);
 
-			for (uint32_t i = 0; i < 32; i++)
+			constexpr uint32_t gridSize = 100;
+			
+			for (uint32_t i = 0; i < gridSize; i++)
 			{
-				for (uint32_t j = 0; j < 32; j++)
+				for (uint32_t j = 0; j < gridSize; j++)
 				{
+					const int32_t x = i - gridSize / 2;
+					const int32_t y = j - gridSize / 2;
+					
 					Ref peasant = Application::Get().GetWorld().Spawn<Peasant>();
-					peasant->SetPosition(Point3D(i / 2.0f, j / 2.0f, 2.0f));
+					peasant->SetPosition(Point3D(x / 2.0f, y / 2.0f, 2.0f));
 				}
 			}
 
@@ -55,7 +60,7 @@ void main()
 
 
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>();
-			camera->SetPosition(Point3D(0, 0, -20));
+			camera->SetPosition(Point3D(0, 0, -40));
 			camera->SetRotation(70.0f, 0.0f, 0.0f);
 		}
 	}, false);

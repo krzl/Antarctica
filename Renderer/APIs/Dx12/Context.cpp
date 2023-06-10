@@ -330,8 +330,8 @@ namespace Renderer::Dx12
 				texture.second->Bind(texture.first);
 			}
 
-			m_commandList->SetGraphicsRootConstantBufferView(
-				0, GetScratchBuffer().GetGpuPointer(renderObject.m_perObjectBuffer));
+			m_commandList->SetGraphicsRootDescriptorTable(
+				0, renderObject.m_perObjectBuffer->GetGPUHandle());
 			camera.m_constantBuffer->UpdateAndGetCurrentBuffer()->Bind(1); //TODO: bind only when it wasn't bound before
 			m_commandList->SetGraphicsRootConstantBufferView(
 				2, GetScratchBuffer().GetGpuPointer(renderObject.m_perCallBuffer));

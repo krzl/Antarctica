@@ -35,7 +35,8 @@ namespace Renderer::Dx12
 				const bool isLastElement        = *(objectsToRender.end() - 1)._Ptr == queuedObject;
 				const bool canBatchWithPrevious = previousSubmesh == queuedObject->m_submesh &&
 												  //previousQueuedObject->m_material == queuedObject->m_material &&
-												  previousBonesCount == queuedObject->m_boneTransforms.size() && instanceCount < 1024;
+												  previousBonesCount == queuedObject->m_boneTransforms.size() &&
+												  instanceCount < 2048;
 
 				if (canBatchWithPrevious)
 				{
@@ -62,8 +63,9 @@ namespace Renderer::Dx12
 
 				RenderObject* lastRenderObject = &m_renderQueue[m_renderQueue.size() - 1];
 
-				lastRenderObject->m_perObjectBuffer = GetScratchBuffer().CreateHandle(
-					(uint32_t) accumulatedConstantBuffers.size() * sizeof(accumulatedConstantBuffers[0]),
+				lastRenderObject->m_perObjectBuffer = GetScratchBuffer().CreateSRV(
+					(uint32_t) accumulatedConstantBuffers.size(),
+					sizeof(accumulatedConstantBuffers[0]),
 					accumulatedConstantBuffers.data());
 				accumulatedConstantBuffers.clear();
 
@@ -73,6 +75,7 @@ namespace Renderer::Dx12
 					lastRenderObject->m_submesh->GetIndexCount(),
 					0
 				};
+
 
 				lastRenderObject->m_perCallBuffer = GetScratchBuffer().CreateHandle(
 					sizeof PerCallBuffer, &perCallBuffer);

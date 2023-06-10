@@ -14,13 +14,12 @@ struct VertexOut
 	float2 texcoord	: TEXCOORD;
 };
 
-cbuffer cbObject : register(b0)
+struct PerObject
 {
-	struct
-	{
-		float4x4	world;
-	} perObjectBuffer[2];
+	float4x4	world;
 };
+
+StructuredBuffer<PerObject> perObjectBuffers : register(t0);
 
 cbuffer cbCamera : register(b1)
 {
@@ -40,7 +39,7 @@ Texture2D tex : register(t3);
 SamplerState samp : register(s0);
 
 #define RS	"RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT)," \
-			"CBV(b0)," \
+			"DescriptorTable( SRV(t0, numDescriptors = 1))," \
 			"CBV(b1)," \
 			"CBV(b2)," \
 			"DescriptorTable( SRV(t3, numDescriptors = 1))," \
@@ -51,7 +50,7 @@ VertexOut vs(VertexIn vin)
 {
 	VertexOut vout;
 
-	float4 worldPos = mul(float4(vin.pos.xyz, 1.0f), perObjectBuffer[vin.instanceId].world);
+	float4 worldPos = mul(float4(vin.pos.xyz, 1.0f), perObjectBuffers[vin.instanceId].world);
 
 	vout.pos		= mul(worldPos,    viewProj);
 	vout.worldPos	= worldPos.xyz;
