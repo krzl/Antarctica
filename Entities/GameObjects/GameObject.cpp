@@ -22,7 +22,7 @@ Ref<Component> GameObject::AddComponent(const Class& clazz, const Ref<SceneCompo
 
 	if (const std::shared_ptr<SceneComponent> sceneComponent = std::dynamic_pointer_cast<SceneComponent>(it->second))
 	{
-		sceneComponent->m_parent = parent.IsValid() ? parent : m_root;
+		sceneComponent->SetParentInternal(parent.IsValid() ? parent : m_root, Ref(it->second).Cast<SceneComponent>());
 	}
 
 	if (GetRef().IsValid())

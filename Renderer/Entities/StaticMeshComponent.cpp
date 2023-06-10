@@ -28,28 +28,32 @@ namespace Renderer
 		return m_mesh->GetNodes()[nodeId].m_globalTransform;
 	}
 
-	std::vector<QueuedRenderObject> StaticMeshComponent::PrepareForRender()
+	void StaticMeshComponent::SetupRenderHandle(const uint32_t submeshId, QueuedRenderObject& renderObject)
+	{
+		renderObject.m_submesh        = &m_mesh->GetSubmesh(submeshId);
+		renderObject.m_material       = &*m_materials[submeshId];
+		renderObject.m_order          = renderObject.m_material->GetOrder();
+		renderObject.m_perObjectBuffer = GetConstantBuffer(submeshId);
+		renderObject.m_boneTransforms.clear();
+	}
+
+
+	void StaticMeshComponent::PrepareForRender(RenderQueue& renderQueue)
 	{
 		if (!m_mesh)
-			return {};
-
-		std::vector<QueuedRenderObject> renderHandles;
+			return;
 
 		for (uint32_t i = 0; i < m_mesh->GetSubmeshCount(); ++i)
 		{
 			if (m_materials.size() > i && m_materials[i])
 			{
-				std::vector<uint8_t> constantBuffer = GetConstantBuffer(i);
 
-				renderHandles.push_back(QueuedRenderObject(
-						m_mesh->GetSubmesh(i),
-						*m_materials[i],
-						std::move(constantBuffer)
-					)
-				);
+				static uint32_t id = 0;
+
+				SetupRenderHandle(i, renderQueue.emplace_back());
+
+				id = (id + 1) % 4097;
 			}
 		}
-
-		return renderHandles;
 	}
 }

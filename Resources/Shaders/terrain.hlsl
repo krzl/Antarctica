@@ -23,19 +23,20 @@ cbuffer cbCamera : register(b1)
 	float4x4	viewProj;
 };
 
-Texture2D tex1 : register(t2);
-Texture2D tex2 : register(t3);
-Texture2D tex3 : register(t4);
-Texture2D tex4 : register(t5);
+Texture2D tex1 : register(t3);
+Texture2D tex2 : register(t4);
+Texture2D tex3 : register(t5);
+Texture2D tex4 : register(t6);
 SamplerState samp : register(s0);
 
 #define RS	"RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT)," \
 			"CBV(b0)," \
 			"CBV(b1)," \
-			"DescriptorTable( SRV(t2, numDescriptors = 1))," \
+			"CBV(b2)," \
 			"DescriptorTable( SRV(t3, numDescriptors = 1))," \
 			"DescriptorTable( SRV(t4, numDescriptors = 1))," \
 			"DescriptorTable( SRV(t5, numDescriptors = 1))," \
+			"DescriptorTable( SRV(t6, numDescriptors = 1))," \
 			"StaticSampler(s0)"
 			
 [RootSignature(RS)]

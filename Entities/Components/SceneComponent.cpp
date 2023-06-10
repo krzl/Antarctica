@@ -1,6 +1,11 @@
 #include "stdafx.h"
 #include "SceneComponent.h"
 
+SceneComponent::~SceneComponent()
+{
+	RemoveFromParent();
+}
+
 Point3D SceneComponent::GetWorldPosition() const
 {
 	if (GetParent().IsValid())
@@ -97,18 +102,77 @@ void SceneComponent::SetWorldScale(const Vector3D scale)
 	}
 }
 
-Transform4D SceneComponent::GetWorldTransform() const
+const Transform4D& SceneComponent::GetWorldTransform() const
 {
-	const Vector3D worldScale = GetWorldScale();
-	return Transform4D::MakeTranslation(GetWorldPosition()) *
-		   GetWorldRotation().GetRotationMatrix() *
-		   Transform4D::MakeScale(worldScale.x, worldScale.y, worldScale.z);
+	if (m_isGlobalTransformDirty)
+	{
+		const Vector3D worldScale = GetWorldScale();
+
+		m_globalTransform = Transform4D::MakeTranslation(GetWorldPosition()) *
+							GetWorldRotation().GetRotationMatrix() *
+							Transform4D::MakeScale(worldScale.x, worldScale.y, worldScale.z);
+
+		m_isGlobalTransformDirty = false;
+	}
+
+	return m_globalTransform;
 }
 
-Transform4D SceneComponent::GetLocalTransform() const
+const Transform4D& SceneComponent::GetLocalTransform() const
 {
-	const Vector3D localScale = GetLocalScale();
-	return Transform4D::MakeTranslation(GetLocalPosition()) *
-		   GetLocalRotation().GetRotationMatrix() *
-		   Transform4D::MakeScale(localScale.x, localScale.y, localScale.z);
+	if (m_isLocalTransformDirty)
+	{
+		const Vector3D localScale = GetLocalScale();
+
+		m_localTransform = Transform4D::MakeTranslation(GetLocalPosition()) *
+						   GetLocalRotation().GetRotationMatrix() *
+						   Transform4D::MakeScale(localScale.x, localScale.y, localScale.z);
+
+		m_isLocalTransformDirty = false;
+	}
+
+	return m_localTransform;
+}
+
+void SceneComponent::RemoveFromParent()
+{
+	const Ref<SceneComponent> self = m_self.Cast<SceneComponent>();
+	if (m_parent.IsValid())
+	{
+		for (uint32_t i = 0; i < m_parent->m_children.size(); ++i)
+		{
+			if (self == m_parent->m_children[i])
+			{
+				m_parent->m_children.erase(m_parent->m_children.begin() + i);
+				return;
+			}
+		}
+	}
+}
+
+auto SceneComponent::SetParent(const Ref<SceneComponent> parent) -> void
+{
+	SetParentInternal(parent, m_self.Cast<SceneComponent>());
+}
+
+void SceneComponent::SetParentInternal(Ref<SceneComponent> parent, Ref<SceneComponent> self)
+{
+	RemoveFromParent();
+
+	m_parent = parent;
+	if (parent.IsValid())
+	{
+		parent->m_children.emplace_back(self);
+	}
+}
+
+void SceneComponent::MarkDirty()
+{
+	m_isLocalTransformDirty  = true;
+	m_isGlobalTransformDirty = true;
+
+	for (Ref<SceneComponent>& child : m_children)
+	{
+		child->MarkDirty();
+	}
 }

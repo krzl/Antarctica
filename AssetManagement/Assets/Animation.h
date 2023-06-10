@@ -33,13 +33,15 @@ struct AnimationNode
 				  std::vector<ScaleKey>&&       scaleKeys,
 				  std::vector<AnimationNode*>&& children) :
 		m_nodeName(std::move(nodeName)),
+		m_nodeNameHash(std::hash<std::string>()(m_nodeName)),
 		m_baseTransform(std::move(baseTransform)),
 		m_positionKeys(std::move(positionKeys)),
 		m_rotationKeys(std::move(rotationKeys)),
 		m_scaleKeys(std::move(scaleKeys)),
 		m_children(std::move(children)) {}
-	
+
 	std::string m_nodeName;
+	uint64_t    m_nodeNameHash;
 
 	Transform4D m_baseTransform = {};
 

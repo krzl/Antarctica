@@ -61,14 +61,14 @@ protected:
 	virtual void OnDisabled() {}
 	virtual void OnDestroy() {}
 
+	Ref<Component> m_self;
+
 private:
 
 	void Init(const Ref<GameObject> owner, const Ref<Component> self);
 
 	Ref<GameObject> m_owner;
 	const Class*    m_class;
-
-	Ref<Component> m_self;
 
 	uint32_t m_componentId = 0;
 

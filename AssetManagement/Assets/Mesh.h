@@ -8,6 +8,7 @@
 struct MeshNode
 {
 	std::string m_name;
+	uint64_t    m_nameHash;
 	int32_t     m_parentNodeId;
 	Transform4D m_globalTransform;
 	Transform4D m_localTransform;
@@ -71,7 +72,7 @@ public:
 		m_globalInverseMatrix = globalInverseMatrix;
 	}
 
-	void  SetMeshNodeData(const std::vector<MeshNode>& nodes)
+	void SetMeshNodeData(const std::vector<MeshNode>& nodes)
 	{
 		m_nodes = nodes;
 	}

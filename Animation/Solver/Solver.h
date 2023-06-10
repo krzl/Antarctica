@@ -27,15 +27,17 @@ namespace Anim
 		static std::vector<Transform4D> Interpolate(const std::vector<Transform4D>& aTransforms,
 													const std::vector<Transform4D>& bTransforms, float alpha);
 
-		std::vector<std::vector<Matrix4D>> UpdateAnimation(const std::shared_ptr<Mesh>& mesh);
-
-		[[nodiscard]] const std::vector<Transform4D>& GetNodeTransforms() const { return m_nodeTransforms; }
+		std::vector<std::vector<Matrix4D>>&                     UpdateAnimation(const std::shared_ptr<Mesh>& mesh);
+		[[nodiscard]] const std::vector<std::vector<Matrix4D>>& GetFinalMatrices() const { return m_finalMatrices; }
+		[[nodiscard]] const std::vector<Transform4D>&           GetNodeTransforms() const { return m_nodeTransforms; }
 
 	private:
 
-		std::shared_ptr<Animator>                     m_animator         = nullptr;
-		std::vector<StateMachineData>                 m_stateMachineData = {};
-		std::set<int32_t>                             m_triggerState     = {};
-		std::vector<Transform4D>                      m_nodeTransforms;
+		std::shared_ptr<Animator>     m_animator         = nullptr;
+		std::vector<StateMachineData> m_stateMachineData = {};
+		std::set<int32_t>             m_triggerState     = {};
+		std::vector<Transform4D>      m_nodeTransforms;
+
+		std::vector<std::vector<Matrix4D>> m_finalMatrices;
 	};
 }

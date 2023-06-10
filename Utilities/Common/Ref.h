@@ -89,6 +89,8 @@ public:
 		return Ref<T2>(nullptr);
 	}
 
+	friend bool operator==(const Ref& lhs, const Ref& rhs) { return lhs.m_ptr.lock() == rhs.m_ptr.lock(); }
+	friend bool operator!=(const Ref& lhs, const Ref& rhs) { return !(lhs == rhs); }
 	// Dereferencing
 
 	T* operator*()

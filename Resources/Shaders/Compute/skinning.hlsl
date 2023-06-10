@@ -27,34 +27,33 @@ void cs(uint3 groupID : SV_GroupID, uint3 tid : SV_DispatchThreadID, uint3 local
 {
 	uint w, h;
 	vertexWeights.GetDimensions(w, h);
+	
+	uint w2, h2;
+	dstBuffer.GetDimensions(w2, h2);
+	
+	uint w3, h3;
+	boneTransforms.GetDimensions(w3, h3);
+	
+	uint meshCount = w2 / w;
+	uint id = groupID.x * 64 + groupIndex;
 
-	uint id = tid.x;
+	uint vertexId = id % w;
+	uint meshId = id / (w);
 	
-	if (id >= w) return;
+	uint boneCount = w3 / meshCount;
 	
-	VertexWeights vw = vertexWeights[id];
+	VertexWeights vw = vertexWeights[vertexId];
 	
 	float3 finalPos = float3(0.0f, 0.0f, 0.0f);
 	
 	float4 inVertex = float4(0,0,0,0);
 
-	if (tid.y == 0){
-		inVertex = float4(asfloat(srcBuffer[0].Load3(id * 12)), 1.0f);
-	}
-	else if (tid.y == 1){
-		inVertex = float4(asfloat(srcBuffer[1].Load3(id * 12)), 1.0f);
-	}
-	else if (tid.y == 2){
-		inVertex = float4(asfloat(srcBuffer[2].Load3(id * 12)), 1.0f);
-	}
-	else if (tid.y == 3){
-		inVertex = float4(asfloat(srcBuffer[3].Load3(id * 12)), 1.0f);
-	}
+	inVertex = float4(asfloat(srcBuffer[0].Load3(vertexId * 12)), 1.0f);
 	
-	finalPos += mul(inVertex, boneTransforms[vw.boneWeights[0].boneId]).xyz * vw.boneWeights[0].weight;
-	finalPos += mul(inVertex, boneTransforms[vw.boneWeights[1].boneId]).xyz * vw.boneWeights[1].weight;
-	finalPos += mul(inVertex, boneTransforms[vw.boneWeights[2].boneId]).xyz * vw.boneWeights[2].weight;
-	finalPos += mul(inVertex, boneTransforms[vw.boneWeights[3].boneId]).xyz * vw.boneWeights[3].weight;
+	finalPos += mul(inVertex, boneTransforms[meshId * boneCount + vw.boneWeights[0].boneId]).xyz * vw.boneWeights[0].weight;
+	finalPos += mul(inVertex, boneTransforms[meshId * boneCount + vw.boneWeights[1].boneId]).xyz * vw.boneWeights[1].weight;
+	finalPos += mul(inVertex, boneTransforms[meshId * boneCount + vw.boneWeights[2].boneId]).xyz * vw.boneWeights[2].weight;
+	finalPos += mul(inVertex, boneTransforms[meshId * boneCount + vw.boneWeights[3].boneId]).xyz * vw.boneWeights[3].weight;
 	
-	dstBuffer[tid.y * w + id] = finalPos;
+	dstBuffer[id] = finalPos;
 }

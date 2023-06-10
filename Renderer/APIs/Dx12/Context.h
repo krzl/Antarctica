@@ -14,11 +14,12 @@ namespace Renderer::Dx12
 	{
 		IShader*                      m_shader;
 		ISubmesh*                     m_submesh;
-		ScratchBufferHandle           m_constantBuffer;
+		ScratchBufferHandle           m_perObjectBuffer;
+		ScratchBufferHandle           m_perCallBuffer;
 		std::map<uint32_t, ITexture*> m_textures;
 		uint32_t                      m_instanceCount;
-
-		IBuffer*                              m_skinningBuffer;
+		
+		std::shared_ptr<DescriptorHeapHandle> m_skinningBufferHandle;
 		std::shared_ptr<DescriptorHeapHandle> m_boneTransforms;
 		std::shared_ptr<DescriptorHeapHandle> m_weightsBuffer;
 	};
@@ -36,7 +37,7 @@ namespace Renderer::Dx12
 
 		void WaitForFrameCompletion() override;
 
-		void CreateRenderQueue(std::multiset<QueuedRenderObject>& objectsToRender) override;
+		void CreateRenderQueue(RenderQueue& objectsToRender) override;
 
 		void        SetupCamera(const Renderer::CameraData& camera) const override;
 		void        SetupRenderTarget(const CameraData& camera) const override;

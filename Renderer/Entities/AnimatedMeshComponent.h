@@ -10,6 +10,7 @@ namespace Renderer
 {
 	class AnimatedMeshComponent : public StaticMeshComponent
 	{
+
 	public:
 
 		void OnEnabled() override;
@@ -29,19 +30,16 @@ namespace Renderer
 	protected:
 
 		std::shared_ptr<Anim::Animator> m_animator;
-		std::vector<DynamicBuffer>      m_skinningBuffers;
 
 		Transform4D GetAttachedNodeTransform(int32_t nodeId, bool ignoreAttachmentRotation) override;
-
+		void SetupRenderHandle(uint32_t submeshId, QueuedRenderObject& renderObject) override;
+		void PrepareForRender(RenderQueue& renderQueue) override;
+		
 	private:
 
 		Anim::Solver m_animationSolver;
 
 		std::vector<Transform4D> m_animatedTransforms;
-
-	protected:
-
-		std::vector<QueuedRenderObject> PrepareForRender() override;
 
 		DEFINE_CLASS()
 	};

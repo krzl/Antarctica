@@ -12,6 +12,7 @@ struct Submesh;
 
 namespace Renderer::Dx12
 {
+	struct RenderObject;
 	struct DescriptorHeapHandle;
 	class Shader;
 
@@ -40,7 +41,7 @@ namespace Renderer::Dx12
 
 		~Submesh();
 
-		void Bind(const Shader* shader, const IBuffer* skinningBuffer) const;
+		void Bind(const RenderObject& renderObject) const;
 
 		const D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferViewForAttribute(MeshAttribute attribute) const;
 

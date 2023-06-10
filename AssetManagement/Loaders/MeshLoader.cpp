@@ -17,16 +17,21 @@ std::vector<Vector3D> CastToVector(const uint32_t count, const aiVector3D& input
 	return std::vector<Vector3D>(inputArray, inputArray + count);
 }
 
-static void ProcessMeshNodeData(Mesh& mesh, const aiNode* node, const int32_t parentNodeId, std::vector<MeshNode>& nodes, Transform4D globalTransform)
+static void ProcessMeshNodeData(Mesh&                  mesh, const aiNode* node, const int32_t parentNodeId,
+								std::vector<MeshNode>& nodes, Transform4D  globalTransform)
 {
 	const uint32_t index = static_cast<uint32_t>(nodes.size());
 
 	const Transform4D localTransform = AIMatrixCast(node->mTransformation);
-	globalTransform = globalTransform * localTransform;
+	globalTransform                  = globalTransform * localTransform;
+
+	std::string    name     = node->mName.C_Str();
+	const uint64_t nameHash = std::hash<std::string>()(name);
 
 	const MeshNode& meshNode = nodes.emplace_back(MeshNode
 		{
-			node->mName.C_Str(),
+			std::move(name),
+			nameHash,
 			parentNodeId,
 			globalTransform,
 			localTransform
@@ -74,7 +79,7 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 	for (uint32_t meshId = 0; meshId < scene->mNumMeshes; ++meshId)
 	{
 		aiMesh* submesh = scene->mMeshes[meshId];
-		
+
 		std::vector<uint32_t> indices(submesh->mNumFaces * 3);
 
 		for (uint32_t i = 0; i < submesh->mNumFaces; i++)
@@ -134,6 +139,7 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 
 				bone.m_skeleton     = &skeleton;
 				bone.m_boneName     = aiBone->mName.C_Str();
+				bone.m_boneNameHash = std::hash<std::string>()(bone.m_boneName);
 				bone.m_offsetMatrix = AIMatrixCast(aiBone->mOffsetMatrix);
 
 				for (uint32_t weightId = 0; weightId < aiBone->mNumWeights; ++weightId)

@@ -18,7 +18,7 @@ namespace Renderer
 			return m_byteSize != 0;
 		}
 
-		[[nodiscard]] uint32_t    GetByteSize() const { return m_byteSize; }
+		[[nodiscard]] uint32_t GetByteSize() const { return m_byteSize; }
 
 	private:
 

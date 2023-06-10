@@ -74,6 +74,7 @@ void Application::Run()
 		Renderer::CameraComponent::SetAspectRatio(GetWindow().GetAspectRatio());
 		m_renderSystem.Render();
 	}
+		
 	m_renderSystem.Cleanup();
 }
 

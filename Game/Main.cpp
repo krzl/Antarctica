@@ -33,9 +33,9 @@ void main()
 			actor->SetScale(Vector3D(1.0f, 1.0f, 1.0f));
 			actor->GetStaticMeshComponent()->SetMesh(mesh);
 
-			for (uint32_t i = 0; i < 10; i++)
+			for (uint32_t i = 0; i < 32; i++)
 			{
-				for (uint32_t j = 0; j < 10; j++)
+				for (uint32_t j = 0; j < 32; j++)
 				{
 					Ref peasant = Application::Get().GetWorld().Spawn<Peasant>();
 					peasant->SetPosition(Point3D(i/2.0f, j/2.0f, 2.0f));
@@ -56,7 +56,7 @@ void main()
 
 			
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>();
-			camera->SetPosition(Point3D(0, 0, -15));
+			camera->SetPosition(Point3D(0, 0, -20));
 			camera->SetRotation(70.0f, 0.0f, 0.0f);
 		}
 	}, false);

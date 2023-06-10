@@ -17,8 +17,9 @@ struct VertexWeights
 struct Bone
 {
 	std::string m_boneName;
+	uint64_t    m_boneNameHash;
 	Skeleton*   m_skeleton = nullptr;
-	Matrix4D m_offsetMatrix;
+	Matrix4D    m_offsetMatrix;
 };
 
 struct Skeleton

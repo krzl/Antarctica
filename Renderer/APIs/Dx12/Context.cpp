@@ -9,9 +9,7 @@
 #include "RenderObject.h"
 #include "Submesh.h"
 #include "Texture.h"
-#include "Assets/SubmeshData.h"
 #include "Buffers/ConstantBuffer.h"
-#include "Shaders/ComputeShader.h"
 #include "Shaders/Shader.h"
 
 namespace Renderer::Dx12
@@ -271,138 +269,6 @@ namespace Renderer::Dx12
 		DescriptorHeap::OnFrameStart();
 	}
 
-	void Dx12Context::CreateRenderQueue(std::multiset<QueuedRenderObject>& objectsToRender)
-	{
-		m_renderQueue.clear();
-		m_renderQueue.reserve(objectsToRender.size());
-
-		bool foundAnyMeshToSkin = false;
-
-		std::map<const Skeleton*, std::shared_ptr<DescriptorHeapHandle>> weightBufferHandles;
-
-		std::vector<uint8_t> accumulatedConstantBuffers;
-
-		const QueuedRenderObject* previousQueuedObject = nullptr;
-		uint32_t                  instanceCount        = 1;
-
-		for (const QueuedRenderObject& queuedObject : objectsToRender)
-		{
-			if (previousQueuedObject)
-			{
-				if (previousQueuedObject->m_submesh == queuedObject.m_submesh &&
-					//previousQueuedObject->m_material == queuedObject.m_material &&
-					previousQueuedObject->m_boneTransforms.size() == 0)
-				{
-					accumulatedConstantBuffers.insert(accumulatedConstantBuffers.end(),
-													  queuedObject.m_constantBuffer.begin(),
-													  queuedObject.m_constantBuffer.end());
-
-					++instanceCount;
-					continue;
-				}
-				else
-				{
-					RenderObject* lastRenderObject     = &m_renderQueue[m_renderQueue.size() - 1];
-					lastRenderObject->m_constantBuffer = GetScratchBuffer().CreateHandle(
-						(uint32_t) accumulatedConstantBuffers.size(),
-						accumulatedConstantBuffers.data());
-					accumulatedConstantBuffers.clear();
-
-					lastRenderObject->m_instanceCount = instanceCount;
-					instanceCount                     = 1;
-				}
-			}
-
-			previousQueuedObject = &queuedObject;
-
-			RenderObject& renderObject = m_renderQueue.emplace_back();
-
-			std::shared_ptr<::Shader> shader = queuedObject.m_material->GetShader();
-			if (shader->GetNativeObject() == nullptr)
-			{
-				shader->SetNativeObject(Shader::Create(shader));
-			}
-			renderObject.m_shader = shader->GetNativeObject();
-
-			UpdateMaterial(queuedObject.m_material, renderObject);
-
-			accumulatedConstantBuffers.insert(accumulatedConstantBuffers.end(),
-											  queuedObject.m_constantBuffer.begin(),
-											  queuedObject.m_constantBuffer.end());
-
-			if (queuedObject.m_submesh->GetNativeObject() == nullptr)
-			{
-				queuedObject.m_submesh->SetNativeObject(Submesh::Create(queuedObject.m_submesh));
-			}
-			renderObject.m_submesh = queuedObject.m_submesh->GetNativeObject();
-
-			if (queuedObject.m_boneTransforms.size() != 0)
-			{
-				if (!foundAnyMeshToSkin)
-				{
-					foundAnyMeshToSkin = true;
-					if (m_skinningShader == nullptr)
-					{
-						m_skinningShader = AssetManager::GetAsset<::ComputeShader>(
-							"../Resources/Shaders/Compute/skinning.hlsl");
-						m_skinningShader->SetNativeObject(IComputeShader::Create(m_skinningShader));
-					}
-				}
-
-				const Skeleton&   skeleton     = queuedObject.m_submesh->GetSkeleton();
-				const MeshBuffer& vertexBuffer = queuedObject.m_submesh->GetVertexBuffer();
-
-				auto it = weightBufferHandles.find(&skeleton);
-				if (it != weightBufferHandles.end())
-				{
-					renderObject.m_weightsBuffer = it->second;
-				}
-				else
-				{
-					const std::shared_ptr<DescriptorHeapHandle> weightBufferHandle = GetScratchBuffer().CreateSRV(
-						sizeof(VertexWeights),
-						(uint32_t) skeleton.m_vertexWeights.size(), skeleton.m_vertexWeights.data());
-					renderObject.m_weightsBuffer   = weightBufferHandle;
-					weightBufferHandles[&skeleton] = weightBufferHandle;
-				}
-
-				if (!queuedObject.m_skinningBuffer->IsInitialized())
-				{
-					queuedObject.m_skinningBuffer->InitUAV(
-						vertexBuffer.m_elementCount * renderObject.m_submesh->GetSkinnedAttributeCount(),
-						sizeof(float) * 3);
-				}
-				else
-				{
-					const CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-						queuedObject.m_skinningBuffer->GetCurrentBuffer()->GetBuffer().Get(),
-						D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
-						D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-				}
-
-				renderObject.m_skinningBuffer = queuedObject.m_skinningBuffer->GetCurrentBuffer();
-
-				renderObject.m_boneTransforms =
-					GetScratchBuffer().CreateSRV(sizeof(float) * 16,
-												 (uint32_t) skeleton.m_bones.size(),
-												 queuedObject.m_boneTransforms.data());
-			}
-		}
-
-		if (!m_renderQueue.empty())
-		{
-			RenderObject* lastRenderObject = &m_renderQueue[m_renderQueue.size() - 1];
-			lastRenderObject->m_constantBuffer = GetScratchBuffer().CreateHandle(
-				(uint32_t)accumulatedConstantBuffers.size(),
-				accumulatedConstantBuffers.data());
-			accumulatedConstantBuffers.clear();
-
-			lastRenderObject->m_instanceCount = instanceCount;
-		}
-		
-		m_scratchBuffer.SubmitBuffers();
-	}
-
 	void Dx12Context::UpdateMaterial(const Material* material, RenderObject& renderObject)
 	{
 		const ShaderDescriptor& descriptor = material->GetShader()->GetNativeObject()->GetShaderDescriptor();
@@ -465,12 +331,20 @@ namespace Renderer::Dx12
 			}
 
 			m_commandList->SetGraphicsRootConstantBufferView(
-				0, GetScratchBuffer().GetGpuPointer(renderObject.m_constantBuffer));
+				0, GetScratchBuffer().GetGpuPointer(renderObject.m_perObjectBuffer));
 			camera.m_constantBuffer->UpdateAndGetCurrentBuffer()->Bind(1); //TODO: bind only when it wasn't bound before
+			m_commandList->SetGraphicsRootConstantBufferView(
+				2, GetScratchBuffer().GetGpuPointer(renderObject.m_perCallBuffer));
 
-			renderObject.m_submesh->Bind(renderObject.m_shader, renderObject.m_skinningBuffer);
+			renderObject.m_submesh->Bind(renderObject);
 
-			m_commandList->DrawIndexedInstanced(renderObject.m_submesh->GetIndexCount(), renderObject.m_instanceCount,
+			if (renderObject.m_skinningBufferHandle)
+			{
+				m_commandList->SetGraphicsRootDescriptorTable(3, renderObject.m_skinningBufferHandle->GetGPUHandle());
+			}
+
+			m_commandList->DrawIndexedInstanced(renderObject.m_submesh->GetIndexCount(),
+												renderObject.m_instanceCount,
 												0, 0, 0);
 		}
 	}
@@ -502,7 +376,7 @@ namespace Renderer::Dx12
 	}
 
 	std::shared_ptr<DescriptorHeapHandle> Dx12Context::CreateHeapHandle(
-		const uint32_t size, D3D12_DESCRIPTOR_HEAP_FLAGS flags)
+		const uint32_t size, const D3D12_DESCRIPTOR_HEAP_FLAGS flags)
 	{
 		for (const std::shared_ptr<DescriptorHeap>& heap : m_srvDescriptorHeaps)
 		{

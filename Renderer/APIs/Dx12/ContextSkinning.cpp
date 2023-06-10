@@ -13,7 +13,7 @@ namespace Renderer::Dx12
 		bool isFirstObject = true;
 		for (const RenderObject& renderObject : m_renderQueue)
 		{
-			if (renderObject.m_skinningBuffer)
+			if (renderObject.m_skinningBufferHandle)
 			{
 				if (isFirstObject)
 				{
@@ -25,12 +25,12 @@ namespace Renderer::Dx12
 				m_commandList->SetComputeRootDescriptorTable(1, renderObject.m_boneTransforms->GetGPUHandle());
 
 				DescriptorHeapHandle& heapHandle = *renderObject.m_submesh->GetSkinningHeapHandle();
-				GetCommandList()->SetComputeRootDescriptorTable(2, heapHandle.GetGPUHandle());
+				m_commandList->SetComputeRootDescriptorTable(2, heapHandle.GetGPUHandle());
 
-				renderObject.m_skinningBuffer->BindCompute(3);
-
-				m_commandList->Dispatch(ceil((float) renderObject.m_submesh->GetVertexCount() / 64),
-										renderObject.m_submesh->GetSkinnedAttributeCount(), 1);
+				m_commandList->SetComputeRootDescriptorTable(3, renderObject.m_skinningBufferHandle->GetGPUHandle());
+				
+				m_commandList->Dispatch(ceil((float) renderObject.m_submesh->GetVertexCount() * renderObject.m_instanceCount / 64),
+										1, 1);
 			}
 		}
 	}

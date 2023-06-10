@@ -4,6 +4,7 @@
 #include "APIs/IContext.h"
 #include "Entities/CameraComponent.h"
 #include "Entities/RenderComponent.h"
+#include "Time/Timer.h"
 
 namespace Renderer
 {
@@ -32,9 +33,9 @@ namespace Renderer
 
 	void RenderSystem::Render()
 	{
-		std::multiset<QueuedRenderObject> objectsToRender = RenderComponent::GetObjectsToRender();
-		std::priority_queue<CameraData>   cameras         = CameraComponent::GetAllCameraData();
-
+		RenderQueue                     objectsToRender = RenderComponent::GetObjectsToRender();
+		std::priority_queue<CameraData> cameras         = CameraComponent::GetAllCameraData();
+		
 		m_context->WaitForFrameCompletion();
 
 		m_context->CreateRenderQueue(objectsToRender);

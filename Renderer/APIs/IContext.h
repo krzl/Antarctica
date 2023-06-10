@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "RenderObject.h"
+#include "Entities/RenderComponent.h"
 
 class ComputeShader;
 class Settings;
@@ -32,7 +33,7 @@ namespace Renderer
 
 		virtual void WaitForFrameCompletion() = 0;
 
-		virtual void CreateRenderQueue(std::multiset<QueuedRenderObject>& objectsToRender) = 0;
+		virtual void CreateRenderQueue(RenderQueue& objectsToRender) = 0;
 
 		virtual void UpdateSkinning() = 0;
 		virtual void SetupCamera(const CameraData& camera) const = 0;

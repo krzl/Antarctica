@@ -34,47 +34,36 @@ namespace Renderer
 		return transform;
 	}
 
-	std::vector<QueuedRenderObject> AnimatedMeshComponent::PrepareForRender()
+	void AnimatedMeshComponent::SetupRenderHandle(const uint32_t submeshId, QueuedRenderObject& renderObject) 
 	{
-		std::vector<std::vector<Matrix4D>> boneTransforms;
+		StaticMeshComponent::SetupRenderHandle(submeshId, renderObject);
+		
+		const Submesh&      submesh    = m_mesh->GetSubmesh(submeshId);
+		const uint32_t      bonesCount = static_cast<uint32_t>(m_animationSolver.GetFinalMatrices()[submeshId].size());
+
+		if (submesh.GetSkeleton().m_bones.size() == 0 || bonesCount == 0)
+		{
+			return;
+		}
+
+		renderObject.m_boneTransforms.resize(bonesCount);
+
+		for (uint32_t j = 0; j < bonesCount; ++j)
+		{
+			renderObject.m_boneTransforms[j] = m_animationSolver.GetFinalMatrices()[submeshId][j] * renderObject.m_perObjectBuffer.m_transform;
+		}
+
+		renderObject.m_perObjectBuffer.m_transform = Transform4D::identity;
+	}
+
+	void AnimatedMeshComponent::PrepareForRender(RenderQueue& renderQueue)
+	{
 		if (m_mesh && m_animator)
 		{
-			boneTransforms = m_animationSolver.UpdateAnimation(m_mesh);
+			m_animationSolver.UpdateAnimation(m_mesh);
 		}
 
-		std::vector<QueuedRenderObject> handles = StaticMeshComponent::PrepareForRender();
-
-		if (handles.size() == 0 || !m_mesh || !m_animator)
-		{
-			return handles;
-		}
-
-		uint32_t handleId = 0;
-
-		for (uint32_t i = 0; i < m_mesh->GetSubmeshCount(); ++i)
-		{
-			const Submesh& submesh    = m_mesh->GetSubmesh(i);
-			const uint32_t bonesCount = static_cast<uint32_t>(boneTransforms[i].size());
-
-			if (submesh.GetSkeleton().m_bones.size() == 0)
-			{
-				continue;
-			}
-			
-			handles[i].m_skinningBuffer = &m_skinningBuffers[i];
-
-			if (bonesCount != 0)
-			{
-				handles[i].m_boneTransforms = std::move(boneTransforms[i]);
-			}
-
-			if (handles[i].m_submesh == &submesh)
-			{
-				handleId++;
-			}
-		}
-
-		return handles;
+		StaticMeshComponent::PrepareForRender(renderQueue);
 	}
 
 	void AnimatedMeshComponent::SetMesh(const std::shared_ptr<Mesh>& mesh)
@@ -89,8 +78,6 @@ namespace Renderer
 		{
 			m_animatedTransforms[i] = meshNodes[i].m_globalTransform;
 		}
-
-		m_skinningBuffers.resize(m_mesh->GetSubmeshCount());
 	}
 
 	void AnimatedMeshComponent::SetAnimator(const std::shared_ptr<Anim::Animator> animator)

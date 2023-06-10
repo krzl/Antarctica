@@ -13,6 +13,8 @@ public:
 	SceneComponent() :
 		m_parent(Ref<SceneComponent>()) { }
 
+	~SceneComponent() override;
+
 	Point3D GetLocalPosition() const
 	{
 		return m_position;
@@ -21,6 +23,7 @@ public:
 	void SetLocalPosition(const Point3D position)
 	{
 		m_position = position;
+		MarkDirty();
 	}
 
 	Point3D GetWorldPosition() const;
@@ -34,6 +37,7 @@ public:
 	void SetLocalRotation(const Quaternion rotation)
 	{
 		m_rotation = rotation;
+		MarkDirty();
 	}
 
 	void SetLocalRotation(const Vector3D axis);
@@ -52,18 +56,22 @@ public:
 	void SetLocalScale(const Vector3D scale)
 	{
 		m_scale = scale;
+		MarkDirty();
 	}
 
 	Vector3D GetWorldScale() const;
 	void     SetWorldScale(const Vector3D scale);
 
-	Transform4D GetWorldTransform() const;
-	Transform4D GetLocalTransform() const;
+	const Transform4D& GetWorldTransform() const;
+	const Transform4D& GetLocalTransform() const;
+	void               RemoveFromParent();
 
 	Ref<SceneComponent> GetParent() const
 	{
 		return m_parent;
 	}
+
+	void SetParent(Ref<SceneComponent> parent);
 
 protected:
 
@@ -71,7 +79,19 @@ protected:
 	Quaternion m_rotation = Quaternion::identity;
 	Vector3D   m_scale    = { 1.0f, 1.0f, 1.0f };
 
-	Ref<SceneComponent> m_parent;
+private:
+
+	void MarkDirty();
+	void SetParentInternal(Ref<SceneComponent> parent, Ref<SceneComponent> self);
+
+	mutable bool m_isLocalTransformDirty  = true;
+	mutable bool m_isGlobalTransformDirty = true;
+
+	mutable Transform4D m_localTransform  = Transform4D::identity;
+	mutable Transform4D m_globalTransform = Transform4D::identity;
+
+	Ref<SceneComponent>              m_parent;
+	std::vector<Ref<SceneComponent>> m_children;
 };
 
 CREATE_CLASS(SceneComponent)

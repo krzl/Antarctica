@@ -19,17 +19,20 @@ namespace Renderer::Dx12
 
 		D3D12_GPU_VIRTUAL_ADDRESS GetGpuPointer(const ScratchBufferHandle& scratchBufferHandle) const;
 
+		std::shared_ptr<DescriptorHeapHandle> CreateUAV(const ScratchBufferHandle& handle, uint32_t elementSize);
+
 	private:
 
-		uint32_t            CreateNewBuffer();
-		ScratchBufferHandle Allocate(uint32_t size);
+		uint32_t            CreateNewBuffer(bool bIsUav);
+		bool                IsUavBuffer(uint32_t i) const;
+		ScratchBufferHandle Allocate(const uint32_t size, bool bIsUav);
 		void                SetData(const void* data, uint32_t bufferId, uint32_t offset, uint32_t size) const;
 
 		void SubmitBuffers() const;
 
 		void Reset();
 
-		static constexpr uint32_t BUFFER_SIZE = 4 * 1024 * 1024;
+		static constexpr uint32_t BUFFER_SIZE = 64 * 1024 * 1024;
 
 		std::vector<ComPtr<ID3D12Resource>> m_buffers;
 		std::vector<ComPtr<ID3D12Resource>> m_uploadBuffers;

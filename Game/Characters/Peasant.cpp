@@ -75,10 +75,14 @@ Peasant::Peasant()
 	std::shared_ptr<Shader> shader   = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic.hlsl");
 	const auto              material = std::make_shared<Material>(shader);
 	material->SetTexture("tex", texture);
+
+	std::shared_ptr<Shader> shaderSkin = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic_skinned.hlsl");
+	const auto              materialSkin = std::make_shared<Material>(shaderSkin);
+	materialSkin->SetTexture("tex", texture);
 	m_animatedMeshComponent->SetMaterial(material);
 	m_animatedMeshComponent->SetMaterial(material, 1);
 	m_animatedMeshComponent->SetMaterial(material, 2);
-	m_animatedMeshComponent->SetMaterial(material, 3);
+	m_animatedMeshComponent->SetMaterial(materialSkin, 3);
 
 	InputSystem::GetInstance()->OnLeftMouseButtonPressed.AddListener([this]()
 	{

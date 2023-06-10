@@ -1,9 +1,9 @@
 struct VertexIn
 {
 	float3 pos		: POSITION0;
-    float3 normal	: NORMAL;
 	float2 texcoord	: TEXCOORD0;
 	uint instanceId	: SV_InstanceID;
+	uint vertexId	: SV_VertexID;
 };
 
 struct VertexOut
@@ -35,14 +35,17 @@ cbuffer cbCall : register(b2)
 	uint padding;
 };
 
-Texture2D tex : register(t3);
+StructuredBuffer<float3> positions : register(t3);
+
+Texture2D tex : register(t4);
 SamplerState samp : register(s0);
 
 #define RS	"RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT)," \
 			"CBV(b0)," \
 			"CBV(b1)," \
 			"CBV(b2)," \
-			"DescriptorTable( SRV(t3, numDescriptors = 1))," \
+			"DescriptorTable(SRV(t3, numDescriptors = 1))," \
+			"DescriptorTable(SRV(t4, numDescriptors = 1))," \
 			"StaticSampler(s0)"
 			
 [RootSignature(RS)]
@@ -50,11 +53,9 @@ VertexOut vs(VertexIn vin)
 {
 	VertexOut vout;
 
-	float4 worldPos = mul(float4(vin.pos.xyz, 1.0f), perObjectBuffer[vin.instanceId].world);
-
-	vout.pos		= mul(worldPos,    viewProj);
-	vout.worldPos	= worldPos.xyz;
-    vout.normal		= vin.normal;
+	vout.worldPos	= positions[vin.instanceId * vertexCount + vin.vertexId];
+	vout.pos		= mul(float4(vout.worldPos, 1.0f), viewProj);
+    vout.normal		= vin.pos;
 	vout.texcoord	= float2(vin.texcoord.x, 1.0f - vin.texcoord.y);
     
     return vout;
