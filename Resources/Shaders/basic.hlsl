@@ -27,6 +27,7 @@ cbuffer cbCamera : register(b1)
 	float4x4	viewProj;
 };
 
+
 cbuffer cbCall : register(b2)
 {
 	uint instanceCount;

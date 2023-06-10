@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <RenderObject.h>
 
 #include "Buffers/Types/PerObjectBuffer.h"
@@ -7,7 +8,7 @@
 
 namespace Renderer
 {
-	typedef std::vector<QueuedRenderObject> RenderQueue;
+	typedef std::vector<QueuedRenderObject*> RenderQueue;
 	
 	class RenderComponent : public SceneComponent
 	{
@@ -19,6 +20,8 @@ namespace Renderer
 		void OnDisabled() override;
 
 	protected:
+
+		static std::mutex renderQueueMutex;
 
 		virtual Transform4D GetAttachmentTransform(uint32_t id);
 		PerObjectBuffer     GetConstantBuffer(uint32_t id);

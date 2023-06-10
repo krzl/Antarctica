@@ -14,7 +14,6 @@ StructuredBuffer<float4x4> boneTransforms : register(t1);
 ByteAddressBuffer srcBuffer[4] : register(t2);
 RWStructuredBuffer<float3> dstBuffer : register(u0);
 
-
 #define RS	"RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT)," \
 			"DescriptorTable(SRV(t0, numDescriptors = 1))," \
 			"DescriptorTable(SRV(t1, numDescriptors = 1))," \

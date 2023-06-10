@@ -22,34 +22,33 @@ namespace Renderer::Dx12
 
 		std::vector<PerObjectBuffer> accumulatedConstantBuffers;
 		std::vector<uint8_t>         accumulatedBoneTransforms;
-		accumulatedBoneTransforms.clear();
 
 		const ::Submesh* previousSubmesh    = nullptr;
 		uint32_t         previousBonesCount = 0;
 
 		uint32_t instanceCount = 1;
 
-		for (const QueuedRenderObject& queuedObject : objectsToRender)
+		for (const QueuedRenderObject* queuedObject : objectsToRender)
 		{
 			if (previousSubmesh)
 			{
-				const bool isLastElement        = (objectsToRender.end() - 1)._Ptr == &queuedObject;
-				const bool canBatchWithPrevious = previousSubmesh == queuedObject.m_submesh &&
-												  //previousQueuedObject->m_material == queuedObject.m_material &&
-												  previousBonesCount == queuedObject.m_boneTransforms.size();
+				const bool isLastElement        = *(objectsToRender.end() - 1)._Ptr == queuedObject;
+				const bool canBatchWithPrevious = previousSubmesh == queuedObject->m_submesh &&
+												  //previousQueuedObject->m_material == queuedObject->m_material &&
+												  previousBonesCount == queuedObject->m_boneTransforms.size() && instanceCount < 1024;
 
 				if (canBatchWithPrevious)
 				{
-					accumulatedConstantBuffers.push_back(queuedObject.m_perObjectBuffer);
+					accumulatedConstantBuffers.push_back(queuedObject->m_perObjectBuffer);
 
-					if (queuedObject.m_boneTransforms.size() != 0)
+					if (queuedObject->m_boneTransforms.size() != 0)
 					{
 						accumulatedBoneTransforms.resize(
-							(instanceCount + 1) * queuedObject.m_boneTransforms.size() * sizeof(Matrix4D));
+							(instanceCount + 1) * queuedObject->m_boneTransforms.size() * sizeof(Matrix4D));
 						memcpy(
-							accumulatedBoneTransforms.data() + instanceCount * queuedObject.m_boneTransforms.size() *
-							sizeof(Matrix4D), queuedObject.m_boneTransforms.data(),
-							queuedObject.m_boneTransforms.size() * sizeof(Matrix4D));
+							accumulatedBoneTransforms.data() + instanceCount * queuedObject->m_boneTransforms.size() *
+							sizeof(Matrix4D), queuedObject->m_boneTransforms.data(),
+							queuedObject->m_boneTransforms.size() * sizeof(Matrix4D));
 					}
 
 
@@ -91,6 +90,7 @@ namespace Renderer::Dx12
 						sizeof(float) * 16,
 						(uint32_t) previousSubmesh->GetSkeleton().m_bones.size() * instanceCount,
 						accumulatedBoneTransforms.data());
+					accumulatedBoneTransforms.clear();
 				}
 
 				lastRenderObject->m_instanceCount = instanceCount;
@@ -102,29 +102,29 @@ namespace Renderer::Dx12
 				}
 			}
 
-			previousSubmesh    = queuedObject.m_submesh;
-			previousBonesCount = (uint32_t) queuedObject.m_boneTransforms.size();
+			previousSubmesh    = queuedObject->m_submesh;
+			previousBonesCount = (uint32_t) queuedObject->m_boneTransforms.size();
 
 			RenderObject& renderObject = m_renderQueue.emplace_back();
 
-			std::shared_ptr<::Shader> shader = queuedObject.m_material->GetShader();
+			std::shared_ptr<::Shader> shader = queuedObject->m_material->GetShader();
 			if (shader->GetNativeObject() == nullptr)
 			{
 				shader->SetNativeObject(Shader::Create(shader));
 			}
 			renderObject.m_shader = shader->GetNativeObject();
 
-			UpdateMaterial(queuedObject.m_material, renderObject);
+			UpdateMaterial(queuedObject->m_material, renderObject);
 
-			accumulatedConstantBuffers.push_back(queuedObject.m_perObjectBuffer);
+			accumulatedConstantBuffers.push_back(queuedObject->m_perObjectBuffer);
 
-			if (queuedObject.m_submesh->GetNativeObject() == nullptr)
+			if (queuedObject->m_submesh->GetNativeObject() == nullptr)
 			{
-				queuedObject.m_submesh->SetNativeObject(Submesh::Create(queuedObject.m_submesh));
+				queuedObject->m_submesh->SetNativeObject(Submesh::Create(queuedObject->m_submesh));
 			}
-			renderObject.m_submesh = queuedObject.m_submesh->GetNativeObject();
+			renderObject.m_submesh = queuedObject->m_submesh->GetNativeObject();
 
-			if (queuedObject.m_boneTransforms.size() != 0)
+			if (queuedObject->m_boneTransforms.size() != 0)
 			{
 				if (!foundAnyMeshToSkin)
 				{
@@ -137,7 +137,7 @@ namespace Renderer::Dx12
 					}
 				}
 
-				const Skeleton& skeleton = queuedObject.m_submesh->GetSkeleton();
+				const Skeleton& skeleton = queuedObject->m_submesh->GetSkeleton();
 
 				auto it = weightBufferHandles.find(&skeleton);
 				if (it != weightBufferHandles.end())
@@ -153,10 +153,10 @@ namespace Renderer::Dx12
 					weightBufferHandles[&skeleton] = weightBufferHandle;
 				}
 
-				accumulatedBoneTransforms.resize(queuedObject.m_boneTransforms.size() * sizeof(Matrix4D));
+				accumulatedBoneTransforms.resize(queuedObject->m_boneTransforms.size() * sizeof(Matrix4D));
 				memcpy(accumulatedBoneTransforms.data(),
-					   queuedObject.m_boneTransforms.data(),
-					   queuedObject.m_boneTransforms.size() * sizeof(Matrix4D));
+					   queuedObject->m_boneTransforms.data(),
+					   queuedObject->m_boneTransforms.size() * sizeof(Matrix4D));
 			}
 		}
 

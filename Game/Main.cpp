@@ -3,7 +3,6 @@
 
 #include <AssetManager.h>
 #include <Core/Application.h>
-#include <Entities/Camera.h>
 #include <Entities/StaticMesh.h>
 
 #include "Camera/RTSCamera.h"
@@ -24,8 +23,8 @@ void main()
 	{
 		{
 			constexpr TerrainGenerator::SpawnParameters params;
-			const std::shared_ptr<Terrain>          terrain = TerrainGenerator::GenerateTerrain(params);
-			const std::shared_ptr<Mesh>             mesh    = terrain->ConstructMesh();
+			const std::shared_ptr<Terrain>              terrain = TerrainGenerator::GenerateTerrain(params);
+			const std::shared_ptr<Mesh>                 mesh    = terrain->ConstructMesh();
 
 			Ref<Renderer::StaticMesh> actor = Application::Get().GetWorld().Spawn<Renderer::StaticMesh>();
 			actor->SetPosition(Point3D(0.0, 0.0f, 0.0f));
@@ -38,23 +37,23 @@ void main()
 				for (uint32_t j = 0; j < 32; j++)
 				{
 					Ref peasant = Application::Get().GetWorld().Spawn<Peasant>();
-					peasant->SetPosition(Point3D(i/2.0f, j/2.0f, 2.0f));
+					peasant->SetPosition(Point3D(i / 2.0f, j / 2.0f, 2.0f));
 				}
 			}
-			
+
 			const std::shared_ptr<Texture> ground = AssetManager::GetAsset<Texture>(
 				"../Resources/Textures/ground.png");
 
 			const std::shared_ptr<Texture> rock = AssetManager::GetAsset<Texture>(
 				"../Resources/Textures/rock.png");
 
-			std::shared_ptr<Shader> terrainShader   = AssetManager::GetAsset<Shader>("../Resources/Shaders/terrain.hlsl");
-			const auto              material = std::make_shared<Material>(terrainShader);
+			std::shared_ptr<Shader> terrainShader = AssetManager::GetAsset<Shader>("../Resources/Shaders/terrain.hlsl");
+			const auto              material      = std::make_shared<Material>(terrainShader);
 			material->SetTexture("tex1", ground);
 			material->SetTexture("tex2", rock);
 			actor->GetStaticMeshComponent()->SetMaterial(material);
 
-			
+
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>();
 			camera->SetPosition(Point3D(0, 0, -20));
 			camera->SetRotation(70.0f, 0.0f, 0.0f);

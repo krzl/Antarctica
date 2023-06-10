@@ -22,6 +22,7 @@ cbuffer cbObject : register(b0)
 	} perObjectBuffer[2];
 };
 
+
 cbuffer cbCamera : register(b1)
 {
 	float4x4	viewProj;

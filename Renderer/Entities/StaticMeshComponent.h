@@ -63,6 +63,8 @@ namespace Renderer
 
 	private:
 
+		std::vector<QueuedRenderObject> m_renderHandles;
+		
 		DEFINE_CLASS()
 	};
 
