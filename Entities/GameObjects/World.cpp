@@ -3,6 +3,13 @@
 
 #include "GameObject.h"
 
+static World* world = nullptr;
+
+World::World()
+{
+	world = this;
+}
+
 uint64_t World::GenerateInstanceId()
 {
 	while (true)
@@ -19,7 +26,6 @@ uint64_t World::GenerateInstanceId()
 void World::SetupSpawnedGameObject(const std::shared_ptr<GameObject> gameObject, const uint64_t instanceId)
 {
 	gameObject->m_self       = gameObject;
-	gameObject->m_world      = this;
 	gameObject->m_instanceId = instanceId;
 
 	gameObject->InitComponents();
@@ -45,6 +51,11 @@ Ref<GameObject> World::GetSpawnedObject(const uint64_t instanceId)
 	}
 
 	return Ref<GameObject>();
+}
+
+World* World::Get()
+{
+	return world;
 }
 
 void World::Update(float deltaTime)

@@ -10,11 +10,7 @@ namespace Renderer
 {
 	class AnimatedMeshComponent : public StaticMeshComponent
 	{
-
 	public:
-
-		void OnEnabled() override;
-		void OnDisabled() override;
 
 		[[nodiscard]] const std::shared_ptr<Anim::Animator>& GetAnimator() const
 		{
@@ -32,9 +28,9 @@ namespace Renderer
 		std::shared_ptr<Anim::Animator> m_animator;
 
 		Transform4D GetAttachedNodeTransform(int32_t nodeId, bool ignoreAttachmentRotation) override;
-		void SetupRenderHandle(uint32_t submeshId, QueuedRenderObject& renderObject) override;
+		void SetupRenderHandle(uint32_t submeshId, Material& material, QueuedRenderObject& renderObject) override;
 		void PrepareForRender(RenderQueue& renderQueue) override;
-		
+
 	private:
 
 		Anim::Solver m_animationSolver;

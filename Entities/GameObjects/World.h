@@ -7,19 +7,28 @@ class World
 
 public:
 
+	World();
+
 	template<
 		class T,
 		class = std::enable_if_t<std::is_base_of_v<GameObject, T>>>
 	Ref<T> Spawn()
 	{
-		std::shared_ptr<GameObject> obj = std::static_pointer_cast<GameObject>(T::GetClass().CreateObject());
-		auto [it, _]                    = m_gameObjects.emplace(std::make_pair(GenerateInstanceId(), obj));
+		std::shared_ptr<GameObject> obj     = std::static_pointer_cast<GameObject>(T::GetClass().CreateObject());
+		auto                        [it, _] = m_gameObjects.emplace(std::make_pair(GenerateInstanceId(), obj));
 		SetupSpawnedGameObject(it->second, it->first);
 
 		return std::dynamic_pointer_cast<T>(it->second);
 	}
 
 	Ref<GameObject> GetSpawnedObject(const uint64_t instanceId);
+
+	const std::unordered_map<uint64_t, std::shared_ptr<GameObject>>& GetAllGameObjects() const
+	{
+		return m_gameObjects;
+	}
+
+	static World* Get();
 
 private:
 

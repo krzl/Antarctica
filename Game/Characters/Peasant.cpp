@@ -80,8 +80,6 @@ Peasant::Peasant()
 	const auto              materialSkin = std::make_shared<Material>(shaderSkin);
 	materialSkin->SetTexture("tex", texture);
 	m_animatedMeshComponent->SetMaterial(material);
-	m_animatedMeshComponent->SetMaterial(material, 1);
-	m_animatedMeshComponent->SetMaterial(material, 2);
 	m_animatedMeshComponent->SetMaterial(materialSkin, 3);
 
 	InputSystem::GetInstance()->OnLeftMouseButtonPressed.AddListener([this]()

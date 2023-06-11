@@ -54,9 +54,9 @@ void GameObject::Destroy()
 	OnDestroy();
 	OnObjectDestroyed.Dispatch(GetRef());
 
-	if (m_world)
+	if (World::Get())
 	{
-		m_world->AddToPendingDestroy(GetRef());
+		World::Get()->AddToPendingDestroy(GetRef());
 	}
 }
 
@@ -101,12 +101,12 @@ void GameObject::SetEnabled(const bool isEnabled)
 		if (m_isEnabled)
 		{
 			OnEnabled();
-			OnObjectEnabled.Dispatch(GetWorld()->GetSpawnedObject(GetInstanceId()));
+			OnObjectEnabled.Dispatch(World::Get()->GetSpawnedObject(GetInstanceId()));
 		}
 		else
 		{
 			OnDisabled();
-			OnObjectDisabled.Dispatch(GetWorld()->GetSpawnedObject(GetInstanceId()));
+			OnObjectDisabled.Dispatch(World::Get()->GetSpawnedObject(GetInstanceId()));
 		}
 	}
 }

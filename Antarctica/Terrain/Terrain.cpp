@@ -22,7 +22,7 @@ void Terrain::SetHeight(const uint32_t x, const uint32_t y, const HeightLevel le
 
 uint32_t Terrain::GetHeightMapArrayIndex(const uint32_t x, const uint32_t y) const
 {
-	return x + y * m_height;
+	return x + y * m_width;
 }
 
 static float TerrainHeightLevelToZ(const Terrain::HeightLevel level)
@@ -35,32 +35,54 @@ std::shared_ptr<Mesh> Terrain::ConstructMesh() const
 {
 	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 
+	constexpr uint32_t gridSubmeshRatio = 32;
 
-	std::vector<Vector3D> vertices(m_heightMap.size());
-	std::vector<float>    texcoordSplatUV(m_heightMap.size() * 2);
-	std::vector<float>    texcoordWeights(m_heightMap.size() * 4);
-	std::vector<uint32_t> indices((m_width - 1) * (m_height - 1) * 6);
+	const uint32_t xSubmeshCount = ceil((float) m_width / gridSubmeshRatio);
+	for (uint32_t i = 0; i < xSubmeshCount; ++i)
+	{
+		const uint32_t xStart = i * gridSubmeshRatio;
+		const uint32_t xEnd   = i == (xSubmeshCount - 1) ? m_width : ((i + 1) * gridSubmeshRatio + 1);
+
+		const uint32_t ySubmeshCount = ceil((float) m_height / gridSubmeshRatio);
+		for (uint32_t j = 0; j < ySubmeshCount; ++j)
+		{
+			const uint32_t yStart = j * gridSubmeshRatio;
+			const uint32_t yEnd   = j == (ySubmeshCount - 1) ? m_height : ((j + 1) * gridSubmeshRatio + 1);
+
+			ConstructSubmesh(mesh, xStart, xEnd, yStart, yEnd);
+		}
+	}
+
+	return mesh;
+}
+
+void Terrain::ConstructSubmesh(const std::shared_ptr<Mesh> mesh, uint32_t xStart, const uint32_t xEnd, uint32_t yStart,
+							   uint32_t                    yEnd) const
+{
+	uint32_t currentIndex = 0;
 
 	const float xCenterOffset = m_width * GRID_CELL_TO_METER / 2.0f;
 	const float yCenterOffset = m_height * GRID_CELL_TO_METER / 2.0f;
 
-	constexpr float slopeUvScaleRatio = GRID_CELL_TO_METER / GRID_LEVEL_HEIGHT_TO_METER;
+	const uint32_t vertexCount = (xEnd - xStart + 1) * (yEnd - yStart + 1);
+	const uint32_t indexCount  = (xEnd - xStart) * (yEnd - yStart);
 
-	for (uint32_t x = 0; x < m_width; ++x)
+	std::vector<Vector3D> vertices(vertexCount);
+	std::vector<float>    texcoordSplatUV(vertexCount * 2);
+	std::vector<float>    texcoordWeights(vertexCount * 4);
+	std::vector<uint32_t> indices(indexCount * 6);
+
+	// ReSharper disable once CppInconsistentNaming
+	auto GetSubmeshIndex = [xStart, xEnd, yStart, this](const uint32_t x, const uint32_t y)
 	{
-		for (uint32_t y = 0; y < m_height; ++y)
-		{
-			const uint32_t idx = GetHeightMapArrayIndex(x, y);
-		}
-	}
+		return (x - xStart) + (y - yStart) * (xEnd - xStart);
+	};
 
-	uint32_t currentIndex = 0;
-
-	for (uint32_t x = 0; x < m_width; ++x)
+	for (uint32_t x = xStart; x < xEnd; ++x)
 	{
-		for (uint32_t y = 0; y < m_height; ++y)
+		for (uint32_t y = yStart; y < yEnd; ++y)
 		{
-			const uint32_t a1 = GetHeightMapArrayIndex(x, y);
+			const uint32_t a1 = GetSubmeshIndex(x, y);
 
 			const bool isFlat =
 				GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x), Clamp(0u, m_height - 1, y + 1)) &&
@@ -72,11 +94,16 @@ std::shared_ptr<Mesh> Terrain::ConstructMesh() const
 				GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y - 1)) &&
 				GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y - 1));
 
-			if (x != m_width - 1 && y != m_height - 1)
+			texcoordWeights[a1 * 4 + 0] = isFlat ? 1.0f : 0.0f;
+			texcoordWeights[a1 * 4 + 1] = isFlat ? 0.0f : 1.0f;
+			texcoordWeights[a1 * 4 + 2] = 0.0f;
+			texcoordWeights[a1 * 4 + 3] = 0.0f;
+			
+			if (x != xEnd - 1 && y != yEnd - 1)
 			{
-				const uint32_t a2 = GetHeightMapArrayIndex(x, y + 1);
-				const uint32_t b1 = GetHeightMapArrayIndex(x + 1, y);
-				const uint32_t b2 = GetHeightMapArrayIndex(x + 1, y + 1);
+				const uint32_t a2 = GetSubmeshIndex(x, y + 1);
+				const uint32_t b1 = GetSubmeshIndex(x + 1, y);
+				const uint32_t b2 = GetSubmeshIndex(x + 1, y + 1);
 
 				indices[currentIndex++] = a1;
 				indices[currentIndex++] = b1;
@@ -84,51 +111,45 @@ std::shared_ptr<Mesh> Terrain::ConstructMesh() const
 				indices[currentIndex++] = b1;
 				indices[currentIndex++] = b2;
 				indices[currentIndex++] = a2;
-
-				texcoordWeights[a1 * 4 + 0] = isFlat ? 1.0f : 0.0f;
-				texcoordWeights[a1 * 4 + 1] = isFlat ? 0.0f : 1.0f;
-				texcoordWeights[a1 * 4 + 2] = 0.0f;
-				texcoordWeights[a1 * 4 + 3] = 0.0f;
 			}
 
 			vertices[a1] = Vector3D(x * GRID_CELL_TO_METER - xCenterOffset,
 									y * GRID_CELL_TO_METER - yCenterOffset,
 									TerrainHeightLevelToZ(GetHeight(x, y)));
 
-			texcoordSplatUV[a1 * 2 + 0] = (float) x / 40.0f;// * (isFlat ? 1.0f : slopeUvScaleRatio);
-			texcoordSplatUV[a1 * 2 + 1] = (float) y / 40.0f;// * (isFlat ? 1.0f : slopeUvScaleRatio);
+			texcoordSplatUV[a1 * 2 + 0] = (float) x / 40.0f;
+			texcoordSplatUV[a1 * 2 + 1] = (float) y / 40.0f;
 		}
 	}
 
-
 	//blur out transition
-	for (uint32_t x = 0; x < m_width - 1; ++x)
+	for (uint32_t x = xStart; x < xEnd - 1; ++x)
 	{
-		for (uint32_t y = 0; y < m_height - 1; ++y)
+		for (uint32_t y = yStart; y < yEnd - 1; ++y)
 		{
-			const uint32_t a1 = GetHeightMapArrayIndex(x, y);
+			const uint32_t a1 = GetSubmeshIndex(x, y);
 
 			bool isNearEdge =
-				texcoordWeights[GetHeightMapArrayIndex(x, y + 1) * 4 + 1] > 0.7 ||
-				texcoordWeights[GetHeightMapArrayIndex(x + 1, y) * 4 + 1] > 0.7 ||
-				texcoordWeights[GetHeightMapArrayIndex(x + 1, y + 1) * 4 + 1] > 0.7;
+				texcoordWeights[(GetSubmeshIndex(x, y + 1)) * 4 + 1] > 0.7 ||
+				texcoordWeights[(GetSubmeshIndex(x + 1, y)) * 4 + 1] > 0.7 ||
+				texcoordWeights[(GetSubmeshIndex(x + 1, y + 1)) * 4 + 1] > 0.7;
 
-			if (!isNearEdge && x != 0)
+			if (!isNearEdge && x != xStart)
 			{
 				isNearEdge =
-					texcoordWeights[GetHeightMapArrayIndex(x - 1, y) * 4 + 1] > 0.7 ||
-					texcoordWeights[GetHeightMapArrayIndex(x - 1, y + 1) * 4 + 1] > 0.7;
+					texcoordWeights[(GetSubmeshIndex(x - 1, y)) * 4 + 1] > 0.7 ||
+					texcoordWeights[(GetSubmeshIndex(x - 1, y + 1)) * 4 + 1] > 0.7;
 			}
-			if (!isNearEdge && y != 0)
+			if (!isNearEdge && y != yStart)
 			{
 				isNearEdge =
-					texcoordWeights[GetHeightMapArrayIndex(x, y - 1) * 4 + 1] > 0.7 ||
-					texcoordWeights[GetHeightMapArrayIndex(x + 1, y - 1) * 4 + 1] > 0.7;
+					texcoordWeights[(GetSubmeshIndex(x, y - 1)) * 4 + 1] > 0.7 ||
+					texcoordWeights[(GetSubmeshIndex(x + 1, y - 1)) * 4 + 1] > 0.7;
 			}
-			if (!isNearEdge && x != 0 && y != 0)
+			if (!isNearEdge && x != xStart && y != yStart)
 			{
 				isNearEdge =
-					texcoordWeights[GetHeightMapArrayIndex(x - 1, y - 1) * 4 + 1] > 0.7;
+					texcoordWeights[(GetSubmeshIndex(x - 1, y - 1)) * 4 + 1] > 0.7;
 			}
 
 			if (isNearEdge)
@@ -138,10 +159,8 @@ std::shared_ptr<Mesh> Terrain::ConstructMesh() const
 		}
 	}
 
-
 	SubmeshBuilder submeshBuilder("Terrain", std::move(vertices), indices);
 	submeshBuilder.SetTexcoords(std::move(texcoordSplatUV), 0);
 	submeshBuilder.SetTexcoords(std::move(texcoordWeights), 1);
 	mesh->AddSubmesh(submeshBuilder.Build());
-	return mesh;
 }

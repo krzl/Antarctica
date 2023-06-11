@@ -35,8 +35,16 @@ public:
 		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
 	Ref<T> GetComponent()
 	{
-		const Class& clazz = T::GetClass();
-		return Ref<T>(GetComponentFromClass(clazz));
+		for (auto [id, component] : m_components)
+		{
+			Ref<T> ref = component->m_self.Cast<T>();
+			if (ref.IsValid())
+			{
+				return ref;
+			}
+		}
+
+		return Ref<Component>();
 	}
 
 	template<
@@ -44,16 +52,24 @@ public:
 		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
 	std::vector<Ref<T>> GetComponents()
 	{
-		const Class&                      clazz      = T::GetClass();
-		const std::vector<Ref<Component>> components = GetComponentsFromClass(clazz);
+		std::vector<Ref<T>> components;
+		GetComponents<T>(components);
+		return components;
+	}
 
-		std::vector<Ref<T>> ret(components.size());
-
-		std::transform(components.begin(), components.end(), ret.begin(), [](Ref<Component> ptr)
+	template<
+		typename T,
+		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
+	void GetComponents(std::vector<Ref<T>>& components)
+	{
+		for (auto [id, component] : m_components)
 		{
-			return Ref<T>(ptr);
-		});
-		return ret;
+			Ref<T> ref = component->m_self.Cast<T>();
+			if (ref.IsValid())
+			{
+				components.emplace_back(ref);
+			}
+		}
 	}
 
 protected:
@@ -85,11 +101,6 @@ public:
 	const Class* GetClass() const
 	{
 		return m_class;
-	}
-
-	World* GetWorld() const
-	{
-		return m_world;
 	}
 
 	bool IsEnabled() const
@@ -192,7 +203,6 @@ private:
 
 	const Class* m_class;
 	uint64_t     m_instanceId;
-	World*       m_world;
 
 	Ref<GameObject> m_self;
 
