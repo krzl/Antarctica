@@ -56,6 +56,7 @@ void main()
 			const auto              material      = std::make_shared<Material>(terrainShader);
 			material->SetTexture("tex1", ground);
 			material->SetTexture("tex2", rock);
+			material->SetOrder(3);
 			actor->GetStaticMeshComponent()->SetMaterial(material);
 
 

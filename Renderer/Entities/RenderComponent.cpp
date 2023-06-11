@@ -31,41 +31,41 @@ namespace Renderer
 
 		RenderQueue* renderQueuePtr = &renderQueue;
 
-		constexpr uint32_t numThreads = 8;
+		constexpr uint32_t numThreads    = 8;
 		const uint32_t     partitionSize = renderComponents.size() / numThreads;
 
-		std::vector<std::thread> threads;
-
-		auto start = renderComponents.begin();
+		std::vector<std::unordered_set<RenderComponent*>::iterator> iterators(numThreads + 1);
+		auto                                                        start = iterators[0] = renderComponents.begin();
 		for (uint32_t i = 0; i < numThreads - 1; ++i)
 		{
-			auto end = std::next(start, partitionSize);
-			threads.emplace_back([start, end, renderQueuePtr]
-			{
-				std::for_each(std::execution::par, start, end, [this, renderQueuePtr](RenderComponent* component)
-				{
-					component->PrepareForRender(*renderQueuePtr);
-				});
-			});
-			start = end;
-		}
+			const auto end = std::next(start, partitionSize);
 
-		if (start != renderComponents.end())
+			start = iterators[i + 1] = end;
+		}
+		iterators[numThreads] = renderComponents.end();
+
+
+
+		std::vector<std::thread> threads;
+		if (threads.size() == 0)
 		{
-			threads.emplace_back([start, renderQueuePtr]
+			for (uint32_t i = 0; i < numThreads; ++i)
 			{
-				std::for_each(std::execution::par, start, renderComponents.end(),
-							  [this, renderQueuePtr](RenderComponent* component)
-							  {
-								  component->PrepareForRender(*renderQueuePtr);
-							  });
-			});
+				threads.emplace_back([i, iterators, renderQueuePtr]
+				{
+					std::for_each(std::execution::par, iterators[i], iterators[i + 1], [this, renderQueuePtr](RenderComponent* component)
+					{
+						component->PrepareForRender(*renderQueuePtr);
+					});
+				});
+			}
 		}
 
 		for (auto& thread : threads)
 		{
 			thread.join();
 		}
+
 
 		std::sort(renderQueue.begin(), renderQueue.end(), RenderQueueComp());
 

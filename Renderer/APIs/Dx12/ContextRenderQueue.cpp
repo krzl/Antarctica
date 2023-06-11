@@ -97,20 +97,20 @@ namespace Renderer::Dx12
 			}
 
 
-			const bool isNextBatched =
+			const bool isNextBatched = 
 				(objectsToRender.size() != i + 1) &&
 				objectsToRender[i + 1]->m_submesh == queuedObject->m_submesh &&
 				//objectsToRender[i + 1]->->m_material == queuedObject->m_material &&
 				objectsToRender[i + 1]->m_boneTransforms.size() == queuedObject->m_boneTransforms.size() &&
 				instanceCount < 2048;
-
+			
 			if (!isNextBatched)
 			{
 				RenderObject* lastRenderObject = &m_renderQueue[m_renderQueue.size() - 1];
 
 				lastRenderObject->m_perObjectBuffer = GetScratchBuffer().CreateSRV(
-					(uint32_t) accumulatedConstantBuffers.size(),
 					sizeof(accumulatedConstantBuffers[0]),
+					(uint32_t) accumulatedConstantBuffers.size(),
 					accumulatedConstantBuffers.data());
 				accumulatedConstantBuffers.clear();
 
@@ -123,7 +123,7 @@ namespace Renderer::Dx12
 
 
 				lastRenderObject->m_perCallBuffer = GetScratchBuffer().CreateHandle(
-					sizeof PerCallBuffer, &perCallBuffer);
+					256, &perCallBuffer);
 
 				if (accumulatedBoneTransforms.size() != 0)
 				{

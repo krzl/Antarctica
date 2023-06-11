@@ -35,7 +35,7 @@ std::shared_ptr<Mesh> Terrain::ConstructMesh() const
 {
 	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 
-	constexpr uint32_t gridSubmeshRatio = 32;
+	constexpr uint32_t gridSubmeshRatio = 64;
 
 	const uint32_t xSubmeshCount = ceil((float) m_width / gridSubmeshRatio);
 	for (uint32_t i = 0; i < xSubmeshCount; ++i)
