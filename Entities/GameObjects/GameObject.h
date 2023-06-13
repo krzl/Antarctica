@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Component.h"
+#include "Collisions/CollisionChannels.h"
 #include "Components/SceneComponent.h"
+#include "Quadtree/Quadtree.h"
 
 class Class;
 
@@ -9,6 +11,7 @@ class GameObject
 {
 	friend class World;
 	friend class Class;
+	friend class Quadtree;
 
 public:
 
@@ -71,13 +74,6 @@ public:
 			}
 		}
 	}
-
-protected:
-
-	Ref<Component>              GetComponentFromClass(const Class& clazz);
-	std::vector<Ref<Component>> GetComponentsFromClass(const Class& clazz);
-
-public:
 
 	// Remove
 
@@ -154,6 +150,22 @@ public:
 		return m_self;
 	}
 
+	[[nodiscard]] uint32_t GetCollisionChannel() const
+	{
+		return m_collisionChannel;
+	}
+
+	[[nodiscard]] const std::string& GetName() const
+	{
+		return m_name;
+	}
+
+	BoundingBox GetBoundingBox() const;
+
+	void MarkDirty();
+
+	[[nodiscard]] World& GetWorld() const { return *m_world; }
+
 	// Setters
 
 	void SetEnabled(bool isEnabled);
@@ -183,6 +195,21 @@ public:
 		m_root->SetWorldScale(scale);
 	}
 
+	void SetCollisionChannel(const Collision::CollisionChannel collisionChannel)
+	{
+		m_collisionChannel = (uint32_t) collisionChannel;
+	}
+
+	void SetCollisionChannel(const uint32_t collisionChannel)
+	{
+		m_collisionChannel = collisionChannel;
+	}
+
+	void SetName(std::string name)
+	{
+		m_name = std::move(name);
+	}
+
 protected:
 
 	// Virtual functions
@@ -194,6 +221,11 @@ protected:
 	virtual void OnDestroy() { }
 
 	void InitComponents();
+
+	Ref<Component>              GetComponentFromClass(const Class& clazz);
+	std::vector<Ref<Component>> GetComponentsFromClass(const Class& clazz);
+
+	uint32_t m_collisionChannel = (uint32_t) Collision::CollisionChannel::DEFAULT;
 
 private:
 
@@ -207,6 +239,12 @@ private:
 	Ref<GameObject> m_self;
 
 	Ref<SceneComponent> m_root;
+
+	std::string m_name;
+
+	World* m_world;
+
+	Quadtree::PlacementRef m_quadtreePlacement;
 
 	bool m_isEnabled        = true;
 	bool m_isPendingDestroy = false;

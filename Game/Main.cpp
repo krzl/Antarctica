@@ -7,6 +7,7 @@
 
 #include "Camera/RTSCamera.h"
 #include "Characters/Peasant.h"
+#include "Debug/QuadtreeTester.h"
 #include "Entities/AnimatedMesh.h"
 #include "Terrain/Terrain.h"
 #include "Terrain/TerrainGenerator.h"
@@ -32,8 +33,11 @@ void main()
 			actor->SetScale(Vector3D(1.0f, 1.0f, 1.0f));
 			actor->GetStaticMeshComponent()->SetMesh(mesh);
 
-			constexpr uint32_t gridSize = 100;
-			
+#if defined(DEBUG) | defined(_DEBUG)
+			constexpr uint32_t gridSize = 4;
+#else
+			constexpr uint32_t gridSize = 400;
+#endif
 			for (uint32_t i = 0; i < gridSize; i++)
 			{
 				for (uint32_t j = 0; j < gridSize; j++)
@@ -43,6 +47,7 @@ void main()
 					
 					Ref peasant = Application::Get().GetWorld().Spawn<Peasant>();
 					peasant->SetPosition(Point3D(x / 2.0f, y / 2.0f, 2.0f));
+					peasant->SetName("Peasant " + std::to_string((gridSize * i) + j));
 				}
 			}
 
@@ -63,6 +68,8 @@ void main()
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>();
 			camera->SetPosition(Point3D(0, 0, -20));
 			camera->SetRotation(70.0f, 0.0f, 0.0f);
+
+			//Ref<QuadtreeTester> qtt = Application::Get().GetWorld().Spawn<QuadtreeTester>();
 		}
 	}, false);
 

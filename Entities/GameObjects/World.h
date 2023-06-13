@@ -1,4 +1,5 @@
 #pragma once
+#include "Quadtree/Quadtree.h"
 
 class World
 {
@@ -28,6 +29,8 @@ public:
 		return m_gameObjects;
 	}
 
+	[[nodiscard]] Quadtree& GetQuadtree() { return m_quadtree; }
+
 	static World* Get();
 
 private:
@@ -41,4 +44,6 @@ private:
 	std::unordered_map<uint64_t, std::shared_ptr<GameObject>> m_gameObjects;
 	std::unordered_set<uint64_t>                              m_pendingDestroyList;
 	std::unordered_map<uint64_t, std::shared_ptr<GameObject>> m_pendingSpawnObjects;
+
+	Quadtree m_quadtree;
 };

@@ -63,12 +63,12 @@ protected:
 
 	Ref<Component> m_self;
 
+	Ref<GameObject> m_owner;
+	const Class* m_class;
+
 private:
 
 	void Init(const Ref<GameObject> owner, const Ref<Component> self);
-
-	Ref<GameObject> m_owner;
-	const Class*    m_class;
 
 	uint32_t m_componentId = 0;
 

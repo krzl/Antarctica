@@ -33,8 +33,6 @@ namespace Renderer::Dx12
 
 		auto& [entryPoint, target] = entryPoints[static_cast<uint8_t>(m_type)];
 
-		D3D_SHADER_MACRO macro;
-		
 		uint32_t retries = 1;
 		while (m_byteCode == nullptr && retries > 0)
 		{

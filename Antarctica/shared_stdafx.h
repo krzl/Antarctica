@@ -9,6 +9,7 @@
 #include <vector>
 #include <bitset>
 
+#include <mutex>
 #include <algorithm>
 #include <functional>
 #include <optional>
@@ -44,6 +45,7 @@ using Terathon::Quaternion;
 #include "../Utilities/Common/Random.h"
 #include "../Utilities/Common/Ref.h"
 #include "../Utilities/Math/MathFunctions.h"
+#include "../Utilities/Math/BoundingBox.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <d3d12.h>

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iosfwd>
 #include <vector>
 
 #include "Skeleton.h"
@@ -55,15 +54,19 @@ struct Submesh
 {
 	typedef std::unique_ptr<Renderer::ISubmesh, void(*)(Renderer::ISubmesh*)> NativePtr;
 
+
 	explicit Submesh(std::string&&        name,
 					 const MeshBuffer&&   vertexBuffer,
 					 const MeshBuffer&&   indexBuffer,
-					 const AttributeUsage attributes) :
+					 const AttributeUsage attributes,
+					 const BoundingBox&   boundingBox) :
 		m_name(std::move(name)),
 		m_vertexBuffer(vertexBuffer),
 		m_indexBuffer(indexBuffer),
 		m_skeleton(),
-		m_attributes(attributes) { }
+		m_attributes(attributes),
+		m_ignoreAttachmentRotation(false),
+		m_boundingBox(boundingBox) { }
 
 	[[nodiscard]] const MeshBuffer& GetVertexBuffer() const
 	{
@@ -114,6 +117,8 @@ struct Submesh
 
 	[[nodiscard]] bool GetIgnoreAttachmentRotation() const { return m_ignoreAttachmentRotation; }
 
+	const BoundingBox& GetBoundingBox() const;
+
 private:
 
 	std::string     m_name;
@@ -124,6 +129,7 @@ private:
 	mutable int32_t m_attachNodeId = -1;
 	mutable bool    m_ignoreAttachmentRotation;
 
+	BoundingBox m_boundingBox;
 
 	mutable NativePtr m_nativeObject = NativePtr(nullptr, Renderer::Deleter);
 };

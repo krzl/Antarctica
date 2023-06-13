@@ -50,6 +50,8 @@ namespace Renderer
 			m_materials = materials;
 		}
 
+		BoundingBox GetBoundingBox() const override;
+
 	protected:
 
 		virtual Transform4D GetAttachedNodeTransform(int32_t nodeId, bool ignoreAttachmentRotation);

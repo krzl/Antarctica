@@ -23,6 +23,8 @@ namespace Renderer
 
 		void SetTrigger(int32_t id, bool value);
 
+		BoundingBox GetBoundingBox() const override;
+		
 	protected:
 
 		std::shared_ptr<Anim::Animator> m_animator;

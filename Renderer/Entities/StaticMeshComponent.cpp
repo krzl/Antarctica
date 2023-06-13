@@ -24,6 +24,31 @@ namespace Renderer
 		m_renderHandles.resize(m_mesh->GetSubmeshCount());
 	}
 
+	BoundingBox StaticMeshComponent::GetBoundingBox() const
+	{
+		BoundingBox boundingBox = SceneComponent::GetBoundingBox();
+
+		if (m_mesh)
+		{
+			bool isFirst = true;
+			for (const Submesh& submesh : m_mesh->GetSubmeshes())
+			{
+				BoundingBox submeshBoundingBox = submesh.GetBoundingBox();
+				if (isFirst)
+				{
+					boundingBox = submeshBoundingBox;
+					isFirst     = false;
+				}
+				else
+				{
+					boundingBox.Append(submeshBoundingBox);
+				}
+			}
+		}
+
+		return boundingBox.Transform(GetWorldTransform());
+	}
+
 	Transform4D StaticMeshComponent::GetAttachedNodeTransform(const int32_t nodeId, bool ignoreAttachmentRotation)
 	{
 		return m_mesh->GetNodes()[nodeId].m_globalTransform;

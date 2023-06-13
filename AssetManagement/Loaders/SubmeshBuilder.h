@@ -22,6 +22,8 @@ private:
 	const AttributeOffsets& GetAttributeOffsets(const AttributeUsage& attributeUsage) const;
 	AttributeUsage          GetAttributeUsage() const;
 
+	BoundingBox CalculateBoundingBox() const;
+	
 	std::string           m_name;
 	std::vector<uint8_t>  m_indices;
 	std::vector<Vector3D> m_positions;

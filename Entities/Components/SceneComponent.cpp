@@ -1,9 +1,21 @@
 #include "stdafx.h"
 #include "SceneComponent.h"
 
+#include "GameObjects/GameObject.h"
+
 SceneComponent::~SceneComponent()
 {
 	RemoveFromParent();
+}
+
+void SceneComponent::SetLocalPosition(const Point3D position)
+{
+	m_position = position;
+	MarkDirty();
+	if (m_owner.IsValid())
+	{
+		m_owner->MarkDirty();
+	}
 }
 
 Point3D SceneComponent::GetWorldPosition() const
@@ -28,6 +40,16 @@ void SceneComponent::SetWorldPosition(const Point3D position)
 	else
 	{
 		SetLocalPosition(position);
+	}
+}
+
+void SceneComponent::SetLocalRotation(const Quaternion rotation)
+{
+	m_rotation = rotation;
+	MarkDirty();
+	if (m_owner.IsValid())
+	{
+		m_owner->MarkDirty();
 	}
 }
 
@@ -74,6 +96,16 @@ void SceneComponent::SetWorldRotation(const Vector3D axis)
 void SceneComponent::SetWorldRotation(const float x, const float y, const float z)
 {
 	SetWorldRotation(EulerToQuaternion(x, y, z));
+}
+
+void SceneComponent::SetLocalScale(const Vector3D scale)
+{
+	m_scale = scale;
+	MarkDirty();
+	if (m_owner.IsValid())
+	{
+		m_owner->MarkDirty();
+	}
 }
 
 Vector3D SceneComponent::GetWorldScale() const
@@ -153,6 +185,11 @@ void SceneComponent::RemoveFromParent()
 auto SceneComponent::SetParent(const Ref<SceneComponent> parent) -> void
 {
 	SetParentInternal(parent, m_self.Cast<SceneComponent>());
+}
+
+BoundingBox SceneComponent::GetBoundingBox() const
+{
+	return BoundingBox(GetWorldPosition(), GetWorldPosition());
 }
 
 void SceneComponent::SetParentInternal(Ref<SceneComponent> parent, Ref<SceneComponent> self)

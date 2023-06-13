@@ -17,6 +17,8 @@ public:
 
 protected:
 
+	void Tick(float deltaTime) override;
+
 	Ref<Renderer::AnimatedMeshComponent> m_animatedMeshComponent;
 	Ref<MovementComponent>               m_movementComponent;
 

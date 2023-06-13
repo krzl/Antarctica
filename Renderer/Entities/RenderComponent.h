@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mutex>
 #include <RenderObject.h>
 
 #include "Buffers/Types/PerObjectBuffer.h"

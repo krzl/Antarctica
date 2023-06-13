@@ -64,8 +64,8 @@ void Terrain::ConstructSubmesh(const std::shared_ptr<Mesh> mesh, uint32_t xStart
 	const float xCenterOffset = m_width * GRID_CELL_TO_METER / 2.0f;
 	const float yCenterOffset = m_height * GRID_CELL_TO_METER / 2.0f;
 
-	const uint32_t vertexCount = (xEnd - xStart + 1) * (yEnd - yStart + 1);
-	const uint32_t indexCount  = (xEnd - xStart) * (yEnd - yStart);
+	const uint32_t vertexCount = (xEnd - xStart) * (yEnd - yStart);
+	const uint32_t indexCount  = (xEnd - xStart - 1) * (yEnd - yStart - 1);
 
 	std::vector<Vector3D> vertices(vertexCount);
 	std::vector<float>    texcoordSplatUV(vertexCount * 2);

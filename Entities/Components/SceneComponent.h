@@ -20,11 +20,7 @@ public:
 		return m_position;
 	}
 
-	void SetLocalPosition(const Point3D position)
-	{
-		m_position = position;
-		MarkDirty();
-	}
+	void SetLocalPosition(const Point3D position);
 
 	Point3D GetWorldPosition() const;
 	void    SetWorldPosition(const Point3D position);
@@ -34,11 +30,7 @@ public:
 		return m_rotation;
 	}
 
-	void SetLocalRotation(const Quaternion rotation)
-	{
-		m_rotation = rotation;
-		MarkDirty();
-	}
+	void SetLocalRotation(const Quaternion rotation);
 
 	void SetLocalRotation(const Vector3D axis);
 	void SetLocalRotation(const float x, const float y, const float z);
@@ -53,11 +45,7 @@ public:
 		return m_scale;
 	}
 
-	void SetLocalScale(const Vector3D scale)
-	{
-		m_scale = scale;
-		MarkDirty();
-	}
+	void SetLocalScale(const Vector3D scale);
 
 	Vector3D GetWorldScale() const;
 	void     SetWorldScale(const Vector3D scale);
@@ -72,6 +60,8 @@ public:
 	}
 
 	void SetParent(Ref<SceneComponent> parent);
+
+	virtual BoundingBox GetBoundingBox() const;
 
 protected:
 

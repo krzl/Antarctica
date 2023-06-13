@@ -127,7 +127,8 @@ Submesh SubmeshBuilder::Build()
 		static_cast<uint32_t>(m_positions.size())
 	};
 
-	Submesh submesh(std::move(m_name), std::move(vertexBuffer), std::move(indexBuffer), attributes);
+	Submesh submesh(std::move(m_name), std::move(vertexBuffer), std::move(indexBuffer), attributes,
+					CalculateBoundingBox());
 	submesh.SetSkeleton(std::move(m_skeleton));
 
 	return submesh;
@@ -220,4 +221,14 @@ AttributeUsage SubmeshBuilder::GetAttributeUsage() const
 		(uint8_t) (m_texcoords2.size() / m_positions.size()),
 		(uint8_t) (m_texcoords3.size() / m_positions.size()),
 	};
+}
+
+BoundingBox SubmeshBuilder::CalculateBoundingBox() const
+{
+	BoundingBox bb(m_positions[0], m_positions[0]);
+	for (uint32_t i = 1; i < m_positions.size(); ++i)
+	{
+		bb.Append((Point3D) m_positions[i]);
+	}
+	return bb;
 }

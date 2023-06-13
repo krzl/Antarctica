@@ -111,6 +111,34 @@ void GameObject::SetEnabled(const bool isEnabled)
 	}
 }
 
+BoundingBox GameObject::GetBoundingBox() const
+{
+	const Vector3D position = GetPosition();
+	BoundingBox    boundingBox(position, position);
+
+	for (auto [_, component] : m_components)
+	{
+		if (component->GetRef().IsValid())
+		{
+			Ref<SceneComponent> sceneComponent = component->GetRef().Cast<SceneComponent>();
+			if (sceneComponent.IsValid())
+			{
+				boundingBox.Append(sceneComponent->GetBoundingBox());
+			}
+		}
+	}
+
+	return boundingBox;
+}
+
+void GameObject::MarkDirty()
+{
+	if (m_quadtreePlacement.IsValid())
+	{
+		m_quadtreePlacement.InvalidatePlacement();
+	}
+}
+
 void GameObject::InitComponents()
 {
 	for (auto [_, component] : m_components)

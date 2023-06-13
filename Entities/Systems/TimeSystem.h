@@ -9,7 +9,7 @@ class TimeSystem : public System
 
 public:
 
-	[[nodiscard]] float GetDeltaTime() const { return m_deltaTime; }
+	[[nodiscard]] float GetDeltaTime() const { return min(1.0f, m_deltaTime); }
 	[[nodiscard]] float GetTimeSinceStart() const { return m_timeSinceStart; }
 
 protected:

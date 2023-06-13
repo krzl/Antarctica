@@ -136,7 +136,7 @@ namespace Renderer::Dx12
 
 					lastRenderObject->m_boneTransforms = GetScratchBuffer().CreateSRV(
 						sizeof(float) * 16,
-						queuedObject->m_submesh->GetSkeleton().m_bones.size() * instanceCount,
+						(uint32_t) queuedObject->m_submesh->GetSkeleton().m_bones.size() * instanceCount,
 						accumulatedBoneTransforms.data());
 					accumulatedBoneTransforms.clear();
 				}

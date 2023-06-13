@@ -32,7 +32,7 @@ namespace Renderer
 		RenderQueue* renderQueuePtr = &renderQueue;
 
 		constexpr uint32_t numThreads    = 8;
-		const uint32_t     partitionSize = renderComponents.size() / numThreads;
+		const uint32_t     partitionSize = (uint32_t) renderComponents.size() / numThreads;
 
 		std::vector<std::unordered_set<RenderComponent*>::iterator> iterators(numThreads + 1);
 		auto                                                        start = iterators[0] = renderComponents.begin();
@@ -43,8 +43,6 @@ namespace Renderer
 			start = iterators[i + 1] = end;
 		}
 		iterators[numThreads] = renderComponents.end();
-
-
 
 		std::vector<std::thread> threads;
 		if (threads.size() == 0)
@@ -69,7 +67,7 @@ namespace Renderer
 
 		std::sort(renderQueue.begin(), renderQueue.end(), RenderQueueComp());
 
-		capacity = max(capacity, renderQueue.capacity());
+		capacity = max(capacity, (uint32_t) renderQueue.capacity());
 
 		return renderQueue;
 	}

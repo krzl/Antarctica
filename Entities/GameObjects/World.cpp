@@ -30,6 +30,14 @@ void World::SetupSpawnedGameObject(const std::shared_ptr<GameObject> gameObject,
 
 	gameObject->InitComponents();
 
+	gameObject->m_quadtreePlacement = m_quadtree.AddObject(gameObject.get(), gameObject->GetBoundingBox());
+	gameObject->m_world             = this;
+
+	if (gameObject->m_name.empty())
+	{
+		gameObject->SetName("GameObject Id: " + std::to_string(instanceId));
+	}
+
 	gameObject->OnCreated();
 	if (gameObject->IsEnabled())
 	{
@@ -68,6 +76,7 @@ void World::Update(float deltaTime)
 
 	for (auto instanceId : m_pendingDestroyList)
 	{
+		m_quadtree.RemoveObject(m_gameObjects[instanceId].get());
 		m_gameObjects.erase(instanceId);
 	}
 	m_pendingDestroyList.clear();

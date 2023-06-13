@@ -79,4 +79,9 @@ namespace Renderer
 	{
 		m_animationSolver.SetTrigger(id, value);
 	}
+
+	BoundingBox AnimatedMeshComponent::GetBoundingBox() const
+	{
+		return StaticMeshComponent::GetBoundingBox().Scale(2.0f);
+	}
 }

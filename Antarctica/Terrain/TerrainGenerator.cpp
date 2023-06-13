@@ -56,7 +56,7 @@ void TerrainGenerator::SpawnRandomIsland(Terrain& terrain, const SpawnParameters
 				{
 					break;
 				}
-				for (uint32_t l = 0; l < currentHeight; ++l)
+				for (uint32_t l = 0; l < (uint32_t) currentHeight; ++l)
 				{
 					const uint32_t posX = startPosX + (i == 0 ? 1 : -1) * k;
 					const uint32_t posY = startPosY + (j == 0 ? 1 : -1) * l;
