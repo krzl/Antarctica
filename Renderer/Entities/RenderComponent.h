@@ -22,6 +22,6 @@ namespace Renderer
 		virtual Transform4D GetAttachmentTransform(uint32_t id);
 		PerObjectBuffer     GetConstantBuffer(uint32_t id);
 		virtual void        PrepareForRender(RenderQueue&          renderQueue, const Frustum& cameraFrustum,
-											 std::atomic_uint16_t& counter);
+											 std::atomic_uint32_t& counter);
 	};
 }

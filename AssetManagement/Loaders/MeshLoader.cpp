@@ -103,7 +103,7 @@ template<>
 std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 {
 	const aiScene* scene = aiImportFile(path.c_str(),
-										aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_PopulateArmatureData);
+										aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_PopulateArmatureData | aiProcess_FlipWindingOrder);
 
 	std::vector<MeshBuffer> indexDataList;
 	std::vector<MeshBuffer> vertexDataList;

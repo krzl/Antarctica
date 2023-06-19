@@ -8,19 +8,6 @@
 #include "GameObjects/World.h"
 #include "Input/InputSystem.h"
 
-Point3D CastRayToXYPlane(const Ray& ray)
-{
-	float t = -ray.m_origin.z / ray.m_direction.z;
-
-	Point3D intersectionPoint = {
-		ray.m_origin.x + t * ray.m_direction.x,
-		ray.m_origin.y + t * ray.m_direction.y,
-		0.0f
-	};
-
-	return intersectionPoint;
-}
-
 void MousePickerComponent::OnCreated()
 {
 	m_cameraComponent = GetOwner()->GetComponent<Renderer::CameraComponent>();

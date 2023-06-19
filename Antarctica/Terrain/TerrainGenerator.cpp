@@ -21,7 +21,7 @@ std::shared_ptr<Terrain> TerrainGenerator::GenerateTerrain(const SpawnParameters
 
 			if (terrain->GetHeight(x, y) == 0)
 			{
-				SpawnRandomIsland(*terrain, params, x, y, 5);
+				SpawnRandomIsland(*terrain, params, x, y, -5);
 			}
 		}
 	}

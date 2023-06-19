@@ -106,11 +106,11 @@ void Terrain::ConstructSubmesh(const std::shared_ptr<Mesh> mesh, uint32_t xStart
 				const uint32_t b2 = GetSubmeshIndex(x + 1, y + 1);
 
 				indices[currentIndex++] = a1;
-				indices[currentIndex++] = b1;
 				indices[currentIndex++] = a2;
 				indices[currentIndex++] = b1;
+				indices[currentIndex++] = b1;
+				indices[currentIndex++] = a2;
 				indices[currentIndex++] = b2;
-				indices[currentIndex++] = a2;
 			}
 
 			vertices[a1] = Vector3D(x * GRID_CELL_TO_METER - xCenterOffset,

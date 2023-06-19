@@ -99,7 +99,7 @@ namespace Renderer
 	}
 
 	void StaticMeshComponent::PrepareForRender(RenderQueue&          renderQueue, const Frustum& cameraFrustum,
-											   std::atomic_uint16_t& counter)
+											   std::atomic_uint32_t& counter)
 	{
 		if (!m_mesh || m_materials.empty())
 		{
@@ -120,6 +120,7 @@ namespace Renderer
 			{
 				material = &*m_materials[i];
 			}
+
 			SetupRenderHandle(i, *material, m_renderHandles[i]);
 
 			renderQueue[counter.fetch_add(1)] = &m_renderHandles[i];

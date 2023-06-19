@@ -62,7 +62,7 @@ namespace Renderer
 		virtual void        SetupRenderHandle(uint32_t submeshId, Material& material, QueuedRenderObject& renderObject);
 		Transform4D         GetAttachmentTransform(uint32_t submeshId) override;
 
-		void PrepareForRender(RenderQueue& renderQueue, const Frustum& cameraFrustum, std::atomic_uint16_t& counter) override;
+		void PrepareForRender(RenderQueue& renderQueue, const Frustum& cameraFrustum, std::atomic_uint32_t& counter) override;
 
 		std::shared_ptr<Mesh>                  m_mesh;
 		std::vector<std::shared_ptr<Material>> m_materials;

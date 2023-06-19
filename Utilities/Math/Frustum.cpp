@@ -3,28 +3,6 @@
 
 Frustum::IntersectTestResult ClassifyPlane(const BoundingBox& boundingBox, const Plane& plane)
 {
-	/*const Point3D center = boundingBox.GetCenter();
-
-	const Vector3D halfSize = center - boundingBox.m_lowerBoundary;
-
-	const float r = abs(halfSize.x * plane.m_direction.x)
-					+ abs(halfSize.y * plane.m_direction.y)
-					+ abs(halfSize.z * plane.m_direction.z);
-
-	const float d = Dot(plane.m_direction, center) + plane.m_distance;
-
-	if (abs(d) < r)
-	{
-		return 0.0f;
-	}
-	if (d < 0.0f)
-	{
-		return d + r;
-	}
-	return d - r;
-    */
-
-
 	Vector3D vMin, vMax;
 
 	if (plane.m_direction.x > 0)

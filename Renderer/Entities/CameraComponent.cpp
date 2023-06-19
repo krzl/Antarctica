@@ -23,8 +23,7 @@ namespace Renderer
 
 	Matrix4D CameraComponent::GetLookAtMatrix() const
 	{
-		return GetWorldRotation().GetRotationMatrix() * Inverse(Transform4D::MakeTranslation(GetWorldPosition()));
-		return Transform4D(GetWorldRotation().GetRotationMatrix(), GetWorldPosition());
+		return Inverse(Transform4D::MakeTranslation(GetWorldPosition()) * GetWorldRotation().GetRotationMatrix());
 	}
 
 	Matrix4D CameraComponent::GetPerspectiveMatrix() const
@@ -32,13 +31,15 @@ namespace Renderer
 		using namespace Terathon;
 
 		const float tan   = Tan(0.5f * DegToRad(m_fov));
-		const float range = m_farZ / (m_farZ - m_nearZ);
+
+		const float a = (m_farZ + m_nearZ) / (m_nearZ - m_farZ);
+		const float b = (2.0f * m_farZ * m_nearZ) / (m_nearZ - m_farZ);
 
 		return Matrix4D(
-			1 / tan / m_aspectRatio, 0.0f, 0.0f, 0.0f,
-			0.0f, 1 / tan, 0, 0.0f,
-			0.0f, 0.0f, range, -range * m_nearZ,
-			0.0f, 0.0f, 1.0f, 0.0f
+			1.0f / (tan * m_aspectRatio), 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f / tan, 0, 0.0f,
+			0.0f, 0.0f, a, b,
+			0.0f, 0.0f, -1.0f, 0.0f
 		);
 	}
 
@@ -79,7 +80,7 @@ namespace Renderer
 
 		for (uint32_t i = 0; i < 6; ++i)
 		{
-			frustum.m_planes[i].m_direction = Cross(*frustumPoints[i][0] - *frustumPoints[i][1],
+			frustum.m_planes[i].m_direction = -Cross(*frustumPoints[i][0] - *frustumPoints[i][1],
 													 *frustumPoints[i][2] - *frustumPoints[i][1]);
 
 			frustum.m_planes[i].m_direction = Normalize(frustum.m_planes[i].m_direction);
@@ -92,7 +93,9 @@ namespace Renderer
 
 	void CameraComponent::UpdateConstantBuffer()
 	{
-		const Matrix4D viewProj = GetPerspectiveMatrix() * GetLookAtMatrix();
+		const Matrix4D proj     = GetPerspectiveMatrix();
+		const Matrix4D view     = GetLookAtMatrix();
+		const Matrix4D viewProj = proj * view;
 
 		PerCameraBuffer* buffer  = m_constantBuffer.GetData<PerCameraBuffer>();
 		buffer->m_viewProjMatrix = viewProj.transpose;

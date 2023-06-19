@@ -29,7 +29,7 @@ namespace Renderer
 
 		Transform4D GetAttachedNodeTransform(int32_t nodeId, bool ignoreAttachmentRotation) override;
 		void SetupRenderHandle(uint32_t submeshId, Material& material, QueuedRenderObject& renderObject) override;
-		void PrepareForRender(RenderQueue& renderQueue, const Frustum& cameraFrustum, std::atomic_uint16_t& counter) override;
+		void PrepareForRender(RenderQueue& renderQueue, const Frustum& cameraFrustum, std::atomic_uint32_t& counter) override;
 
 	private:
 

@@ -46,7 +46,7 @@ void main()
 					const int32_t y = j - gridSize / 2;
 					
 					Ref peasant = Application::Get().GetWorld().Spawn<Peasant>();
-					peasant->SetPosition(Point3D(x / 2.0f, y / 2.0f, 2.0f));
+					peasant->SetPosition(Point3D(x / 2.0f, y / 2.0f, 0.0f));
 					peasant->SetName("Peasant " + std::to_string((gridSize * i) + j));
 				}
 			}
@@ -66,8 +66,8 @@ void main()
 
 
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>();
-			camera->SetPosition(Point3D(0, 0, 20));
-			camera->SetRotation(210.0f, 0.0f, 180.0f);
+			camera->SetPosition(Point3D(0, 0, 10));
+			camera->SetRotation(20.0f, 0.0f, 0.0f);
 
 			//Ref<QuadtreeTester> qtt = Application::Get().GetWorld().Spawn<QuadtreeTester>();
 		}

@@ -48,56 +48,23 @@ namespace Anim
 		uint32_t left  = 0;
 		uint32_t right = keys.size() - 2;
 
-		uint32_t leftOld2 = left;
-		uint32_t rightOld2 = right;
-
-		uint32_t leftOld = left;
-		uint32_t rightOld = right;
-		uint32_t midOld = 0;
-
-		bool a;
-		bool b;
-		
 		while (left <= right)
 		{
-			leftOld2 = leftOld;
-			rightOld2 = rightOld;
-			leftOld = left;
-			rightOld = right;
 			const uint32_t mid = left + (right - left) / 2;
 
-			midOld = mid;
+			bool a = keys[mid].m_time <= currentTime;
+			bool b = keys[mid + 1].m_time >= currentTime;
 
-			a = keys[mid].m_time <= currentTime;
-			b = keys[mid + 1].m_time >= currentTime;
-			
-			// Check if the target is present at the middle position
 			if (keys[mid].m_time <= currentTime && keys[mid + 1].m_time >= currentTime)
 				return mid;
 
-			// If the target is greater, ignore the left half
 			if (keys[mid].m_time < currentTime)
 				left = mid + 1;
-				// If the target is smaller, ignore the right half
 			else
 				right = mid - 1;
 		}
 
 		return -1;
-		/*
-		for (uint32_t i = 1; i < keys.size(); ++i)
-		{
-			if (keys[i].m_time > currentTime)
-			{
-				const float alpha = InverseLerp(keys[i - 1].m_time,
-												keys[i].m_time, currentTime);
-				const Vector3D translation = LerpClamped(keys[i - 1].m_position,
-														 keys[i].m_position,
-														 alpha);
-
-				return translation;
-			}
-		}*/
 	}
 
 	static Vector3D GetCurrentTranslation(const AnimationNode* node, const float currentTime)
@@ -191,7 +158,8 @@ namespace Anim
 	void Solver::Calculate(std::vector<Transform4D>&    transforms, const std::shared_ptr<Animation>& animation,
 						   const std::vector<MeshNode>& meshNodes, const float                        currentTime)
 	{
-		transforms.resize(meshNodes.size());
+		transforms.assign(meshNodes.size(), Transform4D());
+		
 		const Transform4D initialTransform = Transform4D::identity;
 		CalculateNode(animation->m_rootNode, meshNodes, currentTime, transforms, initialTransform);
 

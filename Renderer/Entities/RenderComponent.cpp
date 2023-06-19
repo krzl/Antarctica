@@ -22,7 +22,7 @@ namespace Renderer
 
 	RenderQueue RenderComponent::GetObjectsToRender(const std::vector<GameObject*>& gameObjects)
 	{
-		std::atomic_uint16_t counter;
+		std::atomic_uint32_t counter;
 
 		static RenderQueue renderQueue(1024 * 64);
 		renderQueue.resize(1024 * 64);
@@ -77,5 +77,5 @@ namespace Renderer
 	}
 
 	void RenderComponent::PrepareForRender(RenderQueue&          renderQueue, const Frustum& cameraFrustum,
-										   std::atomic_uint16_t& counter) {}
+										   std::atomic_uint32_t& counter) {}
 }

@@ -14,7 +14,7 @@ namespace Renderer
 
 			DecomposeTransform(transform, translation, rotation, scale);
 
-			transform = Transform4D::MakeTranslation(translation) * Transform4D::MakeScale(scale.x, scale.y, scale.z);
+			transform = Transform4D(Matrix3D::MakeScale(scale.x, scale.y, scale.z), translation);
 		}
 
 		return transform;
@@ -44,7 +44,8 @@ namespace Renderer
 		renderObject.m_perObjectBuffer.m_transform = Transform4D::identity;
 	}
 
-	void AnimatedMeshComponent::PrepareForRender(RenderQueue& renderQueue, const Frustum& cameraFrustum, std::atomic_uint16_t& counter)
+	void AnimatedMeshComponent::PrepareForRender(RenderQueue&          renderQueue, const Frustum& cameraFrustum,
+												 std::atomic_uint32_t& counter)
 	{
 		if (m_mesh && m_animator)
 		{
