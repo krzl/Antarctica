@@ -1,17 +1,17 @@
 #pragma once
 
 #include <array>
+#include <bitset>
 #include <map>
 #include <queue>
 #include <set>
 #include <string>
 #include <unordered_set>
 #include <vector>
-#include <bitset>
 
-#include <mutex>
 #include <algorithm>
 #include <functional>
+#include <mutex>
 #include <optional>
 
 #include <fstream>
@@ -44,8 +44,12 @@ using Terathon::Quaternion;
 #include "../Utilities/Common/MathHelpers.h"
 #include "../Utilities/Common/Random.h"
 #include "../Utilities/Common/Ref.h"
-#include "../Utilities/Math/MathFunctions.h"
 #include "../Utilities/Math/BoundingBox.h"
+#include "../Utilities/Math/Capsule.h"
+#include "../Utilities/Math/Frustum.h"
+#include "../Utilities/Math/MathFunctions.h"
+#include "../Utilities/Math/Plane.h"
+#include "../Utilities/Math/Ray.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <d3d12.h>

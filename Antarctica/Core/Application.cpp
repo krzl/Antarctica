@@ -72,12 +72,8 @@ void Application::Run()
 		}
 		m_window.Update();
 		Renderer::CameraComponent::SetAspectRatio(GetWindow().GetAspectRatio());
-
-		Timer time;
-		time.Start();
-		GetWorld().GetQuadtree().Update();
-		LOG(DEBUG, "Time test", "{}", time.GetTime());
-		m_renderSystem.Render();
+		std::vector<GameObject*> gameObjectsToRender = GetWorld().GetQuadtree().Intersect(Renderer::CameraComponent::Get()->GetFrustum());
+		m_renderSystem.Render(gameObjectsToRender);
 	}
 		
 	m_renderSystem.Cleanup();

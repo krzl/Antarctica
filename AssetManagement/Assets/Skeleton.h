@@ -20,6 +20,7 @@ struct Bone
 	uint64_t    m_boneNameHash;
 	Skeleton*   m_skeleton = nullptr;
 	Matrix4D    m_offsetMatrix;
+	Capsule     m_collider;
 };
 
 struct Skeleton

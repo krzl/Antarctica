@@ -53,6 +53,25 @@ void DecomposeTransform(const Transform4D& transform, Vector3D& translation, Qua
 	rotation.SetRotationMatrix(transform);
 }
 
+float GetDistanceSquaredFromLineToPoint(const Vector3D& direction, const Point3D& point)
+{
+	const float t = (point.x * direction.x + point.y * direction.y + point.z * direction.z) /
+					(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+
+	Vector3D closestPointOnVector = { t * direction.x, t * direction.y, t * direction.z };
+
+	const float distanceSquared = (closestPointOnVector.x - point.x) * (closestPointOnVector.x - point.x) +
+								  (closestPointOnVector.y - point.y) * (closestPointOnVector.y - point.y) +
+								  (closestPointOnVector.z - point.z) * (closestPointOnVector.z - point.z);
+
+	return distanceSquared;
+}
+
+float GetDistanceFromLineToPoint(const Vector3D& direction, const Point3D& point)
+{
+	return std::sqrt(GetDistanceSquaredFromLineToPoint(direction, point));
+}
+
 Vector3D LerpClamped(const Vector3D& a, const Vector3D& b, float alpha)
 {
 	alpha = Terathon::Clamp(alpha, 0.0f, 1.0f);

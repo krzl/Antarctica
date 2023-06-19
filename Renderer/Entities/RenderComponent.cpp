@@ -4,12 +4,10 @@
 #include <execution>
 #include <Buffers/Types/PerObjectBuffer.h>
 
+#include "Camera.h"
+
 namespace Renderer
 {
-	std::unordered_set<RenderComponent*> renderComponents;
-
-	std::mutex RenderComponent::renderQueueMutex;
-
 	struct RenderQueueComp
 	{
 		bool operator()(const QueuedRenderObject* a, const QueuedRenderObject* b) const
@@ -22,64 +20,45 @@ namespace Renderer
 		}
 	};
 
-	RenderQueue RenderComponent::GetObjectsToRender()
+	RenderQueue RenderComponent::GetObjectsToRender(const std::vector<GameObject*>& gameObjects)
 	{
-		static uint32_t capacity = 10000;
+		std::atomic_uint16_t counter;
 
-		RenderQueue renderQueue;
-		renderQueue.reserve(capacity);
+		static RenderQueue renderQueue(1024 * 64);
+		renderQueue.resize(1024 * 64);
 
-		RenderQueue* renderQueuePtr = &renderQueue;
-
-		constexpr uint32_t numThreads    = 8;
-		const uint32_t     partitionSize = (uint32_t) renderComponents.size() / numThreads;
-
-		std::vector<std::unordered_set<RenderComponent*>::iterator> iterators(numThreads + 1);
-		auto                                                        start = iterators[0] = renderComponents.begin();
-		for (uint32_t i = 0; i < numThreads - 1; ++i)
-		{
-			const auto end = std::next(start, partitionSize);
-
-			start = iterators[i + 1] = end;
-		}
-		iterators[numThreads] = renderComponents.end();
-
-		std::vector<std::thread> threads;
-		if (threads.size() == 0)
-		{
-			for (uint32_t i = 0; i < numThreads; ++i)
-			{
-				threads.emplace_back([i, iterators, renderQueuePtr]
+		const Frustum     cameraFrustum = CameraComponent::Get()->GetFrustum();
+		static ThreadPool threadPool    =
+			ThreadPool<GameObject>(
+				[cameraFrustum, &counter](const GameObject* gameObject)
 				{
-					std::for_each(std::execution::par, iterators[i], iterators[i + 1], [this, renderQueuePtr](RenderComponent* component)
+					for (auto [_, component] : gameObject->GetComponents())
 					{
-						component->PrepareForRender(*renderQueuePtr);
-					});
-				});
-			}
-		}
+						Ref<RenderComponent> renderComponent = component->GetRef().Cast<RenderComponent>();
+						if (renderComponent.IsValid())
+						{
+							renderComponent->PrepareForRender(renderQueue, cameraFrustum, counter);
+						}
+					}
+				}, 32);
 
-		for (auto& thread : threads)
-		{
-			thread.join();
-		}
+		std::for_each(std::execution::par_unseq, gameObjects.begin(), gameObjects.end(),
+					  [cameraFrustum, &counter](const GameObject* gameObject)
+					  {
+						  for (auto [_, component] : gameObject->GetComponents())
+						  {
+							  Ref<RenderComponent> renderComponent = component->GetRef().Cast<RenderComponent>();
+							  if (renderComponent.IsValid())
+							  {
+								  renderComponent->PrepareForRender(renderQueue, cameraFrustum, counter);
+							  }
+						  }
+					  });
 
-
+		renderQueue.resize(counter);
 		std::sort(renderQueue.begin(), renderQueue.end(), RenderQueueComp());
 
-		capacity = max(capacity, (uint32_t) renderQueue.capacity());
-
 		return renderQueue;
-	}
-
-	void RenderComponent::OnEnabled()
-	{
-		renderComponents.insert(this);
-	}
-
-	void RenderComponent::OnDisabled()
-	{
-		renderComponents.erase(this);
 	}
 
 	Transform4D RenderComponent::GetAttachmentTransform(uint32_t id)
@@ -97,5 +76,6 @@ namespace Renderer
 		return buffer;
 	}
 
-	void RenderComponent::PrepareForRender(RenderQueue& renderQueue) {}
+	void RenderComponent::PrepareForRender(RenderQueue&          renderQueue, const Frustum& cameraFrustum,
+										   std::atomic_uint16_t& counter) {}
 }

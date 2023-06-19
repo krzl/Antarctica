@@ -30,7 +30,6 @@ void World::SetupSpawnedGameObject(const std::shared_ptr<GameObject> gameObject,
 
 	gameObject->InitComponents();
 
-	gameObject->m_quadtreePlacement = m_quadtree.AddObject(gameObject.get(), gameObject->GetBoundingBox());
 	gameObject->m_world             = this;
 
 	if (gameObject->m_name.empty())
@@ -38,11 +37,14 @@ void World::SetupSpawnedGameObject(const std::shared_ptr<GameObject> gameObject,
 		gameObject->SetName("GameObject Id: " + std::to_string(instanceId));
 	}
 
+	
 	gameObject->OnCreated();
 	if (gameObject->IsEnabled())
 	{
 		gameObject->OnEnabled();
 	}
+	
+	gameObject->m_quadtreePlacement = m_quadtree.AddObject(gameObject.get(), gameObject->GetBoundingBox());
 }
 
 Ref<GameObject> World::GetSpawnedObject(const uint64_t instanceId)
@@ -66,19 +68,20 @@ World* World::Get()
 	return world;
 }
 
-void World::Update(float deltaTime)
+void World::Update(const float deltaTime)
 {
 	for (auto& [instanceId, object] : m_pendingSpawnObjects)
 	{
 		m_gameObjects[instanceId] = object;
 	}
+
 	m_pendingSpawnObjects.clear();
 
 	for (auto instanceId : m_pendingDestroyList)
 	{
-		m_quadtree.RemoveObject(m_gameObjects[instanceId].get());
 		m_gameObjects.erase(instanceId);
 	}
+
 	m_pendingDestroyList.clear();
 
 	for (auto& [_, gameObject] : m_gameObjects)
@@ -98,10 +101,10 @@ void World::AddToPendingDestroy(Ref<GameObject> gameObject)
 		auto it = m_gameObjects.find(ptr->GetInstanceId());
 		if (it != m_gameObjects.end())
 		{
-			it->second.reset();
-
 			m_pendingDestroyList.insert(ptr->GetInstanceId());
 			ptr->m_isPendingDestroy = true;
+
+			it->second.reset();
 		}
 		else
 		{
@@ -111,5 +114,7 @@ void World::AddToPendingDestroy(Ref<GameObject> gameObject)
 				m_pendingSpawnObjects.erase(it);
 			}
 		}
+
+		m_quadtree.RemoveObject(ptr);
 	}
 }

@@ -167,7 +167,7 @@ namespace Renderer::Dx12
 			pipelineStateDesc.RTVFormats[i] = outputFormats[i];
 		}
 
-		pipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
+		pipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
 
 		Dx12Context::Get().GetDevice()->
 						   CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&m_pipelineState));

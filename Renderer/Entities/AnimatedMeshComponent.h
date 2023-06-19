@@ -23,15 +23,13 @@ namespace Renderer
 
 		void SetTrigger(int32_t id, bool value);
 
-		BoundingBox GetBoundingBox() const override;
-		
 	protected:
 
 		std::shared_ptr<Anim::Animator> m_animator;
 
 		Transform4D GetAttachedNodeTransform(int32_t nodeId, bool ignoreAttachmentRotation) override;
 		void SetupRenderHandle(uint32_t submeshId, Material& material, QueuedRenderObject& renderObject) override;
-		void PrepareForRender(RenderQueue& renderQueue) override;
+		void PrepareForRender(RenderQueue& renderQueue, const Frustum& cameraFrustum, std::atomic_uint16_t& counter) override;
 
 	private:
 

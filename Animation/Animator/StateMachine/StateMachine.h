@@ -24,9 +24,8 @@ namespace Anim
 		explicit StateMachine(std::vector<std::shared_ptr<State>>&& states) :
 			m_states(std::move(states)) { }
 
-		std::vector<Transform4D> CalculateMatrices(StateMachineData&            stateMachineData,
-												   std::set<int>&               triggerState,
-												   const std::vector<MeshNode>& meshNodes) const;
+		void CalculateMatrices(StateMachineData& stateMachineData, std::vector<Transform4D>& matrices,
+							   std::set<int>&    triggerState, const std::vector<MeshNode>&  meshNodes) const;
 
 	private:
 

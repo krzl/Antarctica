@@ -24,3 +24,7 @@ T Clamp(const T& a, const T& b, const T& value)
 {
 	return value < a ? a : (value > b ? b : value);
 }
+
+float GetDistanceFromLineToPoint(const Vector3D& direction, const Point3D& point);
+
+float GetDistanceSquaredFromLineToPoint(const Vector3D& direction, const Point3D& point);

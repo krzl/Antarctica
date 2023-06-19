@@ -113,8 +113,65 @@ void GameObject::SetEnabled(const bool isEnabled)
 
 BoundingBox GameObject::GetBoundingBox() const
 {
-	const Vector3D position = GetPosition();
-	BoundingBox    boundingBox(position, position);
+	BoundingBox box = m_boundingBox.value_or(CalculateBoundingBox());
+	
+	if (!m_boundingBox.has_value())
+	{
+		m_boundingBox = box;
+	}
+
+	return box;
+}
+
+void GameObject::MarkDirty()
+{
+	m_boundingBox.reset();
+	if (m_quadtreePlacement.IsValid())
+	{
+		m_quadtreePlacement.InvalidatePlacement();
+	}
+}
+
+#undef max
+
+float GameObject::TraceRay(const BoundingBox::RayIntersectionTester& ray)
+{
+	float closestDistance = std::numeric_limits<float>::max();
+
+	for (auto [_, component] : m_components)
+	{
+		if (component->GetRef().IsValid())
+		{
+			Ref<SceneComponent> sceneComponent = component->GetRef().Cast<SceneComponent>();
+			if (sceneComponent.IsValid())
+			{
+				const float distance = sceneComponent->TraceRay(ray, closestDistance);
+				if (distance >= 0.0f && distance < closestDistance)
+				{
+					closestDistance = distance;
+				}
+			}
+		}
+	}
+
+	return closestDistance;
+}
+
+void GameObject::InitComponents()
+{
+	for (auto [_, component] : m_components)
+	{
+		if (!component->GetRef().IsValid())
+		{
+			component->Init(GetRef(), component);
+		}
+	}
+}
+
+BoundingBox GameObject::CalculateBoundingBox() const
+{
+	const Vector3D position    = GetPosition();
+	BoundingBox    boundingBox = BoundingBox(position, position);
 
 	for (auto [_, component] : m_components)
 	{
@@ -131,29 +188,12 @@ BoundingBox GameObject::GetBoundingBox() const
 	return boundingBox;
 }
 
-void GameObject::MarkDirty()
-{
-	if (m_quadtreePlacement.IsValid())
-	{
-		m_quadtreePlacement.InvalidatePlacement();
-	}
-}
-
-void GameObject::InitComponents()
-{
-	for (auto [_, component] : m_components)
-	{
-		if (!component->GetRef().IsValid())
-		{
-			component->Init(GetRef(), component);
-		}
-	}
-}
-
 void GameObject::TickComponents(const float deltaTime)
 {
 	const uint32_t cachedSize = (uint32_t) m_components.size();
 
+	bool foundNullComponent = false;
+	
 	auto it = m_components.begin();
 	for (uint32_t i = 0; i < cachedSize; i++)
 	{
@@ -164,18 +204,25 @@ void GameObject::TickComponents(const float deltaTime)
 
 			++it;
 		}
-	}
-
-	it = m_components.begin();
-	while (it != m_components.end())
-	{
-		if (it->second.get() == nullptr)
-		{
-			m_components.erase(it);
-		}
 		else
 		{
-			++it;
+			foundNullComponent = true;
+		}
+	}
+
+	if (foundNullComponent)
+	{
+		it = m_components.begin();
+		while (it != m_components.end())
+		{
+			if (it->second.get() == nullptr)
+			{
+				m_components.erase(it);
+			}
+			else
+			{
+				++it;
+			}
 		}
 	}
 }

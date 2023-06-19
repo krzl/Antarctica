@@ -2,6 +2,7 @@
 #include "StaticMeshComponent.h"
 
 #include "Buffers/Types/PerObjectBuffer.h"
+#include "GameObjects/GameObject.h"
 
 namespace Renderer
 {
@@ -22,6 +23,12 @@ namespace Renderer
 
 		m_renderHandles.clear();
 		m_renderHandles.resize(m_mesh->GetSubmeshCount());
+
+		MarkDirty();
+		if (m_owner.IsValid())
+		{
+			m_owner->MarkDirty();
+		}
 	}
 
 	BoundingBox StaticMeshComponent::GetBoundingBox() const
@@ -49,6 +56,34 @@ namespace Renderer
 		return boundingBox.Transform(GetWorldTransform());
 	}
 
+	float StaticMeshComponent::TraceRay(const BoundingBox::RayIntersectionTester& ray, float& closestDistance) const
+	{
+		//const BoundingBox::RayIntersectionTester transformedRayTester = ray.m_ray.Transform(GetInverseWorldTransform());
+
+		if (m_mesh)
+		{
+			for (const Submesh& submesh : m_mesh->GetSubmeshes())
+			{
+				BoundingBox submeshBoundingBox = submesh.GetBoundingBox().Transform(GetWorldTransform());
+				const float distance           = ray.Intersect(submeshBoundingBox);
+
+				if (distance >= 0.0f && distance < closestDistance)
+				{
+					if (m_useMeshForCollision)
+					{
+						//
+					}
+					else
+					{
+						closestDistance = distance;
+					}
+				}
+			}
+		}
+
+		return closestDistance;
+	}
+
 	Transform4D StaticMeshComponent::GetAttachedNodeTransform(const int32_t nodeId, bool ignoreAttachmentRotation)
 	{
 		return m_mesh->GetNodes()[nodeId].m_globalTransform;
@@ -63,7 +98,8 @@ namespace Renderer
 		renderObject.m_perObjectBuffer = GetConstantBuffer(submeshId);
 	}
 
-	void StaticMeshComponent::PrepareForRender(RenderQueue& renderQueue)
+	void StaticMeshComponent::PrepareForRender(RenderQueue&          renderQueue, const Frustum& cameraFrustum,
+											   std::atomic_uint16_t& counter)
 	{
 		if (!m_mesh || m_materials.empty())
 		{
@@ -72,19 +108,21 @@ namespace Renderer
 
 		for (uint32_t i = 0; i < m_mesh->GetSubmeshCount(); ++i)
 		{
+			const BoundingBox boundingBox = m_mesh->GetSubmesh(i).GetBoundingBox().Transform(GetWorldTransform());
+
+			if (cameraFrustum.Intersect(boundingBox) == Frustum::IntersectTestResult::OUTSIDE)
+			{
+				continue;
+			}
+
 			Material* material = &*m_materials[0];
 			if (m_materials.size() > i && m_materials[i])
 			{
 				material = &*m_materials[i];
 			}
 			SetupRenderHandle(i, *material, m_renderHandles[i]);
-		}
 
-		std::lock_guard lock(renderQueueMutex);
-
-		for (uint32_t i = 0; i < m_mesh->GetSubmeshCount(); ++i)
-		{
-			renderQueue.emplace_back(&m_renderHandles[i]);
+			renderQueue[counter.fetch_add(1)] = &m_renderHandles[i];
 		}
 	}
 }

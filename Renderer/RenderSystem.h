@@ -1,5 +1,6 @@
 #pragma once
 
+class GameObject;
 class ComputeShader;
 class Settings;
 
@@ -22,7 +23,7 @@ namespace Renderer
 
 		void Init(const Platform::Window& window, const Settings& settings);
 		void OnResize(const Platform::Window& window);
-		void Render();
+		void Render(const std::vector<GameObject*>& gameObjects);
 		void Cleanup();
 
 		uint32_t GetCurrentBackbufferId() const;

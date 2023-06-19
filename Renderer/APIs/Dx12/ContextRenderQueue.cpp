@@ -101,8 +101,7 @@ namespace Renderer::Dx12
 				(objectsToRender.size() != i + 1) &&
 				objectsToRender[i + 1]->m_submesh == queuedObject->m_submesh &&
 				//objectsToRender[i + 1]->->m_material == queuedObject->m_material &&
-				objectsToRender[i + 1]->m_boneTransforms.size() == queuedObject->m_boneTransforms.size() &&
-				instanceCount < 2048;
+				objectsToRender[i + 1]->m_boneTransforms.size() == queuedObject->m_boneTransforms.size();
 			
 			if (!isNextBatched)
 			{

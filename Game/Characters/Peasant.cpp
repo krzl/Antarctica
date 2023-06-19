@@ -82,17 +82,17 @@ Peasant::Peasant()
 	m_animatedMeshComponent->SetMaterial(material);
 	m_animatedMeshComponent->SetMaterial(materialSkin, 3);
 
-	InputSystem::GetInstance()->OnLeftMouseButtonPressed.AddListener([this]()
+	m_handle = InputSystem::GetInstance()->OnLeftMouseButtonPressed.AddListener([this]()
 	{
 		using namespace Anim;
 
 		m_isWalking = !m_isWalking;
 		
 		m_animatedMeshComponent->SetTrigger(WALK, m_isWalking);
-	}, false);
+	}, true);
 }
 
 void Peasant::Tick(const float deltaTime)
 {
-	SetPosition(GetPosition() - Point3D::x_unit * deltaTime - Point3D::y_unit * deltaTime);
+	//SetPosition(GetPosition() - Point3D::x_unit * deltaTime - Point3D::y_unit * deltaTime);
 }

@@ -42,61 +42,102 @@ namespace Anim
 		return -1;
 	}
 
+	template<typename T>
+	uint32_t FindKeyId(const std::vector<T>& keys, const float currentTime)
+	{
+		uint32_t left  = 0;
+		uint32_t right = keys.size() - 2;
+
+		uint32_t leftOld2 = left;
+		uint32_t rightOld2 = right;
+
+		uint32_t leftOld = left;
+		uint32_t rightOld = right;
+		uint32_t midOld = 0;
+
+		bool a;
+		bool b;
+		
+		while (left <= right)
+		{
+			leftOld2 = leftOld;
+			rightOld2 = rightOld;
+			leftOld = left;
+			rightOld = right;
+			const uint32_t mid = left + (right - left) / 2;
+
+			midOld = mid;
+
+			a = keys[mid].m_time <= currentTime;
+			b = keys[mid + 1].m_time >= currentTime;
+			
+			// Check if the target is present at the middle position
+			if (keys[mid].m_time <= currentTime && keys[mid + 1].m_time >= currentTime)
+				return mid;
+
+			// If the target is greater, ignore the left half
+			if (keys[mid].m_time < currentTime)
+				left = mid + 1;
+				// If the target is smaller, ignore the right half
+			else
+				right = mid - 1;
+		}
+
+		return -1;
+		/*
+		for (uint32_t i = 1; i < keys.size(); ++i)
+		{
+			if (keys[i].m_time > currentTime)
+			{
+				const float alpha = InverseLerp(keys[i - 1].m_time,
+												keys[i].m_time, currentTime);
+				const Vector3D translation = LerpClamped(keys[i - 1].m_position,
+														 keys[i].m_position,
+														 alpha);
+
+				return translation;
+			}
+		}*/
+	}
+
 	static Vector3D GetCurrentTranslation(const AnimationNode* node, const float currentTime)
 	{
-		if (node->m_positionKeys.back().m_time > currentTime)
+		if (node->m_positionKeys.size() > 1 && node->m_positionKeys.back().m_time > currentTime)
 		{
-			for (uint32_t i = 1; i < node->m_positionKeys.size(); ++i)
-			{
-				if (node->m_positionKeys[i].m_time > currentTime)
-				{
-					const float alpha = InverseLerp(node->m_positionKeys[i - 1].m_time,
-													node->m_positionKeys[i].m_time, currentTime);
-					const Vector3D translation = LerpClamped(node->m_positionKeys[i - 1].m_position,
-															 node->m_positionKeys[i].m_position,
-															 alpha);
-
-					return translation;
-				}
-			}
+			const uint32_t keyId = FindKeyId(node->m_positionKeys, currentTime);
+			const float    alpha = InverseLerp(node->m_positionKeys[keyId].m_time,
+											   node->m_positionKeys[keyId + 1].m_time, currentTime);
+			return LerpClamped(node->m_positionKeys[keyId].m_position,
+							   node->m_positionKeys[keyId + 1].m_position,
+							   alpha);
 		}
 		return node->m_positionKeys.back().m_position;
 	}
 
 	Quaternion GetCurrentRotation(const AnimationNode* node, const float currentTime)
 	{
-		if (node->m_rotationKeys.back().m_time > currentTime)
+		if (node->m_rotationKeys.size() > 1 && node->m_rotationKeys.back().m_time > currentTime)
 		{
-			for (uint32_t i = 1; i < node->m_rotationKeys.size(); ++i)
-			{
-				if (node->m_rotationKeys[i].m_time > currentTime)
-				{
-					const float alpha = InverseLerp(node->m_rotationKeys[i - 1].m_time,
-													node->m_rotationKeys[i].m_time, currentTime);
-					return SlerpClamped(node->m_rotationKeys[i - 1].m_rotation,
-										node->m_rotationKeys[i].m_rotation,
-										alpha);
-				}
-			}
+			const uint32_t keyId = FindKeyId(node->m_rotationKeys, currentTime);
+			const float    alpha = InverseLerp(node->m_rotationKeys[keyId].m_time,
+											   node->m_rotationKeys[keyId + 1].m_time, currentTime);
+			return SlerpClamped(node->m_rotationKeys[keyId].m_rotation,
+								node->m_rotationKeys[keyId + 1].m_rotation,
+								alpha);
 		}
 		return node->m_rotationKeys.back().m_rotation;
 	}
 
 	Vector3D GetCurrentScale(const AnimationNode* node, const float currentTime)
 	{
-		if (node->m_scaleKeys.back().m_time > currentTime)
+		if (node->m_scaleKeys.size() > 1 && node->m_scaleKeys.back().m_time > currentTime)
 		{
-			for (uint32_t i = 1; i < node->m_scaleKeys.size(); ++i)
-			{
-				if (node->m_scaleKeys[i].m_time > currentTime)
-				{
-					const float alpha = InverseLerp(node->m_scaleKeys[i - 1].m_time, node->m_scaleKeys[i].m_time,
-													currentTime);
-					return LerpClamped(node->m_scaleKeys[i - 1].m_scale,
-									   node->m_scaleKeys[i].m_scale,
-									   alpha);
-				}
-			}
+			const uint32_t keyId = FindKeyId(node->m_scaleKeys, currentTime);
+			const float    alpha = InverseLerp(node->m_scaleKeys[keyId].m_time, node->m_scaleKeys[keyId + 1].m_time,
+											   currentTime);
+			return LerpClamped(node->m_scaleKeys[keyId].m_scale,
+							   node->m_scaleKeys[keyId + 1].m_scale,
+							   alpha);
 		}
 		return node->m_scaleKeys.back().m_scale;
 	}
@@ -147,12 +188,11 @@ namespace Anim
 		}
 	}
 
-	std::vector<Transform4D> Solver::Calculate(const std::shared_ptr<Animation>& animation,
-											   const std::vector<MeshNode>&      meshNodes,
-											   const float                       currentTime)
+	void Solver::Calculate(std::vector<Transform4D>&    transforms, const std::shared_ptr<Animation>& animation,
+						   const std::vector<MeshNode>& meshNodes, const float                        currentTime)
 	{
-		std::vector<Transform4D> transforms(meshNodes.size());
-		const Transform4D        initialTransform = Transform4D::identity;
+		transforms.resize(meshNodes.size());
+		const Transform4D initialTransform = Transform4D::identity;
 		CalculateNode(animation->m_rootNode, meshNodes, currentTime, transforms, initialTransform);
 
 		for (uint32_t i = 0; i < meshNodes.size(); ++i)
@@ -162,7 +202,6 @@ namespace Anim
 				transforms[i] = transforms[meshNodes[i].m_parentNodeId] * meshNodes[i].m_localTransform;
 			}
 		}
-		return transforms;
 	}
 
 	std::vector<std::vector<Matrix4D>>& Solver::UpdateAnimation(const std::shared_ptr<Mesh>& mesh)
@@ -174,8 +213,8 @@ namespace Anim
 			std::shared_ptr<StateMachine> stateMachine = m_animator->m_stateMachines[i];
 
 			//TODO: Support multiple layers
-			m_nodeTransforms = m_animator->m_stateMachines[i]->CalculateMatrices(
-				m_stateMachineData[i], m_triggerState, mesh->GetNodes());
+			m_animator->m_stateMachines[i]->CalculateMatrices(m_stateMachineData[i], m_nodeTransforms,
+															  m_triggerState, mesh->GetNodes());
 
 			break;
 		}
@@ -206,14 +245,10 @@ namespace Anim
 		return m_finalMatrices;
 	}
 
-	std::vector<Transform4D> Solver::Interpolate(const std::vector<Transform4D>& aTransforms,
-												 const std::vector<Transform4D>& bTransforms,
-												 const float                     alpha)
+	void Solver::Interpolate(const std::vector<Transform4D>& aTransforms, std::vector<Transform4D>& bTransforms,
+							 const float                     alpha)
 	{
 		assert(aTransforms.size() == bTransforms.size());
-
-		std::vector<Transform4D> interpolated;
-		interpolated.resize(aTransforms.size());
 
 		for (uint32_t i = 0; i < aTransforms.size(); ++i)
 		{
@@ -232,10 +267,8 @@ namespace Anim
 			const Quaternion rotation    = SlerpClamped(aRotation, bRotation, alpha);
 			const Vector3D   scale       = LerpClamped(aScale, bScale, alpha);
 
-			interpolated[i] = Transform4D::MakeTranslation(translation) * rotation.GetRotationMatrix() *
-							  Transform4D::MakeScale(scale.x, scale.y, scale.z);
+			bTransforms[i] = Transform4D::MakeTranslation(translation) * rotation.GetRotationMatrix() *
+							 Transform4D::MakeScale(scale.x, scale.y, scale.z);
 		}
-
-		return interpolated;
 	}
 }

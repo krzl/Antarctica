@@ -37,22 +37,21 @@ namespace Renderer
 
 		for (uint32_t j = 0; j < bonesCount; ++j)
 		{
-			renderObject.m_boneTransforms[j] = m_animationSolver.GetFinalMatrices()[submeshId][j] * renderObject.
-																								    m_perObjectBuffer.
-																								    m_transform;
+			renderObject.m_boneTransforms[j] =
+				m_animationSolver.GetFinalMatrices()[submeshId][j] * renderObject.m_perObjectBuffer.m_transform;
 		}
 
 		renderObject.m_perObjectBuffer.m_transform = Transform4D::identity;
 	}
 
-	void AnimatedMeshComponent::PrepareForRender(RenderQueue& renderQueue)
+	void AnimatedMeshComponent::PrepareForRender(RenderQueue& renderQueue, const Frustum& cameraFrustum, std::atomic_uint16_t& counter)
 	{
 		if (m_mesh && m_animator)
 		{
 			m_animationSolver.UpdateAnimation(m_mesh);
 		}
 
-		StaticMeshComponent::PrepareForRender(renderQueue);
+		StaticMeshComponent::PrepareForRender(renderQueue, cameraFrustum, counter);
 	}
 
 	void AnimatedMeshComponent::SetMesh(const std::shared_ptr<Mesh>& mesh)
@@ -78,10 +77,5 @@ namespace Renderer
 	void AnimatedMeshComponent::SetTrigger(const int32_t id, const bool value)
 	{
 		m_animationSolver.SetTrigger(id, value);
-	}
-
-	BoundingBox AnimatedMeshComponent::GetBoundingBox() const
-	{
-		return StaticMeshComponent::GetBoundingBox().Scale(2.0f);
 	}
 }

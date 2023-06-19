@@ -28,9 +28,8 @@ namespace Anim
 		return true;
 	}
 
-	std::vector<Transform4D> StateMachine::CalculateMatrices(StateMachineData&            stateMachineData,
-															 std::set<int32_t>&           triggerState,
-															 const std::vector<MeshNode>& meshNodes) const
+	void StateMachine::CalculateMatrices(StateMachineData&  stateMachineData, std::vector<Transform4D>& matrices,
+										 std::set<int32_t>& triggerState, const std::vector<MeshNode>&  meshNodes) const
 	{
 		if (stateMachineData.m_currentState == nullptr)
 		{
@@ -63,21 +62,20 @@ namespace Anim
 			}
 		}
 
-		std::vector<Transform4D> transforms = stateMachineData.m_currentState->CalculateBones(
-			meshNodes, stateMachineData.m_currentTime);
+		stateMachineData.m_currentState->CalculateBones(matrices,
+														meshNodes, stateMachineData.m_currentTime);
 
 		if (stateMachineData.m_previousState)
 		{
-			const std::vector<Transform4D> oldStateTransforms = stateMachineData.m_previousState->
-																				 CalculateBones(meshNodes,
-																							    stateMachineData.
-																							    m_previousTime);
+			//TODO: don't reallocate?
+			std::vector<Transform4D> oldStateTransforms(matrices.size());
+
+			stateMachineData.m_previousState->CalculateBones(oldStateTransforms, meshNodes,
+															 stateMachineData.m_previousTime);
 
 			const float alpha = stateMachineData.m_currentTime / stateMachineData.m_transitionTime;
 
-			transforms = Solver::Interpolate(oldStateTransforms, transforms, alpha);
+			Solver::Interpolate(oldStateTransforms, matrices, alpha);
 		}
-
-		return transforms;
 	}
 }

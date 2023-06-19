@@ -47,7 +47,7 @@ public:
 			}
 		}
 
-		return Ref<Component>();
+		return Ref<T>();
 	}
 
 	template<
@@ -73,6 +73,11 @@ public:
 				components.emplace_back(ref);
 			}
 		}
+	}
+
+	[[nodiscard]] const std::unordered_multimap<uint64_t, std::shared_ptr<Component>>& GetComponents() const
+	{
+		return m_components;
 	}
 
 	// Remove
@@ -162,9 +167,11 @@ public:
 
 	BoundingBox GetBoundingBox() const;
 
-	void MarkDirty();
-
 	[[nodiscard]] World& GetWorld() const { return *m_world; }
+
+	void MarkDirty();
+	
+	float TraceRay(const BoundingBox::RayIntersectionTester& ray);
 
 	// Setters
 
@@ -228,6 +235,8 @@ protected:
 	uint32_t m_collisionChannel = (uint32_t) Collision::CollisionChannel::DEFAULT;
 
 private:
+	
+	[[nodiscard]] BoundingBox CalculateBoundingBox() const;
 
 	void TickComponents(float deltaTime);
 
@@ -245,6 +254,7 @@ private:
 	World* m_world;
 
 	Quadtree::PlacementRef m_quadtreePlacement;
+	mutable std::optional<BoundingBox> m_boundingBox;
 
 	bool m_isEnabled        = true;
 	bool m_isPendingDestroy = false;

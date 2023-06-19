@@ -12,10 +12,6 @@ void SceneComponent::SetLocalPosition(const Point3D position)
 {
 	m_position = position;
 	MarkDirty();
-	if (m_owner.IsValid())
-	{
-		m_owner->MarkDirty();
-	}
 }
 
 Point3D SceneComponent::GetWorldPosition() const
@@ -43,14 +39,23 @@ void SceneComponent::SetWorldPosition(const Point3D position)
 	}
 }
 
-void SceneComponent::SetLocalRotation(const Quaternion rotation)
+void SceneComponent::MarkDirty()
 {
-	m_rotation = rotation;
-	MarkDirty();
+	OnMarkedDirty();
+	for (Ref<SceneComponent>& child : m_children)
+	{
+		child->OnMarkedDirty();
+	}
 	if (m_owner.IsValid())
 	{
 		m_owner->MarkDirty();
 	}
+}
+
+void SceneComponent::SetLocalRotation(const Quaternion rotation)
+{
+	m_rotation = rotation;
+	MarkDirty();
 }
 
 void SceneComponent::SetLocalRotation(const Vector3D axis)
@@ -102,10 +107,6 @@ void SceneComponent::SetLocalScale(const Vector3D scale)
 {
 	m_scale = scale;
 	MarkDirty();
-	if (m_owner.IsValid())
-	{
-		m_owner->MarkDirty();
-	}
 }
 
 Vector3D SceneComponent::GetWorldScale() const
@@ -166,6 +167,15 @@ const Transform4D& SceneComponent::GetLocalTransform() const
 	return m_localTransform;
 }
 
+const Transform4D& SceneComponent::GetInverseWorldTransform() const
+{
+	if (!m_inverseGlobalTransform.has_value())
+	{
+		m_inverseGlobalTransform = Inverse(GetWorldTransform());
+	}
+	return m_inverseGlobalTransform.value();
+}
+
 void SceneComponent::RemoveFromParent()
 {
 	const Ref<SceneComponent> self = m_self.Cast<SceneComponent>();
@@ -192,6 +202,13 @@ BoundingBox SceneComponent::GetBoundingBox() const
 	return BoundingBox(GetWorldPosition(), GetWorldPosition());
 }
 
+#undef max
+
+float SceneComponent::TraceRay(const BoundingBox::RayIntersectionTester& ray, float& closestDistance) const
+{
+	return -1.0f;
+}
+
 void SceneComponent::SetParentInternal(Ref<SceneComponent> parent, Ref<SceneComponent> self)
 {
 	RemoveFromParent();
@@ -203,13 +220,9 @@ void SceneComponent::SetParentInternal(Ref<SceneComponent> parent, Ref<SceneComp
 	}
 }
 
-void SceneComponent::MarkDirty()
+void SceneComponent::OnMarkedDirty()
 {
 	m_isLocalTransformDirty  = true;
 	m_isGlobalTransformDirty = true;
-
-	for (Ref<SceneComponent>& child : m_children)
-	{
-		child->MarkDirty();
-	}
+	m_inverseGlobalTransform.reset();
 }

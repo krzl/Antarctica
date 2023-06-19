@@ -1,4 +1,5 @@
 #pragma once
+#include "Threading/ThreadPool.h"
 
 namespace Collision
 {
@@ -37,6 +38,8 @@ public:
 
 		Node*       m_node = nullptr;
 		GameObject* m_object;
+
+		bool m_isWaitingForUpdate = false;
 	};
 
 	struct Node
@@ -59,6 +62,10 @@ public:
 		Node*        TryPushBack(GameObject* object, const BoundingBox& boundingBox);
 		void         RemoveObject(GameObject* object);
 
+		GameObject* TraceObject(const BoundingBox::RayIntersectionTester& ray, float& minDistance) const;
+		void        TestIntersect(const Frustum& frustum, std::vector<GameObject*>& objects) const;
+
+		void CollectChildObjects(std::vector<GameObject*>& objects) const;
 
 		void IncrementCollisionCounts(const GameObject* object);
 		void DecrementCollisionCountsInner(const GameObject* object);
@@ -97,25 +104,25 @@ public:
 
 	[[nodiscard]] Node* GetRoot() const { return m_root; }
 
+	struct TraceResult
+	{
+		Ref<GameObject> m_object;
+		Point3D         m_tracePoint;
+		float           m_distance;
+	};
+
+	TraceResult              TraceObject(const BoundingBox::RayIntersectionTester& ray) const;
+	std::vector<GameObject*> Intersect(const Frustum& frustum) const;
+
 private:
 
 	void ExpandRoot(const Vector3D& point);
 
 	void InvalidatePlacement(PlacementRef* placement);
 
-	void ThreadLoop();
-
-
 	Node* m_root = nullptr;
 
-	std::mutex               m_mutex;
-	std::condition_variable  m_awaitCV;
-	std::condition_variable  m_updateEndCV;
-	std::vector<std::thread> m_threads;
-
-	std::vector<PlacementRef*> m_updateList;
-
-	static constexpr uint32_t NUM_THREADS = 4;
+	ThreadPool<PlacementRef> m_threadPool;
 
 	static constexpr float INITIAL_ROOT_SIZE = 64.0f;
 };

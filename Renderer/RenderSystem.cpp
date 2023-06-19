@@ -31,11 +31,11 @@ namespace Renderer
 		m_context->OnResize(window);
 	}
 
-	void RenderSystem::Render()
+	void RenderSystem::Render(const std::vector<GameObject*>& gameObjects)
 	{
-		RenderQueue                     objectsToRender = RenderComponent::GetObjectsToRender();
+		RenderQueue                     objectsToRender = RenderComponent::GetObjectsToRender(gameObjects);
 		std::priority_queue<CameraData> cameras         = CameraComponent::GetAllCameraData();
-		
+
 		m_context->WaitForFrameCompletion();
 
 		m_context->CreateRenderQueue(objectsToRender);

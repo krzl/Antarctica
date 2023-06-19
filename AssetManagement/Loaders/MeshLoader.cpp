@@ -14,7 +14,49 @@
 std::vector<Vector3D> CastToVector(const uint32_t count, const aiVector3D& input)
 {
 	const auto inputArray = reinterpret_cast<const Vector3D*>(&input);
-	return std::vector<Vector3D>(inputArray, inputArray + count);
+	return std::vector(inputArray, inputArray + count);
+}
+
+Capsule GetCapsuleFromVertices(const std::vector<Point3D>& points)
+{
+	float biggestDistance = 0;
+
+	Point3D a;
+	Point3D b;
+
+	for (uint32_t i = 0; i < points.size(); ++i)
+	{
+		for (uint32_t j = 0; j < points.size(); ++j)
+		{
+			if (i == j)
+			{
+				continue;
+			}
+
+			const Vector3D distance = a - b;
+
+			if (biggestDistance < Dot(distance, distance))
+			{
+				a = points[i];
+				b = points[j];
+			}
+		}
+	}
+
+	Capsule capsule;
+	capsule.m_up     = (a - b).Normalize();
+	capsule.m_center = (a - b) / 2 + b;
+	capsule.m_height = std::sqrt(biggestDistance) / 2.0f;
+
+	float widthSquared = 0.0f;
+	for (uint32_t i = 0; i < points.size(); i++)
+	{
+		widthSquared = GetDistanceFromLineToPoint(capsule.m_up, points[i]);
+	}
+
+	capsule.m_width = std::sqrt(widthSquared);
+
+	return capsule;
 }
 
 static void ProcessMeshNodeData(Mesh&                  mesh, const aiNode* node, const int32_t parentNodeId,
@@ -142,6 +184,9 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 				bone.m_boneNameHash = std::hash<std::string>()(bone.m_boneName);
 				bone.m_offsetMatrix = AIMatrixCast(aiBone->mOffsetMatrix);
 
+				uint32_t             verticesFound = 0;
+				std::vector<Point3D> verticesForCollider(aiBone->mNumWeights);
+
 				for (uint32_t weightId = 0; weightId < aiBone->mNumWeights; ++weightId)
 				{
 					const uint32_t vertexId = aiBone->mWeights[weightId].mVertexId;
@@ -149,7 +194,17 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 						boneId,
 						aiBone->mWeights[weightId].mWeight,
 					};
+
+					if (aiBone->mWeights[weightId].mWeight > 0.5f)
+					{
+						verticesForCollider.emplace_back(builder.GetPositions()[aiBone->mWeights[weightId].mVertexId]);
+						++verticesFound;
+					}
 				}
+
+				verticesForCollider.resize(aiBone->mNumWeights);
+
+				bone.m_collider = GetCapsuleFromVertices(verticesForCollider);
 
 				nodeToBoneMap[aiBone->mNode] = &bone;
 			}

@@ -13,6 +13,8 @@ namespace Renderer
 
 	public:
 
+		static CameraComponent* Get(); //TOOD: REMOVE
+
 		[[nodiscard]] float GetFOV() const
 		{
 			return m_fov;
@@ -55,13 +57,15 @@ namespace Renderer
 
 		static std::priority_queue<CameraData> GetAllCameraData();
 
+		[[nodiscard]] Matrix4D GetLookAtMatrix() const;
+		[[nodiscard]] Matrix4D GetPerspectiveMatrix() const;
+
+		Frustum GetFrustum() const;
+
 	protected:
 
 		void OnEnabled() override;
 		void OnDisabled() override;
-
-		[[nodiscard]] Matrix4D GetLookAtMatrix() const;
-		[[nodiscard]] Matrix4D GetPerspectiveMatrix() const;
 
 		float m_fov   = 60;
 		float m_farZ  = 100;

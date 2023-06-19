@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MousePickerComponent.h"
 #include "Entities/Camera.h"
 
 class CameraScrollComponent;
@@ -13,6 +14,7 @@ public:
 private:
 
 	Ref<CameraScrollComponent> m_cameraScrollComponent;
+	Ref<MousePickerComponent>  m_mousePicker;
 
 	DEFINE_CLASS()
 };

@@ -24,6 +24,7 @@ public:
 
 	Point3D GetWorldPosition() const;
 	void    SetWorldPosition(const Point3D position);
+	void    MarkDirty();
 
 	Quaternion GetLocalRotation() const
 	{
@@ -52,6 +53,8 @@ public:
 
 	const Transform4D& GetWorldTransform() const;
 	const Transform4D& GetLocalTransform() const;
+	const Transform4D& GetInverseWorldTransform() const;
+	
 	void               RemoveFromParent();
 
 	Ref<SceneComponent> GetParent() const
@@ -63,15 +66,18 @@ public:
 
 	virtual BoundingBox GetBoundingBox() const;
 
+	virtual float TraceRay(const BoundingBox::RayIntersectionTester& ray, float& closestDistance) const;
+
 protected:
 
 	Point3D    m_position = Point3D::origin;
 	Quaternion m_rotation = Quaternion::identity;
 	Vector3D   m_scale    = { 1.0f, 1.0f, 1.0f };
 
-private:
+	void OnMarkedDirty();
 
-	void MarkDirty();
+private:
+	
 	void SetParentInternal(Ref<SceneComponent> parent, Ref<SceneComponent> self);
 
 	mutable bool m_isLocalTransformDirty  = true;
@@ -79,6 +85,8 @@ private:
 
 	mutable Transform4D m_localTransform  = Transform4D::identity;
 	mutable Transform4D m_globalTransform = Transform4D::identity;
+
+	mutable std::optional<Transform4D> m_inverseGlobalTransform = Transform4D::identity;
 
 	Ref<SceneComponent>              m_parent;
 	std::vector<Ref<SceneComponent>> m_children;

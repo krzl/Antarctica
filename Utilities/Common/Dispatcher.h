@@ -13,6 +13,8 @@ class DispatchHandle
 
 public:
 
+	DispatchHandle() = default;
+
 	~DispatchHandle()
 	{
 		if (m_autoClear)

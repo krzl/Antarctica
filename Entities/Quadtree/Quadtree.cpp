@@ -5,6 +5,11 @@
 
 void Quadtree::PlacementRef::InvalidatePlacement()
 {
+	if (m_isWaitingForUpdate)
+	{
+		return;
+	}
+	m_isWaitingForUpdate = true;
 	m_node->m_tree->InvalidatePlacement(this);
 }
 
@@ -15,7 +20,13 @@ bool Quadtree::PlacementRef::IsValid() const
 
 void Quadtree::PlacementRef::Refresh()
 {
-	const BoundingBox boundingBox = m_object->GetBoundingBox();
+	m_isWaitingForUpdate = false;
+	BoundingBox boundingBox;
+	{
+		std::lock_guard lock(m_node->m_mutex);
+		boundingBox = m_object->GetBoundingBox();
+	}
+
 	if (!m_node->Contains(boundingBox))
 	{
 		Quadtree& tree = m_node->GetTree();
@@ -30,20 +41,15 @@ void Quadtree::PlacementRef::Refresh()
 	}
 }
 
-Quadtree::Quadtree()
+Quadtree::Quadtree() :
+	m_threadPool([](PlacementRef* ref) { ref->Refresh(); }, 8)
 {
 	m_root = new Node();
 
-	const Vector3D lowerBoundary = Vector3D::zero - Vector3D(INITIAL_ROOT_SIZE, INITIAL_ROOT_SIZE, INITIAL_ROOT_SIZE);
-	const Vector3D upperBoundary = Vector3D::zero + Vector3D(INITIAL_ROOT_SIZE, INITIAL_ROOT_SIZE, INITIAL_ROOT_SIZE);
+	const Vector3D lowerBoundary = Vector3D::zero - Vector3D(INITIAL_ROOT_SIZE, INITIAL_ROOT_SIZE, 0.0f);
+	const Vector3D upperBoundary = Vector3D::zero + Vector3D(INITIAL_ROOT_SIZE, INITIAL_ROOT_SIZE, 0.0f);
 	m_root->m_boundingBox        = BoundingBox(lowerBoundary, upperBoundary);
 	m_root->m_tree               = this;
-
-	for (uint32_t i = 0; i < NUM_THREADS; ++i)
-	{
-		m_threads.emplace_back(std::bind(&Quadtree::ThreadLoop, this));
-		m_threads[i].detach();
-	}
 }
 
 void Quadtree::ExpandRoot(const Vector3D& point)
@@ -121,16 +127,7 @@ void Quadtree::ExpandRoot(const Vector3D& point)
 
 void Quadtree::InvalidatePlacement(PlacementRef* placement)
 {
-	if constexpr (NUM_THREADS != 0)
-	{
-		std::lock_guard lock(m_mutex);
-		m_updateList.emplace_back(placement);
-		m_awaitCV.notify_all();
-	}
-	else
-	{
-		m_updateList.emplace_back(placement);
-	}
+	m_threadPool.AddItem(placement);
 }
 
 Quadtree::PlacementRef Quadtree::AddObject(GameObject* object, const BoundingBox boundingBox)
@@ -150,57 +147,13 @@ Quadtree::PlacementRef Quadtree::AddObject(GameObject* object, const BoundingBox
 
 void Quadtree::RemoveObject(GameObject* object)
 {
-	for (auto it = m_updateList.begin(); it != m_updateList.end(); ++it)
-	{
-		if (*it == &object->m_quadtreePlacement)
-		{
-			m_updateList.erase(it);
-			break;
-		}
-	}
-
-	m_root->RemoveObject(object);
+	m_threadPool.RemoveItem(&object->m_quadtreePlacement);
+	object->m_quadtreePlacement.m_node->RemoveObject(object);
 }
 
 void Quadtree::Update()
 {
-	if constexpr (NUM_THREADS != 0)
-	{
-		std::unique_lock lock(m_mutex);
-		if (m_updateList.size() != 0)
-		{
-			m_updateEndCV.wait(lock, [this] { return m_updateList.size() == 0; });
-		}
-	}
-	else
-	{
-		for (PlacementRef* element : m_updateList)
-		{
-			element->Refresh();
-		}
-		m_updateList.clear();
-	}
-}
-
-void Quadtree::ThreadLoop()
-{
-	while (true)
-	{
-		PlacementRef* ref = nullptr;
-		{
-			std::unique_lock lock(m_mutex);
-			m_awaitCV.wait(lock, [this] { return m_updateList.size() != 0; });
-
-			auto it = m_updateList.end() - 1;
-			ref     = *it;
-
-			m_updateList.erase(it);
-		}
-
-		ref->Refresh();
-
-		m_updateEndCV.notify_one();
-	}
+	m_threadPool.WaitForCompletion();
 }
 
 bool Quadtree::Node::Contains(const Vector3D& point) const
@@ -218,8 +171,8 @@ void Quadtree::Node::AddObjectInner(const GameObject* object, const BoundingBox&
 	const bool shouldCreateChildren = m_totalObjectCount != 1 && m_childNodes[0] == nullptr && (
 										  m_boundingBox.m_upperBoundary.x - m_boundingBox.m_lowerBoundary.x) > 1.0f;
 
-	m_maxHeight = max(m_maxHeight, boundingBox.m_upperBoundary.z);
-	m_minHeight = max(m_minHeight, boundingBox.m_lowerBoundary.z);
+	m_boundingBox.m_upperBoundary.z = max(m_boundingBox.m_upperBoundary.z, boundingBox.m_upperBoundary.z);
+	m_boundingBox.m_lowerBoundary.z = min(m_boundingBox.m_lowerBoundary.z, boundingBox.m_lowerBoundary.z);
 
 	if (shouldCreateChildren)
 	{
@@ -231,14 +184,8 @@ void Quadtree::Node::AddObjectInner(const GameObject* object, const BoundingBox&
 
 Quadtree::PlacementRef Quadtree::Node::AddObject(GameObject* object, const BoundingBox& boundingBox)
 {
-	if constexpr (NUM_THREADS != 0)
 	{
 		std::lock_guard lock(m_mutex);
-
-		AddObjectInner(object, boundingBox);
-	}
-	else
-	{
 		AddObjectInner(object, boundingBox);
 	}
 
@@ -251,13 +198,8 @@ Quadtree::PlacementRef Quadtree::Node::AddObject(GameObject* object, const Bound
 		}
 	}
 
-	if constexpr (NUM_THREADS != 0)
 	{
 		std::lock_guard lock(m_mutex);
-		m_objects.emplace(object);
-	}
-	else
-	{
 		m_objects.emplace(object);
 	}
 
@@ -266,16 +208,11 @@ Quadtree::PlacementRef Quadtree::Node::AddObject(GameObject* object, const Bound
 
 void Quadtree::Node::RemoveObject(GameObject* object)
 {
-	if constexpr (NUM_THREADS != 0)
 	{
 		std::lock_guard lock(m_mutex);
 		m_objects.erase(object);
 	}
-	else
-	{
-		m_objects.erase(object);
-	}
-	
+
 	RemoveObjectInner(object);
 }
 
@@ -284,17 +221,13 @@ Quadtree::Node* Quadtree::Node::TryPushBack(GameObject* object, const BoundingBo
 	if (!boundingBox.Contains2D((Point2D) m_boundingBox.GetCenter().xy) && (
 			m_childNodes[0] != nullptr || m_objects.size() > 1))
 	{
-		if constexpr (NUM_THREADS != 0)
 		{
 			std::lock_guard lock(m_mutex);
 			m_objects.erase(object);
 		}
-		else
-		{
-			m_objects.erase(object);
-		}
+
 		DecrementCollisionCounts(object);
-		
+
 		const PlacementRef placement = AddObject(object, boundingBox);
 		return placement.m_node;
 	}
@@ -397,19 +330,139 @@ void Quadtree::Node::DecrementCollisionCountsInner(const GameObject* object)
 
 	if (m_totalObjectCount == 0)
 	{
-		m_maxHeight = m_minHeight = 0.0f;
+		m_boundingBox.m_upperBoundary.z = m_boundingBox.m_lowerBoundary.z = 0.0f;
 	}
 }
 
 void Quadtree::Node::DecrementCollisionCounts(const GameObject* object)
 {
-	if constexpr (NUM_THREADS != 0)
 	{
 		std::lock_guard lock(m_mutex);
 		DecrementCollisionCountsInner(object);
 	}
-	else
+}
+
+#undef max
+
+Quadtree::TraceResult Quadtree::TraceObject(const BoundingBox::RayIntersectionTester& ray) const
+{
+	const_cast<Quadtree*>(this)->Update();
+
+	float distance = std::numeric_limits<float>::max();
+
+	GameObject* object = m_root->TraceObject(ray, distance);
+
+	if (object != nullptr)
 	{
-		DecrementCollisionCountsInner(object);
+		return {
+			object->GetRef(),
+			ray.m_ray.m_origin + ray.m_ray.m_direction * distance,
+			distance
+		};
+	}
+
+	return
+	{
+		object != nullptr ? object->GetRef() : Ref<GameObject>(),
+		(Point3D) Vector3D::zero,
+		0.0f
+	};
+}
+
+GameObject* Quadtree::Node::TraceObject(const BoundingBox::RayIntersectionTester& ray, float& minDistance) const
+{
+	GameObject* closestObject = nullptr;
+
+	for (GameObject* object : m_objects)
+	{
+		float distance = ray.Intersect(object->GetBoundingBox());
+
+		if (distance < 0.0f || minDistance <= distance)
+		{
+			continue;
+		}
+
+		distance = object->TraceRay(ray);
+
+		if (distance < 0.0f || minDistance <= distance)
+		{
+			continue;
+		}
+
+		minDistance   = distance;
+		closestObject = object;
+	}
+
+	for (const Node* childNode : m_childNodes)
+	{
+		if (childNode != nullptr && ray.Intersect(childNode->m_boundingBox) < minDistance)
+		{
+			float       distance = minDistance;
+			GameObject* object   = childNode->TraceObject(ray, distance);
+			if (object && distance >= 0.0f && distance < minDistance)
+			{
+				closestObject = object;
+				minDistance   = distance;
+			}
+		}
+	}
+
+	return closestObject;
+}
+
+std::vector<GameObject*> Quadtree::Intersect(const Frustum& frustum) const
+{
+	const_cast<Quadtree*>(this)->Update();
+
+	std::vector<GameObject*> objects;
+
+	m_root->TestIntersect(frustum, objects);
+
+	return objects;
+}
+
+
+void Quadtree::Node::TestIntersect(const Frustum& frustum, std::vector<GameObject*>& objects) const
+{
+	for (GameObject* object : m_objects)
+	{
+		if (frustum.Intersect(object->GetBoundingBox()) != Frustum::IntersectTestResult::OUTSIDE)
+		{
+			objects.emplace_back(object);
+		}
+	}
+
+	for (const Node* childNode : m_childNodes)
+	{
+		if (childNode != nullptr && childNode->m_totalObjectCount > 0)
+		{
+			switch (frustum.Intersect(childNode->m_boundingBox))
+			{
+				case Frustum::IntersectTestResult::OUTSIDE:
+					continue;
+				case Frustum::IntersectTestResult::INTERSECT:
+					childNode->TestIntersect(frustum, objects);
+					break;
+				case Frustum::IntersectTestResult::INSIDE:
+					childNode->CollectChildObjects(objects);
+					break;
+			}
+		}
+	}
+}
+
+void Quadtree::Node::CollectChildObjects(std::vector<GameObject*>& objects) const
+{
+	for (GameObject* object : m_objects)
+	{
+		objects.emplace_back(object);
+	}
+
+	for (const Node* childNode : m_childNodes)
+	{
+		if (childNode != nullptr && childNode->m_totalObjectCount > 0)
+		{
+			childNode->CollectChildObjects(objects);
+		}
 	}
 }

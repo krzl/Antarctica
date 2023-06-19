@@ -23,7 +23,8 @@ protected:
 	Ref<MovementComponent>               m_movementComponent;
 
 	bool m_isWalking = false;
-	
+	DispatchHandle<>  m_handle;
+
 	DEFINE_CLASS()
 };
 

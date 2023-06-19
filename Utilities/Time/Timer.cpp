@@ -23,7 +23,7 @@ void Timer::Stop()
 	}
 
 	m_isStopped = true;
-	m_accumulator += GetTime();
+	m_accumulator = GetTime();
 }
 
 void Timer::Restart()
