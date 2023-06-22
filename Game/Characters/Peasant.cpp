@@ -19,7 +19,7 @@ Peasant::Peasant()
 {
 	m_animatedMeshComponent = AddComponent<Renderer::AnimatedMeshComponent>();
 	m_movementComponent     = AddComponent<MovementComponent>();
-	
+
 	m_animatedMeshComponent->SetLocalScale(Vector3D(0.01f, 0.01f, 0.01f));
 	m_animatedMeshComponent->SetLocalRotation(90.0, 0.0f, 0.0f);
 
@@ -76,20 +76,23 @@ Peasant::Peasant()
 	const auto              material = std::make_shared<Material>(shader);
 	material->SetTexture("tex", texture);
 
-	std::shared_ptr<Shader> shaderSkin = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic_skinned.hlsl");
+	std::shared_ptr<Shader> shaderSkin   = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic_skinned.hlsl");
 	const auto              materialSkin = std::make_shared<Material>(shaderSkin);
 	materialSkin->SetTexture("tex", texture);
 	m_animatedMeshComponent->SetMaterial(material);
 	m_animatedMeshComponent->SetMaterial(materialSkin, 3);
+}
 
+void Peasant::OnCreated()
+{
 	m_handle = InputSystem::GetInstance()->OnLeftMouseButtonPressed.AddListener([this]()
 	{
 		using namespace Anim;
 
 		m_isWalking = !m_isWalking;
-		
+
 		m_animatedMeshComponent->SetTrigger(WALK, m_isWalking);
-	}, true);
+	}, GetRef());
 }
 
 void Peasant::Tick(const float deltaTime)

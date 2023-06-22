@@ -41,6 +41,7 @@ public:
 	Ref(std::shared_ptr<D> ptr) :
 		m_ptr(std::weak_ptr<T>(ptr)) { }
 
+
 	// Assignment operators
 
 	Ref& operator=(const Ref& other)
@@ -87,6 +88,12 @@ public:
 			return Ref<T2>(std::dynamic_pointer_cast<T2, T>(m_ptr.lock()));
 		}
 		return Ref<T2>(nullptr);
+	}
+
+	// ReSharper disable once CppNonExplicitConversionOperator
+	operator Ref<void>() const
+	{
+		return Ref<void>(m_ptr);
 	}
 
 	friend bool operator==(const Ref& lhs, const Ref& rhs) { return lhs.m_ptr.lock() == rhs.m_ptr.lock(); }

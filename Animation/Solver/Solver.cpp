@@ -46,7 +46,7 @@ namespace Anim
 	uint32_t FindKeyId(const std::vector<T>& keys, const float currentTime)
 	{
 		uint32_t left  = 0;
-		uint32_t right = keys.size() - 2;
+		uint32_t right = (uint32_t) keys.size() - 2;
 
 		while (left <= right)
 		{
@@ -159,7 +159,7 @@ namespace Anim
 						   const std::vector<MeshNode>& meshNodes, const float                        currentTime)
 	{
 		transforms.assign(meshNodes.size(), Transform4D());
-		
+
 		const Transform4D initialTransform = Transform4D::identity;
 		CalculateNode(animation->m_rootNode, meshNodes, currentTime, transforms, initialTransform);
 

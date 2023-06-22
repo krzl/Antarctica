@@ -15,6 +15,8 @@ public:
 
 	Peasant();
 
+	void OnCreated() override;
+
 protected:
 
 	void Tick(float deltaTime) override;

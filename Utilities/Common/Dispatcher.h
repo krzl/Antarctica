@@ -15,25 +15,15 @@ public:
 
 	DispatchHandle() = default;
 
-	~DispatchHandle()
-	{
-		if (m_autoClear)
-		{
-			Clear();
-		}
-	}
-
 	void Clear();
 
 private:
 
-	explicit DispatchHandle(DispatcherType& dispatcher, const uint32_t id, const bool autoClear = true) :
+	explicit DispatchHandle(DispatcherType& dispatcher, const uint32_t id) :
 		m_dispatcher(&dispatcher),
-		m_autoClear(autoClear),
 		m_id(id) { }
 
 	DispatcherType* m_dispatcher;
-	bool            m_autoClear;
 	uint32_t        m_id;
 };
 
@@ -45,16 +35,21 @@ class Dispatcher
 
 	friend class DispatchHandle<_Args...>;
 
-private:
-
 	struct DispatchListElem
 	{
 		FunctionType m_function;
 		uint32_t     m_id;
+		Ref<void>    m_owner;
+		bool         m_clearWhenOwnerExpired;
+
+		DispatchListElem(FunctionType&& function, const uint32_t id, const Ref<void> owner) :
+			m_function(std::move(function)),
+			m_id(id),
+			m_owner(owner),
+			m_clearWhenOwnerExpired(owner.IsValid()) { }
 
 		DispatchListElem(FunctionType&& function, const uint32_t id) :
-			m_function(std::move(function)),
-			m_id(id) { }
+			DispatchListElem(std::move(function), id, Ref<void>()) {}
 	};
 
 public:
@@ -67,12 +62,20 @@ public:
 		RemoveAllListeners();
 	}
 
-	HandleType AddListener(FunctionType listener, const bool autoClear = true)
+	HandleType AddListener(FunctionType listener)
 	{
 		const uint32_t listenerId = counter++;
 
 		m_dispatchList.emplace_back(std::move(listener), listenerId);
-		return HandleType(*this, listenerId, autoClear);
+		return HandleType(*this, listenerId);
+	}
+
+	HandleType AddListener(FunctionType listener, const Ref<void> owner)
+	{
+		const uint32_t listenerId = counter++;
+
+		m_dispatchList.emplace_back(std::move(listener), listenerId, owner);
+		return HandleType(*this, listenerId);
 	}
 
 	void RemoveAllListeners()
@@ -82,9 +85,17 @@ public:
 
 	void Dispatch(_Args... arguments)
 	{
-		for (auto& dispatchElement : m_dispatchList)
+		for (auto it = m_dispatchList.begin(); it != m_dispatchList.end();)
 		{
-			dispatchElement.m_function(std::forward<_Args>(arguments)...);
+			DispatchListElem& elem = *it;
+			if (elem.m_clearWhenOwnerExpired && !elem.m_owner.IsValid())
+			{
+				it = m_dispatchList.erase(it);
+				continue;
+			}
+
+			elem.m_function(std::forward<_Args>(arguments)...);
+			++it;
 		}
 	}
 

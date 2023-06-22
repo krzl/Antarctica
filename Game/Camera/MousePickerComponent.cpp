@@ -42,5 +42,5 @@ void MousePickerComponent::OnCreated()
 				test.m_object->Destroy();
 			}
 		}
-	}, false);
+	}, m_self);
 }

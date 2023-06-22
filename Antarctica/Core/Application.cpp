@@ -34,12 +34,12 @@ void Application::Start()
 	m_window.OnResized.AddListener([this]()
 	{
 		m_renderSystem.OnResize(m_window);
-	}, false);
+	});
 
 	m_window.OnDestroyed.AddListener([this]()
 	{
 		m_isRunning = false;
-	}, false);
+	});
 
 	m_renderSystem.Init(m_window, m_appSettings);
 
@@ -72,10 +72,11 @@ void Application::Run()
 		}
 		m_window.Update();
 		Renderer::CameraComponent::SetAspectRatio(GetWindow().GetAspectRatio());
-		std::vector<GameObject*> gameObjectsToRender = GetWorld().GetQuadtree().Intersect(Renderer::CameraComponent::Get()->GetFrustum());
+		std::vector<GameObject*> gameObjectsToRender = GetWorld().GetQuadtree().Intersect(
+			Renderer::CameraComponent::Get()->GetFrustum());
 		m_renderSystem.Render(gameObjectsToRender);
 	}
-		
+
 	m_renderSystem.Cleanup();
 }
 

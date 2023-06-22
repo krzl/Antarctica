@@ -39,11 +39,12 @@ using Terathon::Matrix4D;
 using Terathon::Transform4D;
 using Terathon::Quaternion;
 
+#include "../Utilities/Common/Ref.h"
+
 #include "../Utilities/Common/Dispatcher.h"
 #include "../Utilities/Common/Logger.h"
 #include "../Utilities/Common/MathHelpers.h"
 #include "../Utilities/Common/Random.h"
-#include "../Utilities/Common/Ref.h"
 #include "../Utilities/Math/BoundingBox.h"
 #include "../Utilities/Math/Capsule.h"
 #include "../Utilities/Math/Frustum.h"

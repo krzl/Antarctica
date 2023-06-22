@@ -44,7 +44,7 @@ void main()
 				{
 					const int32_t x = i - gridSize / 2;
 					const int32_t y = j - gridSize / 2;
-					
+
 					Ref peasant = Application::Get().GetWorld().Spawn<Peasant>();
 					peasant->SetPosition(Point3D(x / 2.0f, y / 2.0f, 0.0f));
 					peasant->SetName("Peasant " + std::to_string((gridSize * i) + j));
@@ -71,7 +71,7 @@ void main()
 
 			//Ref<QuadtreeTester> qtt = Application::Get().GetWorld().Spawn<QuadtreeTester>();
 		}
-	}, false);
+	});
 
 	app.Start();
 }
