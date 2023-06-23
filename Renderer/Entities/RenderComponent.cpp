@@ -32,7 +32,7 @@ namespace Renderer
 			ThreadPool<GameObject>(
 				[cameraFrustum, &counter](const GameObject* gameObject)
 				{
-					for (auto [_, component] : gameObject->GetComponents())
+					for (const std::shared_ptr<Component>& component : gameObject->GetComponents())
 					{
 						Ref<RenderComponent> renderComponent = component->GetRef().Cast<RenderComponent>();
 						if (renderComponent.IsValid())
@@ -45,7 +45,7 @@ namespace Renderer
 		std::for_each(std::execution::par_unseq, gameObjects.begin(), gameObjects.end(),
 					  [cameraFrustum, &counter](const GameObject* gameObject)
 					  {
-						  for (auto [_, component] : gameObject->GetComponents())
+						  for (const std::shared_ptr<Component>& component : gameObject->GetComponents())
 						  {
 							  Ref<RenderComponent> renderComponent = component->GetRef().Cast<RenderComponent>();
 							  if (renderComponent.IsValid())

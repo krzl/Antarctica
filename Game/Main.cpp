@@ -34,7 +34,7 @@ void main()
 			actor->GetStaticMeshComponent()->SetMesh(mesh);
 
 #if defined(DEBUG) | defined(_DEBUG)
-			constexpr uint32_t gridSize = 10;
+			constexpr uint32_t gridSize = 100;
 #else
 			constexpr uint32_t gridSize = 100;
 #endif

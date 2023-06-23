@@ -38,9 +38,9 @@ public:
 		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
 	Ref<T> GetComponent()
 	{
-		for (auto [id, component] : m_components)
+		for (auto it = m_components.begin(); it != m_components.end(); ++it)
 		{
-			Ref<T> ref = component->m_self.Cast<T>();
+			Ref<T> ref = (*it)->m_self.Cast<T>();
 			if (ref.IsValid())
 			{
 				return ref;
@@ -65,9 +65,9 @@ public:
 		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
 	void GetComponents(std::vector<Ref<T>>& components)
 	{
-		for (auto [id, component] : m_components)
+		for (auto it = m_components.begin(); it != m_components.end(); ++it)
 		{
-			Ref<T> ref = component->m_self.Cast<T>();
+			Ref<T> ref = (*it)->m_self.Cast<T>();
 			if (ref.IsValid())
 			{
 				components.emplace_back(ref);
@@ -75,7 +75,7 @@ public:
 		}
 	}
 
-	[[nodiscard]] const std::unordered_multimap<uint64_t, std::shared_ptr<Component>>& GetComponents() const
+	[[nodiscard]] const std::vector<std::shared_ptr<Component>>& GetComponents() const //TODO: Remove
 	{
 		return m_components;
 	}
@@ -170,7 +170,7 @@ public:
 	[[nodiscard]] World& GetWorld() const { return *m_world; }
 
 	void MarkDirty();
-	
+
 	float TraceRay(const BoundingBox::RayIntersectionTester& ray);
 
 	// Setters
@@ -235,12 +235,12 @@ protected:
 	uint32_t m_collisionChannel = (uint32_t) Collision::CollisionChannel::DEFAULT;
 
 private:
-	
+
 	[[nodiscard]] BoundingBox CalculateBoundingBox() const;
 
 	void TickComponents(float deltaTime);
 
-	std::unordered_multimap<uint64_t, std::shared_ptr<Component>> m_components;
+	std::vector<std::shared_ptr<Component>> m_components;
 
 	const Class* m_class;
 	uint64_t     m_instanceId;
@@ -253,7 +253,7 @@ private:
 
 	World* m_world;
 
-	Quadtree::PlacementRef m_quadtreePlacement;
+	Quadtree::PlacementRef             m_quadtreePlacement;
 	mutable std::optional<BoundingBox> m_boundingBox;
 
 	bool m_isEnabled        = true;

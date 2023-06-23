@@ -17,30 +17,29 @@ Ref<Component> GameObject::AddComponent(const Class& clazz, const Ref<SceneCompo
 	if (!component)
 		return Ref<Component>(nullptr);
 
-	const auto it             = m_components.insert(std::make_pair(clazz.GetId(), std::move(component)));
-	it->second->m_componentId = ++m_componentCounter;
+	component = m_components.emplace_back(std::move(component));
+	component->m_componentId = ++m_componentCounter;
 
-	if (const std::shared_ptr<SceneComponent> sceneComponent = std::dynamic_pointer_cast<SceneComponent>(it->second))
+	if (const std::shared_ptr<SceneComponent> sceneComponent = std::dynamic_pointer_cast<SceneComponent>(component))
 	{
-		sceneComponent->SetParentInternal(parent.IsValid() ? parent : m_root, Ref(it->second).Cast<SceneComponent>());
+		sceneComponent->SetParentInternal(parent.IsValid() ? parent : m_root, Ref(component).Cast<SceneComponent>());
 	}
 
 	if (GetRef().IsValid())
 	{
-		it->second->Init(GetRef(), it->second);
+		component->Init(GetRef(), component);
 	}
 
-	return it->second;
+	return component;
 }
 
 void GameObject::RemoveComponent(const Ref<Component> component)
 {
 	if (const Component* ptr = *component)
 	{
-		const auto [start, end] = m_components.equal_range(ptr->GetClass()->GetId());
-		for (auto it = start; it == end; ++it)
+		for (auto it = m_components.begin(); it != m_components.end(); ++it)
 		{
-			if (it->second.get() == ptr)
+			if ((*it)->m_componentId == ptr->m_componentId)
 			{
 				m_components.erase(it);
 				return;
@@ -62,13 +61,11 @@ void GameObject::Destroy()
 
 Ref<Component> GameObject::GetComponentFromClass(const Class& clazz)
 {
-	const auto [start, end] = m_components.equal_range(clazz.GetId());
-
-	for (auto it = start; it != end; ++it)
+	for (auto it = m_components.begin(); it != m_components.end(); ++it)
 	{
-		if (it->second.get() != nullptr)
+		if ((*it)->GetClass()->GetId() == clazz.GetId())
 		{
-			return Ref<Component>(it->second);
+			return Ref(*it);
 		}
 	}
 	return Ref<Component>();
@@ -76,18 +73,21 @@ Ref<Component> GameObject::GetComponentFromClass(const Class& clazz)
 
 std::vector<Ref<Component>> GameObject::GetComponentsFromClass(const Class& clazz)
 {
-	const auto [start, end] = m_components.equal_range(clazz.GetId());
+	std::vector<Ref<Component>> components;
 
-	std::vector<Ref<Component>> components(std::distance(start, end));
-
-	std::transform(start, end, components.begin(), [](auto& it)
-	{
-		return Ref<Component>(it.second);
-	});
+	std::transform(m_components.begin(), m_components.end(), components.begin(),
+				   [clazz](std::shared_ptr<Component>& component)
+				   {
+					   if (component->GetClass()->GetId() == clazz.GetId())
+					   {
+						   return Ref(component);
+					   }
+					   return Ref<Component>();
+				   });
 
 	components.erase(std::remove_if(components.begin(), components.end(), [](Ref<Component>& component)
 	{
-		return *component == nullptr;
+		return !component.IsValid();
 	}));
 
 	return components;
@@ -101,12 +101,12 @@ void GameObject::SetEnabled(const bool isEnabled)
 		if (m_isEnabled)
 		{
 			OnEnabled();
-			OnObjectEnabled.Dispatch(World::Get()->GetSpawnedObject(GetInstanceId()));
+			OnObjectEnabled.Dispatch(GetRef());
 		}
 		else
 		{
 			OnDisabled();
-			OnObjectDisabled.Dispatch(World::Get()->GetSpawnedObject(GetInstanceId()));
+			OnObjectDisabled.Dispatch(GetRef());
 		}
 	}
 }
@@ -114,7 +114,7 @@ void GameObject::SetEnabled(const bool isEnabled)
 BoundingBox GameObject::GetBoundingBox() const
 {
 	BoundingBox box = m_boundingBox.value_or(CalculateBoundingBox());
-	
+
 	if (!m_boundingBox.has_value())
 	{
 		m_boundingBox = box;
@@ -138,9 +138,9 @@ float GameObject::TraceRay(const BoundingBox::RayIntersectionTester& ray)
 {
 	float closestDistance = std::numeric_limits<float>::max();
 
-	for (auto [_, component] : m_components)
+	for (auto it = m_components.begin(); it != m_components.end(); ++it)
 	{
-		if (component->GetRef().IsValid())
+		if (const Component* component = (*it).get())
 		{
 			Ref<SceneComponent> sceneComponent = component->GetRef().Cast<SceneComponent>();
 			if (sceneComponent.IsValid())
@@ -159,11 +159,14 @@ float GameObject::TraceRay(const BoundingBox::RayIntersectionTester& ray)
 
 void GameObject::InitComponents()
 {
-	for (auto [_, component] : m_components)
+	for (auto it = m_components.begin(); it != m_components.end(); ++it)
 	{
-		if (!component->GetRef().IsValid())
+		if (Component* component = (*it).get())
 		{
-			component->Init(GetRef(), component);
+			if (!component->GetRef().IsValid())
+			{
+				component->Init(GetRef(), *it);
+			}
 		}
 	}
 }
@@ -173,14 +176,17 @@ BoundingBox GameObject::CalculateBoundingBox() const
 	const Vector3D position    = GetPosition();
 	BoundingBox    boundingBox = BoundingBox(position, position);
 
-	for (auto [_, component] : m_components)
+	for (auto it = m_components.begin(); it != m_components.end(); ++it)
 	{
-		if (component->GetRef().IsValid())
+		if (Component* component = (*it).get())
 		{
-			Ref<SceneComponent> sceneComponent = component->GetRef().Cast<SceneComponent>();
-			if (sceneComponent.IsValid())
+			if (component->GetRef().IsValid())
 			{
-				boundingBox.Append(sceneComponent->GetBoundingBox());
+				Ref<SceneComponent> sceneComponent = component->GetRef().Cast<SceneComponent>();
+				if (sceneComponent.IsValid())
+				{
+					boundingBox.Append(sceneComponent->GetBoundingBox());
+				}
 			}
 		}
 	}
@@ -193,16 +199,13 @@ void GameObject::TickComponents(const float deltaTime)
 	const uint32_t cachedSize = (uint32_t) m_components.size();
 
 	bool foundNullComponent = false;
-	
-	auto it = m_components.begin();
+
 	for (uint32_t i = 0; i < cachedSize; i++)
 	{
-		if (it->second.get() != nullptr)
+		Component* component = m_components[i].get();
+		if (component != nullptr)
 		{
-			const auto& component = it->second;
 			component->Tick(deltaTime);
-
-			++it;
 		}
 		else
 		{
@@ -212,17 +215,11 @@ void GameObject::TickComponents(const float deltaTime)
 
 	if (foundNullComponent)
 	{
-		it = m_components.begin();
-		while (it != m_components.end())
-		{
-			if (it->second.get() == nullptr)
-			{
-				m_components.erase(it);
-			}
-			else
-			{
-				++it;
-			}
-		}
+		m_components.erase(
+			std::remove_if(m_components.begin(), m_components.end(),
+						   [](const std::shared_ptr<Component>& component)
+						   {
+							   return component != nullptr;
+						   }));
 	}
 }
