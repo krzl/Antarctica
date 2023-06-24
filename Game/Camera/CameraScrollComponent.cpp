@@ -4,13 +4,18 @@
 #include "GameObjects/GameObject.h"
 #include "Input/InputSystem.h"
 
+CameraScrollComponent::CameraScrollComponent()
+{
+	m_isTickable = true;
+}
+
 void CameraScrollComponent::Tick(float deltaTime)
 {
 	if (InputSystem::GetInstance()->IsMiddleMousePressed())
 	{
 		const auto mouseDelta = InputSystem::GetInstance()->GetMouseDelta();
 
-		const Vector3D positionDelta = Vector3D(mouseDelta.first * cameraSpeed, mouseDelta.second * cameraSpeed, 0.0f);
+		const Vector3D positionDelta = Vector3D(-mouseDelta.first * cameraSpeed, mouseDelta.second * cameraSpeed, 0.0f);
 
 		GetOwner()->SetPosition(GetOwner()->GetPosition() + positionDelta);
 	}

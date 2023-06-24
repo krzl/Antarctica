@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Containers/LookupList.h"
 #include "Quadtree/Quadtree.h"
 
 class World
@@ -16,18 +17,23 @@ public:
 		class = std::enable_if_t<std::is_base_of_v<GameObject, T>>>
 	Ref<T> Spawn()
 	{
-		const uint64_t instanceId = GenerateInstanceId();
-		std::shared_ptr<GameObject> obj = std::static_pointer_cast<GameObject>(T::GetClass().CreateObject());
+		const uint64_t                    instanceId = GenerateInstanceId();
+		const std::shared_ptr<GameObject> obj = std::static_pointer_cast<GameObject>(T::GetClass().CreateObject());
 
 		//TODO: Use m_pendingSpawnObjects
-		m_gameObjectLookupMap[instanceId] = m_gameObjects.size();
-		m_gameObjects.emplace_back(obj);
+		m_gameObjects.Add(obj, instanceId);
 		SetupSpawnedGameObject(obj, instanceId);
-		
+
+		if (obj->CanTick())
+		{
+			m_tickableGameObjects.Add(obj.get(), instanceId);
+		}
+
 		return std::dynamic_pointer_cast<T>(obj);
 	}
 
-	const std::vector<std::shared_ptr<GameObject>>& GetAllGameObjects() const
+	//TODO: remove
+	const LookupList<std::shared_ptr<GameObject>, uint64_t>& GetAllGameObjects() const
 	{
 		return m_gameObjects;
 	}
@@ -40,14 +46,12 @@ private:
 
 	void Update(float deltaTime);
 
-	uint64_t GenerateInstanceId();
+	uint64_t GenerateInstanceId() const;
 	void     SetupSpawnedGameObject(std::shared_ptr<GameObject> gameObject, uint64_t instanceId);
 	void     AddToPendingDestroy(Ref<GameObject> gameObject);
 
-	std::unordered_map<uint64_t, std::shared_ptr<GameObject>> m_oldGameObjects;
-
-	std::map<uint64_t, uint64_t>             m_gameObjectLookupMap;
-	std::vector<std::shared_ptr<GameObject>> m_gameObjects;
+	LookupList<std::shared_ptr<GameObject>, uint64_t> m_gameObjects;
+	LookupList<GameObject*, uint64_t>                 m_tickableGameObjects;
 
 	std::unordered_set<uint64_t>                              m_pendingDestroyList;
 	std::unordered_map<uint64_t, std::shared_ptr<GameObject>> m_pendingSpawnObjects;

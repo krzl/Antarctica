@@ -64,7 +64,9 @@ protected:
 	Ref<Component> m_self;
 
 	Ref<GameObject> m_owner;
-	const Class* m_class;
+	const Class*    m_class;
+
+	bool m_isTickable = false;
 
 private:
 

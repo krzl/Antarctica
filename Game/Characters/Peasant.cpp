@@ -94,8 +94,3 @@ void Peasant::OnCreated()
 		m_animatedMeshComponent->SetTrigger(WALK, m_isWalking);
 	}, GetRef());
 }
-
-void Peasant::Tick(const float deltaTime)
-{
-	//SetPosition(GetPosition() - Point3D::x_unit * deltaTime - Point3D::y_unit * deltaTime);
-}

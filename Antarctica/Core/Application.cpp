@@ -64,14 +64,11 @@ void Application::Run()
 	{
 		if (!m_isPaused)
 		{
-			Timer time;
-			time.Start();
 			for (System* system : m_systems)
 			{
 				system->Update();
 			}
 			Update(TimeSystem::GetInstance()->GetDeltaTime());
-			LOG(DEBUG, "TEST", "{}", time.GetTime() * 1000.0f);
 		}
 		m_window.Update();
 		Renderer::CameraComponent::SetAspectRatio(GetWindow().GetAspectRatio());

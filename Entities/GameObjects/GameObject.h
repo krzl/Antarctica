@@ -169,6 +169,8 @@ public:
 
 	[[nodiscard]] World& GetWorld() const { return *m_world; }
 
+	bool CanTick() const;
+
 	void MarkDirty();
 
 	float TraceRay(const BoundingBox::RayIntersectionTester& ray);
@@ -232,15 +234,22 @@ protected:
 	Ref<Component>              GetComponentFromClass(const Class& clazz);
 	std::vector<Ref<Component>> GetComponentsFromClass(const Class& clazz);
 
+	bool m_isTickable = false;
+
 	uint32_t m_collisionChannel = (uint32_t) Collision::CollisionChannel::DEFAULT;
 
 private:
 
+	void TickInner(const float deltaTime) { if (m_isTickable) { Tick(deltaTime); } }
+
 	[[nodiscard]] BoundingBox CalculateBoundingBox() const;
+
+	void UpdateTickableComponents();
 
 	void TickComponents(float deltaTime);
 
 	std::vector<std::shared_ptr<Component>> m_components;
+	std::vector<Component*>                 m_tickableComponents;
 
 	const Class* m_class;
 	uint64_t     m_instanceId;

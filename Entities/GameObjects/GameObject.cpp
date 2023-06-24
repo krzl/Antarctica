@@ -8,6 +8,20 @@ GameObject::GameObject()
 	m_root = AddComponent<SceneComponent>();
 }
 
+void GameObject::UpdateTickableComponents()
+{
+	m_tickableComponents.clear();
+
+	for (std::shared_ptr<Component>& component : m_components)
+	{
+		Component* comp = component.get();
+		if (comp->m_isTickable)
+		{
+			m_tickableComponents.push_back(comp);
+		}
+	}
+}
+
 Ref<Component> GameObject::AddComponent(const Class& clazz, const Ref<SceneComponent> parent)
 {
 	const std::shared_ptr<void> object = clazz.CreateObject();
@@ -17,7 +31,7 @@ Ref<Component> GameObject::AddComponent(const Class& clazz, const Ref<SceneCompo
 	if (!component)
 		return Ref<Component>(nullptr);
 
-	component = m_components.emplace_back(std::move(component));
+	m_components.emplace_back(component);
 	component->m_componentId = ++m_componentCounter;
 
 	if (const std::shared_ptr<SceneComponent> sceneComponent = std::dynamic_pointer_cast<SceneComponent>(component))
@@ -29,6 +43,8 @@ Ref<Component> GameObject::AddComponent(const Class& clazz, const Ref<SceneCompo
 	{
 		component->Init(GetRef(), component);
 	}
+
+	UpdateTickableComponents();
 
 	return component;
 }
@@ -42,7 +58,16 @@ void GameObject::RemoveComponent(const Ref<Component> component)
 			if ((*it)->m_componentId == ptr->m_componentId)
 			{
 				m_components.erase(it);
-				return;
+				break;
+			}
+		}
+
+		for (uint32_t i = 0; i < m_tickableComponents.size(); ++i)
+		{
+			if (m_tickableComponents[i] == ptr)
+			{
+				m_tickableComponents[i] = nullptr;
+				break;
 			}
 		}
 	}
@@ -76,7 +101,7 @@ std::vector<Ref<Component>> GameObject::GetComponentsFromClass(const Class& claz
 	std::vector<Ref<Component>> components;
 
 	std::transform(m_components.begin(), m_components.end(), components.begin(),
-				   [clazz](std::shared_ptr<Component>& component)
+				   [clazz](const std::shared_ptr<Component>& component)
 				   {
 					   if (component->GetClass()->GetId() == clazz.GetId())
 					   {
@@ -121,6 +146,11 @@ BoundingBox GameObject::GetBoundingBox() const
 	}
 
 	return box;
+}
+
+bool GameObject::CanTick() const
+{
+	return m_isTickable || m_tickableComponents.size() != 0;
 }
 
 void GameObject::MarkDirty()
@@ -196,30 +226,19 @@ BoundingBox GameObject::CalculateBoundingBox() const
 
 void GameObject::TickComponents(const float deltaTime)
 {
-	const uint32_t cachedSize = (uint32_t) m_components.size();
-
-	bool foundNullComponent = false;
-
-	for (uint32_t i = 0; i < cachedSize; i++)
+	bool nullElementFound = false;
+	for (Component* tickableComponent : m_tickableComponents)
 	{
-		Component* component = m_components[i].get();
-		if (component != nullptr)
+		if (tickableComponent == nullptr)
 		{
-			component->Tick(deltaTime);
+			nullElementFound = true;
+			continue;
 		}
-		else
-		{
-			foundNullComponent = true;
-		}
+		tickableComponent->Tick(deltaTime);
 	}
 
-	if (foundNullComponent)
+	if (nullElementFound)
 	{
-		m_components.erase(
-			std::remove_if(m_components.begin(), m_components.end(),
-						   [](const std::shared_ptr<Component>& component)
-						   {
-							   return component != nullptr;
-						   }));
+		UpdateTickableComponents();
 	}
 }

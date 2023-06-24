@@ -7,6 +7,7 @@ class CameraScrollComponent : public Component
 	
 public:
 
+	CameraScrollComponent();
 	void Tick(float deltaTime) override;
 	
 private:
