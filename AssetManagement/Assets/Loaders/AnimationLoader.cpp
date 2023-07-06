@@ -1,13 +1,12 @@
 #include "stdafx.h"
 #include "AnimationLoader.h"
-#include "AssetLoader.h"
 
 #include <assimp/cimport.h>
-#include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
 #include "AnimationNodeBuilder.h"
+#include "Assets/SubmeshData.h"
 
 Quaternion AIQuaternionCast(const aiQuaternion& quaternion)
 {
@@ -63,7 +62,7 @@ AnimationNode& ImportNode(std::vector<AnimationNode>& nodes, float&     duration
 	{
 		aiNode->mMetaData->Get("Show", useRotation);
 	}
-	
+
 	const aiNodeAnim* nodeAnim = FindNode(aiAnimation, builder.GetNodeName());
 	if (nodeAnim && useRotation)
 	{
@@ -74,7 +73,7 @@ AnimationNode& ImportNode(std::vector<AnimationNode>& nodes, float&     duration
 			positionKeys.emplace_back(
 				PositionKey{
 					AIVectorCast(nodeAnim->mPositionKeys[i].mValue),
-					(float)(nodeAnim->mPositionKeys[i].mTime * tickScale)
+					(float) (nodeAnim->mPositionKeys[i].mTime * tickScale)
 				});
 		}
 
@@ -131,37 +130,30 @@ AnimationNode& ImportNode(std::vector<AnimationNode>& nodes, float&     duration
 	return nodes[id];
 }
 
-std::shared_ptr<Animation> ImportAnimation(const aiAnimation* aiAnimation, const aiNode* rootNode)
+void ImportAnimation(Animation& animation, const aiAnimation* aiAnimation, const aiNode* rootNode)
 {
-	std::vector<AnimationNode> nodes(GetChildNodeCount(rootNode) + 1);
+	animation.m_nodes.resize(GetChildNodeCount(rootNode) + 1);
 
-	float    duration;
 	uint32_t currentIndex = 0;
 
-	AnimationNode& root = ImportNode(nodes, duration, aiAnimation, rootNode, currentIndex);
-
-	std::shared_ptr<Animation> animation = std::make_shared<Animation>(std::move(nodes), root, duration);
-
-	return animation;
+	animation.m_rootNode = &ImportNode(animation.m_nodes, animation.m_duration, aiAnimation, rootNode, currentIndex);
 }
 
-template<>
-std::shared_ptr<Animation> AssetLoader::Load(const std::string& path)
+bool Animation::Load(const std::string& path)
 {
-	const aiScene* scene = aiImportFile(path.c_str(),
-										aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_PopulateArmatureData);
+	const aiScene* scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_PopulateArmatureData);
 
 	std::vector<MeshBuffer> indexDataList;
 	std::vector<MeshBuffer> vertexDataList;
 
 	if (!scene || !scene->HasAnimations())
 	{
-		return std::make_shared<Animation>();
+		return false;
 	}
 
-	std::shared_ptr<Animation> animation = ImportAnimation(scene->mAnimations[0], scene->mRootNode);
+	ImportAnimation(*this, scene->mAnimations[0], scene->mRootNode);
 
 	aiReleaseImport(scene);
 
-	return animation;
+	return true;
 }

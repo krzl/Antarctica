@@ -5,24 +5,21 @@
 
 class ComputeShader : public Asset
 {
-	typedef std::unique_ptr<Renderer::IComputeShader, void(*)(Renderer::IComputeShader*)> NativePtr;
+	typedef std::unique_ptr<Renderer::NativeComputeShader, void(*)(Renderer::NativeComputeShader*)> NativePtr;
 
 public:
 
-	explicit ComputeShader(std::string path) :
-		m_path(std::move(path)) { }
-
-	[[nodiscard]] const Renderer::IComputeShader* GetNativeObject() const
+	[[nodiscard]] const Renderer::NativeComputeShader* GetNativeObject() const
 	{
 		return m_nativeObject.get();
 	}
 
-	[[nodiscard]] Renderer::IComputeShader* GetNativeObject()
+	[[nodiscard]] Renderer::NativeComputeShader* GetNativeObject()
 	{
 		return m_nativeObject.get();
 	}
 
-	void SetNativeObject(Renderer::IComputeShader* nativePtr)
+	void SetNativeObject(Renderer::NativeComputeShader* nativePtr)
 	{
 		m_nativeObject = NativePtr(nativePtr, Renderer::Deleter);
 	}
@@ -31,6 +28,8 @@ public:
 	{
 		return m_path;
 	}
+
+	bool Load(const std::string& path) override;
 
 private:
 

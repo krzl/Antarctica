@@ -38,5 +38,5 @@ namespace Renderer::Dx12
 
 namespace Renderer
 {
-	class IBuffer : public Dx12::Buffer {};
+	class NativeBuffer : public Dx12::Buffer {};
 }

@@ -2,7 +2,10 @@
 
 #include "AssetManager.h"
 #include "Context.h"
+#include "DynamicSubmesh.h"
+#include "StaticSubmesh.h"
 #include "Submesh.h"
+#include "Assets/DynamicSubmesh.h"
 #include "Assets/Skeleton.h"
 #include "Assets/SubmeshData.h"
 #include "Buffers/Types/PerCallBuffer.h"
@@ -46,9 +49,17 @@ namespace Renderer::Dx12
 
 				if (queuedObject->m_submesh->GetNativeObject() == nullptr)
 				{
-					queuedObject->m_submesh->SetNativeObject(Submesh::Create(queuedObject->m_submesh));
+					if (queuedObject->m_submesh->IsDynamic())
+					{
+						queuedObject->m_submesh->SetNativeObject(DynamicSubmesh::Create(queuedObject->m_submesh));
+					}
+					else
+					{
+						queuedObject->m_submesh->SetNativeObject(StaticSubmesh::Create(queuedObject->m_submesh));
+					}
 				}
 				renderObject.m_submesh = queuedObject->m_submesh->GetNativeObject();
+				renderObject.m_submesh->Update(queuedObject->m_submesh);
 
 				if (queuedObject->m_boneTransforms.size() != 0)
 				{
@@ -59,7 +70,7 @@ namespace Renderer::Dx12
 						{
 							m_skinningShader = AssetManager::GetAsset<::ComputeShader>(
 								"../Resources/Shaders/Compute/skinning.hlsl");
-							m_skinningShader->SetNativeObject(IComputeShader::Create(m_skinningShader));
+							m_skinningShader->SetNativeObject(NativeComputeShader::Create(m_skinningShader));
 						}
 					}
 
@@ -97,12 +108,14 @@ namespace Renderer::Dx12
 			}
 
 
-			const bool isNextBatched = 
+			const bool isNextBatched =
 				(objectsToRender.size() != i + 1) &&
 				objectsToRender[i + 1]->m_submesh == queuedObject->m_submesh &&
 				//objectsToRender[i + 1]->->m_material == queuedObject->m_material &&
-				objectsToRender[i + 1]->m_boneTransforms.size() == queuedObject->m_boneTransforms.size();
-			
+				objectsToRender[i + 1]->m_boneTransforms.size() == queuedObject->m_boneTransforms.size() &&
+				!objectsToRender[i + 1]->m_clipRect.has_value() &&
+				!queuedObject->m_clipRect.has_value();
+
 			if (!isNextBatched)
 			{
 				RenderObject* lastRenderObject = &m_renderQueue[m_renderQueue.size() - 1];
@@ -139,6 +152,8 @@ namespace Renderer::Dx12
 						accumulatedBoneTransforms.data());
 					accumulatedBoneTransforms.clear();
 				}
+
+				lastRenderObject->m_clipRect = queuedObject->m_clipRect;
 
 				lastRenderObject->m_instanceCount = instanceCount;
 				instanceCount                     = 0;

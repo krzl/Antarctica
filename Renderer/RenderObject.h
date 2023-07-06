@@ -17,6 +17,7 @@ namespace Renderer
 		float                 m_order;
 		PerObjectBuffer       m_perObjectBuffer;
 		std::vector<Matrix4D> m_boneTransforms;
+		std::optional<Rect>   m_clipRect;
 
 		friend bool operator<(const QueuedRenderObject& lhs, const QueuedRenderObject& rhs)
 		{
@@ -81,11 +82,11 @@ namespace Renderer
 		{
 			if (this == &other)
 				return *this;
-			m_submesh        = other.m_submesh;
-			m_material       = other.m_material;
-			m_order          = other.m_order;
+			m_submesh         = other.m_submesh;
+			m_material        = other.m_material;
+			m_order           = other.m_order;
 			m_perObjectBuffer = other.m_perObjectBuffer;
-			m_boneTransforms = other.m_boneTransforms;
+			m_boneTransforms  = other.m_boneTransforms;
 			return *this;
 		}
 
@@ -93,11 +94,11 @@ namespace Renderer
 		{
 			if (this == &other)
 				return *this;
-			m_submesh        = other.m_submesh;
-			m_material       = other.m_material;
-			m_order          = other.m_order;
+			m_submesh         = other.m_submesh;
+			m_material        = other.m_material;
+			m_order           = other.m_order;
 			m_perObjectBuffer = std::move(other.m_perObjectBuffer);
-			m_boneTransforms = std::move(other.m_boneTransforms);
+			m_boneTransforms  = std::move(other.m_boneTransforms);
 			return *this;
 		}
 	};

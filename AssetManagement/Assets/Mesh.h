@@ -77,6 +77,10 @@ public:
 		m_nodes = nodes;
 	}
 
+protected:
+
+	bool Load(const std::string& path) override;
+
 private:
 
 	std::vector<Submesh>                    m_submeshes;

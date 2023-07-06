@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AssetLoader.h"
 #include "Assets/Asset.h"
 
 class AssetManager
@@ -23,11 +22,13 @@ public:
 			return asset;
 		}
 
-		std::shared_ptr<T> asset = AssetLoader::Load<T>(path);
+		std::shared_ptr<T> asset = std::make_shared<T>();
 
-		if (asset.get() != nullptr)
+		const std::shared_ptr<Asset> assetBase = std::static_pointer_cast<Asset, T>(asset);
+
+		if (assetBase->Load(path))
 		{
-			AddToAssetDatabase(std::static_pointer_cast<Asset, T>(asset), assetId);
+			AddToAssetDatabase(assetBase, assetId);
 		}
 		else
 		{

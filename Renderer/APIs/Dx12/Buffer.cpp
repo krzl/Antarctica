@@ -132,7 +132,7 @@ namespace Renderer::Dx12
 
 namespace Renderer
 {
-	extern void Deleter(IBuffer* buffer)
+	extern void Deleter(NativeBuffer* buffer)
 	{
 		if (buffer != nullptr)
 		{

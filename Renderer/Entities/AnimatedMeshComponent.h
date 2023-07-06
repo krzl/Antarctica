@@ -4,7 +4,7 @@
 #include "Buffers/DynamicBuffer.h"
 #include "Solver/Solver.h"
 
-typedef std::unique_ptr<Renderer::IBuffer, void(*)(Renderer::IBuffer*)> NativeBufferPtr;
+typedef std::unique_ptr<Renderer::NativeBuffer, void(*)(Renderer::NativeBuffer*)> NativeBufferPtr;
 
 namespace Renderer
 {

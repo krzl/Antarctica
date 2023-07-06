@@ -2,15 +2,15 @@
 
 namespace Renderer
 {
-	class IComputeShader;
-	class IShader;
-	class ISubmesh;
-	class ITexture;
-	class IBuffer;
+	class NativeComputeShader;
+	class NativeShader;
+	class NativeSubmesh;
+	class NativeTexture;
+	class NativeBuffer;
 	
-	extern void Deleter(IComputeShader*);
-	extern void Deleter(IShader*);
-	extern void Deleter(ISubmesh*);
-	extern void Deleter(ITexture*);
-	extern void Deleter(IBuffer*);
+	extern void Deleter(NativeComputeShader*);
+	extern void Deleter(NativeShader*);
+	extern void Deleter(NativeSubmesh*);
+	extern void Deleter(NativeTexture*);
+	extern void Deleter(NativeBuffer*);
 }

@@ -32,7 +32,6 @@ public:
 
 private:
 
-	const AttributeOffsets& GetAttributeOffsets(const AttributeUsage& attributeUsage) const;
 	AttributeUsage          GetAttributeUsage() const;
 
 	BoundingBox CalculateBoundingBox() const;

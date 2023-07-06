@@ -3,6 +3,10 @@
 
 class QuadtreeTester : public GameObject
 {
+public:
+
+	QuadtreeTester();
+
 protected:
 
 	void Tick(float deltaTime) override;

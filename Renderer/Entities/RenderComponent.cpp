@@ -28,19 +28,6 @@ namespace Renderer
 		renderQueue.resize(1024 * 64);
 
 		const Frustum     cameraFrustum = CameraComponent::Get()->GetFrustum();
-		static ThreadPool threadPool    =
-			ThreadPool<GameObject>(
-				[cameraFrustum, &counter](const GameObject* gameObject)
-				{
-					for (const std::shared_ptr<Component>& component : gameObject->GetComponents())
-					{
-						Ref<RenderComponent> renderComponent = component->GetRef().Cast<RenderComponent>();
-						if (renderComponent.IsValid())
-						{
-							renderComponent->PrepareForRender(renderQueue, cameraFrustum, counter);
-						}
-					}
-				}, 32);
 
 		std::for_each(std::execution::par_unseq, gameObjects.begin(), gameObjects.end(),
 					  [cameraFrustum, &counter](const GameObject* gameObject)
@@ -56,8 +43,9 @@ namespace Renderer
 					  });
 
 		renderQueue.resize(counter);
+		
 		std::sort(renderQueue.begin(), renderQueue.end(), RenderQueueComp());
-
+		
 		return renderQueue;
 	}
 

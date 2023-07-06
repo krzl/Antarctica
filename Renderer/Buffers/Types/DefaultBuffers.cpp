@@ -6,15 +6,16 @@
 
 namespace Renderer
 {
-	const PerCameraBuffer Renderer::PerCameraBuffer::DEFAULT_BUFFER = {
+	const PerCameraBuffer PerCameraBuffer::DEFAULT_BUFFER = {
+		Transform4D::identity,
 		Transform4D::identity
 	};
 
-	const PerObjectBuffer Renderer::PerObjectBuffer::DEFAULT_BUFFER = {
+	const PerObjectBuffer PerObjectBuffer::DEFAULT_BUFFER = {
 		Transform4D::identity
 	};
 
-	const PerCallBuffer Renderer::PerCallBuffer::DEFAULT_BUFFER = {
+	const PerCallBuffer PerCallBuffer::DEFAULT_BUFFER = {
 		0,
 		0,
 		0,

@@ -5,11 +5,11 @@
 
 class Texture : public Asset
 {
-	typedef std::unique_ptr<Renderer::ITexture, void(*)(Renderer::ITexture*)> NativePtr;
+	typedef std::unique_ptr<Renderer::NativeTexture, void(*)(Renderer::NativeTexture*)> NativePtr;
 
 public:
 
-	Texture() { }
+	Texture() = default;
 
 	Texture(const uint8_t* data, const int32_t width, const int32_t height, const int32_t channels, std::string path) :
 		m_data(data),
@@ -18,18 +18,18 @@ public:
 		m_channels(channels),
 		m_path(std::move(path)) { }
 
-	[[nodiscard]] Renderer::ITexture* GetNativeObject()
+	[[nodiscard]] Renderer::NativeTexture* GetNativeObject()
 	{
 		return m_nativeObject.get();
 	}
 
 
-	[[nodiscard]] const Renderer::ITexture* GetNativeObject() const
+	[[nodiscard]] const Renderer::NativeTexture* GetNativeObject() const
 	{
 		return m_nativeObject.get();
 	}
 
-	void SetNativeObject(Renderer::ITexture* nativePtr)
+	void SetNativeObject(Renderer::NativeTexture* nativePtr)
 	{
 		m_nativeObject = NativePtr(nativePtr, Renderer::Deleter);
 	}
@@ -39,6 +39,10 @@ public:
 	[[nodiscard]] int32_t            GetHeight() const { return m_height; }
 	[[nodiscard]] int32_t            GetChannels() const { return m_channels; }
 	[[nodiscard]] const std::string& GetPath() const { return m_path; }
+
+protected:
+
+	bool Load(const std::string& path) override;
 
 private:
 

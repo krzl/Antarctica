@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "AssetLoader.h"
+#include "Assets/Mesh.h"
 
 #include <assimp/cimport.h>
 #include <assimp/mesh.h>
@@ -99,24 +99,22 @@ static void ProcessMeshNodeData(Mesh&                  mesh, const aiNode* node,
 	}
 }
 
-template<>
-std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
+bool Mesh::Load(const std::string& path)
 {
 	const aiScene* scene = aiImportFile(path.c_str(),
-										aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_PopulateArmatureData | aiProcess_FlipWindingOrder);
+										aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_PopulateArmatureData |
+										aiProcess_FlipWindingOrder);
 
 	std::vector<MeshBuffer> indexDataList;
 	std::vector<MeshBuffer> vertexDataList;
 
-	auto mesh = std::make_shared<Mesh>();
-
 	if (!scene)
 	{
-		return mesh;
+		return false;
 	}
 
 	Transform4D globalTransformMatrix = AIMatrixCast(scene->mRootNode->mTransformation);
-	mesh->SetGlobalInverseMatrix(Inverse(globalTransformMatrix));
+	SetGlobalInverseMatrix(Inverse(globalTransformMatrix));
 
 	for (uint32_t meshId = 0; meshId < scene->mNumMeshes; ++meshId)
 	{
@@ -212,19 +210,21 @@ std::shared_ptr<Mesh> AssetLoader::Load(const std::string& path)
 			builder.SetSkeleton(std::move(skeleton));
 		}
 
-		mesh->AddSubmesh(builder.Build());
+		AddSubmesh(builder.Build());
 	}
 
 	for (uint32_t animationId = 0; animationId < scene->mNumAnimations; ++animationId)
 	{
-		aiAnimation* animation = scene->mAnimations[animationId];
-		mesh->AddAnimation(ImportAnimation(animation, scene->mRootNode));
+		aiAnimation*               aiAnimation = scene->mAnimations[animationId];
+		std::shared_ptr<Animation> animation   = std::make_shared<Animation>();
+		ImportAnimation(*animation, aiAnimation, scene->mRootNode);
+		AddAnimation(animation);
 	}
 
 	std::vector<MeshNode> meshNodes;
-	ProcessMeshNodeData(*mesh.get(), scene->mRootNode, -1, meshNodes, Transform4D::identity);
-	mesh->SetMeshNodeData(meshNodes);
+	ProcessMeshNodeData(*this, scene->mRootNode, -1, meshNodes, Transform4D::identity);
+	SetMeshNodeData(meshNodes);
 
 	aiReleaseImport(scene);
-	return mesh;
+	return true;
 }

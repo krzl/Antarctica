@@ -38,6 +38,10 @@ public:
 		return m_textures;
 	}
 
+protected:
+
+	bool Load(const std::string& path) override { return true; }
+
 private:
 
 	std::unordered_map<std::string, std::shared_ptr<Texture>> m_textures;

@@ -4,6 +4,9 @@
 
 struct Skeleton;
 
+struct aiNode;
+struct aiAnimation;
+
 struct PositionKey
 {
 	const Vector3D m_position;
@@ -62,17 +65,26 @@ struct SkeletonBinding
 
 class Animation : public Asset
 {
+	friend void ImportAnimation(Animation& animation, const aiAnimation* aiAnimation, const aiNode* rootNode);
+
 public:
 
 	Animation() = default;
 
-	Animation(std::vector<AnimationNode>&& nodes, const AnimationNode& rootNode, const float duration) :
-		m_nodes(std::move(nodes)),
-		m_rootNode(&rootNode),
-		m_duration(duration) {}
+	[[nodiscard]] const std::vector<AnimationNode>& GetNodes() const { return m_nodes; }
+	[[nodiscard]] const AnimationNode*              GetRootNode() const { return m_rootNode; }
+	[[nodiscard]] float                             GetDuration() const { return m_duration; }
 
-	const std::vector<AnimationNode> m_nodes;
-	const AnimationNode*             m_rootNode;
+protected:
 
-	const float m_duration = 0.0f;
+	bool Load(const std::string& path) override;
+
+private:
+
+	float m_duration = 0.0f;
+
+private:
+
+	std::vector<AnimationNode> m_nodes;
+	AnimationNode*             m_rootNode;
 };

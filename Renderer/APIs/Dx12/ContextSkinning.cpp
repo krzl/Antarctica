@@ -2,6 +2,7 @@
 
 #include "Buffer.h"
 #include "Context.h"
+#include "StaticSubmesh.h"
 #include "Submesh.h"
 
 #include "Shaders/ComputeShader.h"
@@ -24,7 +25,9 @@ namespace Renderer::Dx12
 				m_commandList->SetComputeRootDescriptorTable(0, renderObject.m_weightsBuffer->GetGPUHandle());
 				m_commandList->SetComputeRootDescriptorTable(1, renderObject.m_boneTransforms->GetGPUHandle());
 
-				DescriptorHeapHandle& heapHandle = *renderObject.m_submesh->GetSkinningHeapHandle();
+				StaticSubmesh* staticSubmesh = static_cast<StaticSubmesh*>(renderObject.m_submesh);
+				
+				DescriptorHeapHandle& heapHandle = *staticSubmesh->GetSkinningHeapHandle();
 				m_commandList->SetComputeRootDescriptorTable(2, heapHandle.GetGPUHandle());
 
 				m_commandList->SetComputeRootDescriptorTable(3, renderObject.m_skinningBufferHandle->GetGPUHandle());

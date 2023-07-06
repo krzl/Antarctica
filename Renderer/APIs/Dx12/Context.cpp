@@ -336,12 +336,28 @@ namespace Renderer::Dx12
 			m_commandList->SetGraphicsRootConstantBufferView(
 				2, GetScratchBuffer().GetGpuPointer(renderObject.m_perCallBuffer));
 
-			renderObject.m_submesh->Bind(renderObject);
-
 			if (renderObject.m_skinningBufferHandle)
 			{
 				m_commandList->SetGraphicsRootDescriptorTable(3, renderObject.m_skinningBufferHandle->GetGPUHandle());
 			}
+
+			if (renderObject.m_clipRect.has_value())
+			{
+				D3D12_RECT rect = {
+					(int32_t) renderObject.m_clipRect->m_lowerBoundary.x,
+					(int32_t) renderObject.m_clipRect->m_lowerBoundary.y,
+					(int32_t) renderObject.m_clipRect->m_upperBoundary.x,
+					(int32_t) renderObject.m_clipRect->m_upperBoundary.y
+				};
+
+				m_commandList->RSSetScissorRects(1, &rect);
+			}
+			else
+			{
+				m_commandList->RSSetScissorRects(1, &m_scissorRect);
+			}
+
+			renderObject.m_submesh->Bind(renderObject);
 
 			m_commandList->DrawIndexedInstanced(renderObject.m_submesh->GetIndexCount(),
 												renderObject.m_instanceCount,

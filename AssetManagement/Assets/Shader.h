@@ -3,26 +3,30 @@
 #include "Asset.h"
 #include "Types.h"
 
+struct ShaderParams
+{
+	bool m_isDoubleSided    = false;
+	bool m_blendingEnabled  = false;
+	bool m_depthTestEnabled = true;
+};
+
 class Shader : public Asset
 {
-	typedef std::unique_ptr<Renderer::IShader, void(*)(Renderer::IShader*)> NativePtr;
+	typedef std::unique_ptr<Renderer::NativeShader, void(*)(Renderer::NativeShader*)> NativePtr;
 
 public:
 
-	explicit Shader(std::string path) :
-		m_path(std::move(path)) { }
-
-	[[nodiscard]] const Renderer::IShader* GetNativeObject() const
+	[[nodiscard]] const Renderer::NativeShader* GetNativeObject() const
 	{
 		return m_nativeObject.get();
 	}
 
-	[[nodiscard]] Renderer::IShader* GetNativeObject()
+	[[nodiscard]] Renderer::NativeShader* GetNativeObject()
 	{
 		return m_nativeObject.get();
 	}
 
-	void SetNativeObject(Renderer::IShader* nativePtr)
+	void SetNativeObject(Renderer::NativeShader* nativePtr)
 	{
 		m_nativeObject = NativePtr(nativePtr, Renderer::Deleter);
 	}
@@ -31,6 +35,13 @@ public:
 	{
 		return m_path;
 	}
+
+	virtual std::unique_ptr<ShaderParams> GetShaderParams() { return std::unique_ptr<ShaderParams>(new ShaderParams); }
+
+
+protected:
+
+	bool Load(const std::string& path) override;
 
 private:
 

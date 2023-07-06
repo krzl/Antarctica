@@ -77,15 +77,15 @@ namespace Renderer::Dx12
 		SetDebugName(m_pipelineState, m_path.data());
 	}
 
-	IComputeShader* ComputeShader::Create(const std::shared_ptr<::ComputeShader>& shader)
+	NativeComputeShader* ComputeShader::Create(const std::shared_ptr<::ComputeShader>& shader)
 	{
-		return static_cast<IComputeShader*>(new ComputeShader(shader->GetPath()));
+		return static_cast<NativeComputeShader*>(new ComputeShader(shader->GetPath()));
 	}
 }
 
 namespace Renderer
 {
-	extern void Deleter(IComputeShader* shader)
+	extern void Deleter(NativeComputeShader* shader)
 	{
 		if (shader != nullptr)
 		{

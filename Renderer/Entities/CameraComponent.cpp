@@ -99,6 +99,7 @@ namespace Renderer
 
 		PerCameraBuffer* buffer  = m_constantBuffer.GetData<PerCameraBuffer>();
 		buffer->m_viewProjMatrix = viewProj.transpose;
+		buffer->m_projMatrix = proj.transpose;
 	}
 
 	void CameraComponent::SetAspectRatio(const float aspectRatio)

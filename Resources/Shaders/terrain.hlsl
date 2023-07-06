@@ -25,6 +25,7 @@ StructuredBuffer<PerObject> perObjectBuffers : register(t0);
 cbuffer cbCamera : register(b1)
 {
 	float4x4	viewProj;
+	float4x4	proj;
 };
 
 Texture2D tex1 : register(t3);

@@ -2,9 +2,9 @@
 
 namespace Renderer
 {
-	class IBuffer;
-	class IComputeShader;
-	class IShader;
-	class ISubmesh;
-	class ITexture;
+	class NativeBuffer;
+	class NativeComputeShader;
+	class NativeShader;
+	class NativeSubmesh;
+	class NativeTexture;
 }

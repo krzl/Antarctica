@@ -65,17 +65,17 @@ namespace Renderer::Dx12
 		Dx12Context::Get().GetCommandList()->SetGraphicsRootDescriptorTable(index, m_heapHandle->GetGPUHandle());
 	}
 
-	ITexture* Texture::Create(const std::shared_ptr<::Texture>& texture)
+	NativeTexture* Texture::Create(const std::shared_ptr<::Texture>& texture)
 	{
 		Texture* nativeSubmesh = new Texture();
 		nativeSubmesh->Init(texture.get());
-		return static_cast<ITexture*>(nativeSubmesh);
+		return static_cast<NativeTexture*>(nativeSubmesh);
 	}
 }
 
 namespace Renderer
 {
-	extern void Deleter(ITexture* texture)
+	extern void Deleter(NativeTexture* texture)
 	{
 		if (texture != nullptr)
 		{

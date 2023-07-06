@@ -13,7 +13,7 @@ namespace Renderer
 
 		void     Init(const uint32_t elementCount, const uint32_t elementSize);
 		void     InitUAV(const uint32_t elementCount, const uint32_t elementSize);
-		IBuffer* GetCurrentBuffer() const;
+		NativeBuffer* GetCurrentBuffer() const;
 
 		[[nodiscard]] bool IsInitialized() const
 		{
@@ -27,6 +27,6 @@ namespace Renderer
 
 	private:
 
-		std::array<IBuffer*, RenderSystem::BUFFER_COUNT> m_buffers = {};
+		std::array<NativeBuffer*, RenderSystem::BUFFER_COUNT> m_buffers = {};
 	};
 }

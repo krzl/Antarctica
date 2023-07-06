@@ -49,7 +49,7 @@ namespace Renderer::Dx12
 	}
 
 	std::shared_ptr<DescriptorHeapHandle> ScratchBuffer::CreateUAV(const ScratchBufferHandle& handle,
-																   uint32_t                   elementSize)
+																   const uint32_t             elementSize)
 	{
 		ID3D12Device* device = Dx12Context::Get().GetDevice();
 
@@ -128,7 +128,7 @@ namespace Renderer::Dx12
 		return m_mappedBuffers[i] == nullptr;
 	}
 
-	ScratchBufferHandle ScratchBuffer::Allocate(const uint32_t size, bool bIsUav)
+	ScratchBufferHandle ScratchBuffer::Allocate(const uint32_t size, const bool bIsUav)
 	{
 		for (uint32_t i = 0; i < m_bufferAllocationSizes.size(); ++i)
 		{

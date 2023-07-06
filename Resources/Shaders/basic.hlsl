@@ -24,8 +24,8 @@ StructuredBuffer<PerObject> perObjectBuffers : register(t0);
 cbuffer cbCamera : register(b1)
 {
 	float4x4	viewProj;
+	float4x4	proj;
 };
-
 
 cbuffer cbCall : register(b2)
 {
@@ -63,5 +63,4 @@ VertexOut vs(VertexIn vin)
 float4 ps(VertexOut pin) : SV_Target
 {
 	return tex.Sample(samp, pin.texcoord);
-    return float4(1,0.2,0.0,1);
 }

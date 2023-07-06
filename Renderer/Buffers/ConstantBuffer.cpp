@@ -23,7 +23,7 @@ namespace Renderer
 		return m_updateMask & currentMask;
 	}
 
-	IBuffer* ConstantBuffer::UpdateAndGetCurrentBuffer()
+	NativeBuffer* ConstantBuffer::UpdateAndGetCurrentBuffer()
 	{
 		UpdateCurrentBuffer();
 		return GetCurrentBuffer();
@@ -37,7 +37,7 @@ namespace Renderer
 
 	void ConstantBuffer::UpdateCurrentBuffer()
 	{
-		IBuffer* buffer = GetCurrentBuffer();
+		NativeBuffer* buffer = GetCurrentBuffer();
 		if (IsOutOfDate())
 		{
 			buffer->SetData(m_bufferData.data());

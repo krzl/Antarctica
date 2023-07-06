@@ -100,6 +100,67 @@ namespace Renderer::Dx12
 		}
 	}
 
+	D3D12_RASTERIZER_DESC Shader::GetRasterizerDescription()
+	{
+		auto rasterizerDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+
+		if (m_shaderParams->m_isDoubleSided)
+		{
+			rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+		}
+
+		return rasterizerDesc;
+	}
+
+	D3D12_BLEND_DESC Shader::GetBlendDescription()
+	{
+		if (m_shaderParams->m_blendingEnabled)
+		{
+			D3D12_BLEND_DESC blendDesc;
+			blendDesc.AlphaToCoverageEnable  = false;
+			blendDesc.IndependentBlendEnable = false;
+
+			constexpr D3D12_RENDER_TARGET_BLEND_DESC renderTargetBlendDesc =
+			{
+				true,
+				false,
+				D3D12_BLEND_SRC_ALPHA,
+				D3D12_BLEND_INV_SRC_ALPHA,
+				D3D12_BLEND_OP_ADD,
+				D3D12_BLEND_ONE,
+				D3D12_BLEND_ZERO,
+				D3D12_BLEND_OP_ADD,
+				D3D12_LOGIC_OP_NOOP,
+				D3D12_COLOR_WRITE_ENABLE_ALL,
+			};
+
+
+			for (uint32_t i               = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
+				blendDesc.RenderTarget[i] = renderTargetBlendDesc;
+
+			return blendDesc;
+		}
+
+		return CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	}
+
+	D3D12_DEPTH_STENCIL_DESC Shader::GetDepthStencilDescription()
+	{
+		CD3DX12_DEPTH_STENCIL_DESC depthStencilDesc(D3D12_DEFAULT);
+
+		if (!m_shaderParams->m_depthTestEnabled)
+		{
+			depthStencilDesc.DepthEnable = false;
+			depthStencilDesc.DepthFunc   = D3D12_COMPARISON_FUNC_ALWAYS;
+		}
+		else if (m_shaderParams->m_blendingEnabled)
+		{
+			depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		}
+
+		return depthStencilDesc;
+	}
+
 	void Shader::CreatePipelineState()
 	{
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElements = GetInputElements();
@@ -139,10 +200,10 @@ namespace Renderer::Dx12
 				m_gs->GetByteCode().Get() != nullptr ? m_gs->GetByteCode()->GetBufferSize() : 0
 			},
 			{},
-			CD3DX12_BLEND_DESC(D3D12_DEFAULT),
+			GetBlendDescription(),
 			UINT_MAX,
-			CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT),
-			CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT),
+			GetRasterizerDescription(),
+			GetDepthStencilDescription(),
 			{
 				inputElements.data(),
 				(uint32_t) inputElements.size()
@@ -166,8 +227,6 @@ namespace Renderer::Dx12
 		{
 			pipelineStateDesc.RTVFormats[i] = outputFormats[i];
 		}
-
-		pipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
 
 		Dx12Context::Get().GetDevice()->
 						   CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&m_pipelineState));
@@ -258,15 +317,15 @@ namespace Renderer::Dx12
 		return DXGI_FORMAT_UNKNOWN;
 	}
 
-	IShader* Shader::Create(const std::shared_ptr<::Shader>& shader)
+	NativeShader* Shader::Create(const std::shared_ptr<::Shader>& shader)
 	{
-		return static_cast<IShader*>(new Shader(shader->GetPath()));
+		return static_cast<NativeShader*>(new Shader(shader->GetPath(), shader->GetShaderParams()));
 	}
 }
 
 namespace Renderer
 {
-	extern void Deleter(IShader* shader)
+	extern void Deleter(NativeShader* shader)
 	{
 		if (shader != nullptr)
 		{

@@ -5,7 +5,8 @@ SubmeshBuilder::SubmeshBuilder(std::string&& name, std::vector<Vector3D>&& posit
 	m_name(std::move(name)),
 	m_indices(reinterpret_cast<uint8_t*>(indices.data()),
 			  reinterpret_cast<uint8_t*>(indices.data()) + indices.size() * 4),
-	m_positions(std::move(positions)) {}
+	m_positions(std::move(positions)),
+	m_skeleton() {}
 
 void SubmeshBuilder::SetNormals(std::vector<Vector3D>&& normals)
 {
@@ -71,8 +72,8 @@ static void AppendVertexData(std::vector<T>& newData, std::vector<uint8_t>& vert
 
 Submesh SubmeshBuilder::Build()
 {
-	const uint32_t indexCount  = static_cast<uint32_t>(m_indices.size() / sizeof(uint32_t));
-	MeshBuffer     indexBuffer = {
+	const uint32_t          indexCount  = static_cast<uint32_t>(m_indices.size() / sizeof(uint32_t));
+	MeshBuffer indexBuffer = {
 		std::move(m_indices),
 		sizeof(uint32_t),
 		indexCount
@@ -80,7 +81,7 @@ Submesh SubmeshBuilder::Build()
 
 	const AttributeUsage attributes = GetAttributeUsage();
 
-	const uint32_t stride = GetAttributeOffsets(attributes).m_stride;
+	const uint32_t stride = attributes.GetAttributeOffsets().m_stride;
 
 	std::vector<uint8_t> vertices(stride * m_positions.size());
 
@@ -132,80 +133,6 @@ Submesh SubmeshBuilder::Build()
 	submesh.SetSkeleton(std::move(m_skeleton));
 
 	return submesh;
-}
-
-const AttributeOffsets& SubmeshBuilder::GetAttributeOffsets(
-	const AttributeUsage& attributeUsage) const
-{
-	const auto it = AttributeUsage::m_attributeOffsets.find(attributeUsage);
-
-	if (it != AttributeUsage::m_attributeOffsets.end())
-	{
-		return it->second;
-	}
-
-	AttributeOffsets offsets;
-
-	uint32_t stride = 3 * 4;
-
-	if (m_normals.size() != 0)
-	{
-		offsets.m_normalOffset = stride;
-		stride += 3 * 4;
-	}
-	if (m_tangents.size() != 0)
-	{
-		offsets.m_tangentOffset = stride;
-		stride += 3 * 4;
-	}
-	if (m_bitangents.size() != 0)
-	{
-		offsets.m_bitangentOffset = stride;
-		stride += 3 * 4;
-	}
-	if (m_colors.size() != 0)
-	{
-		const uint8_t colorChannelCount = (uint32_t) m_colors.size() / (uint32_t) m_positions.size();
-
-		offsets.m_colorOffset0 = colorChannelCount >= 1 ? stride + 4 * 4 * 0 : 0;
-		offsets.m_colorOffset1 = colorChannelCount >= 2 ? stride + 4 * 4 * 1 : offsets.m_colorOffset0;
-		offsets.m_colorOffset2 = colorChannelCount >= 3 ? stride + 4 * 4 * 2 : offsets.m_colorOffset1;
-		offsets.m_colorOffset3 = colorChannelCount >= 4 ? stride + 4 * 4 * 3 : offsets.m_colorOffset2;
-
-		stride += 4 * 4 * colorChannelCount;
-	}
-	if (m_texcoords0.size() != 0)
-	{
-		offsets.m_texcoordOffset0 = stride;
-		offsets.m_texcoordOffset1 = stride;
-		offsets.m_texcoordOffset2 = stride;
-		offsets.m_texcoordOffset3 = stride;
-		stride += 4 * (uint32_t) m_texcoords0.size() / (uint32_t) m_positions.size();
-	}
-	if (m_texcoords1.size() != 0)
-	{
-		offsets.m_texcoordOffset1 = stride;
-		offsets.m_texcoordOffset2 = stride;
-		offsets.m_texcoordOffset3 = stride;
-		stride += 4 * (uint32_t) m_texcoords1.size() / (uint32_t) m_positions.size();
-	}
-	if (m_texcoords2.size() != 0)
-	{
-		offsets.m_texcoordOffset2 = stride;
-		offsets.m_texcoordOffset3 = stride;
-		stride += 4 * (uint32_t) m_texcoords2.size() / (uint32_t) m_positions.size();
-	}
-	if (m_texcoords3.size() != 0)
-	{
-		offsets.m_texcoordOffset3 = stride;
-		stride += 4 * (uint32_t) m_texcoords3.size() / (uint32_t) m_positions.size();
-	}
-
-	offsets.m_stride = stride;
-
-	AttributeUsage::m_attributeOffsets[attributeUsage] = offsets;
-
-	return AttributeUsage::m_attributeOffsets[attributeUsage];
 }
 
 AttributeUsage SubmeshBuilder::GetAttributeUsage() const

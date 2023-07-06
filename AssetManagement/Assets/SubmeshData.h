@@ -10,6 +10,43 @@ struct MeshBuffer
 	std::vector<uint8_t> m_data;
 	uint32_t             m_elementSize;
 	uint32_t             m_elementCount;
+
+	MeshBuffer(const std::vector<uint8_t>& data, const uint32_t elementSize, const uint32_t elementCount)
+		: m_data(data),
+		  m_elementSize(elementSize),
+		  m_elementCount(elementCount) {}
+
+	MeshBuffer() = default;
+
+	MeshBuffer(const MeshBuffer& other)
+		: m_data(other.m_data),
+		  m_elementSize(other.m_elementSize),
+		  m_elementCount(other.m_elementCount) {}
+
+	MeshBuffer(MeshBuffer&& other) noexcept
+		: m_data(std::move(other.m_data)),
+		  m_elementSize(other.m_elementSize),
+		  m_elementCount(other.m_elementCount) {}
+
+	MeshBuffer& operator=(const MeshBuffer& other)
+	{
+		if (this == &other)
+			return *this;
+		m_data         = other.m_data;
+		m_elementSize  = other.m_elementSize;
+		m_elementCount = other.m_elementCount;
+		return *this;
+	}
+
+	MeshBuffer& operator=(MeshBuffer&& other) noexcept
+	{
+		if (this == &other)
+			return *this;
+		m_data         = std::move(other.m_data);
+		m_elementSize  = other.m_elementSize;
+		m_elementCount = other.m_elementCount;
+		return *this;
+	}
 };
 
 struct AttributeOffsets
@@ -37,23 +74,22 @@ struct AttributeUsage
 	uint8_t m_hasTangents : 1;
 	uint8_t m_hasBitangents : 1;
 	uint8_t m_colorChannelCount : 3;
-	uint8_t m_dataSizeTexcoord0 : 2;
-	uint8_t m_dataSizeTexcoord1 : 2;
-	uint8_t m_dataSizeTexcoord2 : 2;
-	uint8_t m_dataSizeTexcoord3 : 2;
+	uint8_t m_dataSizeTexcoord0 : 3;
+	uint8_t m_dataSizeTexcoord1 : 3;
+	uint8_t m_dataSizeTexcoord2 : 3;
+	uint8_t m_dataSizeTexcoord3 : 3;
 
 	// ReSharper disable once CppNonExplicitConversionOperator
-	operator uint16_t() const;
+	operator uint32_t() const;
 
 	[[nodiscard]] const AttributeOffsets& GetAttributeOffsets() const;
 
-	static std::unordered_map<uint16_t, AttributeOffsets> m_attributeOffsets;
+	static std::unordered_map<uint32_t, AttributeOffsets> m_attributeOffsets;
 };
 
 struct Submesh
 {
-	typedef std::unique_ptr<Renderer::ISubmesh, void(*)(Renderer::ISubmesh*)> NativePtr;
-
+	typedef std::unique_ptr<Renderer::NativeSubmesh, void(*)(Renderer::NativeSubmesh*)> NativePtr;
 
 	explicit Submesh(std::string&&        name,
 					 const MeshBuffer&&   vertexBuffer,
@@ -61,8 +97,8 @@ struct Submesh
 					 const AttributeUsage attributes,
 					 const BoundingBox&   boundingBox) :
 		m_name(std::move(name)),
-		m_vertexBuffer(vertexBuffer),
-		m_indexBuffer(indexBuffer),
+		m_vertexBuffer(std::move(vertexBuffer)),
+		m_indexBuffer(std::move(indexBuffer)),
 		m_skeleton(),
 		m_attributes(attributes),
 		m_ignoreAttachmentRotation(false),
@@ -73,7 +109,7 @@ struct Submesh
 		return m_vertexBuffer;
 	}
 
-	[[nodiscard]] const MeshBuffer& GetIndexBuffer() const
+	[[nodiscard]] const MeshBuffer& GetIndexBuffer(const uint32_t index = 0) const
 	{
 		return m_indexBuffer;
 	}
@@ -93,12 +129,12 @@ struct Submesh
 		m_skeleton = std::move(skeleton);
 	}
 
-	[[nodiscard]] Renderer::ISubmesh* GetNativeObject() const
+	[[nodiscard]] Renderer::NativeSubmesh* GetNativeObject() const
 	{
 		return m_nativeObject.get();
 	}
 
-	void SetNativeObject(Renderer::ISubmesh* nativePtr) const
+	void SetNativeObject(Renderer::NativeSubmesh* nativePtr) const
 	{
 		m_nativeObject = NativePtr(nativePtr, Renderer::Deleter);
 	}
@@ -118,8 +154,11 @@ struct Submesh
 	[[nodiscard]] bool GetIgnoreAttachmentRotation() const { return m_ignoreAttachmentRotation; }
 
 	const BoundingBox& GetBoundingBox() const;
+	bool               IsDynamic() const { return m_isDynamic; }
 
-private:
+protected:
+
+	Submesh() = default;
 
 	std::string     m_name;
 	MeshBuffer      m_vertexBuffer;
@@ -128,8 +167,11 @@ private:
 	AttributeUsage  m_attributes;
 	mutable int32_t m_attachNodeId = -1;
 	mutable bool    m_ignoreAttachmentRotation;
+	bool            m_isDynamic = false;
 
 	BoundingBox m_boundingBox;
+
+private:
 
 	mutable NativePtr m_nativeObject = NativePtr(nullptr, Renderer::Deleter);
 };

@@ -12,4 +12,4 @@ Quaternion  AIQuaternionCast(const aiQuaternion& quaternion);
 Vector3D    AIVectorCast(const aiVector3D& vector);
 Transform4D AIMatrixCast(const aiMatrix4x4& matrix);
 
-std::shared_ptr<Animation> ImportAnimation(const aiAnimation* aiAnimation, const aiNode* rootNode);
+void ImportAnimation(Animation& animation, const aiAnimation* aiAnimation, const aiNode* rootNode);

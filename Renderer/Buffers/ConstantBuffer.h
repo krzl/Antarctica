@@ -26,7 +26,7 @@ namespace Renderer
 			return static_cast<T*>(static_cast<void*>(m_bufferData.data()));
 		}
 
-		IBuffer* UpdateAndGetCurrentBuffer();
+		NativeBuffer* UpdateAndGetCurrentBuffer();
 
 	private:
 
@@ -34,7 +34,7 @@ namespace Renderer
 
 		static constexpr uint8_t DIRTY_UPDATE_MASK = (1 << RenderSystem::BUFFER_COUNT) - 1;
 
-		std::array<IBuffer*, RenderSystem::BUFFER_COUNT> m_buffers = {};
+		std::array<NativeBuffer*, RenderSystem::BUFFER_COUNT> m_buffers = {};
 		std::vector<uint8_t>                             m_bufferData;
 
 		uint32_t m_elementCount      = 0;

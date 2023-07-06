@@ -161,7 +161,7 @@ namespace Anim
 		transforms.assign(meshNodes.size(), Transform4D());
 
 		const Transform4D initialTransform = Transform4D::identity;
-		CalculateNode(animation->m_rootNode, meshNodes, currentTime, transforms, initialTransform);
+		CalculateNode(animation->GetRootNode(), meshNodes, currentTime, transforms, initialTransform);
 
 		for (uint32_t i = 0; i < meshNodes.size(); ++i)
 		{

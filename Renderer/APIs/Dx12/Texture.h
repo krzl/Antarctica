@@ -17,7 +17,7 @@ namespace Renderer::Dx12
 
 		void Bind(uint32_t index);
 
-		static ITexture* Create(const std::shared_ptr<::Texture>& texture);
+		static NativeTexture* Create(const std::shared_ptr<::Texture>& texture);
 
 	private:
 
@@ -37,5 +37,5 @@ namespace Renderer::Dx12
 
 namespace Renderer
 {
-	class ITexture : public Dx12::Texture {};
+	class NativeTexture : public Dx12::Texture {};
 }

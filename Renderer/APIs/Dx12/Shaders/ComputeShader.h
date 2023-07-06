@@ -30,7 +30,7 @@ namespace Renderer::Dx12
 			return m_shaderDescriptor;
 		}
 
-		static IComputeShader* Create(const std::shared_ptr<::ComputeShader>& shader);
+		static NativeComputeShader* Create(const std::shared_ptr<::ComputeShader>& shader);
 
 	private:
 
@@ -56,7 +56,7 @@ namespace Renderer::Dx12
 
 namespace Renderer
 {
-	class IComputeShader : public Dx12::ComputeShader {};
+	class NativeComputeShader : public Dx12::ComputeShader {};
 
-	extern void Deleter(IComputeShader* shader);
+	extern void Deleter(NativeComputeShader* shader);
 }

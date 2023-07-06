@@ -1,20 +1,14 @@
 #pragma once
 
 #include "Common.h"
-#include "Buffers/DynamicBuffer.h"
 
-namespace Renderer
-{
-	struct ScratchBufferHandle;
-}
-
+struct AttributeOffsets;
 struct Submesh;
 
 namespace Renderer::Dx12
 {
 	struct RenderObject;
 	struct DescriptorHeapHandle;
-	class Shader;
 
 	enum class MeshAttribute
 	{
@@ -34,50 +28,26 @@ namespace Renderer::Dx12
 	};
 
 	MeshAttribute GetMeshAttributeFromName(const char* attributeName, uint32_t index);
+	uint16_t      GetAttributeOffset(MeshAttribute attribute, const AttributeOffsets& offsets);
+	uint16_t      GetAttributeDataSize(MeshAttribute attribute, const AttributeOffsets& offsets);
 
 	class Submesh
 	{
 	public:
 
-		~Submesh();
+		virtual ~Submesh() = default;
 
-		void Bind(const RenderObject& renderObject) const;
-
-		const D3D12_VERTEX_BUFFER_VIEW* GetVertexBufferViewForAttribute(MeshAttribute attribute) const;
+		virtual void Update(const ::Submesh* submesh) {}
+		virtual void Bind(const RenderObject& renderObject) const = 0;
 
 		[[nodiscard]] uint32_t GetIndexCount() const { return m_indexCount; }
 		[[nodiscard]] uint32_t GetVertexCount() const { return m_vertexCount; }
 
-		std::shared_ptr<DescriptorHeapHandle> GetSkinningHeapHandle();
+	protected:
 
-		uint32_t GetSkinnedAttributeCount() const;
+		Submesh() = default;
 
-		static ISubmesh* Create(const ::Submesh* submesh);
-
-	private:
-
-		Submesh();
-
-		void Init(const ::Submesh* submesh);
-
-		void CreateVertexBufferViews(const ::Submesh* submesh);
-		void AddVertexBufferView(const ::Submesh* submesh, MeshAttribute attribute, uint16_t offset,
-								 uint16_t         nextOffset);
-
-
-		void CreateShaderResourceViews(const ::Submesh* submesh);
-		void AddShaderResourceViews(const ::Submesh* submesh, MeshAttribute attribute, uint16_t offset);
-
-		D3D12_INDEX_BUFFER_VIEW m_indexBufferView = {};
-		ComPtr<ID3D12Resource>  m_indexBuffer;
-		ComPtr<ID3D12Resource>  m_indexUploadBuffer;
-
-		std::map<MeshAttribute, D3D12_VERTEX_BUFFER_VIEW> m_vertexBufferViews;
-		ComPtr<ID3D12Resource>                            m_vertexBuffer;
-		ComPtr<ID3D12Resource>                            m_vertexUploadBuffer;
-
-		std::shared_ptr<DescriptorHeapHandle> m_skinningHeapHandle;
-		uint32_t                              m_skinnedAttributesCount = 0;
+		virtual void Init(const ::Submesh* submesh) = 0;
 
 		uint32_t m_vertexCount = 0;
 		uint32_t m_indexCount  = 0;
@@ -86,5 +56,5 @@ namespace Renderer::Dx12
 
 namespace Renderer
 {
-	class ISubmesh : public Dx12::Submesh { };
+	class NativeSubmesh : public Dx12::Submesh { };
 }

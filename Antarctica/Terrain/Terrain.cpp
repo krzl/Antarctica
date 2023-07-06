@@ -2,7 +2,7 @@
 #include "Terrain.h"
 
 #include "Assets/Mesh.h"
-#include "Loaders/SubmeshBuilder.h"
+#include "Assets/Loaders/SubmeshBuilder.h"
 
 #define GRID_CELL_TO_METER (1.0f/4.0f)
 #define GRID_LEVEL_HEIGHT_TO_METER 1.5f

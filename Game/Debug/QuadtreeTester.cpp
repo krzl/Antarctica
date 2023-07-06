@@ -3,6 +3,11 @@
 
 #include "GameObjects/World.h"
 
+QuadtreeTester::QuadtreeTester()
+{
+	m_isTickable = true;
+}
+
 static void PrintNode(Quadtree::Node* node, const uint32_t depth)
 {
 	std::ostringstream string;
