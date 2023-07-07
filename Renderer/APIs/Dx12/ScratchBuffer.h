@@ -12,10 +12,14 @@ namespace Renderer::Dx12
 
 	public:
 
-		ScratchBufferHandle CreateHandle(uint32_t size, const void* data = nullptr);
+		ScratchBufferHandle CreateHandle(uint32_t size, const void* data = nullptr, bool isUav = false);
 
 		std::shared_ptr<DescriptorHeapHandle> CreateSRV(uint32_t    elementSize, uint32_t elementCount = 1,
 														const void* data                               = nullptr);
+		std::shared_ptr<DescriptorHeapHandle> CreateSRV(const ScratchBufferHandle& handle, const uint32_t elementSize);
+
+		std::shared_ptr<DescriptorHeapHandle> CreateCBV(uint32_t size, const void* data = nullptr);
+		std::shared_ptr<DescriptorHeapHandle> CreateCBV(const ScratchBufferHandle& handle);
 
 		D3D12_GPU_VIRTUAL_ADDRESS GetGpuPointer(const ScratchBufferHandle& scratchBufferHandle) const;
 
@@ -27,6 +31,7 @@ namespace Renderer::Dx12
 		bool                IsUavBuffer(uint32_t i) const;
 		ScratchBufferHandle Allocate(const uint32_t size, bool bIsUav);
 		void                SetData(const void* data, uint32_t bufferId, uint32_t offset, uint32_t size) const;
+		uint8_t*            GetDataPtr(const ScratchBufferHandle& handle) const;
 
 		void SubmitBuffers() const;
 

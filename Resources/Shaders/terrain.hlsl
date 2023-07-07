@@ -22,7 +22,7 @@ struct PerObject
 
 StructuredBuffer<PerObject> perObjectBuffers : register(t0);
 
-cbuffer cbCamera : register(b1)
+cbuffer _cbCamera : register(b1)
 {
 	float4x4	viewProj;
 	float4x4	proj;

@@ -5,9 +5,9 @@
 
 namespace Renderer::Dx12
 {
-	ScratchBufferHandle ScratchBuffer::CreateHandle(const uint32_t size, const void* data)
+	ScratchBufferHandle ScratchBuffer::CreateHandle(const uint32_t size, const void* data, const bool isUav)
 	{
-		const ScratchBufferHandle handle = Allocate(size, data == nullptr);
+		const ScratchBufferHandle handle = Allocate(size, isUav);
 		if (data)
 		{
 			SetData(data, handle.m_bufferId, handle.m_offset, handle.m_byteSize);
@@ -19,9 +19,15 @@ namespace Renderer::Dx12
 																   const uint32_t elementCount,
 																   const void*    data)
 	{
+		const ScratchBufferHandle handle = CreateHandle(elementSize * elementCount, data);
+		return CreateSRV(handle, elementSize);
+	}
+
+	std::shared_ptr<DescriptorHeapHandle> ScratchBuffer::CreateSRV(const ScratchBufferHandle& handle,
+																   const uint32_t             elementSize)
+	{
 		std::shared_ptr<DescriptorHeapHandle> heapHandle = Dx12Context::Get().CreateHeapHandle();
 
-		const ScratchBufferHandle handle = CreateHandle(elementSize * elementCount, data);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC desc
 		{
@@ -32,13 +38,34 @@ namespace Renderer::Dx12
 		desc.Buffer =
 		{
 			handle.m_offset / elementSize,
-			elementCount,
+			handle.GetByteSize() / elementSize,
 			elementSize,
 			D3D12_BUFFER_SRV_FLAG_NONE
 		};
 
 		Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_buffers[handle.m_bufferId].Get(), &desc,
 																 heapHandle->GetCPUHandle());
+
+		return heapHandle;
+	}
+
+	std::shared_ptr<DescriptorHeapHandle> ScratchBuffer::CreateCBV(const uint32_t size, const void* data)
+	{
+		const ScratchBufferHandle handle = CreateHandle(size, data);
+		return CreateCBV(handle);
+	}
+
+	std::shared_ptr<DescriptorHeapHandle> ScratchBuffer::CreateCBV(const ScratchBufferHandle& handle)
+	{
+		std::shared_ptr<DescriptorHeapHandle> heapHandle = Dx12Context::Get().CreateHeapHandle();
+
+		D3D12_CONSTANT_BUFFER_VIEW_DESC desc
+		{
+			GetGpuPointer(handle),
+			handle.GetByteSize()
+		};
+
+		Dx12Context::Get().GetDevice()->CreateConstantBufferView(&desc, heapHandle->GetCPUHandle());
 
 		return heapHandle;
 	}
@@ -161,6 +188,11 @@ namespace Renderer::Dx12
 								const uint32_t size) const
 	{
 		memcpy(m_mappedBuffers[bufferId] + offset, data, size);
+	}
+
+	uint8_t* ScratchBuffer::GetDataPtr(const ScratchBufferHandle& handle) const
+	{
+		return (uint8_t*) m_mappedBuffers[handle.m_bufferId] + handle.m_offset;
 	}
 
 	void ScratchBuffer::SubmitBuffers() const

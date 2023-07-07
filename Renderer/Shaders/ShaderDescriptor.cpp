@@ -8,11 +8,6 @@ namespace Renderer
 		m_textures.push_back(std::move(descriptor));
 	}
 
-	void ShaderDescriptor::AddVariableDescriptor(VariableDescriptor&& descriptor)
-	{
-		m_variables.push_back(std::move(descriptor));
-	}
-
 	void ShaderDescriptor::AddBufferDescriptor(BufferDescriptor&& descriptor)
 	{
 		m_buffers.push_back(std::move(descriptor));
@@ -20,9 +15,9 @@ namespace Renderer
 
 	bool ShaderDescriptor::ContainsBuffer(const std::string& name) const
 	{
-		for (const auto& [bufferName, bufferSize, defaultValue] : m_buffers)
+		for (const auto& buffer : m_buffers)
 		{
-			if (bufferName == name)
+			if (buffer.m_name == name)
 			{
 				return true;
 			}
@@ -32,7 +27,7 @@ namespace Renderer
 
 	bool ShaderDescriptor::ContainsTextureId(const uint32_t id) const
 	{
-		for (const auto& [name, textureId] : m_textures)
+		for (const auto& [name, nameHash, textureId] : m_textures)
 		{
 			if (textureId == id)
 			{

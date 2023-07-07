@@ -30,9 +30,9 @@ namespace Renderer::Dx12
 
 	void Shader::BindMaterial(const Material& materialData) const
 	{
-		for (const auto& [name, id] : m_shaderDescriptor.GetTextures())
+		for (const auto& [_, nameHash, id] : m_shaderDescriptor.GetTextures())
 		{
-			auto it = materialData.GetTextures().find(name);
+			auto it = materialData.GetTextures().find(nameHash);
 			if (it != materialData.GetTextures().end())
 			{
 				std::shared_ptr<::Texture> texture = it->second;
@@ -41,6 +41,16 @@ namespace Renderer::Dx12
 					texture->SetNativeObject(Texture::Create(texture));
 				}
 				texture->GetNativeObject()->Bind(id);
+			}
+		}
+
+		for (const auto& a : m_shaderDescriptor.GetBuffers())
+		{
+			auto it = materialData.GetTextures().find(a.m_nameHash);
+			if (it != materialData.GetTextures().end())
+			{
+				std::shared_ptr<::Texture> texture = it->second;
+				//texture->GetNativeObject()->Bind(a.);
 			}
 		}
 	}

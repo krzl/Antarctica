@@ -12,13 +12,14 @@ namespace Renderer::Dx12
 {
 	struct RenderObject
 	{
-		NativeShader*                         m_shader;
-		NativeSubmesh*                        m_submesh;
-		std::shared_ptr<DescriptorHeapHandle> m_perObjectBuffer;
-		ScratchBufferHandle                   m_perCallBuffer;
-		std::map<uint32_t, NativeTexture*>    m_textures;
-		uint32_t                              m_instanceCount;
-		std::optional<Rect>                   m_clipRect;
+		NativeShader*                                             m_shader;
+		NativeSubmesh*                                            m_submesh;
+		std::shared_ptr<DescriptorHeapHandle>                     m_perObjectBuffer;
+		ScratchBufferHandle                                       m_perCallBuffer;
+		std::map<uint32_t, NativeTexture*>                        m_textures;
+		std::map<uint32_t, std::shared_ptr<DescriptorHeapHandle>> m_constantBuffers;
+		uint32_t                                                  m_instanceCount;
+		std::optional<Rect>                                       m_clipRect;
 
 		std::shared_ptr<DescriptorHeapHandle> m_skinningBufferHandle;
 		std::shared_ptr<DescriptorHeapHandle> m_boneTransforms;
@@ -40,12 +41,12 @@ namespace Renderer::Dx12
 
 		void CreateRenderQueue(RenderQueue& objectsToRender) override;
 
-		void        SetupCamera(const Renderer::CameraData& camera) const override;
-		void        SetupRenderTarget(const CameraData& camera) const override;
-		void        DrawObjects(const CameraData& camera) override;
-		void        FinalizeDrawing() override;
-		void        UpdateSkinning() override;
-		static void UpdateMaterial(const Material* material, RenderObject& renderObject);
+		void SetupCamera(const Renderer::CameraData& camera) const override;
+		void SetupRenderTarget(const CameraData& camera) const override;
+		void DrawObjects(const CameraData& camera) override;
+		void FinalizeDrawing() override;
+		void UpdateSkinning() override;
+		void UpdateMaterial(const Material* material, RenderObject& renderObject);
 
 		uint32_t GetCurrentBackbufferId() override;
 

@@ -80,6 +80,9 @@ std::vector<Renderer::QueuedRenderObject>& ImGuiSystem::Render()
 
 	const ImDrawData* imDrawData = ImGui::GetDrawData();
 
+	Vector2D scale = Vector2D(2.0f / imDrawData->DisplaySize.x, -2.0f / imDrawData->DisplaySize.y);
+	m_material->SetVariable<Vector2D>("scale", scale);
+	
 	uint32_t submeshCount = 0;
 	for (uint32_t drawListId = 0; drawListId < (uint32_t) imDrawData->CmdListsCount; ++drawListId)
 	{

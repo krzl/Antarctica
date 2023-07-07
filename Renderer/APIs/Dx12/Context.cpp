@@ -273,9 +273,9 @@ namespace Renderer::Dx12
 	{
 		const ShaderDescriptor& descriptor = material->GetShader()->GetNativeObject()->GetShaderDescriptor();
 
-		for (const auto& [name, id] : descriptor.GetTextures())
+		for (const auto& [name, nameHash, id] : descriptor.GetTextures())
 		{
-			auto it = material->GetTextures().find(name);
+			auto it = material->GetTextures().find(nameHash);
 			if (it != material->GetTextures().end())
 			{
 				std::shared_ptr<::Texture> texture = it->second;
@@ -285,6 +285,30 @@ namespace Renderer::Dx12
 				}
 				renderObject.m_textures[id] = texture->GetNativeObject();
 			}
+		}
+
+		for (const auto& buffer : descriptor.GetBuffers())
+		{
+			const uint32_t remainder  = buffer.m_bufferSize % 256;
+			const uint32_t bufferSize = remainder == 0 ? buffer.m_bufferSize : buffer.m_bufferSize + (256 - remainder);
+
+			ScratchBufferHandle handle = GetScratchBuffer().CreateHandle(bufferSize);
+			uint8_t*            ptr    = GetScratchBuffer().GetDataPtr(handle);;
+
+			std::vector<uint8_t> bufferData(buffer.m_bufferSize);
+			memcpy(ptr, buffer.m_defaultValue, buffer.m_bufferSize);
+
+			for (const ShaderDescriptor::VariableDescriptor& variable : buffer.m_variables)
+			{
+				auto it = material->GetShaderVariables().find(variable.m_nameHash);
+				if (it != material->GetShaderVariables().end())
+				{
+					const Material::MaterialVarData& varData = it->second;
+					memcpy(ptr + variable.m_offset, varData.m_data, variable.m_byteSize);
+				}
+			}
+
+			renderObject.m_constantBuffers[buffer.m_id] = GetScratchBuffer().CreateCBV(handle);
 		}
 	}
 
@@ -330,8 +354,12 @@ namespace Renderer::Dx12
 				texture.second->Bind(texture.first);
 			}
 
-			m_commandList->SetGraphicsRootDescriptorTable(
-				0, renderObject.m_perObjectBuffer->GetGPUHandle());
+			for (const auto buffer : renderObject.m_constantBuffers)
+			{
+				m_commandList->SetGraphicsRootDescriptorTable(buffer.first, buffer.second->GetGPUHandle());
+			}
+
+			m_commandList->SetGraphicsRootDescriptorTable(0, renderObject.m_perObjectBuffer->GetGPUHandle());
 			camera.m_constantBuffer->UpdateAndGetCurrentBuffer()->Bind(1); //TODO: bind only when it wasn't bound before
 			m_commandList->SetGraphicsRootConstantBufferView(
 				2, GetScratchBuffer().GetGpuPointer(renderObject.m_perCallBuffer));
