@@ -47,13 +47,6 @@ void ImGuiSystem::Init()
 	};
 }
 
-struct Vertex
-{
-	Vector3D m_position;
-	Vector4D m_color;
-	Vector2D m_texcoord;
-};
-
 void ImGuiSystem::Update()
 {
 	const Platform::Window& window = Application::Get().GetWindow();
@@ -74,20 +67,12 @@ void ImGuiSystem::Update()
 	ImGui::ShowDemoWindow();
 }
 
-Rect GetClipRect(const ImVec4& clipRect)
+struct Vertex
 {
-	return Rect
-	{
-		{
-			clipRect.x,
-			clipRect.y,
-		},
-		{
-			clipRect.z,
-			clipRect.w
-		}
-	};
-}
+	Vector3D m_position;
+	Vector4D m_color;
+	Vector2D m_texcoord;
+};
 
 std::vector<Renderer::QueuedRenderObject>& ImGuiSystem::Render()
 {
@@ -106,7 +91,7 @@ std::vector<Renderer::QueuedRenderObject>& ImGuiSystem::Render()
 			}
 		}
 	}
-	
+
 	if (m_submeshes.size() != submeshCount)
 	{
 		m_submeshes.resize(submeshCount);
@@ -177,7 +162,16 @@ std::vector<Renderer::QueuedRenderObject>& ImGuiSystem::Render()
 			m_renderObjectsCache[cmdIndex].m_material        = &*m_material;
 			m_renderObjectsCache[cmdIndex].m_order           = 5000.0f + cmdIndex;
 			m_renderObjectsCache[cmdIndex].m_perObjectBuffer = Renderer::PerObjectBuffer::DEFAULT_BUFFER;
-			m_renderObjectsCache[cmdIndex].m_clipRect        = GetClipRect(cmd.ClipRect);
+			m_renderObjectsCache[cmdIndex].m_clipRect        = Rect{
+				{
+					cmd.ClipRect.x,
+					cmd.ClipRect.y,
+				},
+				{
+					cmd.ClipRect.z,
+					cmd.ClipRect.w
+				}
+			};
 
 			++cmdIndex;
 		}

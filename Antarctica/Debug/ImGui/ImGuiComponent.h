@@ -6,8 +6,6 @@ class ImGuiComponent : public Renderer::RenderComponent
 {
 public:
 
-	ImGuiComponent();
-
 	BoundingBox GetBoundingBox() const override;
 
 protected:

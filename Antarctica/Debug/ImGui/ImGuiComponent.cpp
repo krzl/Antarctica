@@ -3,15 +3,10 @@
 
 #include "ImGuiSystem.h"
 
-ImGuiComponent::ImGuiComponent()
-{
-	SetLocalPosition(Point3D(0.0f, 0.0f, -1.0f)); //in order to make it in front of near plane, so it won't get frustum culled
-	m_isTickable = true;
-}
-
 BoundingBox ImGuiComponent::GetBoundingBox() const
 {
-	return RenderComponent::GetBoundingBox();
+	return BoundingBox(GetWorldPosition() - Vector3D(1.0f, 1.0f, 1.0f),
+					   GetWorldPosition() + Vector3D(1.0f, 1.0f, 1.0f));
 }
 
 void ImGuiComponent::PrepareForRender(Renderer::RenderQueue& renderQueue, const Frustum& cameraFrustum,
