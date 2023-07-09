@@ -8,6 +8,8 @@ public:
 
 	virtual ~System() = default;
 
+	virtual float GetPriority() const { return 0.0f; }
+
 protected:
 
 	virtual void Init() {}

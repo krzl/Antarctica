@@ -6,13 +6,13 @@ Quaternion DirectionToQuaternion(Vector3D direction)
 {
 	direction.Normalize();
 
-	Vector3D xAxis = Cross(direction, Vector3D::z_unit);
+	Vector3D xAxis = Cross(Vector3D::y_unit, direction);
 	xAxis.Normalize();
 
-	Vector3D zAxis = Cross(xAxis, direction);
-	zAxis.Normalize();
+	Vector3D yAxis = Cross(direction, xAxis);
+	yAxis.Normalize();
 
-	Matrix3D rotationMatrix(xAxis, direction, zAxis);
+	Matrix3D rotationMatrix(xAxis, yAxis, direction);
 
 	Quaternion quaternion;
 	quaternion.SetRotationMatrix(rotationMatrix);
@@ -77,6 +77,17 @@ Vector3D LerpClamped(const Vector3D& a, const Vector3D& b, float alpha)
 	alpha = Terathon::Clamp(alpha, 0.0f, 1.0f);
 
 	return Vector3D(
+		a.x * (1.0f - alpha) + b.x * alpha,
+		a.y * (1.0f - alpha) + b.y * alpha,
+		a.z * (1.0f - alpha) + b.z * alpha
+	);
+}
+
+Point3D LerpClamped(const Point3D& a, const Point3D& b, float alpha)
+{
+	alpha = Terathon::Clamp(alpha, 0.0f, 1.0f);
+
+	return Point3D(
 		a.x * (1.0f - alpha) + b.x * alpha,
 		a.y * (1.0f - alpha) + b.y * alpha,
 		a.z * (1.0f - alpha) + b.z * alpha

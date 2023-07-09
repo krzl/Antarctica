@@ -2,12 +2,12 @@
 
 #include <memory>
 
-#include "imgui.h"
 #include "Assets/DynamicSubmesh.h"
-#include "Assets/Material.h"
 #include "Buffers/Types/PerObjectBuffer.h"
 #include "Systems/System.h"
 
+class Texture;
+class Material;
 class ImGuiShader;
 
 namespace Renderer
@@ -23,8 +23,8 @@ class ImGuiSystem : public System
 
 protected:
 
-	void  Init() override;
-	void  Update() override;
+	void Init() override;
+	void Update() override;
 
 public:
 
@@ -43,4 +43,6 @@ private:
 	std::vector<Renderer::QueuedRenderObject> m_renderObjectsCache;
 
 	AttributeUsage m_attributeUsage;
+
+	bool m_wasRendered = true;
 };

@@ -41,6 +41,7 @@ using Terathon::Quaternion;
 
 #include "../Utilities/Common/Ref.h"
 
+#include "../Utilities/Common/Color.h"
 #include "../Utilities/Common/Dispatcher.h"
 #include "../Utilities/Common/Logger.h"
 #include "../Utilities/Common/MathHelpers.h"

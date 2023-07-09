@@ -141,7 +141,7 @@ namespace Renderer::Dx12
 				{
 					ScratchBufferHandle skinningBuffer = GetScratchBuffer().CreateHandle(
 						sizeof(float) * 3 * instanceCount *
-						queuedObject->m_submesh->GetVertexBuffer().m_elementCount, nullptr, true);
+						queuedObject->m_submesh->GetVertexBuffer().GetElementCount(), nullptr, true);
 
 					lastRenderObject->m_skinningBufferHandle = GetScratchBuffer().CreateUAV(
 						skinningBuffer, sizeof(float) * 3);

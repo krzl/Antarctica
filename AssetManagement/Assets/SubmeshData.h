@@ -9,32 +9,27 @@ struct MeshBuffer
 {
 	std::vector<uint8_t> m_data;
 	uint32_t             m_elementSize;
-	uint32_t             m_elementCount;
 
 	MeshBuffer(const std::vector<uint8_t>& data, const uint32_t elementSize, const uint32_t elementCount)
 		: m_data(data),
-		  m_elementSize(elementSize),
-		  m_elementCount(elementCount) {}
+		  m_elementSize(elementSize) {}
 
 	MeshBuffer() = default;
 
 	MeshBuffer(const MeshBuffer& other)
 		: m_data(other.m_data),
-		  m_elementSize(other.m_elementSize),
-		  m_elementCount(other.m_elementCount) {}
+		  m_elementSize(other.m_elementSize) {}
 
 	MeshBuffer(MeshBuffer&& other) noexcept
 		: m_data(std::move(other.m_data)),
-		  m_elementSize(other.m_elementSize),
-		  m_elementCount(other.m_elementCount) {}
+		  m_elementSize(other.m_elementSize) {}
 
 	MeshBuffer& operator=(const MeshBuffer& other)
 	{
 		if (this == &other)
 			return *this;
-		m_data         = other.m_data;
-		m_elementSize  = other.m_elementSize;
-		m_elementCount = other.m_elementCount;
+		m_data        = other.m_data;
+		m_elementSize = other.m_elementSize;
 		return *this;
 	}
 
@@ -42,11 +37,12 @@ struct MeshBuffer
 	{
 		if (this == &other)
 			return *this;
-		m_data         = std::move(other.m_data);
-		m_elementSize  = other.m_elementSize;
-		m_elementCount = other.m_elementCount;
+		m_data        = std::move(other.m_data);
+		m_elementSize = other.m_elementSize;
 		return *this;
 	}
+
+	[[nodiscard]] uint32_t GetElementCount() const { return (uint32_t) m_data.size() / m_elementSize; }
 };
 
 struct AttributeOffsets

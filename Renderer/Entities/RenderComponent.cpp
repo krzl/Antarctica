@@ -26,6 +26,7 @@ namespace Renderer
 
 		static RenderQueue renderQueue(1024 * 64);
 		renderQueue.resize(1024 * 64);
+		//TODO: make it expand when almost full
 
 		const Frustum     cameraFrustum = CameraComponent::Get()->GetFrustum();
 

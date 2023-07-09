@@ -49,6 +49,10 @@ void ImGuiSystem::Init()
 
 void ImGuiSystem::Update()
 {
+	if (!m_wasRendered)
+	{
+		ImGui::Render();
+	}
 	const Platform::Window& window = Application::Get().GetWindow();
 
 	ImGuiIO& io    = ImGui::GetIO();
@@ -65,24 +69,27 @@ void ImGuiSystem::Update()
 	ImGui::NewFrame();
 	ImGui::SetNextWindowPos(ImVec2(-500, -500));
 	ImGui::ShowDemoWindow();
+
+	m_wasRendered = false;
 }
 
 struct Vertex
 {
-	Vector3D m_position;
-	Vector4D m_color;
+	Point3D  m_position;
+	Color    m_color;
 	Vector2D m_texcoord;
 };
 
 std::vector<Renderer::QueuedRenderObject>& ImGuiSystem::Render()
 {
+	m_wasRendered = true;
 	ImGui::Render();
 
 	const ImDrawData* imDrawData = ImGui::GetDrawData();
 
-	Vector2D scale = Vector2D(2.0f / imDrawData->DisplaySize.x, -2.0f / imDrawData->DisplaySize.y);
+	const Vector2D scale = Vector2D(2.0f / imDrawData->DisplaySize.x, -2.0f / imDrawData->DisplaySize.y);
 	m_material->SetVariable<Vector2D>("scale", scale);
-	
+
 	uint32_t submeshCount = 0;
 	for (uint32_t drawListId = 0; drawListId < (uint32_t) imDrawData->CmdListsCount; ++drawListId)
 	{
@@ -117,43 +124,29 @@ std::vector<Renderer::QueuedRenderObject>& ImGuiSystem::Render()
 			MeshBuffer& vertexData = m_submeshes[cmdIndex].GetVertexBuffer();
 			m_submeshes[cmdIndex].SetAttributeUsage(m_attributeUsage);
 
-			vertexData.m_elementCount = drawList->VtxBuffer.Size;
-			vertexData.m_elementSize  = sizeof(Vertex);
-			vertexData.m_data.resize(vertexData.m_elementSize * vertexData.m_elementCount);
+			vertexData.m_elementSize = sizeof(Point3D) + sizeof(Color) + sizeof(Vector2D);
+			vertexData.m_data.resize(vertexData.m_elementSize * drawList->VtxBuffer.Size);
 
 			for (uint32_t j = 0; j < (uint32_t) drawList->VtxBuffer.size(); ++j)
 			{
 				const ImDrawVert& vertex = drawList->VtxBuffer[j];
 
-				const uint32_t color = vertex.col;
-				const uint8_t  aChar = (color & 0xFF000000) >> 24;
-				const uint8_t  bChar = (color & 0x00FF0000) >> 16;
-				const uint8_t  gChar = (color & 0x0000FF00) >> 8;
-				const uint8_t  rChar = color & 0x000000FF;
-
-				const float r = (float) rChar / 255.0f;
-				const float g = (float) gChar / 255.0f;
-				const float b = (float) bChar / 255.0f;
-				const float a = (float) aChar / 255.0f;
-
-
 				const Vertex v =
 				{
-					Vector3D(vertex.pos.x, vertex.pos.y, 1.0f),
-					Vector4D(r, g, b, a),
+					Point3D(vertex.pos.x, vertex.pos.y, 1.0f),
+					Color(vertex.col),
 					Vector2D(vertex.uv.x, vertex.uv.y),
 				};
 
-				memcpy(&vertexData.m_data[drawList->VtxBuffer.Size * 0 + j * 12], &v.m_position, sizeof(Vector3D));
-				memcpy(&vertexData.m_data[drawList->VtxBuffer.Size * 12 + j * 16], &v.m_color, sizeof(Vector4D));
+				memcpy(&vertexData.m_data[drawList->VtxBuffer.Size * 0 + j * 12], &v.m_position, sizeof(Point3D));
+				memcpy(&vertexData.m_data[drawList->VtxBuffer.Size * 12 + j * 16], &v.m_color, sizeof(Color));
 				memcpy(&vertexData.m_data[drawList->VtxBuffer.Size * 28 + j * 8], &v.m_texcoord, sizeof(Vector2D));
 			}
 
 			MeshBuffer& indexData = m_submeshes[cmdIndex].GetIndexBuffer();
 
-			indexData.m_elementCount = cmd.ElemCount;
-			indexData.m_elementSize  = sizeof(Vertex);
-			indexData.m_data.resize(indexData.m_elementSize * indexData.m_elementCount);
+			indexData.m_elementSize = sizeof(Vertex);
+			indexData.m_data.resize(indexData.m_elementSize * cmd.ElemCount);
 
 			for (uint32_t j = 0; j < (uint32_t) cmd.ElemCount; ++j)
 			{

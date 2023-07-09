@@ -58,8 +58,8 @@ namespace Renderer::Dx12
 			DXGI_FORMAT_R32_UINT
 		};
 
-		m_vertexCount = submesh->GetVertexBuffer().m_elementCount;
-		m_indexCount  = submesh->GetIndexBuffer().m_elementCount;
+		m_vertexCount = submesh->GetVertexBuffer().GetElementCount();
+		m_indexCount  = submesh->GetIndexBuffer().GetElementCount();
 	}
 
 	void StaticSubmesh::Bind(const RenderObject& renderObject) const
@@ -109,7 +109,7 @@ namespace Renderer::Dx12
 	{
 		if (dataSize != 0)
 		{
-			const uint32_t vertexCount = submesh->GetVertexBuffer().m_elementCount;
+			const uint32_t vertexCount = submesh->GetVertexBuffer().GetElementCount();
 
 			m_vertexBufferViews[attribute] =
 			{
@@ -145,8 +145,8 @@ namespace Renderer::Dx12
 			};
 			desc.Buffer =
 			{
-				submesh->GetVertexBuffer().m_elementCount * 3 * offset / 12,
-				submesh->GetVertexBuffer().m_elementCount * 3,
+				submesh->GetVertexBuffer().GetElementCount() * 3 * offset / 12,
+				submesh->GetVertexBuffer().GetElementCount() * 3,
 				0,
 				D3D12_BUFFER_SRV_FLAG_NONE
 			};
