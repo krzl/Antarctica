@@ -1,29 +1,37 @@
 ﻿#include "stdafx.h"
-#include "DebugDrawSystem.h"
+#include "Debug/DebugDrawSystem.h"
 
 #include <numeric>
 
 #include "AssetManager.h"
 #include "Assets/Material.h"
 #include "Assets/Shader.h"
+#include "Buffers/Types/PerObjectBuffer.h"
+#include "Entities/RenderComponent.h"
 #include "Systems/TimeSystem.h"
 
-DebugDrawSystem::DebugDrawElement::DebugDrawElement(ElementBuilder&& builder, const float despawnTime, const BoundingBox& boundingBox, const Color& color, const std::shared_ptr<Material>& material,
-													const AttributeUsage& attributeUsage)
+DebugDrawSystem::DebugDrawElement::DebugDrawElement(ElementBuilder&&               builder, const float          despawnTime,
+													const BoundingBox&             boundingBox, const Color&     color,
+													const std::shared_ptr<Shader>& shader, const AttributeUsage& attributeUsage)
 	: m_despawnTime(despawnTime),
 	  m_boundingBox(boundingBox)
 {
-	m_cachedRenderObject = Renderer::QueuedRenderObject
-	{
-		&m_submesh,
-		&*material,
-		0.0f,
-		Renderer::PerObjectBuffer::DEFAULT_BUFFER
-	};
+	m_material = std::make_shared<Material>(shader);
+	m_material->SetVariable<Color>("color", color);
+
+	m_cachedRenderObject = std::make_unique<Renderer::QueuedRenderObject>(
+		Renderer::QueuedRenderObject
+		{
+			&m_submesh,
+			&*m_material,
+			0.0f,
+			Renderer::PerObjectBuffer::DEFAULT_BUFFER
+		}
+	);
 
 	MeshBuffer& vertexBuffer   = m_submesh.GetVertexBuffer();
-	vertexBuffer.m_elementSize = sizeof(Vertex);
-	vertexBuffer.m_data.resize(sizeof(Vertex) * builder.m_vertices.size());
+	vertexBuffer.m_elementSize = sizeof(Point3D);
+	vertexBuffer.m_data.resize(sizeof(Point3D) * builder.m_vertices.size());
 	MeshBuffer& indexBuffer   = m_submesh.GetIndexBuffer();
 	indexBuffer.m_elementSize = sizeof(uint32_t);
 	indexBuffer.m_data.resize(sizeof(uint32_t) * builder.m_indices.size());
@@ -31,19 +39,12 @@ DebugDrawSystem::DebugDrawElement::DebugDrawElement(ElementBuilder&& builder, co
 	m_submesh.SetAttributeUsage(attributeUsage);
 
 	memcpy(vertexBuffer.m_data.data(), builder.m_vertices.data(), builder.m_vertices.size() * sizeof(Point3D));
-
-	for (uint32_t i = 0; i < builder.m_vertices.size(); ++i)
-	{
-		memcpy(&vertexBuffer.m_data[builder.m_vertices.size() * 12 + i * sizeof(Color)], &color, sizeof(Color));
-	}
-
 	memcpy(indexBuffer.m_data.data(), builder.m_indices.data(), builder.m_indices.size() * sizeof(uint32_t));
 }
 
 void DebugDrawSystem::Init()
 {
-	m_shader   = AssetManager::GetAsset<Shader>("../Resources/Shaders/debug_draw.hlsl");
-	m_material = std::make_shared<Material>(m_shader);
+	m_shader = AssetManager::GetAsset<Shader>("../Resources/Shaders/debug_draw.hlsl");
 
 	m_attributeUsage = {
 		false,
@@ -165,7 +166,7 @@ void DebugDrawSystem::DrawBox(Point3D center, Quaternion rotation, float x, floa
 			TimeSystem::GetInstance()->GetTimeSinceStart() + duration,
 			GetBoundingBox(vertices),
 			color,
-			m_material,
+			m_shader,
 			m_attributeUsage)
 	);
 }
@@ -221,7 +222,7 @@ void DebugDrawSystem::DrawCylinder(Point3D center, Quaternion rotation, float he
 			TimeSystem::GetInstance()->GetTimeSinceStart() + duration,
 			bbLower,
 			color,
-			m_material,
+			m_shader,
 			m_attributeUsage)
 	);
 }
@@ -241,7 +242,7 @@ void DebugDrawSystem::DrawLine(const Point3D  start, const Point3D end, const fl
 			TimeSystem::GetInstance()->GetTimeSinceStart() + duration,
 			boundingBox,
 			color,
-			m_material,
+			m_shader,
 			m_attributeUsage)
 	);
 }
@@ -291,7 +292,7 @@ void DebugDrawSystem::DrawSphere(const Point3D center, const float radius, const
 			TimeSystem::GetInstance()->GetTimeSinceStart() + duration,
 			BoundingBox(center - Vector3D(radius, radius, radius), center + Vector3D(radius, radius, radius)),
 			color,
-			m_material,
+			m_shader,
 			m_attributeUsage)
 	);
 }
@@ -314,7 +315,7 @@ void DebugDrawSystem::DrawTriangles(std::vector<Point3D>&& pointsList, const flo
 			TimeSystem::GetInstance()->GetTimeSinceStart() + duration,
 			boundingBox,
 			color,
-			m_material,
+			m_shader,
 			m_attributeUsage)
 	);
 }
@@ -386,6 +387,6 @@ void DebugDrawSystem::Render(Renderer::RenderQueue& renderQueue, const Frustum& 
 			continue;
 		}
 
-		renderQueue[counter.fetch_add(1)] = &drawElement->m_cachedRenderObject;
+		renderQueue[counter.fetch_add(1)] = drawElement->m_cachedRenderObject.get();
 	}
 }

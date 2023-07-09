@@ -1,13 +1,11 @@
 struct VertexIn
 {
 	float3 pos		: POSITION0;
-    float4 color 	: COLOR;
 };
 
 struct VertexOut
 {
 	float4 pos		: SV_POSITION;
-	float4 color 	: COLOR;
 };
 
 struct PerObject
@@ -31,6 +29,11 @@ cbuffer _cbCall : register(b2)
 	uint padding;
 };
 
+cbuffer MaterialData : register(b3)
+{
+	float4 color;
+}
+
 Texture2D tex : register(t3);
 SamplerState samp : register(s0);
 
@@ -38,6 +41,7 @@ SamplerState samp : register(s0);
 			"DescriptorTable( SRV(t0, numDescriptors = 1))," \
 			"CBV(b1)," \
 			"CBV(b2)," \
+			"DescriptorTable(CBV(b3))," \
 			"StaticSampler(s0)"
 			
 [RootSignature(RS)]
@@ -46,12 +50,11 @@ VertexOut vs(VertexIn vin)
 	VertexOut vout;
 
 	vout.pos	= mul(float4(vin.pos, 1.0f), viewProj);
-    vout.color	= vin.color;
 	
     return vout;
 }
 
 float4 ps(VertexOut pin) : SV_Target
 {
-	return pin.color;
+	return color;
 }

@@ -7,8 +7,8 @@
 
 #include "Camera/RTSCamera.h"
 #include "Characters/Peasant.h"
+#include "Debug/DebugDrawSystem.h"
 #include "Debug/QuadtreeTester.h"
-#include "Debug/DebugDraw/DebugDrawSystem.h"
 #include "Entities/AnimatedMesh.h"
 #include "Terrain/Terrain.h"
 #include "Terrain/TerrainGenerator.h"
@@ -67,7 +67,7 @@ void main()
 
 			Vector3D up(1.0f, 1.0f, 1.0f);
 			up.Normalize();
-			
+
 			DebugDrawSystem::GetInstance()->DrawBox(Point3D(15.0f, 5.0f, 5.0f), DirectionToQuaternion(up), 3.0f, 0.5f, 10.0f, 20.0f);
 			DebugDrawSystem::GetInstance()->DrawSphere(Point3D(-5.0f, 5.0f, 5.0f), 2.0f, 150000.0f, Color::blue);
 

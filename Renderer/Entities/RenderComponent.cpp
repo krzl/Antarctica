@@ -24,7 +24,7 @@ namespace Renderer
 	{
 		std::atomic_uint32_t counter;
 
-		static RenderQueue renderQueue(1024 * 64);
+		static RenderQueue renderQueue;
 		renderQueue.resize(1024 * 64);
 		//TODO: make it expand when almost full
 

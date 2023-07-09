@@ -9,7 +9,9 @@
 
 namespace Renderer
 {
-	typedef std::vector<QueuedRenderObject*> RenderQueue;
+	class RenderQueue : public std::vector<QueuedRenderObject*> {};
+
+	//typedef std::vector<QueuedRenderObject*> RenderQueue;
 
 	class RenderComponent : public SceneComponent
 	{

@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "DebugDrawComponent.h"
 
-#include "DebugDrawSystem.h"
+#include "Debug/DebugDrawSystem.h"
 
 BoundingBox DebugDrawComponent::GetBoundingBox() const
 {

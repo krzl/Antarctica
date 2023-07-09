@@ -1,23 +1,21 @@
 #pragma once
 
-#include "RenderObject.h"
 #include "Assets/DynamicSubmesh.h"
 #include "Assets/SubmeshData.h"
-#include "Buffers/Types/PerObjectBuffer.h"
-#include "Entities/RenderComponent.h"
 #include "Systems/System.h"
 
+class Shader;
 class Material;
+
+namespace Renderer
+{
+	struct QueuedRenderObject;
+	class RenderQueue;
+};
 
 class DebugDrawSystem : public System
 {
 	REGISTER_SYSTEM(DebugDrawSystem);
-
-	struct Vertex
-	{
-		Point3D m_position;
-		Color   m_color;
-	};
 
 	struct ElementBuilder
 	{
@@ -29,18 +27,20 @@ class DebugDrawSystem : public System
 
 	struct DebugDrawElement
 	{
-		std::vector<uint8_t>  m_vertexData;
-		std::vector<uint32_t> m_indices;
-		float                 m_despawnTime = 0;
-		BoundingBox           m_boundingBox;
+		std::vector<uint8_t>      m_vertexData;
+		std::vector<uint32_t>     m_indices;
+		float                     m_despawnTime = 0;
+		BoundingBox               m_boundingBox;
+		std::shared_ptr<Material> m_material;
 
-		Renderer::QueuedRenderObject m_cachedRenderObject;
-		DynamicSubmesh               m_submesh;
+		DynamicSubmesh m_submesh;
+
+		std::unique_ptr<Renderer::QueuedRenderObject> m_cachedRenderObject;
 
 		DebugDrawElement() = default;
 
-		DebugDrawElement(ElementBuilder&& builder, const float                    despawnTime, const BoundingBox& boundingBox,
-						 const Color&     color, const std::shared_ptr<Material>& material, const AttributeUsage& attributeUsage);
+		DebugDrawElement(ElementBuilder&& builder, const float                  despawnTime, const BoundingBox& boundingBox,
+						 const Color&     color, const std::shared_ptr<Shader>& shader, const AttributeUsage&   attributeUsage);
 	};
 
 protected:
@@ -67,12 +67,9 @@ private:
 
 	void AppendLine(Point3D start, Point3D end, ElementBuilder& drawElement, uint32_t segmentCount = SEGMENTS_PER_LINE, float width = LINE_WIDTH) const;
 
-	Renderer::PerObjectBuffer perObjectBuffer = {};
-
 	std::vector<std::unique_ptr<DebugDrawElement>> m_drawElements;
 
-	std::shared_ptr<Material> m_material;
-	std::shared_ptr<Shader>   m_shader;
+	std::shared_ptr<Shader> m_shader;
 
 	AttributeUsage m_attributeUsage;
 };

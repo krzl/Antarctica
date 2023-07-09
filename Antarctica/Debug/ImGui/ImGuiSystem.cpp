@@ -1,5 +1,5 @@
 ﻿#include "stdafx.h"
-#include "ImGuiSystem.h"
+#include "Debug/ImGuiSystem.h"
 
 #include "AssetManager.h"
 #include "imgui.h"

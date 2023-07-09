@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "Assets/DynamicSubmesh.h"
-#include "Buffers/Types/PerObjectBuffer.h"
 #include "Systems/System.h"
 
 class Texture;
@@ -31,8 +30,6 @@ public:
 	std::vector<Renderer::QueuedRenderObject>& Render();
 
 private:
-
-	Renderer::PerObjectBuffer perObjectBuffer = {};
 
 	std::shared_ptr<Material>    m_material;
 	std::shared_ptr<ImGuiShader> m_shader;
