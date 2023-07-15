@@ -1,5 +1,5 @@
 ﻿#include "stdafx.h"
-#include "Debug/ImGuiSystem.h"
+#include "Debug/ImGui/ImGuiSystem.h"
 
 #include "AssetManager.h"
 #include "imgui.h"
@@ -67,8 +67,6 @@ void ImGuiSystem::Update()
 	io.MouseDown[1] = inputSystem->IsRightMousePressed();
 
 	ImGui::NewFrame();
-	ImGui::SetNextWindowPos(ImVec2(-500, -500));
-	ImGui::ShowDemoWindow();
 
 	m_wasRendered = false;
 }

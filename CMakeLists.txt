@@ -19,6 +19,7 @@ add_subdirectory(Entities)
 
 add_subdirectory(Animation)
 add_subdirectory(AssetManagement)
+add_subdirectory(Navigation)
 add_subdirectory(Platform)
 add_subdirectory(Renderer)
 

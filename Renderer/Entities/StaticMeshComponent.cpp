@@ -56,10 +56,8 @@ namespace Renderer
 		return boundingBox.Transform(GetWorldTransform());
 	}
 
-	float StaticMeshComponent::TraceRay(const BoundingBox::RayIntersectionTester& ray, float& closestDistance) const
+	float StaticMeshComponent::TraceRay(const RayIntersectionTester& ray, float& closestDistance) const
 	{
-		//const BoundingBox::RayIntersectionTester transformedRayTester = ray.m_ray.Transform(GetInverseWorldTransform());
-
 		if (m_mesh)
 		{
 			for (const Submesh& submesh : m_mesh->GetSubmeshes())
@@ -71,7 +69,7 @@ namespace Renderer
 				{
 					if (m_useMeshForCollision)
 					{
-						//
+						//TODO: complex mesh trace
 					}
 					else
 					{
@@ -110,7 +108,7 @@ namespace Renderer
 		{
 			const BoundingBox boundingBox = m_mesh->GetSubmesh(i).GetBoundingBox().Transform(GetWorldTransform());
 
-			if (cameraFrustum.Intersect(boundingBox) == Frustum::IntersectTestResult::OUTSIDE)
+			if (Intersect(cameraFrustum, boundingBox) == IntersectTestResult::OUTSIDE)
 			{
 				continue;
 			}

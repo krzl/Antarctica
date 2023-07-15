@@ -52,7 +52,7 @@ namespace Renderer
 
 		BoundingBox GetBoundingBox() const override;
 
-		float TraceRay(const BoundingBox::RayIntersectionTester& ray, float& closestDistance) const override;
+		float TraceRay(const RayIntersectionTester& ray, float& closestDistance) const override;
 
 		bool m_useMeshForCollision = false;
 

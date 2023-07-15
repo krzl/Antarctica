@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "ImGuiComponent.h"
 
-#include "Debug/ImGuiSystem.h"
+#include "Debug/ImGui/ImGuiSystem.h"
 
 BoundingBox ImGuiComponent::GetBoundingBox() const
 {

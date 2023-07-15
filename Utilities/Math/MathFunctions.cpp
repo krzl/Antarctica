@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "MathFunctions.h"
 
 
@@ -27,8 +27,9 @@ Quaternion EulerToQuaternion(const float x, const float y, const float z)
 		   Quaternion::MakeRotationZ(DegToRad(z));
 }
 
-float LerpClamped(const float a, const float b, const float alpha)
+float LerpClamped(const float a, const float b, float alpha)
 {
+	alpha = Terathon::Clamp(alpha, 0.0f, 1.0f);
 	return a * (1.0f - alpha) + b * alpha;
 }
 
@@ -40,6 +41,21 @@ float DegToRad(const float deg)
 float RadToDeg(const float rad)
 {
 	return rad * 180.0f / Terathon::Math::pi;
+}
+
+float RemapAngleRad(float angle)
+{
+	angle = fmod(angle + Terathon::Math::pi, 2.0f * Terathon::Math::pi);
+	if (angle < 0)
+		angle += 2.0 * Terathon::Math::pi;
+	return angle - Terathon::Math::pi;
+}
+
+float AngleDifference(const float a, const float b)
+{
+	const float diffA = abs(a - b);
+	const float diffB = (2.0f * Terathon::Math::pi) - diffA;
+	return diffA > diffB ? diffB : diffA;
 }
 
 void DecomposeTransform(const Transform4D& transform, Vector3D& translation, Quaternion& rotation, Vector3D& scale)
@@ -67,6 +83,74 @@ float GetDistanceSquaredFromLineToPoint(const Vector3D& direction, const Point3D
 	return distanceSquared;
 }
 
+bool IsNaN(const Vector2D& vector)
+{
+	return isnan<float>(vector.x) || isnan<float>(vector.y);
+}
+
+bool IsNaN(const Vector3D& vector)
+{
+	return isnan<float>(vector.x) || isnan<float>(vector.y) || isnan<float>(vector.z);
+}
+
+bool IsNaN(const Vector4D& vector)
+{
+	return isnan<float>(vector.x) || isnan<float>(vector.y) || isnan<float>(vector.z) || isnan<float>(vector.w);
+}
+
+bool IsNaN(const Point3D& point)
+{
+	return isnan<float>(point.x) || isnan<float>(point.y) || isnan<float>(point.z);
+}
+
+bool operator!=(const Vector2D& lhs, const Vector2D& rhs)
+{
+	return !(lhs == rhs);
+}
+
+bool operator!=(const Vector3D& lhs, const Vector3D& rhs)
+{
+	return !(lhs == rhs);
+}
+
+bool operator!=(const Vector4D& lhs, const Vector4D& rhs)
+{
+	return !(lhs == rhs);
+}
+
+bool operator!=(const Point3D& lhs, const Point3D& rhs)
+{
+	return !(lhs == rhs);
+}
+
+bool operator==(const Vector2D& lhs, const Vector2D& rhs)
+{
+	return lhs.x == rhs.x &&
+		   lhs.y == rhs.y;
+}
+
+bool operator==(const Vector3D& lhs, const Vector3D& rhs)
+{
+	return lhs.x == rhs.x &&
+		   lhs.y == rhs.y &&
+		   lhs.z == rhs.z;
+}
+
+bool operator==(const Vector4D& lhs, const Vector4D& rhs)
+{
+	return lhs.x == rhs.x &&
+		   lhs.y == rhs.y &&
+		   lhs.z == rhs.z &&
+		   lhs.w == rhs.w;
+}
+
+bool operator==(const Point3D& lhs, const Point3D& rhs)
+{
+	return lhs.x == rhs.x &&
+		   lhs.y == rhs.y &&
+		   lhs.z == rhs.z;
+}
+
 float GetDistanceFromLineToPoint(const Vector3D& direction, const Point3D& point)
 {
 	return std::sqrt(GetDistanceSquaredFromLineToPoint(direction, point));
@@ -91,6 +175,18 @@ Point3D LerpClamped(const Point3D& a, const Point3D& b, float alpha)
 		a.x * (1.0f - alpha) + b.x * alpha,
 		a.y * (1.0f - alpha) + b.y * alpha,
 		a.z * (1.0f - alpha) + b.z * alpha
+	);
+}
+
+Color LerpClamped(const Color& a, const Color& b, float alpha)
+{
+	alpha = Terathon::Clamp(alpha, 0.0f, 1.0f);
+
+	return Color(
+		a.r * (1.0f - alpha) + b.r * alpha,
+		a.g * (1.0f - alpha) + b.g * alpha,
+		a.b * (1.0f - alpha) + b.b * alpha,
+		a.a * (1.0f - alpha) + b.a * alpha
 	);
 }
 

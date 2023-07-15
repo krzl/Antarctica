@@ -164,7 +164,7 @@ void GameObject::MarkDirty()
 
 #undef max
 
-float GameObject::TraceRay(const BoundingBox::RayIntersectionTester& ray)
+float GameObject::TraceRay(const RayIntersectionTester& ray)
 {
 	float closestDistance = std::numeric_limits<float>::max();
 
@@ -212,11 +212,7 @@ BoundingBox GameObject::CalculateBoundingBox() const
 		{
 			if (component->GetRef().IsValid())
 			{
-				Ref<SceneComponent> sceneComponent = component->GetRef().Cast<SceneComponent>();
-				if (sceneComponent.IsValid())
-				{
-					boundingBox.Append(sceneComponent->GetBoundingBox());
-				}
+				boundingBox.Append(component->GetBoundingBox());
 			}
 		}
 	}

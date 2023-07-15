@@ -178,7 +178,7 @@ const Transform4D& SceneComponent::GetInverseWorldTransform() const
 
 void SceneComponent::RemoveFromParent()
 {
-	const Ref<SceneComponent> self = m_self.Cast<SceneComponent>();
+	const Ref<SceneComponent> self = GetRef().Cast<SceneComponent>();
 	if (m_parent.IsValid())
 	{
 		for (uint32_t i = 0; i < m_parent->m_children.size(); ++i)
@@ -194,17 +194,12 @@ void SceneComponent::RemoveFromParent()
 
 auto SceneComponent::SetParent(const Ref<SceneComponent> parent) -> void
 {
-	SetParentInternal(parent, m_self.Cast<SceneComponent>());
-}
-
-BoundingBox SceneComponent::GetBoundingBox() const
-{
-	return BoundingBox(GetWorldPosition(), GetWorldPosition());
+	SetParentInternal(parent, GetRef().Cast<SceneComponent>());
 }
 
 #undef max
 
-float SceneComponent::TraceRay(const BoundingBox::RayIntersectionTester& ray, float& closestDistance) const
+float SceneComponent::TraceRay(const RayIntersectionTester& ray, float& closestDistance) const
 {
 	return -1.0f;
 }

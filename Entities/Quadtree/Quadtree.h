@@ -62,8 +62,9 @@ public:
 		Node*        TryPushBack(GameObject* object, const BoundingBox& boundingBox);
 		void         RemoveObject(GameObject* object);
 
-		GameObject* TraceObject(const BoundingBox::RayIntersectionTester& ray, float& minDistance) const;
+		GameObject* TraceObject(const RayIntersectionTester& ray, float& minDistance) const;
 		void        TestIntersect(const Frustum& frustum, std::vector<GameObject*>& objects) const;
+		void        FindNearby(const Sphere& sphere, std::vector<GameObject*>& objects) const;
 
 		void CollectChildObjects(std::vector<GameObject*>& objects) const;
 
@@ -111,8 +112,9 @@ public:
 		float           m_distance;
 	};
 
-	TraceResult              TraceObject(const BoundingBox::RayIntersectionTester& ray) const;
+	TraceResult              TraceObject(const RayIntersectionTester& ray) const;
 	std::vector<GameObject*> Intersect(const Frustum& frustum) const;
+	std::vector<GameObject*> FindNearby(const Sphere& sphere) const;
 
 private:
 

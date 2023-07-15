@@ -344,7 +344,7 @@ void Quadtree::Node::DecrementCollisionCounts(const GameObject* object)
 
 #undef max
 
-Quadtree::TraceResult Quadtree::TraceObject(const BoundingBox::RayIntersectionTester& ray) const
+Quadtree::TraceResult Quadtree::TraceObject(const RayIntersectionTester& ray) const
 {
 	const_cast<Quadtree*>(this)->Update();
 
@@ -369,7 +369,7 @@ Quadtree::TraceResult Quadtree::TraceObject(const BoundingBox::RayIntersectionTe
 	};
 }
 
-GameObject* Quadtree::Node::TraceObject(const BoundingBox::RayIntersectionTester& ray, float& minDistance) const
+GameObject* Quadtree::Node::TraceObject(const RayIntersectionTester& ray, float& minDistance) const
 {
 	GameObject* closestObject = nullptr;
 
@@ -426,7 +426,7 @@ void Quadtree::Node::TestIntersect(const Frustum& frustum, std::vector<GameObjec
 {
 	for (GameObject* object : m_objects)
 	{
-		if (frustum.Intersect(object->GetBoundingBox()) != Frustum::IntersectTestResult::OUTSIDE)
+		if (::Intersect(frustum, object->GetBoundingBox()) != IntersectTestResult::OUTSIDE)
 		{
 			objects.emplace_back(object);
 		}
@@ -436,14 +436,54 @@ void Quadtree::Node::TestIntersect(const Frustum& frustum, std::vector<GameObjec
 	{
 		if (childNode != nullptr && childNode->m_totalObjectCount > 0)
 		{
-			switch (frustum.Intersect(childNode->m_boundingBox))
+			switch (::Intersect(frustum, childNode->m_boundingBox))
 			{
-				case Frustum::IntersectTestResult::OUTSIDE:
+				case IntersectTestResult::OUTSIDE:
 					continue;
-				case Frustum::IntersectTestResult::INTERSECT:
+				case IntersectTestResult::INTERSECT:
 					childNode->TestIntersect(frustum, objects);
 					break;
-				case Frustum::IntersectTestResult::INSIDE:
+				case IntersectTestResult::INSIDE:
+					childNode->CollectChildObjects(objects);
+					break;
+			}
+		}
+	}
+}
+
+std::vector<GameObject*> Quadtree::FindNearby(const Sphere& sphere) const
+{
+	const_cast<Quadtree*>(this)->Update();
+
+	std::vector<GameObject*> objects;
+
+	m_root->FindNearby(sphere, objects);
+
+	return objects;
+}
+
+void Quadtree::Node::FindNearby(const Sphere& sphere, std::vector<GameObject*>& objects) const
+{
+	for (GameObject* object : m_objects)
+	{
+		if (Intersect2D(sphere, object->GetBoundingBox()) != IntersectTestResult::OUTSIDE)
+		{
+			objects.emplace_back(object);
+		}
+	}
+
+	for (const Node* childNode : m_childNodes)
+	{
+		if (childNode != nullptr && childNode->m_totalObjectCount > 0)
+		{
+			switch (Intersect2D(sphere, childNode->m_boundingBox))
+			{
+				case IntersectTestResult::OUTSIDE:
+					continue;
+				case IntersectTestResult::INTERSECT:
+					childNode->FindNearby(sphere, objects);
+					break;
+				case IntersectTestResult::INSIDE:
 					childNode->CollectChildObjects(objects);
 					break;
 			}

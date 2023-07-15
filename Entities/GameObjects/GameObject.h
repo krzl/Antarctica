@@ -173,7 +173,7 @@ public:
 
 	void MarkDirty();
 
-	float TraceRay(const BoundingBox::RayIntersectionTester& ray);
+	float TraceRay(const RayIntersectionTester& ray);
 
 	// Setters
 

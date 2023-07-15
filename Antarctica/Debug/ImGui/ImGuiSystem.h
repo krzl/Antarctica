@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "Assets/DynamicSubmesh.h"
 #include "Systems/System.h"
 

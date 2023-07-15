@@ -12,8 +12,8 @@ public:
 		uint32_t m_width  = 512;
 		uint32_t m_height = 512;
 
-		uint32_t m_minIslandCount = 14;
-		uint32_t m_maxIslandCount = 23;
+		uint32_t m_minIslandCount = 0;
+		uint32_t m_maxIslandCount = 0;
 
 		uint32_t m_minIslandStartingSize = 10;
 		uint32_t m_maxIslandStartingSize = 20;

@@ -3,6 +3,11 @@
 
 #include "GameObject.h"
 
+BoundingBox Component::GetBoundingBox() const
+{
+	return BoundingBox(GetOwner()->GetPosition(), GetOwner()->GetPosition());
+}
+
 bool Component::IsEnabled() const
 {
 	if (GetOwner().IsValid())

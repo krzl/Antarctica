@@ -64,9 +64,7 @@ public:
 
 	void SetParent(Ref<SceneComponent> parent);
 
-	virtual BoundingBox GetBoundingBox() const;
-
-	virtual float TraceRay(const BoundingBox::RayIntersectionTester& ray, float& closestDistance) const;
+	virtual float TraceRay(const RayIntersectionTester& ray, float& closestDistance) const;
 
 protected:
 

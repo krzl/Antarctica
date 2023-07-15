@@ -4,43 +4,8 @@
 #include <numeric>
 
 #include "AssetManager.h"
-#include "Assets/Material.h"
 #include "Assets/Shader.h"
-#include "Buffers/Types/PerObjectBuffer.h"
-#include "Entities/RenderComponent.h"
 #include "Systems/TimeSystem.h"
-
-DebugDrawSystem::DebugDrawElement::DebugDrawElement(ElementBuilder&&               builder, const float          despawnTime,
-													const BoundingBox&             boundingBox, const Color&     color,
-													const std::shared_ptr<Shader>& shader, const AttributeUsage& attributeUsage)
-	: m_despawnTime(despawnTime),
-	  m_boundingBox(boundingBox)
-{
-	m_material = std::make_shared<Material>(shader);
-	m_material->SetVariable<Color>("color", color);
-
-	m_cachedRenderObject = std::make_unique<Renderer::QueuedRenderObject>(
-		Renderer::QueuedRenderObject
-		{
-			&m_submesh,
-			&*m_material,
-			0.0f,
-			Renderer::PerObjectBuffer::DEFAULT_BUFFER
-		}
-	);
-
-	MeshBuffer& vertexBuffer   = m_submesh.GetVertexBuffer();
-	vertexBuffer.m_elementSize = sizeof(Point3D);
-	vertexBuffer.m_data.resize(sizeof(Point3D) * builder.m_vertices.size());
-	MeshBuffer& indexBuffer   = m_submesh.GetIndexBuffer();
-	indexBuffer.m_elementSize = sizeof(uint32_t);
-	indexBuffer.m_data.resize(sizeof(uint32_t) * builder.m_indices.size());
-
-	m_submesh.SetAttributeUsage(attributeUsage);
-
-	memcpy(vertexBuffer.m_data.data(), builder.m_vertices.data(), builder.m_vertices.size() * sizeof(Point3D));
-	memcpy(indexBuffer.m_data.data(), builder.m_indices.data(), builder.m_indices.size() * sizeof(uint32_t));
-}
 
 void DebugDrawSystem::Init()
 {
@@ -56,17 +21,6 @@ void DebugDrawSystem::Init()
 		0,
 		0
 	};
-}
-
-void DebugDrawSystem::Update()
-{
-	const float currentTime = TimeSystem::GetInstance()->GetTimeSinceStart();
-	m_drawElements.erase(
-		std::remove_if(m_drawElements.begin(), m_drawElements.end(),
-					   [currentTime](const std::unique_ptr<DebugDrawElement>& element)
-					   {
-						   return element->m_despawnTime <= currentTime;
-					   }), m_drawElements.end());
 }
 
 static BoundingBox GetBoundingBox(const std::vector<Point3D>& pointsList)
@@ -159,16 +113,13 @@ void DebugDrawSystem::DrawBox(Point3D center, Quaternion rotation, float x, floa
 	AppendLine(vertices[2], vertices[6], builder);
 	AppendLine(vertices[3], vertices[7], builder);
 
+	builder.m_despawnTime    = TimeSystem::GetInstance()->GetTimeSinceStart() + duration;
+	builder.m_boundingBox    = GetBoundingBox(vertices);
+	builder.m_color          = color;
+	builder.m_shader         = m_shader;
+	builder.m_attributeUsage = m_attributeUsage;
 
-	m_drawElements.emplace_back(
-		std::make_unique<DebugDrawElement>(
-			std::move(builder),
-			TimeSystem::GetInstance()->GetTimeSinceStart() + duration,
-			GetBoundingBox(vertices),
-			color,
-			m_shader,
-			m_attributeUsage)
-	);
+	m_onDrawItemQueued.Dispatch(&builder);
 }
 
 
@@ -215,16 +166,13 @@ void DebugDrawSystem::DrawCylinder(Point3D center, Quaternion rotation, float he
 	BoundingBox bbUpper = GetBoundingBox(upperCircle);
 	bbLower.Append(bbUpper);
 
+	builder.m_despawnTime    = TimeSystem::GetInstance()->GetTimeSinceStart() + duration;
+	builder.m_boundingBox    = bbLower;
+	builder.m_color          = color;
+	builder.m_shader         = m_shader;
+	builder.m_attributeUsage = m_attributeUsage;
 
-	m_drawElements.emplace_back(
-		std::make_unique<DebugDrawElement>(
-			std::move(builder),
-			TimeSystem::GetInstance()->GetTimeSinceStart() + duration,
-			bbLower,
-			color,
-			m_shader,
-			m_attributeUsage)
-	);
+	m_onDrawItemQueued.Dispatch(&builder);
 }
 
 void DebugDrawSystem::DrawLine(const Point3D  start, const Point3D end, const float width, const float duration, const Color color,
@@ -235,16 +183,13 @@ void DebugDrawSystem::DrawLine(const Point3D  start, const Point3D end, const fl
 
 	BoundingBox boundingBox = GetBoundingBox(builder.m_vertices);
 
+	builder.m_despawnTime    = TimeSystem::GetInstance()->GetTimeSinceStart() + duration;
+	builder.m_boundingBox    = boundingBox;
+	builder.m_color          = color;
+	builder.m_shader         = m_shader;
+	builder.m_attributeUsage = m_attributeUsage;
 
-	m_drawElements.emplace_back(
-		std::make_unique<DebugDrawElement>(
-			std::move(builder),
-			TimeSystem::GetInstance()->GetTimeSinceStart() + duration,
-			boundingBox,
-			color,
-			m_shader,
-			m_attributeUsage)
-	);
+	m_onDrawItemQueued.Dispatch(&builder);
 }
 
 void DebugDrawSystem::DrawSphere(const Point3D center, const float radius, const float duration, const Color color, const uint32_t segments)
@@ -285,16 +230,13 @@ void DebugDrawSystem::DrawSphere(const Point3D center, const float radius, const
 		AppendLine(vertices[0], vertices[vertices.size() - 2 - i], builder);
 	}
 
+	builder.m_despawnTime    = TimeSystem::GetInstance()->GetTimeSinceStart() + duration;
+	builder.m_boundingBox    = BoundingBox(center - Vector3D(radius, radius, radius), center + Vector3D(radius, radius, radius));
+	builder.m_color          = color;
+	builder.m_shader         = m_shader;
+	builder.m_attributeUsage = m_attributeUsage;
 
-	m_drawElements.emplace_back(
-		std::make_unique<DebugDrawElement>(
-			std::move(builder),
-			TimeSystem::GetInstance()->GetTimeSinceStart() + duration,
-			BoundingBox(center - Vector3D(radius, radius, radius), center + Vector3D(radius, radius, radius)),
-			color,
-			m_shader,
-			m_attributeUsage)
-	);
+	m_onDrawItemQueued.Dispatch(&builder);
 }
 
 void DebugDrawSystem::DrawTriangles(std::vector<Point3D>&& pointsList, const float duration, const Color color)
@@ -306,18 +248,13 @@ void DebugDrawSystem::DrawTriangles(std::vector<Point3D>&& pointsList, const flo
 	builder.m_indices.resize(builder.m_vertices.size());
 	std::iota(builder.m_indices.begin(), builder.m_indices.end(), 0);
 
-	BoundingBox boundingBox = GetBoundingBox(builder.m_vertices);
+	builder.m_despawnTime    = TimeSystem::GetInstance()->GetTimeSinceStart() + duration;
+	builder.m_boundingBox    = GetBoundingBox(builder.m_vertices);
+	builder.m_color          = color;
+	builder.m_shader         = m_shader;
+	builder.m_attributeUsage = m_attributeUsage;
 
-
-	m_drawElements.emplace_back(
-		std::make_unique<DebugDrawElement>(
-			std::move(builder),
-			TimeSystem::GetInstance()->GetTimeSinceStart() + duration,
-			boundingBox,
-			color,
-			m_shader,
-			m_attributeUsage)
-	);
+	m_onDrawItemQueued.Dispatch(&builder);
 }
 
 DebugDrawSystem::ElementBuilder DebugDrawSystem::ReserveLines(const uint32_t lineCount, const uint32_t segmentCount)
@@ -376,17 +313,4 @@ void DebugDrawSystem::AppendLine(Point3D         start, Point3D end,
 		   upperCircle.size() * sizeof(Point3D));
 
 	currentVertex += 2 * segmentCount;
-}
-
-void DebugDrawSystem::Render(Renderer::RenderQueue& renderQueue, const Frustum& cameraFrustum, std::atomic_uint32_t& counter) const
-{
-	for (const std::unique_ptr<DebugDrawElement>& drawElement : m_drawElements)
-	{
-		if (cameraFrustum.Intersect(drawElement->m_boundingBox) == Frustum::IntersectTestResult::OUTSIDE)
-		{
-			continue;
-		}
-
-		renderQueue[counter.fetch_add(1)] = drawElement->m_cachedRenderObject.get();
-	}
 }

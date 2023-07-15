@@ -39,8 +39,8 @@ void MousePickerComponent::OnCreated()
 		{
 			if (test.m_object.Cast<Peasant>())
 			{
-				test.m_object->Destroy();
+				//test.m_object->Destroy();
 			}
 		}
-	}, m_self);
+	}, GetRef());
 }

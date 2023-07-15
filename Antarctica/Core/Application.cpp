@@ -13,8 +13,8 @@ Application* gApp = nullptr;
 void SetDefaultAppSettings(Settings& appSettings)
 {
 	appSettings.SetValue("window.title", "Antarctica");
-	appSettings.SetValue("window.width", 1024);
-	appSettings.SetValue("window.height", 800);
+	appSettings.SetValue("window.width", 1920);
+	appSettings.SetValue("window.height", 1080);
 }
 
 void Application::Start()

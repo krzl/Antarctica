@@ -43,6 +43,8 @@ public:
 		return m_self;
 	}
 
+	virtual BoundingBox GetBoundingBox() const;
+
 	bool IsEnabled() const;
 
 	// Setters
@@ -61,8 +63,6 @@ protected:
 	virtual void OnDisabled() {}
 	virtual void OnDestroy() {}
 
-	Ref<Component> m_self;
-
 	Ref<GameObject> m_owner;
 	const Class*    m_class;
 
@@ -73,6 +73,8 @@ private:
 	void Init(const Ref<GameObject> owner, const Ref<Component> self);
 
 	uint32_t m_componentId = 0;
+
+	Ref<Component> m_self;
 
 	bool m_isEnabled = true;
 };
