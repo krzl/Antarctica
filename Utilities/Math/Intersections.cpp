@@ -173,3 +173,33 @@ IntersectTestResult Intersect(const Frustum& frustum, const BoundingBox& boundin
 
 	return result;
 }
+
+bool IsOverlapping2D(const Sphere& sphere, const BoundingBox& boundingBox)
+{
+	float dMin = 0;
+
+
+	if (sphere.m_center.x < boundingBox.m_lowerBoundary.x)
+	{
+		const float diff = sphere.m_center.x - boundingBox.m_lowerBoundary.x;
+		dMin += diff * diff;
+	}
+	else if (sphere.m_center.x > boundingBox.m_upperBoundary.x)
+	{
+		const float diff = sphere.m_center.x - boundingBox.m_upperBoundary.x;
+		dMin += diff;
+	}
+
+	if (sphere.m_center.y < boundingBox.m_lowerBoundary.y)
+	{
+		const float diff = sphere.m_center.y - boundingBox.m_lowerBoundary.y;
+		dMin += diff * diff;
+	}
+	else if (sphere.m_center.y > boundingBox.m_upperBoundary.y)
+	{
+		const float diff = sphere.m_center.y - boundingBox.m_upperBoundary.y;
+		dMin += diff;
+	}
+
+	return dMin <= (sphere.m_radius * sphere.m_radius);
+}

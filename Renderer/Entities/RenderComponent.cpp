@@ -28,15 +28,14 @@ namespace Renderer
 		renderQueue.resize(1024 * 64);
 		//TODO: make it expand when almost full
 
-		const Frustum     cameraFrustum = CameraComponent::Get()->GetFrustum();
+		const Frustum cameraFrustum = CameraComponent::Get()->GetFrustum();
 
 		std::for_each(std::execution::par_unseq, gameObjects.begin(), gameObjects.end(),
 					  [cameraFrustum, &counter](const GameObject* gameObject)
 					  {
 						  for (const std::shared_ptr<Component>& component : gameObject->GetComponents())
 						  {
-							  Ref<RenderComponent> renderComponent = component->GetRef().Cast<RenderComponent>();
-							  if (renderComponent.IsValid())
+							  if (RenderComponent* renderComponent = *component->GetRef().Cast<RenderComponent>())
 							  {
 								  renderComponent->PrepareForRender(renderQueue, cameraFrustum, counter);
 							  }
@@ -44,9 +43,9 @@ namespace Renderer
 					  });
 
 		renderQueue.resize(counter);
-		
+
 		std::sort(renderQueue.begin(), renderQueue.end(), RenderQueueComp());
-		
+
 		return renderQueue;
 	}
 

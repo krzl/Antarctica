@@ -10,7 +10,7 @@
 
 void MousePickerComponent::OnCreated()
 {
-	m_cameraComponent = GetOwner()->GetComponent<Renderer::CameraComponent>();
+	m_cameraComponent = GetOwner()->GetComponentRef<Renderer::CameraComponent>();
 
 	m_inputHandle = InputSystem::GetInstance()->OnLeftMouseButtonPressed.AddListener([this]()
 	{

@@ -138,14 +138,14 @@ void GameObject::SetEnabled(const bool isEnabled)
 
 BoundingBox GameObject::GetBoundingBox() const
 {
-	BoundingBox box = m_boundingBox.value_or(CalculateBoundingBox());
-
-	if (!m_boundingBox.has_value())
+	if (m_boundingBox.has_value())
 	{
-		m_boundingBox = box;
+		return m_boundingBox.value();
 	}
 
-	return box;
+	m_boundingBox = CalculateBoundingBox();
+	
+	return m_boundingBox.value();
 }
 
 bool GameObject::CanTick() const

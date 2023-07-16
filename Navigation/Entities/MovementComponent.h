@@ -7,8 +7,6 @@ namespace Navigation
 {
 	class MovementComponent : public Component
 	{
-	private:
-
 		DEFINE_CLASS()
 
 		friend class SteeringBehavior;
@@ -62,7 +60,7 @@ namespace Navigation
 
 		float m_radius = 0.0f;
 
-		float m_maxAcceleration    = 100.0f;
+		float m_maxAcceleration    = 50.0f;
 		float m_maxSpeed           = 4.0f;
 		float m_decelerationFactor = 2.0f;
 

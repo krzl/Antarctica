@@ -36,7 +36,24 @@ public:
 	template<
 		typename T,
 		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
-	Ref<T> GetComponent()
+	T* GetComponent()
+	{
+		for (auto it = m_components.begin(); it != m_components.end(); ++it)
+		{
+			Component* comp = it->get();
+			if (T* ptr = dynamic_cast<T*>(comp))
+			{
+				return ptr;
+			}
+		}
+
+		return nullptr;
+	}
+
+	template<
+		typename T,
+		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
+	Ref<T> GetComponentRef()
 	{
 		for (auto it = m_components.begin(); it != m_components.end(); ++it)
 		{
@@ -53,9 +70,9 @@ public:
 	template<
 		typename T,
 		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
-	std::vector<Ref<T>> GetComponents()
+	std::vector<T*> GetComponents()
 	{
-		std::vector<Ref<T>> components;
+		std::vector<T*> components;
 		GetComponents<T>(components);
 		return components;
 	}
@@ -63,14 +80,13 @@ public:
 	template<
 		typename T,
 		class = std::enable_if_t<std::is_base_of_v<Component, T>>>
-	void GetComponents(std::vector<Ref<T>>& components)
+	void GetComponents(std::vector<T*>& components)
 	{
 		for (auto it = m_components.begin(); it != m_components.end(); ++it)
 		{
-			Ref<T> ref = (*it)->m_self.Cast<T>();
-			if (ref.IsValid())
+			if (T* ptr = *(*it)->m_self.Cast<T>())
 			{
-				components.emplace_back(ref);
+				components.emplace_back(ptr);
 			}
 		}
 	}

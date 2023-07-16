@@ -11,7 +11,7 @@ namespace Navigation
 		explicit SeparationBehavior(MovementComponent* movementComponent)
 			: SteeringBehavior(movementComponent)
 		{
-			SetWeight(1.5f);
+			SetWeight(1.0f);
 		}
 
 		Vector2D GetLinearAcceleration() override;
@@ -21,6 +21,6 @@ namespace Navigation
 
 	private:
 
-		float m_decayCoefficient = 0.4f;
+		float m_decayCoefficient = 0.075f;
 	};
 }

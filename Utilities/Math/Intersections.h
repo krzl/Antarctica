@@ -48,3 +48,5 @@ enum class IntersectTestResult
 IntersectTestResult Intersect2D(const Sphere& sphere, const BoundingBox& boundingBox);
 IntersectTestResult Intersect(const Sphere& sphere, const BoundingBox& boundingBox);
 IntersectTestResult Intersect(const Frustum& frustum, const BoundingBox& boundingBox);
+
+bool IsOverlapping2D(const Sphere& sphere, const BoundingBox& boundingBox);

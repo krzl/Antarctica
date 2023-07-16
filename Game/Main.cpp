@@ -42,9 +42,9 @@ void main()
 			std::vector<Navigation::MovementComponent*> movementComponents;
 
 #if defined(DEBUG) | defined(_DEBUG)
-			constexpr uint32_t gridSize = 4;
+			constexpr uint32_t gridSize = 10;
 #else
-			constexpr uint32_t gridSize = 8;
+			constexpr uint32_t gridSize = 20;
 #endif
 			for (uint32_t i = 0; i < gridSize; i++)
 			{

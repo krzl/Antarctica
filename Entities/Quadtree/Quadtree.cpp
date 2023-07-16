@@ -456,8 +456,10 @@ std::vector<GameObject*> Quadtree::FindNearby(const Sphere& sphere) const
 	const_cast<Quadtree*>(this)->Update();
 
 	std::vector<GameObject*> objects;
-
+	objects.reserve(100);
+	
 	m_root->FindNearby(sphere, objects);
+	objects.shrink_to_fit();
 
 	return objects;
 }
@@ -466,7 +468,7 @@ void Quadtree::Node::FindNearby(const Sphere& sphere, std::vector<GameObject*>& 
 {
 	for (GameObject* object : m_objects)
 	{
-		if (Intersect2D(sphere, object->GetBoundingBox()) != IntersectTestResult::OUTSIDE)
+		if (IsOverlapping2D(sphere, object->GetBoundingBox()))
 		{
 			objects.emplace_back(object);
 		}

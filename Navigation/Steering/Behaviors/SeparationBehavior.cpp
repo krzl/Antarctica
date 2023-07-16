@@ -22,18 +22,18 @@ namespace Navigation
 
 			const float otherRadius = target->GetRadius();
 
-			const float radiusSum        = characterRadius + otherRadius;
+			const float radiusSum = characterRadius + otherRadius;
 
 			if (m_movement->HasTarget() && !target->HasTarget())
 			{
 				continue;
 			}
 
-			if (distance < max(radiusSum, radiusSum) && distance > 0.0f)
+			if (distance < radiusSum && distance > 0.0f)
 			{
 				const float relativeDistance = distance / radiusSum;
-				const float strength = Min(m_decayCoefficient / (relativeDistance * relativeDistance), 1.0f);
-				
+				const float strength         = m_decayCoefficient / (relativeDistance * relativeDistance);
+
 				totalAcceleration += direction * strength;
 
 				++actorCount;
@@ -43,6 +43,14 @@ namespace Navigation
 		if (actorCount == 0 || totalAcceleration == Vector2D::zero)
 		{
 			return Vector2D::zero;
+		}
+
+		totalAcceleration *= m_movement->GetMaxAcceleration() / actorCount;
+
+		const float acceleration = Magnitude(totalAcceleration);
+		if (acceleration > m_movement->GetMaxAcceleration())
+		{
+			totalAcceleration *= m_movement->GetMaxAcceleration() / acceleration;
 		}
 
 		return totalAcceleration / actorCount * m_movement->GetMaxAcceleration();

@@ -50,15 +50,15 @@ namespace Navigation
 
 		m_targets.clear();
 		const std::vector<GameObject*> nearbyObjects = World::Get()->GetQuadtree().FindNearby(Sphere{ GetOwner()->GetPosition(), maxRadiusToCheck });
+		
 		for (GameObject* gameObject : nearbyObjects)
 		{
-			Ref<MovementComponent> movementComponent = gameObject->GetComponent<MovementComponent>();
-			if (movementComponent.IsValid() && *movementComponent != this)
+			if (MovementComponent* movementComponent = gameObject->GetComponent<MovementComponent>())
 			{
-				m_targets.push_back(*movementComponent);
+				m_targets.push_back(movementComponent);
 			}
 		}
-
+		
 		Vector2D acceleration = m_steeringPipeline.GetLinearAcceleration(this);
 
 		if (!HasTarget())
@@ -66,7 +66,7 @@ namespace Navigation
 			acceleration *= m_decelerationFactor;
 		}
 
-		if (SquaredMag(acceleration) == 0.0f)
+		if (acceleration == Vector2D::zero)
 		{
 			if (SquaredMag(m_velocity) != 0.0f)
 			{
@@ -87,18 +87,18 @@ namespace Navigation
 			m_velocity += acceleration * deltaTime;
 		}
 
-		if (SquaredMag(m_velocity) > GetMaxSpeed() * GetMaxSpeed())
-		{
-			m_velocity = Normalize(m_velocity) * GetMaxSpeed();
-		}
-
-		GetOwner()->SetPosition(GetOwner()->GetPosition() + Vector3D(m_velocity, 0.0f) * deltaTime);
-
-		const Vector3D oldDirection   = GetOwner()->GetRotation().GetDirectionY();
-		const float    oldOrientation = std::atan2(-oldDirection.x, oldDirection.y);
-
 		if (m_velocity != Vector2D::zero)
 		{
+			if (SquaredMag(m_velocity) > GetMaxSpeed() * GetMaxSpeed())
+			{
+				m_velocity = Normalize(m_velocity) * GetMaxSpeed();
+			}
+
+			GetOwner()->SetPosition(GetOwner()->GetPosition() + Vector3D(m_velocity, 0.0f) * deltaTime);
+			
+			const Vector3D oldDirection = GetOwner()->GetRotation().GetDirectionY();
+			const float    oldOrientation = std::atan2(-oldDirection.x, oldDirection.y);
+			
 			const Vector2D test              = Normalize(m_velocity);
 			const float    targetOrientation = std::atan2(-test.x, test.y);
 

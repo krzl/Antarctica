@@ -8,13 +8,15 @@ public:
 	// Constructors
 
 	Ref() :
-		m_ptr(std::weak_ptr<T>()) { }
+		m_ptr(std::weak_ptr<T>()),
+		m_cachedPtr(nullptr) { }
 
 	Ref(const Ref& other) = default;
 
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref(std::weak_ptr<T> ptr) :
-		m_ptr(ptr) { }
+		m_ptr(ptr),
+		m_cachedPtr(GetPtrSafe()) { }
 
 	template<
 		class D,
@@ -28,31 +30,36 @@ public:
 		class = std::enable_if_t<std::is_base_of_v<T, D>>>
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref(std::weak_ptr<D> ptr) :
-		m_ptr(std::weak_ptr<T>(ptr)) { }
+		m_ptr(std::weak_ptr<T>(ptr)),
+		m_cachedPtr(GetPtrSafe()) { }
 
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref(std::shared_ptr<T> ptr) :
-		m_ptr(std::weak_ptr<T>(ptr)) { }
+		m_ptr(std::weak_ptr<T>(ptr)),
+		m_cachedPtr(GetPtrSafe()) { }
 
 	template<
 		class D,
 		class = std::enable_if_t<std::is_base_of_v<T, D>>>
 	// ReSharper disable once CppNonExplicitConvertingConstructor
 	Ref(std::shared_ptr<D> ptr) :
-		m_ptr(std::weak_ptr<T>(ptr)) { }
+		m_ptr(std::weak_ptr<T>(ptr)),
+		m_cachedPtr(GetPtrSafe()) { }
 
 
 	// Assignment operators
 
 	Ref& operator=(const Ref& other)
 	{
-		m_ptr = other.m_ptr;
+		m_ptr       = other.m_ptr;
+		m_cachedPtr = GetPtrSafe();
 		return *this;
 	}
 
 	Ref& operator=(std::weak_ptr<T> ptr)
 	{
-		m_ptr = ptr;
+		m_ptr       = ptr;
+		m_cachedPtr = GetPtrSafe();
 		return *this;
 	}
 
@@ -67,7 +74,8 @@ public:
 
 	Ref& operator=(std::shared_ptr<T> ptr)
 	{
-		m_ptr = ptr;
+		m_ptr       = ptr;
+		m_cachedPtr = GetPtrSafe();
 		return *this;
 	}
 
@@ -76,7 +84,8 @@ public:
 		class = std::enable_if_t<std::is_base_of_v<T, D>>>
 	Ref& operator=(std::shared_ptr<D> ptr)
 	{
-		m_ptr = std::weak_ptr<T>(ptr);
+		m_ptr       = std::weak_ptr<T>(ptr);
+		m_cachedPtr = GetPtrSafe();
 		return *this;
 	}
 
@@ -102,22 +111,34 @@ public:
 
 	T* operator*()
 	{
-		return IsValid() ? m_ptr.lock().get() : nullptr;
+		return m_cachedPtr;
 	}
 
 	T* operator->()
 	{
-		return IsValid() ? m_ptr.lock().get() : nullptr;
+		return m_cachedPtr;
 	}
 
 	const T* operator*() const
 	{
-		return IsValid() ? m_ptr.lock().get() : nullptr;
+		return m_cachedPtr;
 	}
 
 	const T* operator->() const
 	{
-		return IsValid() ? m_ptr.lock().get() : nullptr;
+		return m_cachedPtr;
+	}
+
+	T* GetPtrSafe()
+	{
+		m_cachedPtr = IsValid() ? m_ptr.lock().get() : nullptr;
+		return m_cachedPtr;
+	}
+
+	const T* GetPtrSafe() const
+	{
+		m_cachedPtr = IsValid() ? m_ptr.lock().get() : nullptr;
+		return m_cachedPtr;
 	}
 
 	bool IsValid() const
@@ -133,4 +154,5 @@ public:
 private:
 
 	std::weak_ptr<T> m_ptr;
+	mutable T*       m_cachedPtr;
 };

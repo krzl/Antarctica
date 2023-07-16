@@ -80,8 +80,8 @@ BoundingBox BoundingBox::Transform(const Transform4D& transform) const
 		{ m_lowerBoundary.x, m_lowerBoundary.y, m_lowerBoundary.z },
 		{ m_upperBoundary.x, m_lowerBoundary.y, m_lowerBoundary.z },
 		{ m_lowerBoundary.x, m_upperBoundary.y, m_lowerBoundary.z },
-		{ m_lowerBoundary.x, m_lowerBoundary.y, m_upperBoundary.z },
 		{ m_upperBoundary.x, m_upperBoundary.y, m_lowerBoundary.z },
+		{ m_lowerBoundary.x, m_lowerBoundary.y, m_upperBoundary.z },
 		{ m_upperBoundary.x, m_lowerBoundary.y, m_upperBoundary.z },
 		{ m_lowerBoundary.x, m_upperBoundary.y, m_upperBoundary.z },
 		{ m_upperBoundary.x, m_upperBoundary.y, m_upperBoundary.z }
@@ -91,7 +91,8 @@ BoundingBox BoundingBox::Transform(const Transform4D& transform) const
 	Vector3D lowerBoundary = transform * points[0];
 	Vector3D upperBoundary = lowerBoundary;
 
-	for (uint32_t i = 1; i < 8; i++)
+	uint32_t pointCount = sizeof points / sizeof(Point3D);
+	for (uint32_t i = 1; i < pointCount; ++i)
 	{
 		Vector3D transformed = transform * points[i];
 
