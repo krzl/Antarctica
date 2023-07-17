@@ -9,7 +9,7 @@ endif()
 
 add_library(Rendering STATIC ${SOURCES} ${HEADERS})
 
-target_link_libraries(Rendering imgui terathon-math d3d12 d3dcompiler dxgi stb Animation Entities Platform Utilities dxguid)
+target_link_libraries(Rendering imgui terathon-math d3d12 d3dcompiler dxgi stb Animation ECS Platform Utilities dxguid)
 
 target_include_directories(Rendering PUBLIC . )
 

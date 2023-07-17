@@ -8,7 +8,7 @@ if (MSVC)
 endif()
 
 add_library(Platform STATIC ${SOURCES} ${HEADERS})
-target_link_libraries(Platform Entities)
+target_link_libraries(Platform ECS)
 
 target_include_directories(Platform PUBLIC . )
 

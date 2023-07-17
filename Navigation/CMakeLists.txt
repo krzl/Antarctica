@@ -9,7 +9,7 @@ endif()
 
 add_library(Navigation STATIC ${SOURCES} ${HEADERS})
 
-target_link_libraries(Navigation Entities Utilities)
+target_link_libraries(Navigation ECS Utilities)
 target_include_directories(Navigation PUBLIC . )
 
 set_source_files_properties( stdafx.cpp PROPERTIES COMPILE_FLAGS "/Ycstdafx.h" )

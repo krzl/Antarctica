@@ -15,7 +15,7 @@ set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 
 add_subdirectory(Antarctica)
 add_subdirectory(Game)
-add_subdirectory(Entities)
+add_subdirectory(ECS)
 
 add_subdirectory(Animation)
 add_subdirectory(AssetManagement)
