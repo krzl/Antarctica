@@ -12,23 +12,23 @@ struct ShaderParams
 
 class Shader : public Asset
 {
-	typedef std::unique_ptr<Renderer::NativeShader, void(*)(Renderer::NativeShader*)> NativePtr;
+	typedef std::unique_ptr<Rendering::NativeShader, void(*)(Rendering::NativeShader*)> NativePtr;
 
 public:
 
-	[[nodiscard]] const Renderer::NativeShader* GetNativeObject() const
+	[[nodiscard]] const Rendering::NativeShader* GetNativeObject() const
 	{
 		return m_nativeObject.get();
 	}
 
-	[[nodiscard]] Renderer::NativeShader* GetNativeObject()
+	[[nodiscard]] Rendering::NativeShader* GetNativeObject()
 	{
 		return m_nativeObject.get();
 	}
 
-	void SetNativeObject(Renderer::NativeShader* nativePtr)
+	void SetNativeObject(Rendering::NativeShader* nativePtr)
 	{
-		m_nativeObject = NativePtr(nativePtr, Renderer::Deleter);
+		m_nativeObject = NativePtr(nativePtr, Rendering::Deleter);
 	}
 
 	[[nodiscard]] const std::string& GetPath() const
@@ -47,5 +47,5 @@ private:
 
 	std::string m_path;
 
-	NativePtr m_nativeObject = NativePtr(nullptr, Renderer::Deleter);
+	NativePtr m_nativeObject = NativePtr(nullptr, Rendering::Deleter);
 };

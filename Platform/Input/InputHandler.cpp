@@ -3,17 +3,17 @@
 
 #include <WindowsX.h>
 
-#include "InputSystem.h"
+#include "InputManager.h"
 
-void InputHandler::Init(InputSystem& inputSystem)
+void InputHandler::Init(InputManager& inputManager)
 {
-	m_inputSystem = &inputSystem;
+	m_inputManager = &inputManager;
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
 void InputHandler::ProcessMessage(const UINT msg, const WPARAM wParam, const LPARAM lParam)
 {
-	if (!m_inputSystem)
+	if (!m_inputManager)
 		return;
 
 	switch (msg)
@@ -41,30 +41,30 @@ void InputHandler::ProcessMouseInput(const UINT msg, const WPARAM wParam, const 
 	const int32_t x = GET_X_LPARAM(lParam);
 	const int32_t y = GET_Y_LPARAM(lParam);
 
-	m_inputSystem->m_mousePosition = MousePosition(x, y);
+	m_inputManager->m_mousePosition = MousePosition(x, y);
 
 	switch (msg)
 	{
 		case WM_LBUTTONDOWN:
-			m_inputSystem->OnLeftMouseButtonPressed.Dispatch();
+			m_inputManager->OnLeftMouseButtonPressed.Dispatch();
 			return;
 		case WM_MBUTTONDOWN:
-			m_inputSystem->OnMiddleMouseButtonPressed.Dispatch();
+			m_inputManager->OnMiddleMouseButtonPressed.Dispatch();
 			return;
 		case WM_RBUTTONDOWN:
-			m_inputSystem->OnRightMouseButtonPressed.Dispatch();
+			m_inputManager->OnRightMouseButtonPressed.Dispatch();
 			return;
 		case WM_LBUTTONUP:
-			m_inputSystem->OnLeftMouseButtonReleased.Dispatch();
+			m_inputManager->OnLeftMouseButtonReleased.Dispatch();
 			return;
 		case WM_MBUTTONUP:
-			m_inputSystem->OnMiddleMouseButtonReleased.Dispatch();
+			m_inputManager->OnMiddleMouseButtonReleased.Dispatch();
 			return;
 		case WM_RBUTTONUP:
-			m_inputSystem->OnRightMouseButtonReleased.Dispatch();
+			m_inputManager->OnRightMouseButtonReleased.Dispatch();
 			return;
 		case WM_MOUSEMOVE:
-			m_inputSystem->OnMouseMove.Dispatch(x, y);
+			m_inputManager->OnMouseMove.Dispatch(x, y);
 			return;
 	}
 }

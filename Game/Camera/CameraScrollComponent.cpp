@@ -2,7 +2,7 @@
 #include "CameraScrollComponent.h"
 
 #include "GameObjects/GameObject.h"
-#include "Input/InputSystem.h"
+#include "Input/InputManager.h"
 
 CameraScrollComponent::CameraScrollComponent()
 {
@@ -11,9 +11,9 @@ CameraScrollComponent::CameraScrollComponent()
 
 void CameraScrollComponent::Tick(float deltaTime)
 {
-	if (InputSystem::GetInstance()->IsMiddleMousePressed())
+	if (InputManager::GetInstance()->IsMiddleMousePressed())
 	{
-		const auto mouseDelta = InputSystem::GetInstance()->GetMouseDelta();
+		const auto mouseDelta = InputManager::GetInstance()->GetMouseDelta();
 
 		const Vector3D positionDelta = Vector3D(-mouseDelta.first * cameraSpeed, mouseDelta.second * cameraSpeed, 0.0f);
 

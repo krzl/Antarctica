@@ -4,7 +4,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-class InputSystem;
+class InputManager;
 class Settings;
 
 namespace Platform
@@ -16,7 +16,7 @@ namespace Platform
 	public:
 
 		void Init(const Settings& appSettings);
-		void SetupInputSystem(InputSystem& inputSystem);
+		void SetupInputManager(InputManager& inputManager);
 		void Update();
 
 		Dispatcher<> OnDestroyed;

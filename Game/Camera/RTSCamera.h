@@ -5,7 +5,7 @@
 
 class CameraScrollComponent;
 
-class RTSCamera : public Renderer::Camera
+class RTSCamera : public Rendering::Camera
 {
 public:
 	

@@ -1,0 +1,82 @@
+#include "stdafx.h"
+#include "AnimatedMeshComponent.h"
+
+namespace Rendering
+{
+	Transform4D AnimatedMeshComponent::GetAttachedNodeTransform(const int32_t nodeId, bool ignoreAttachmentRotation)
+	{
+		Transform4D transform = m_animationSolver.GetNodeTransforms()[nodeId];
+		if (ignoreAttachmentRotation)
+		{
+			Vector3D   translation;
+			Quaternion rotation;
+			Vector3D   scale;
+
+			DecomposeTransform(transform, translation, rotation, scale);
+
+			transform = Transform4D(Matrix3D::MakeScale(scale.x, scale.y, scale.z), translation);
+		}
+
+		return transform;
+	}
+
+	void AnimatedMeshComponent::SetupRenderHandle(const uint32_t      submeshId, Material& material,
+												  QueuedRenderObject& renderObject)
+	{
+		StaticMeshComponent::SetupRenderHandle(submeshId, material, renderObject);
+
+		const Submesh& submesh    = m_mesh->GetSubmesh(submeshId);
+		const uint32_t bonesCount = static_cast<uint32_t>(m_animationSolver.GetFinalMatrices()[submeshId].size());
+
+		if (submesh.GetSkeleton().m_bones.size() == 0 || bonesCount == 0)
+		{
+			return;
+		}
+
+		renderObject.m_boneTransforms.resize(bonesCount);
+
+		for (uint32_t j = 0; j < bonesCount; ++j)
+		{
+			renderObject.m_boneTransforms[j] =
+				m_animationSolver.GetFinalMatrices()[submeshId][j] * renderObject.m_perObjectBuffer.m_transform;
+		}
+
+		renderObject.m_perObjectBuffer.m_transform = Transform4D::identity;
+	}
+
+	void AnimatedMeshComponent::PrepareForRender(RenderQueue&          renderQueue, const Frustum& cameraFrustum,
+												 std::atomic_uint32_t& counter)
+	{
+		if (m_mesh && m_animator)
+		{
+			m_animationSolver.UpdateAnimation(m_mesh);
+		}
+
+		StaticMeshComponent::PrepareForRender(renderQueue, cameraFrustum, counter);
+	}
+
+	void AnimatedMeshComponent::SetMesh(const std::shared_ptr<Mesh>& mesh)
+	{
+		StaticMeshComponent::SetMesh(mesh);
+
+		const std::vector<MeshNode>& meshNodes = mesh->GetNodes();
+
+		m_animatedTransforms.resize(meshNodes.size());
+
+		for (uint32_t i = 0; i < meshNodes.size(); ++i)
+		{
+			m_animatedTransforms[i] = meshNodes[i].m_globalTransform;
+		}
+	}
+
+	void AnimatedMeshComponent::SetAnimator(const std::shared_ptr<Anim::Animator> animator)
+	{
+		m_animator = animator;
+		m_animationSolver.ResetSolver(m_animator);
+	}
+
+	void AnimatedMeshComponent::SetTrigger(const int32_t id, const bool value)
+	{
+		m_animationSolver.SetTrigger(id, value);
+	}
+}

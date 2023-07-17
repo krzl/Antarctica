@@ -2,7 +2,7 @@
 
 #include "Entities/RenderComponent.h"
 
-class ImGuiComponent : public Renderer::RenderComponent
+class ImGuiComponent : public Rendering::RenderComponent
 {
 public:
 
@@ -10,7 +10,7 @@ public:
 
 protected:
 
-	void PrepareForRender(Renderer::RenderQueue& renderQueue, const Frustum& cameraFrustum,
+	void PrepareForRender(Rendering::RenderQueue& renderQueue, const Frustum& cameraFrustum,
 						  std::atomic_uint32_t&  counter) override;
 	DEFINE_CLASS()
 };

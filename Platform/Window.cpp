@@ -61,9 +61,9 @@ void Platform::Window::Init(const Settings& appSettings)
 	UpdateWindow(m_handle);
 }
 
-void Platform::Window::SetupInputSystem(InputSystem& inputSystem)
+void Platform::Window::SetupInputManager(InputManager& inputManager)
 {
-	m_inputHandler.Init(inputSystem);
+	m_inputHandler.Init(inputManager);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic

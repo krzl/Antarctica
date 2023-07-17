@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "Application.h"
 
-#include <RenderSystem.h>
+#include <Renderer.h>
 
 #include "Entities/CameraComponent.h"
 #include "GameObjects/World.h"
-#include "Systems/System.h"
-#include "Systems/TimeSystem.h"
+#include "Managers/Manager.h"
+#include "Managers/TimeManager.h"
 
 Application* gApp = nullptr;
 
@@ -33,7 +33,7 @@ void Application::Start()
 
 	m_window.OnResized.AddListener([this]()
 	{
-		m_renderSystem.OnResize(m_window);
+		m_renderer.OnResize(m_window);
 	});
 
 	m_window.OnDestroyed.AddListener([this]()
@@ -41,15 +41,15 @@ void Application::Start()
 		m_isRunning = false;
 	});
 
-	m_renderSystem.Init(m_window, m_appSettings);
+	m_renderer.Init(m_window, m_appSettings);
 
-	m_systems = SystemCreator::CreateSystems();
-	for (System* system : m_systems)
+	m_managers = ManagerCreator::CreateManagers();
+	for (Manager* manager : m_managers)
 	{
-		system->Init();
+		manager->Init();
 	}
 
-	m_window.SetupInputSystem(*InputSystem::GetInstance());
+	m_window.SetupInputManager(*InputManager::GetInstance());
 
 	OnApplicationInitialized.Dispatch();
 
@@ -64,20 +64,20 @@ void Application::Run()
 	{
 		if (!m_isPaused)
 		{
-			for (System* system : m_systems)
+			for (Manager* manager : m_managers)
 			{
-				system->Update();
+				manager->Update();
 			}
-			Update(TimeSystem::GetInstance()->GetDeltaTime());
+			Update(TimeManager::GetInstance()->GetDeltaTime());
 		}
 		m_window.Update();
-		Renderer::CameraComponent::SetAspectRatio(GetWindow().GetAspectRatio());
+		Rendering::CameraComponent::SetAspectRatio(GetWindow().GetAspectRatio());
 		std::vector<GameObject*> gameObjectsToRender = GetWorld().GetQuadtree().Intersect(
-			Renderer::CameraComponent::Get()->GetFrustum());
-		m_renderSystem.Render(gameObjectsToRender);
+			Rendering::CameraComponent::Get()->GetFrustum());
+		m_renderer.Render(gameObjectsToRender);
 	}
 
-	m_renderSystem.Cleanup();
+	m_renderer.Cleanup();
 }
 
 void Application::Stop()

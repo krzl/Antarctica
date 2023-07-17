@@ -10,7 +10,7 @@
 #include "Entities/AnimatedMeshComponent.h"
 #include "Entities/MovementComponent.h"
 #include "GameObjects/World.h"
-#include "Input/InputSystem.h"
+#include "Input/InputManager.h"
 
 enum PeasantAnimTrigger
 {
@@ -20,7 +20,7 @@ enum PeasantAnimTrigger
 
 Peasant::Peasant()
 {
-	m_animatedMeshComponent = AddComponent<Renderer::AnimatedMeshComponent>();
+	m_animatedMeshComponent = AddComponent<Rendering::AnimatedMeshComponent>();
 	m_movementComponent     = AddComponent<Navigation::MovementComponent>();
 
 	m_animatedMeshComponent->SetLocalScale(Vector3D(0.01f, 0.01f, 0.01f));
@@ -90,9 +90,9 @@ Peasant::Peasant()
 
 void Peasant::OnCreated()
 {
-	InputSystem::GetInstance()->OnRightMouseButtonPressed.AddListener([this]()
+	InputManager::GetInstance()->OnRightMouseButtonPressed.AddListener([this]()
 	{
-		const MousePosition pos = InputSystem::GetInstance()->GetMousePosition();
+		const MousePosition pos = InputManager::GetInstance()->GetMousePosition();
 
 		const float ndcX = (2.0f * pos.first) / Application::Get().GetWindow().GetWidth() - 1.0f;
 		const float ndcY = 1.0f - (2.0f * pos.second) / Application::Get().GetWindow().GetHeight();

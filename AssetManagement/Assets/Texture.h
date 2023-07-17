@@ -5,7 +5,7 @@
 
 class Texture : public Asset
 {
-	typedef std::unique_ptr<Renderer::NativeTexture, void(*)(Renderer::NativeTexture*)> NativePtr;
+	typedef std::unique_ptr<Rendering::NativeTexture, void(*)(Rendering::NativeTexture*)> NativePtr;
 
 public:
 
@@ -18,20 +18,20 @@ public:
 		m_channels(channels),
 		m_path(std::move(path)) { }
 
-	[[nodiscard]] Renderer::NativeTexture* GetNativeObject()
+	[[nodiscard]] Rendering::NativeTexture* GetNativeObject()
 	{
 		return m_nativeObject.get();
 	}
 
 
-	[[nodiscard]] const Renderer::NativeTexture* GetNativeObject() const
+	[[nodiscard]] const Rendering::NativeTexture* GetNativeObject() const
 	{
 		return m_nativeObject.get();
 	}
 
-	void SetNativeObject(Renderer::NativeTexture* nativePtr)
+	void SetNativeObject(Rendering::NativeTexture* nativePtr)
 	{
-		m_nativeObject = NativePtr(nativePtr, Renderer::Deleter);
+		m_nativeObject = NativePtr(nativePtr, Rendering::Deleter);
 	}
 
 	[[nodiscard]] const uint8_t*     GetData() const { return m_data; }
@@ -46,7 +46,7 @@ protected:
 
 private:
 
-	NativePtr m_nativeObject = NativePtr(nullptr, Renderer::Deleter);
+	NativePtr m_nativeObject = NativePtr(nullptr, Rendering::Deleter);
 
 	const uint8_t* m_data     = nullptr;
 	int32_t        m_width    = 0;

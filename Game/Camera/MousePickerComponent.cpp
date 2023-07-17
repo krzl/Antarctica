@@ -6,15 +6,15 @@
 #include "Entities/CameraComponent.h"
 #include "GameObjects/GameObject.h"
 #include "GameObjects/World.h"
-#include "Input/InputSystem.h"
+#include "Input/InputManager.h"
 
 void MousePickerComponent::OnCreated()
 {
-	m_cameraComponent = GetOwner()->GetComponentRef<Renderer::CameraComponent>();
+	m_cameraComponent = GetOwner()->GetComponentRef<Rendering::CameraComponent>();
 
-	m_inputHandle = InputSystem::GetInstance()->OnLeftMouseButtonPressed.AddListener([this]()
+	m_inputHandle = InputManager::GetInstance()->OnLeftMouseButtonPressed.AddListener([this]()
 	{
-		const MousePosition pos = InputSystem::GetInstance()->GetMousePosition();
+		const MousePosition pos = InputManager::GetInstance()->GetMousePosition();
 
 		const float ndcX = (2.0f * pos.first) / Application::Get().GetWindow().GetWidth() - 1.0f;
 		const float ndcY = 1.0f - (2.0f * pos.second) / Application::Get().GetWindow().GetHeight();

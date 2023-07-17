@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "ImGuiComponent.h"
 
-#include "Debug/ImGui/ImGuiSystem.h"
+#include "Debug/ImGui/ImGuiManager.h"
 
 BoundingBox ImGuiComponent::GetBoundingBox() const
 {
@@ -9,12 +9,12 @@ BoundingBox ImGuiComponent::GetBoundingBox() const
 					   GetWorldPosition() + Vector3D(1.0f, 1.0f, 1.0f));
 }
 
-void ImGuiComponent::PrepareForRender(Renderer::RenderQueue& renderQueue, const Frustum& cameraFrustum,
+void ImGuiComponent::PrepareForRender(Rendering::RenderQueue& renderQueue, const Frustum& cameraFrustum,
 									  std::atomic_uint32_t&  counter)
 {
-	std::vector<Renderer::QueuedRenderObject>& renderObjects = ImGuiSystem::GetInstance()->Render();
+	std::vector<Rendering::QueuedRenderObject>& renderObjects = ImGuiManager::GetInstance()->Render();
 
-	for (Renderer::QueuedRenderObject& renderObject : renderObjects)
+	for (Rendering::QueuedRenderObject& renderObject : renderObjects)
 	{
 		renderQueue[counter.fetch_add(1)] = &renderObject;
 	}

@@ -5,23 +5,23 @@
 
 class ComputeShader : public Asset
 {
-	typedef std::unique_ptr<Renderer::NativeComputeShader, void(*)(Renderer::NativeComputeShader*)> NativePtr;
+	typedef std::unique_ptr<Rendering::NativeComputeShader, void(*)(Rendering::NativeComputeShader*)> NativePtr;
 
 public:
 
-	[[nodiscard]] const Renderer::NativeComputeShader* GetNativeObject() const
+	[[nodiscard]] const Rendering::NativeComputeShader* GetNativeObject() const
 	{
 		return m_nativeObject.get();
 	}
 
-	[[nodiscard]] Renderer::NativeComputeShader* GetNativeObject()
+	[[nodiscard]] Rendering::NativeComputeShader* GetNativeObject()
 	{
 		return m_nativeObject.get();
 	}
 
-	void SetNativeObject(Renderer::NativeComputeShader* nativePtr)
+	void SetNativeObject(Rendering::NativeComputeShader* nativePtr)
 	{
-		m_nativeObject = NativePtr(nativePtr, Renderer::Deleter);
+		m_nativeObject = NativePtr(nativePtr, Rendering::Deleter);
 	}
 
 	[[nodiscard]] const std::string& GetPath() const
@@ -35,5 +35,5 @@ private:
 
 	std::string m_path;
 
-	NativePtr m_nativeObject = NativePtr(nullptr, Renderer::Deleter);
+	NativePtr m_nativeObject = NativePtr(nullptr, Rendering::Deleter);
 };

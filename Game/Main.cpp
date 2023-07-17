@@ -9,7 +9,7 @@
 #include "Characters/Peasant.h"
 #include "Debug/MovementTester.h"
 #include "Debug/QuadtreeTester.h"
-#include "Debug/DebugDrawSystem.h"
+#include "Debug/DebugDrawManager.h"
 #include "Entities/AnimatedMesh.h"
 #include "Terrain/Terrain.h"
 #include "Terrain/TerrainGenerator.h"
@@ -33,7 +33,7 @@ void main()
 			camera->SetPosition(Point3D(0, 0, 20));
 			camera->SetRotation(20.0f, 0.0f, 0.0f);
 
-			Ref<Renderer::StaticMesh> actor = Application::Get().GetWorld().Spawn<Renderer::StaticMesh>();
+			Ref<Rendering::StaticMesh> actor = Application::Get().GetWorld().Spawn<Rendering::StaticMesh>();
 			actor->SetPosition(Point3D(0.0, 0.0f, 0.0f));
 			actor->SetRotation(0.0f, 0.0f, 0.0f);
 			actor->SetScale(Vector3D(1.0f, 1.0f, 1.0f));

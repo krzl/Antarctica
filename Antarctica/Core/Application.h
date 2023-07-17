@@ -1,14 +1,14 @@
 #pragma once
 
-#include <RenderSystem.h>
+#include <Renderer.h>
 #include <Window.h>
-#include <Input/InputSystem.h>
+#include <Input/InputManager.h>
 #include <Settings/Settings.h>
 
 #include "GameObjects/World.h"
-#include "Systems/TimeSystem.h"
+#include "Managers/TimeManager.h"
 
-class System;
+class Manager;
 class World;
 
 class Application
@@ -30,9 +30,9 @@ public:
 		return m_appSettings;
 	}
 
-	[[nodiscard]] Renderer::RenderSystem& GetRenderSystem()
+	[[nodiscard]] Rendering::Renderer& GetRenderer()
 	{
-		return m_renderSystem;
+		return m_renderer;
 	}
 
 	[[nodiscard]] Platform::Window& GetWindow()
@@ -51,7 +51,7 @@ private:
 	
 	void Run();
 
-	InputSystem m_inputSystem;
+	InputManager m_inputManager;
 	Settings    m_appSettings;
 
 	bool m_isRunning = false;
@@ -61,7 +61,7 @@ private:
 	World            m_world;
 	Platform::Window m_window;
 
-	Renderer::RenderSystem m_renderSystem;
+	Rendering::Renderer m_renderer;
 
-	std::vector<System*> m_systems;
+	std::vector<Manager*> m_managers;
 };

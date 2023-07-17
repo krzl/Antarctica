@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Renderer
+namespace Rendering
 {
 	class NativeComputeShader;
 	class NativeShader;

@@ -4,7 +4,7 @@
 #include "State.h"
 #include "StateMachineData.h"
 #include "Transition.h"
-#include "Systems/TimeSystem.h"
+#include "Managers/TimeManager.h"
 
 namespace Anim
 {
@@ -53,7 +53,7 @@ namespace Anim
 		}
 		else
 		{
-			stateMachineData.m_currentTime += TimeSystem::GetInstance()->GetDeltaTime();
+			stateMachineData.m_currentTime += TimeManager::GetInstance()->GetDeltaTime();
 
 			if (stateMachineData.m_previousState != nullptr && stateMachineData.m_currentTime > stateMachineData.
 				m_transitionTime)

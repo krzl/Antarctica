@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Assets/DynamicSubmesh.h"
-#include "Debug/DebugDrawSystem.h"
+#include "Debug/DebugDrawManager.h"
 #include "Entities/RenderComponent.h"
 
-class DebugDrawComponent : public Renderer::RenderComponent
+class DebugDrawComponent : public Rendering::RenderComponent
 {
 	struct DebugDrawElement
 	{
@@ -16,11 +16,11 @@ class DebugDrawComponent : public Renderer::RenderComponent
 
 		DynamicSubmesh m_submesh;
 
-		std::unique_ptr<Renderer::QueuedRenderObject> m_cachedRenderObject;
+		std::unique_ptr<Rendering::QueuedRenderObject> m_cachedRenderObject;
 
 		DebugDrawElement() = default;
 
-		explicit DebugDrawElement(DebugDrawSystem::ElementBuilder&& builder);
+		explicit DebugDrawElement(DebugDrawManager::ElementBuilder&& builder);
 	};
 
 public:
@@ -31,7 +31,7 @@ protected:
 
 	void OnCreated() override;
 
-	void PrepareForRender(Renderer::RenderQueue& renderQueue, const Frustum& cameraFrustum,
+	void PrepareForRender(Rendering::RenderQueue& renderQueue, const Frustum& cameraFrustum,
 						  std::atomic_uint32_t&  counter) override;
 
 private:

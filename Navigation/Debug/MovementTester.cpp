@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "MovementTester.h"
 
-#include "Debug/DebugDrawSystem.h"
+#include "Debug/DebugDrawManager.h"
 #include "Entities/MovementComponent.h"
 #include "imgui/imgui.h"
 #include "Steering/Behaviors/AlignmentBehavior.h"
@@ -121,8 +121,8 @@ namespace Navigation
 				const float speedRatio = Magnitude(comp->GetVelocity()) / comp->GetMaxSpeed();
 				const Color color      = LerpClamped(Color::red, Color::white, speedRatio);
 
-				DebugDrawSystem::GetInstance()->DrawSphere(comp->GetOwner()->GetPosition(), comp->GetRadius(), 0.0f, color, 8);
-				DebugDrawSystem::GetInstance()->DrawLine(comp->GetOwner()->GetPosition(), comp->GetOwner()->GetPosition() + Vector3D(comp->GetVelocity(), 0.0f), 0.05f, 0.0f, Color::yellow, 6);
+				DebugDrawManager::GetInstance()->DrawSphere(comp->GetOwner()->GetPosition(), comp->GetRadius(), 0.0f, color, 8);
+				DebugDrawManager::GetInstance()->DrawLine(comp->GetOwner()->GetPosition(), comp->GetOwner()->GetPosition() + Vector3D(comp->GetVelocity(), 0.0f), 0.05f, 0.0f, Color::yellow, 6);
 			}
 		}
 	}

@@ -9,7 +9,7 @@ namespace Navigation
 
 class MovementComponent;
 
-namespace Renderer
+namespace Rendering
 {
 	class AnimatedMeshComponent;
 }
@@ -22,17 +22,17 @@ public:
 
 	void OnCreated() override;
 
-	Renderer::CameraComponent* m_camera; //TODO: REMOVE
+	Rendering::CameraComponent* m_camera; //TODO: REMOVE
 
-	[[nodiscard]] Renderer::AnimatedMeshComponent* GetAnimatedMeshComponent() { return *m_animatedMeshComponent; }
+	[[nodiscard]] Rendering::AnimatedMeshComponent* GetAnimatedMeshComponent() { return *m_animatedMeshComponent; }
 	[[nodiscard]] Navigation::MovementComponent*   GetMovementComponent() { return *m_movementComponent; }
 
-	[[nodiscard]] const Renderer::AnimatedMeshComponent* GetAnimatedMeshComponent() const { return *m_animatedMeshComponent; }
+	[[nodiscard]] const Rendering::AnimatedMeshComponent* GetAnimatedMeshComponent() const { return *m_animatedMeshComponent; }
 	[[nodiscard]] const Navigation::MovementComponent*   GetMovementComponent() const { return *m_movementComponent; }
 
 protected:
 
-	Ref<Renderer::AnimatedMeshComponent> m_animatedMeshComponent;
+	Ref<Rendering::AnimatedMeshComponent> m_animatedMeshComponent;
 	Ref<Navigation::MovementComponent>   m_movementComponent;
 
 	bool m_isWalking = false;

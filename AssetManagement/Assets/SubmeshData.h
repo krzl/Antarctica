@@ -85,7 +85,7 @@ struct AttributeUsage
 
 struct Submesh
 {
-	typedef std::unique_ptr<Renderer::NativeSubmesh, void(*)(Renderer::NativeSubmesh*)> NativePtr;
+	typedef std::unique_ptr<Rendering::NativeSubmesh, void(*)(Rendering::NativeSubmesh*)> NativePtr;
 
 	explicit Submesh(std::string&&        name,
 					 const MeshBuffer&&   vertexBuffer,
@@ -125,14 +125,14 @@ struct Submesh
 		m_skeleton = std::move(skeleton);
 	}
 
-	[[nodiscard]] Renderer::NativeSubmesh* GetNativeObject() const
+	[[nodiscard]] Rendering::NativeSubmesh* GetNativeObject() const
 	{
 		return m_nativeObject.get();
 	}
 
-	void SetNativeObject(Renderer::NativeSubmesh* nativePtr) const
+	void SetNativeObject(Rendering::NativeSubmesh* nativePtr) const
 	{
-		m_nativeObject = NativePtr(nativePtr, Renderer::Deleter);
+		m_nativeObject = NativePtr(nativePtr, Rendering::Deleter);
 	}
 
 	const std::string& GetName() const
@@ -169,5 +169,5 @@ protected:
 
 private:
 
-	mutable NativePtr m_nativeObject = NativePtr(nullptr, Renderer::Deleter);
+	mutable NativePtr m_nativeObject = NativePtr(nullptr, Rendering::Deleter);
 };
