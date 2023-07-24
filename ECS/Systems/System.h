@@ -1,5 +1,8 @@
 #pragma once
 
+#include <execution>
+#include <iterator>
+
 #include "SystemBase.h"
 #include "Archetypes/Archetype.h"
 
@@ -26,14 +29,22 @@ public:
 			static uint32_t componentIds[sizeof...(Types)];
 			TryAddNewArchetype<0>(allArchetypes[m_archetypesParsed++].get(), componentIds);
 		}
+		//TODO: ECS: disable multithreading on certain systems
+		std::for_each(std::execution::par_unseq,
+					  m_archetypesMatched.begin(),
+					  m_archetypesMatched.end(),
+					  [this](const MatchedArchetype& archetype)
+					  {
+						  std::atomic_uint32_t counter = 0;
+						  std::for_each(std::execution::par_unseq,
+									    archetype.m_archetype->m_entityIds.begin(),
+									    archetype.m_archetype->m_entityIds.end(),
+									    [this, archetype, &counter](const uint64_t entityId)
+									    {
+										    Run<0>(archetype, counter++, entityId);
+									    });
+					  });
 
-		for (const MatchedArchetype& archetype : m_archetypesMatched)
-		{
-			for (uint32_t i = 0; i < archetype.m_archetype->m_entityIds.size(); ++i)
-			{
-				Run<0>(archetype, i);
-			}
-		}
 		OnUpdateEnd();
 	}
 
@@ -74,20 +85,20 @@ private:
 
 
 	template<std::size_t Index, typename... Ts>
-	std::enable_if_t<Index != sizeof...(Types)> Run(const MatchedArchetype& archetype, const uint32_t id, Ts... ts)
+	std::enable_if_t<Index != sizeof...(Types)> Run(const MatchedArchetype& archetype, const uint32_t id, const uint64_t entityId, Ts... ts)
 	{
 		using ComponentType = std::tuple_element_t<Index, std::tuple<Types...>>;
 
 		const uint32_t componentId    = archetype.m_componentIds[Index];
 		ComponentType* componentStart = (ComponentType*) archetype.m_archetype->m_componentData[componentId].data();
 
-		Run<Index + 1>(archetype, id, ts..., componentStart + id);
+		Run<Index + 1>(archetype, id, entityId, ts..., componentStart + id);
 	}
 
 	template<std::size_t Index, typename... Ts>
-	std::enable_if_t<Index == sizeof...(Types)> Run(const MatchedArchetype& archetype, const uint32_t id, Ts... ts)
+	std::enable_if_t<Index == sizeof...(Types)> Run(const MatchedArchetype& archetype, const uint32_t id, const uint64_t entityId, Ts... ts)
 	{
-		Update(archetype.m_archetype->m_entityIds[id], ts...);
+		Update(entityId, ts...);
 	}
 
 	std::vector<MatchedArchetype> m_archetypesMatched;
