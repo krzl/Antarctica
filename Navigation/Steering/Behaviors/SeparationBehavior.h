@@ -8,13 +8,14 @@ namespace Navigation
 	{
 	public:
 
-		explicit SeparationBehavior(MovementComponent* movementComponent)
-			: SteeringBehavior(movementComponent)
+		explicit SeparationBehavior()
 		{
 			SetWeight(1.0f);
 		}
 
-		Vector2D GetLinearAcceleration() override;
+		Vector2D GetLinearAcceleration(const TransformComponent* transform,
+			const MovementComponent*                             movement,
+			const std::vector<NearbyTarget>&                     nearbyTargets) override;
 
 		[[nodiscard]] float GetDecayCoefficient() const { return m_decayCoefficient; }
 		void                SetDecayCoefficient(const float radiusScale) { m_decayCoefficient = radiusScale; }

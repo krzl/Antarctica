@@ -1,25 +1,22 @@
 #pragma once
 
-#include "CameraComponent.h"
-#include "GameObjects/GameObject.h"
+#include "Entities/Entity.h"
 
 namespace Rendering
 {
-	class Camera : public GameObject
+	class Camera : public Entity
 	{
 	public:
 
 		Camera();
 
-		[[nodiscard]] const Ref<CameraComponent>& GetCameraComponent() const { return m_camera; }
-		[[nodiscard]] Ref<CameraComponent>& GetCameraComponent() { return m_camera; }
+		void DefineArchetype(ArchetypeBuilder& builder) override;
 
-	protected:
+		//TODO: ECS: grant access to camera in other way (maybe variable in certain systems) (also remove all managers and do it like this?)
+		static Camera* Get();
 
-		Ref<CameraComponent> m_camera;
+	private:
 
-		DEFINE_CLASS()
+		static Camera* m_camera;
 	};
-
-	CREATE_CLASS(Camera)
 }

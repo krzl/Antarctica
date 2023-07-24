@@ -3,10 +3,21 @@
 
 #include <Renderer.h>
 
-#include "Entities/CameraComponent.h"
-#include "GameObjects/World.h"
+#include "Abilities/AbilitySystem.h"
+#include "Abilities/AbilityTriggerSystem.h"
+#include "Camera/PlayerCameraSystem.h"
+#include "Debug/DebugDraw/DebugDrawSystem.h"
+#include "Debug/ImGui/ImGuiSystem.h"
+#include "Entities/World.h"
+#include "Input/InputSystem.h"
 #include "Managers/Manager.h"
-#include "Managers/TimeManager.h"
+#include "Steering/MovementSystem.h"
+#include "Steering/SteeringSystem.h"
+#include "Systems/AnimationSystem.h"
+#include "Systems/CullingSystem.h"
+#include "Systems/QuadtreeUpdateSystem.h"
+#include "Systems/RenderSystem.h"
+#include "Systems/SkinningSystem.h"
 
 Application* gApp = nullptr;
 
@@ -49,6 +60,46 @@ void Application::Start()
 		manager->Init();
 	}
 
+	m_inputSystem        = new InputSystem();
+	m_playerCameraSystem = new PlayerCameraSystem();
+
+	m_preStepLockSystems = std::initializer_list<SystemBase*>{
+		m_inputSystem,
+		m_playerCameraSystem,
+		new AbilityTriggerSystem(),
+	};
+
+	m_stepLockSystems = std::initializer_list<SystemBase*>{
+		new AbilitySystem(),
+		new Anim::AnimationSystem(),
+		new Navigation::SteeringSystem(),
+		new Navigation::MovementSystem(),
+		new QuadtreeUpdateSystem(),
+	};
+
+	m_renderSystem = new Rendering::RenderSystem();
+
+	m_postStepLockSystems = std::initializer_list<SystemBase*>{
+		new DebugDrawSystem(),
+		new Rendering::CullingSystem(),
+		new Rendering::SkinningSystem(),
+		new ImGuiSystem(),
+		m_renderSystem
+	};
+
+	for (SystemBase* system : m_preStepLockSystems)
+	{
+		system->Init(&m_frameCounter);
+	}
+	for (SystemBase* system : m_stepLockSystems)
+	{
+		system->Init(&m_frameCounter);
+	}
+	for (SystemBase* system : m_postStepLockSystems)
+	{
+		system->Init(&m_frameCounter);
+	}
+
 	m_window.SetupInputManager(*InputManager::GetInstance());
 
 	OnApplicationInitialized.Dispatch();
@@ -64,17 +115,61 @@ void Application::Run()
 	{
 		if (!m_isPaused)
 		{
+			m_inputSystem->ResetInput();
+			m_window.Update();
+
+			++m_frameCounter.m_renderFrameCount;
+
+			for (SystemBase* system : m_preStepLockSystems)
+			{
+				system->OnFrameBegin();
+			}
+			for (SystemBase* system : m_stepLockSystems)
+			{
+				system->OnFrameBegin();
+			}
+			for (SystemBase* system : m_postStepLockSystems)
+			{
+				system->OnFrameBegin();
+			}
+
 			for (Manager* manager : m_managers)
 			{
 				manager->Update();
 			}
-			Update(TimeManager::GetInstance()->GetDeltaTime());
+			m_world.Update();
+
+			for (SystemBase* system : m_preStepLockSystems)
+			{
+				system->Run();
+			}
+
+			++m_frameCounter.m_lockStepFrameCount;
+			for (SystemBase* system : m_stepLockSystems)
+			{
+				system->Run();
+			}
 		}
-		m_window.Update();
-		Rendering::CameraComponent::SetAspectRatio(GetWindow().GetAspectRatio());
-		std::vector<GameObject*> gameObjectsToRender = GetWorld().GetQuadtree().Intersect(
-			Rendering::CameraComponent::Get()->GetFrustum());
-		m_renderer.Render(gameObjectsToRender);
+
+		for (SystemBase* system : m_postStepLockSystems)
+		{
+			system->Run();
+		}
+
+		for (SystemBase* system : m_preStepLockSystems)
+		{
+			system->OnFrameEnd();
+		}
+		for (SystemBase* system : m_stepLockSystems)
+		{
+			system->OnFrameEnd();
+		}
+		for (SystemBase* system : m_postStepLockSystems)
+		{
+			system->OnFrameEnd();
+		}
+
+		m_renderer.Render(m_renderSystem->GetRenderQueue(), m_playerCameraSystem->GetCameras());
 	}
 
 	m_renderer.Cleanup();
@@ -93,11 +188,6 @@ void Application::Pause()
 void Application::Unpause()
 {
 	m_isPaused = false;
-}
-
-void Application::Update(const float deltaTime)
-{
-	m_world.Update(deltaTime);
 }
 
 Application& Application::Get()

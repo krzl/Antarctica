@@ -5,15 +5,15 @@
 
 namespace Anim
 {
-	void Solver::SetTrigger(const int32_t id, const bool value)
+	void Solver::SetTrigger(const AnimTrigger id, const bool value)
 	{
 		if (value)
 		{
-			m_triggerState.emplace(id);
+			m_triggerState.set((uint32_t) id, true);
 		}
 		else
 		{
-			m_triggerState.erase(id);
+			m_triggerState.set((uint32_t) id, false);
 		}
 	}
 
@@ -22,7 +22,7 @@ namespace Anim
 		m_animator = animator;
 		m_stateMachineData.clear();
 		m_stateMachineData.resize(animator->m_stateMachines.size());
-		m_triggerState.clear();
+		m_triggerState.reset();
 
 		for (uint32_t i = 0; i < animator->m_stateMachines.size(); ++i)
 		{
@@ -73,7 +73,8 @@ namespace Anim
 		{
 			const uint32_t keyId = FindKeyId(node->m_positionKeys, currentTime);
 			const float    alpha = InverseLerp(node->m_positionKeys[keyId].m_time,
-											   node->m_positionKeys[keyId + 1].m_time, currentTime);
+											   node->m_positionKeys[keyId + 1].m_time,
+											   currentTime);
 			return LerpClamped(node->m_positionKeys[keyId].m_position,
 							   node->m_positionKeys[keyId + 1].m_position,
 							   alpha);
@@ -87,7 +88,8 @@ namespace Anim
 		{
 			const uint32_t keyId = FindKeyId(node->m_rotationKeys, currentTime);
 			const float    alpha = InverseLerp(node->m_rotationKeys[keyId].m_time,
-											   node->m_rotationKeys[keyId + 1].m_time, currentTime);
+											   node->m_rotationKeys[keyId + 1].m_time,
+											   currentTime);
 			return SlerpClamped(node->m_rotationKeys[keyId].m_rotation,
 								node->m_rotationKeys[keyId + 1].m_rotation,
 								alpha);
@@ -100,7 +102,8 @@ namespace Anim
 		if (node->m_scaleKeys.size() > 1 && node->m_scaleKeys.back().m_time > currentTime)
 		{
 			const uint32_t keyId = FindKeyId(node->m_scaleKeys, currentTime);
-			const float    alpha = InverseLerp(node->m_scaleKeys[keyId].m_time, node->m_scaleKeys[keyId + 1].m_time,
+			const float    alpha = InverseLerp(node->m_scaleKeys[keyId].m_time,
+											   node->m_scaleKeys[keyId + 1].m_time,
 											   currentTime);
 			return LerpClamped(node->m_scaleKeys[keyId].m_scale,
 							   node->m_scaleKeys[keyId + 1].m_scale,
@@ -109,8 +112,11 @@ namespace Anim
 		return node->m_scaleKeys.back().m_scale;
 	}
 
-	void CalculateNode(const AnimationNode*      node, const std::vector<MeshNode>& meshNodes, float currentTime,
-					   std::vector<Transform4D>& transforms, const Transform4D&     parentTransform)
+	void CalculateNode(const AnimationNode* node,
+		const std::vector<MeshNode>&        meshNodes,
+		float                               currentTime,
+		std::vector<Transform4D>&           transforms,
+		const Transform4D&                  parentTransform)
 	{
 		int32_t meshNodeId = FindNodeId(meshNodes, node->m_nodeNameHash);
 
@@ -155,8 +161,10 @@ namespace Anim
 		}
 	}
 
-	void Solver::Calculate(std::vector<Transform4D>&    transforms, const std::shared_ptr<Animation>& animation,
-						   const std::vector<MeshNode>& meshNodes, const float                        currentTime)
+	void Solver::Calculate(std::vector<Transform4D>& transforms,
+		const std::shared_ptr<Animation>&            animation,
+		const std::vector<MeshNode>&                 meshNodes,
+		const float                                  currentTime)
 	{
 		transforms.assign(meshNodes.size(), Transform4D());
 
@@ -172,7 +180,20 @@ namespace Anim
 		}
 	}
 
-	std::vector<std::vector<Matrix4D>>& Solver::UpdateAnimation(const std::shared_ptr<Mesh>& mesh)
+	void Solver::UpdateState()
+	{
+		for (uint32_t i = 0; i < m_animator->m_stateMachines.size(); ++i)
+		{
+			std::shared_ptr<StateMachine> stateMachine = m_animator->m_stateMachines[i];
+
+			//TODO: Support multiple layers
+			m_animator->m_stateMachines[i]->Update(m_stateMachineData[i], m_triggerState);
+
+			break;
+		}
+	}
+
+	std::vector<std::vector<Matrix4D>>& Solver::CalculateAnimation(const std::shared_ptr<Mesh>& mesh)
 	{
 		m_finalMatrices.resize(mesh->GetSubmeshCount());
 
@@ -181,8 +202,9 @@ namespace Anim
 			std::shared_ptr<StateMachine> stateMachine = m_animator->m_stateMachines[i];
 
 			//TODO: Support multiple layers
-			m_animator->m_stateMachines[i]->CalculateMatrices(m_stateMachineData[i], m_nodeTransforms,
-															  m_triggerState, mesh->GetNodes());
+			m_animator->m_stateMachines[i]->CalculateMatrices(m_stateMachineData[i],
+															  m_nodeTransforms,
+															  mesh->GetNodes());
 
 			break;
 		}
@@ -200,7 +222,7 @@ namespace Anim
 				if (id != -1)
 				{
 					finalMatrix = skeleton.m_globalInverseTransform * m_nodeTransforms[id] * skeleton.m_bones[j].
-								  m_offsetMatrix;
+						m_offsetMatrix;
 				}
 				else
 				{
@@ -213,8 +235,9 @@ namespace Anim
 		return m_finalMatrices;
 	}
 
-	void Solver::Interpolate(const std::vector<Transform4D>& aTransforms, std::vector<Transform4D>& bTransforms,
-							 const float                     alpha)
+	void Solver::Interpolate(const std::vector<Transform4D>& aTransforms,
+		std::vector<Transform4D>&                            bTransforms,
+		const float                                          alpha)
 	{
 		assert(aTransforms.size() == bTransforms.size());
 
@@ -236,7 +259,7 @@ namespace Anim
 			const Vector3D   scale       = LerpClamped(aScale, bScale, alpha);
 
 			bTransforms[i] = Transform4D::MakeTranslation(translation) * rotation.GetRotationMatrix() *
-							 Transform4D::MakeScale(scale.x, scale.y, scale.z);
+				Transform4D::MakeScale(scale.x, scale.y, scale.z);
 		}
 	}
 }

@@ -5,9 +5,15 @@
 #include <Input/InputManager.h>
 #include <Settings/Settings.h>
 
-#include "GameObjects/World.h"
+#include "Entities/World.h"
+#include "Input/InputSystem.h"
+#include "Managers/FrameCounter.h"
 #include "Managers/TimeManager.h"
+#include "Systems/RenderSystem.h"
 
+class PlayerCameraSystem;
+
+class SystemBase;
 class Manager;
 class World;
 
@@ -20,8 +26,6 @@ public:
 
 	void Pause();
 	void Unpause();
-
-	void Update(float deltaTime);
 
 	static Application& Get();
 
@@ -48,20 +52,29 @@ public:
 	Dispatcher<> OnApplicationInitialized;
 
 private:
-	
+
 	void Run();
 
 	InputManager m_inputManager;
-	Settings    m_appSettings;
+	Settings     m_appSettings;
+
+	FrameCounter m_frameCounter = {};
 
 	bool m_isRunning = false;
 	bool m_isPaused  = false;
 
+	std::vector<SystemBase*> m_preStepLockSystems;
+	std::vector<SystemBase*> m_stepLockSystems;
+	std::vector<SystemBase*> m_postStepLockSystems;
 
 	World            m_world;
 	Platform::Window m_window;
 
-	Rendering::Renderer m_renderer;
+	InputSystem*        m_inputSystem        = nullptr;
+	PlayerCameraSystem* m_playerCameraSystem = nullptr;
+
+	Rendering::Renderer      m_renderer;
+	Rendering::RenderSystem* m_renderSystem = nullptr;
 
 	std::vector<Manager*> m_managers;
 };

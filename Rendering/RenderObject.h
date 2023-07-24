@@ -12,12 +12,13 @@ namespace Rendering
 
 	struct QueuedRenderObject
 	{
-		const ::Submesh*      m_submesh;
-		Material*             m_material;
-		float                 m_order;
-		PerObjectBuffer       m_perObjectBuffer;
+		const Submesh*    m_submesh;
+		Material*           m_material;
+		float               m_order;
+		PerObjectBuffer     m_perObjectBuffer;
+		std::optional<Rect> m_clipRect;
+
 		std::vector<Matrix4D> m_boneTransforms;
-		std::optional<Rect>   m_clipRect;
 
 		friend bool operator<(const QueuedRenderObject& lhs, const QueuedRenderObject& rhs)
 		{
@@ -64,30 +65,32 @@ namespace Rendering
 
 		QueuedRenderObject() = default;
 
-		QueuedRenderObject(const Submesh*               submesh, Material* material, const float order,
-						   const PerObjectBuffer&       perObjectBuffer,
-						   const std::vector<Matrix4D>& boneTransforms = std::vector<Matrix4D>(),
-						   const std::optional<Rect>&   clipRect       = std::optional<Rect>())
-			: m_submesh(submesh),
-			  m_material(material),
-			  m_order(order),
-			  m_perObjectBuffer(perObjectBuffer),
-			  m_boneTransforms(boneTransforms),
-			  m_clipRect(clipRect) {}
+		QueuedRenderObject(const Submesh* submesh,
+			Material*                     material,
+			const float                   order,
+			const PerObjectBuffer&        perObjectBuffer,
+			const std::vector<Matrix4D>&  boneTransforms = std::vector<Matrix4D>(),
+			const std::optional<Rect>&    clipRect       = std::optional<Rect>()) :
+			m_submesh(submesh),
+			m_material(material),
+			m_order(order),
+			m_perObjectBuffer(perObjectBuffer),
+			m_boneTransforms(boneTransforms),
+			m_clipRect(clipRect) {}
 
-		QueuedRenderObject(const QueuedRenderObject& other)
-			: m_submesh(other.m_submesh),
-			  m_material(other.m_material),
-			  m_order(other.m_order),
-			  m_perObjectBuffer(other.m_perObjectBuffer),
-			  m_boneTransforms(other.m_boneTransforms) {}
+		QueuedRenderObject(const QueuedRenderObject& other) :
+			m_submesh(other.m_submesh),
+			m_material(other.m_material),
+			m_order(other.m_order),
+			m_perObjectBuffer(other.m_perObjectBuffer),
+			m_boneTransforms(other.m_boneTransforms) {}
 
-		QueuedRenderObject(QueuedRenderObject&& other) noexcept
-			: m_submesh(other.m_submesh),
-			  m_material(other.m_material),
-			  m_order(other.m_order),
-			  m_perObjectBuffer(std::move(other.m_perObjectBuffer)),
-			  m_boneTransforms(std::move(other.m_boneTransforms)) {}
+		QueuedRenderObject(QueuedRenderObject&& other) noexcept :
+			m_submesh(other.m_submesh),
+			m_material(other.m_material),
+			m_order(other.m_order),
+			m_perObjectBuffer(std::move(other.m_perObjectBuffer)),
+			m_boneTransforms(std::move(other.m_boneTransforms)) {}
 
 		QueuedRenderObject& operator=(const QueuedRenderObject& other)
 		{

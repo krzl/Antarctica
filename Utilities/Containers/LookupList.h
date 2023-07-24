@@ -7,13 +7,13 @@ class LookupList
 
 public:
 
-	explicit LookupList(std::function<L(const T&)> lookupFunction)
-		: m_lookupFunction(lookupFunction) { }
+	explicit LookupList(std::function<L(const T&)> lookupFunction) :
+		m_lookupFunction(lookupFunction) { }
 
-	void Add(const T& gameObject, L id)
+	void Add(const T& entity, L id)
 	{
 		m_lookupList[id] = (uint32_t) m_list.size();
-		m_list.emplace_back(gameObject);
+		m_list.emplace_back(entity);
 	}
 
 	bool Contains(L id) const

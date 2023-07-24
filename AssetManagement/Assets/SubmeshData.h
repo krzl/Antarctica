@@ -4,25 +4,26 @@
 
 #include "Skeleton.h"
 #include "Types.h"
+#include "Debug/DebugDrawManager.h"
 
 struct MeshBuffer
 {
 	std::vector<uint8_t> m_data;
 	uint32_t             m_elementSize;
 
-	MeshBuffer(const std::vector<uint8_t>& data, const uint32_t elementSize, const uint32_t elementCount)
-		: m_data(data),
-		  m_elementSize(elementSize) {}
+	MeshBuffer(const std::vector<uint8_t>& data, const uint32_t elementSize, const uint32_t elementCount) :
+		m_data(data),
+		m_elementSize(elementSize) {}
 
 	MeshBuffer() = default;
 
-	MeshBuffer(const MeshBuffer& other)
-		: m_data(other.m_data),
-		  m_elementSize(other.m_elementSize) {}
+	MeshBuffer(const MeshBuffer& other) :
+		m_data(other.m_data),
+		m_elementSize(other.m_elementSize) {}
 
-	MeshBuffer(MeshBuffer&& other) noexcept
-		: m_data(std::move(other.m_data)),
-		  m_elementSize(other.m_elementSize) {}
+	MeshBuffer(MeshBuffer&& other) noexcept :
+		m_data(std::move(other.m_data)),
+		m_elementSize(other.m_elementSize) {}
 
 	MeshBuffer& operator=(const MeshBuffer& other)
 	{
@@ -87,11 +88,13 @@ struct Submesh
 {
 	typedef std::unique_ptr<Rendering::NativeSubmesh, void(*)(Rendering::NativeSubmesh*)> NativePtr;
 
-	explicit Submesh(std::string&&        name,
-					 const MeshBuffer&&   vertexBuffer,
-					 const MeshBuffer&&   indexBuffer,
-					 const AttributeUsage attributes,
-					 const BoundingBox&   boundingBox) :
+	Submesh() = default;
+
+	explicit Submesh(std::string&& name,
+		const MeshBuffer&&         vertexBuffer,
+		const MeshBuffer&&         indexBuffer,
+		const AttributeUsage       attributes,
+		const BoundingBox&         boundingBox) :
 		m_name(std::move(name)),
 		m_vertexBuffer(std::move(vertexBuffer)),
 		m_indexBuffer(std::move(indexBuffer)),
@@ -105,14 +108,29 @@ struct Submesh
 		return m_vertexBuffer;
 	}
 
+	[[nodiscard]] MeshBuffer& GetVertexBuffer()
+	{
+		return m_vertexBuffer;
+	}
+
 	[[nodiscard]] const MeshBuffer& GetIndexBuffer(const uint32_t index = 0) const
 	{
 		return m_indexBuffer;
 	}
 
-	[[nodiscard]] const AttributeUsage& GetAttributes() const
+	[[nodiscard]] MeshBuffer& GetIndexBuffer(const uint32_t index = 0)
+	{
+		return m_indexBuffer;
+	}
+
+	[[nodiscard]] const AttributeUsage& GetAttributesUsage() const
 	{
 		return m_attributes;
+	}
+
+	void SetAttributesUsage(const AttributeUsage usage)
+	{
+		m_attributes = usage;
 	}
 
 	[[nodiscard]] const Skeleton& GetSkeleton() const
@@ -150,11 +168,16 @@ struct Submesh
 	[[nodiscard]] bool GetIgnoreAttachmentRotation() const { return m_ignoreAttachmentRotation; }
 
 	const BoundingBox& GetBoundingBox() const;
-	bool               IsDynamic() const { return m_isDynamic; }
+
+	void SetBoundingBox(const BoundingBox& boundingBox)
+	{
+		m_boundingBox = boundingBox;
+	}
+
+	bool IsDynamic() const { return m_isDynamic; }
+	void SetDynamic() { m_isDynamic = true; }
 
 protected:
-
-	Submesh() = default;
 
 	std::string     m_name;
 	MeshBuffer      m_vertexBuffer;

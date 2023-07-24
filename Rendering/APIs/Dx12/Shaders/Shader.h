@@ -4,10 +4,9 @@
 
 #include "ShaderStage.h"
 #include "../Common.h"
+#include "Assets/Shader.h"
 #include "Shaders/ShaderDescriptor.h"
 
-struct ShaderParams;
-class Shader;
 class Material;
 struct AttributeUsage;
 

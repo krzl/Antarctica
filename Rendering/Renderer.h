@@ -1,6 +1,6 @@
 #pragma once
 
-class GameObject;
+class Entity;
 class ComputeShader;
 class Settings;
 
@@ -11,6 +11,8 @@ namespace Platform
 
 namespace Rendering
 {
+	struct CameraData;
+	class RenderQueue;
 	class IContext;
 
 	class Renderer
@@ -23,7 +25,7 @@ namespace Rendering
 
 		void Init(const Platform::Window& window, const Settings& settings);
 		void OnResize(const Platform::Window& window);
-		void Render(const std::vector<GameObject*>& gameObjects);
+		void Render(const RenderQueue& renderQueue, const std::vector<CameraData>& cameras);
 		void Cleanup();
 
 		uint32_t GetCurrentBackbufferId() const;

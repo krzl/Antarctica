@@ -1,17 +1,12 @@
 ﻿#pragma once
 
-#include "Entities/RenderComponent.h"
+#include "Components/Component.h"
 
-class ImGuiComponent : public Rendering::RenderComponent
+class Texture;
+class ImGuiShader;
+
+struct ImGuiComponent : Component
 {
-public:
-
-	BoundingBox GetBoundingBox() const override;
-
-protected:
-
-	void PrepareForRender(Rendering::RenderQueue& renderQueue, const Frustum& cameraFrustum,
-						  std::atomic_uint32_t&  counter) override;
 	DEFINE_CLASS()
 };
 

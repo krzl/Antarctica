@@ -8,8 +8,8 @@
 
 namespace Anim
 {
-	bool Transition::CanTransition(const std::set<int32_t>& triggerState,
-								   const bool               isCurrentStateFinished) const
+	bool Transition::CanTransition(const TriggerState& triggerState,
+		const bool                                     isCurrentStateFinished) const
 	{
 		if (!isCurrentStateFinished && !m_canInterrupt)
 		{
@@ -18,7 +18,7 @@ namespace Anim
 
 		for (const TriggerCondition& triggerCondition : m_triggerConditions)
 		{
-			const bool isTriggerSet = triggerState.find(triggerCondition.m_triggerId) != triggerState.end();
+			const bool isTriggerSet = triggerState.test(triggerCondition.m_triggerId);
 			if (isTriggerSet == triggerCondition.m_invertCondition)
 			{
 				return false;
@@ -28,8 +28,7 @@ namespace Anim
 		return true;
 	}
 
-	void StateMachine::CalculateMatrices(StateMachineData&  stateMachineData, std::vector<Transform4D>& matrices,
-										 std::set<int32_t>& triggerState, const std::vector<MeshNode>&  meshNodes) const
+	void StateMachine::Update(StateMachineData& stateMachineData, TriggerState& triggerState) const
 	{
 		if (stateMachineData.m_currentState == nullptr)
 		{
@@ -37,7 +36,8 @@ namespace Anim
 		}
 
 		const Transition* transition = stateMachineData.m_currentState->GetNextState(
-			triggerState, stateMachineData.m_currentTime);
+			triggerState,
+			stateMachineData.m_currentTime);
 
 		if (transition != nullptr)
 		{
@@ -61,16 +61,23 @@ namespace Anim
 				stateMachineData.m_previousState = nullptr;
 			}
 		}
+	}
 
+	void StateMachine::CalculateMatrices(StateMachineData& stateMachineData,
+		std::vector<Transform4D>&                          matrices,
+		const std::vector<MeshNode>&                       meshNodes) const
+	{
 		stateMachineData.m_currentState->CalculateBones(matrices,
-														meshNodes, stateMachineData.m_currentTime);
+														meshNodes,
+														stateMachineData.m_currentTime);
 
 		if (stateMachineData.m_previousState)
 		{
 			//TODO: don't reallocate?
 			std::vector<Transform4D> oldStateTransforms(matrices.size());
 
-			stateMachineData.m_previousState->CalculateBones(oldStateTransforms, meshNodes,
+			stateMachineData.m_previousState->CalculateBones(oldStateTransforms,
+															 meshNodes,
 															 stateMachineData.m_previousTime);
 
 			const float alpha = stateMachineData.m_currentTime / stateMachineData.m_transitionTime;

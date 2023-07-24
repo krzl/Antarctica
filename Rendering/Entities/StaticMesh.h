@@ -1,26 +1,31 @@
 #pragma once
-#include "StaticMeshComponent.h"
-#include "GameObjects/GameObject.h"
+
+#include <memory>
+#include <memory>
+
+#include "Assets/Material.h"
+#include "Assets/Mesh.h"
+#include "Entities/Entity.h"
 
 namespace Rendering
 {
-	class StaticMesh : public GameObject
+	struct MeshComponent;
+
+	class StaticMesh : public Entity
 	{
 	public:
 
-		StaticMesh();
+		explicit StaticMesh(const std::shared_ptr<Mesh>& mesh);
 
-		Ref<StaticMeshComponent> GetStaticMeshComponent() const
-		{
-			return m_staticMeshComponent;
-		}
+		void SetMaterial(const std::shared_ptr<Material>& material, uint32_t index = 0);
 
 	protected:
 
-		Ref<StaticMeshComponent> m_staticMeshComponent;
+		void DefineArchetype(ArchetypeBuilder& builder) override;
+		void SetupComponents(ComponentAccessor& accessor) override;
 
-		DEFINE_CLASS()
+	private:
+
+		std::shared_ptr<Mesh> m_mesh;
 	};
-
-	CREATE_CLASS(StaticMesh)
 }

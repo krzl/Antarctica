@@ -59,7 +59,8 @@ namespace Rendering::Dx12
 			0
 		};
 
-		m_device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msQualityLevels,
+		m_device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
+									  &msQualityLevels,
 									  sizeof(msQualityLevels));
 
 		m_msNumQualityLevels = msQualityLevels.NumQualityLevels;
@@ -73,7 +74,10 @@ namespace Rendering::Dx12
 
 		m_device->CreateCommandQueue(&commandQueueInfo, IID_PPV_ARGS(&m_commandQueue));
 		m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_directCommandAllocator));
-		m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_directCommandAllocator.Get(), nullptr,
+		m_device->CreateCommandList(0,
+									D3D12_COMMAND_LIST_TYPE_DIRECT,
+									m_directCommandAllocator.Get(),
+									nullptr,
 									IID_PPV_ARGS(&m_commandList));
 
 		for (uint32_t i = 0; i < Renderer::BUFFER_COUNT; ++i)
@@ -165,7 +169,9 @@ namespace Rendering::Dx12
 
 		m_currentBackbufferId = 0;
 
-		m_swapchain->ResizeBuffers(Renderer::BUFFER_COUNT, window.GetWidth(), window.GetHeight(),
+		m_swapchain->ResizeBuffers(Renderer::BUFFER_COUNT,
+								   window.GetWidth(),
+								   window.GetHeight(),
 								   DXGI_FORMAT_R8G8B8A8_UNORM,
 								   DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 
@@ -222,7 +228,8 @@ namespace Rendering::Dx12
 			0
 		};
 
-		m_device->CreateDepthStencilView(m_depthStencilBuffer.Get(), &dsvInfo,
+		m_device->CreateDepthStencilView(m_depthStencilBuffer.Get(),
+										 &dsvInfo,
 										 m_dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
 		const D3D12_RESOURCE_BARRIER depthTransition = CD3DX12_RESOURCE_BARRIER::Transition(m_depthStencilBuffer.Get(),
@@ -312,10 +319,14 @@ namespace Rendering::Dx12
 		}
 	}
 
-	void Dx12Context::SetupCamera(const CameraData& camera) const
+	void Dx12Context::SetupCamera(const CameraData& camera)
 	{
 		m_commandList->RSSetViewports(1, &m_viewport);
 		m_commandList->RSSetScissorRects(1, &m_scissorRect);
+
+		m_currentCameraBufferHandle = GetScratchBuffer().CreateHandle(
+			Max((uint32_t) sizeof(PerCameraBuffer), (uint32_t) 256),
+			&camera.m_constantBuffer);
 	}
 
 	void Dx12Context::SetupRenderTarget(const CameraData& camera) const
@@ -336,8 +347,11 @@ namespace Rendering::Dx12
 
 		const auto depthStencilView =
 			CD3DX12_CPU_DESCRIPTOR_HANDLE(m_dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-		m_commandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f,
-											 0, 0,
+		m_commandList->ClearDepthStencilView(depthStencilView,
+											 D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
+											 1.0f,
+											 0,
+											 0,
 											 nullptr);
 
 		m_commandList->OMSetRenderTargets(1, &backbufferView, true, &depthStencilView);
@@ -360,9 +374,11 @@ namespace Rendering::Dx12
 			}
 
 			m_commandList->SetGraphicsRootDescriptorTable(0, renderObject.m_perObjectBuffer->GetGPUHandle());
-			camera.m_constantBuffer->UpdateAndGetCurrentBuffer()->Bind(1); //TODO: bind only when it wasn't bound before
+
+			m_commandList->SetGraphicsRootConstantBufferView(1, GetScratchBuffer().GetGpuPointer(m_currentCameraBufferHandle));
 			m_commandList->SetGraphicsRootConstantBufferView(
-				2, GetScratchBuffer().GetGpuPointer(renderObject.m_perCallBuffer));
+				2,
+				GetScratchBuffer().GetGpuPointer(renderObject.m_perCallBuffer));
 
 			if (renderObject.m_skinningBufferHandle)
 			{
@@ -389,7 +405,9 @@ namespace Rendering::Dx12
 
 			m_commandList->DrawIndexedInstanced(renderObject.m_submesh->GetIndexCount(),
 												renderObject.m_instanceCount,
-												0, 0, 0);
+												0,
+												0,
+												0);
 		}
 	}
 
@@ -397,7 +415,8 @@ namespace Rendering::Dx12
 	{
 		const D3D12_RESOURCE_BARRIER transitionToPresent =
 			CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainBuffers[m_currentBackbufferId].Get(),
-												 D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+												 D3D12_RESOURCE_STATE_RENDER_TARGET,
+												 D3D12_RESOURCE_STATE_PRESENT);
 		m_commandList->ResourceBarrier(1, &transitionToPresent);
 	}
 
@@ -420,7 +439,8 @@ namespace Rendering::Dx12
 	}
 
 	std::shared_ptr<DescriptorHeapHandle> Dx12Context::CreateHeapHandle(
-		const uint32_t size, const D3D12_DESCRIPTOR_HEAP_FLAGS flags)
+		const uint32_t                    size,
+		const D3D12_DESCRIPTOR_HEAP_FLAGS flags)
 	{
 		for (const std::shared_ptr<DescriptorHeap>& heap : m_srvDescriptorHeaps)
 		{

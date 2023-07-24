@@ -1,26 +1,17 @@
 #pragma once
 
-#include "GameObjects/GameObject.h"
+struct TransformComponent;
 
 namespace Navigation
 {
-	class MovementComponent;
+	struct MovementComponent;
 
-	class MovementTester : public GameObject
+	class MovementTester
 	{
 	public:
-
-		MovementTester();
-
-		void SetComponents(const std::vector<MovementComponent*>& components);
-
-	protected:
-
-		void Tick(float deltaTime) override;
-
-	private:
-
-		std::vector<MovementComponent*> m_components;
+		
+		void DrawMenu();
+		void UpdateComponent(MovementComponent* movement, TransformComponent* transform);
 
 		float m_arriveWeight     = 0.0f;
 		float m_separationWeight = 0.0f;
@@ -30,24 +21,21 @@ namespace Navigation
 		float m_agentRadius        = 0.0f;
 		float m_maxAcceleration    = 0.0f;
 		float m_maxSpeed           = 0.0f;
-		float m_decelerationFactor = 0.0f;
 
-		float m_maxRotation            = 0.0f;
+		float m_maxRotation = 0.0f;
 
 		float m_arriveTargetRadius      = 0.0f;
-		float m_arriveTargetOuterRadius = 0.0f;
-		float m_arriveNotifyRadius      = 0.0f;
 		float m_arriveSlowdownRadius    = 0.0f;
 		float m_arriveTimeToTarget      = 0.0f;
 
-		float m_cohesionScale          = 0.0f;
-		float m_alignmentCohesionScale = 0.0f;
-		float m_separationDecayCoefficient  = 0.0f;
+		float m_cohesionScale              = 0.0f;
+		float m_alignmentCohesionScale     = 0.0f;
+		float m_separationDecayCoefficient = 0.0f;
 
 		bool m_showDebug = false;
+		bool m_hasValuesChanged = false;
 
-		DEFINE_CLASS()
+		std::atomic_bool m_hasComponentsToTest = false;
+		std::atomic_bool m_hasBeenInitialized = false;
 	};
-
-	CREATE_CLASS(MovementTester)
 }

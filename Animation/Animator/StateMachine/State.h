@@ -20,12 +20,13 @@ namespace Anim
 
 	protected:
 
-		virtual void CalculateBones(std::vector<Transform4D>&    boneMatrices,
-									const std::vector<MeshNode>& meshNodes, const float currentTime) const = 0;
+		virtual void CalculateBones(std::vector<Transform4D>& boneMatrices,
+			const std::vector<MeshNode>&                      meshNodes,
+			const float                                       currentTime) const = 0;
 
 	private:
 
-		const Transition* GetNextState(std::set<int>& triggerState, float currentTime) const;
+		const Transition* GetNextState(TriggerState& triggerState, float currentTime) const;
 
 		std::vector<Transition> m_transitions;
 	};

@@ -67,6 +67,8 @@ public:
 		return m_globalInverseMatrix;
 	}
 
+	[[nodiscard]] BoundingBox GetBoundingBox() const { return m_boundingBox; }
+
 	void SetGlobalInverseMatrix(const Transform4D& globalInverseMatrix)
 	{
 		m_globalInverseMatrix = globalInverseMatrix;
@@ -81,10 +83,12 @@ protected:
 
 	bool Load(const std::string& path) override;
 
+	std::vector<Submesh> m_submeshes;
+
 private:
 
-	std::vector<Submesh>                    m_submeshes;
 	std::vector<std::shared_ptr<Animation>> m_animations;
 	std::vector<MeshNode>                   m_nodes;
+	BoundingBox                             m_boundingBox         = {};
 	Transform4D                             m_globalInverseMatrix = Transform4D::identity;
 };

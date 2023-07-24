@@ -32,15 +32,16 @@ namespace Anim
 					transition.m_transitionTime,
 					invertedConditions,
 					this
-				}, false
+				},
+				false
 			);
 		}
-		
+
 		m_transitions.emplace_back(std::move(transition));
 	}
 
-	const Transition* State::GetNextState(std::set<int32_t>& triggerState,
-										  const float        currentTime) const
+	const Transition* State::GetNextState(TriggerState& triggerState,
+		const float                                                    currentTime) const
 	{
 		const bool isCurrentStateFinished = IsFinished(currentTime);
 
@@ -52,7 +53,7 @@ namespace Anim
 				{
 					if (triggerCondition.m_shouldConsume && !triggerCondition.m_invertCondition)
 					{
-						triggerState.erase(triggerCondition.m_triggerId);
+						triggerState.set(triggerCondition.m_triggerId, false);
 					}
 				}
 				return &transition;

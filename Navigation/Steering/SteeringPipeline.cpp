@@ -2,15 +2,24 @@
 #include "SteeringPipeline.h"
 
 #include "Behaviors/SteeringBehavior.h"
-#include "Entities/MovementComponent.h"
+#include "Components/MovementComponent.h"
 
 namespace Navigation
 {
-	Vector2D SteeringPipeline::GetLinearAcceleration(const MovementComponent* movementComponent) const
+	Vector2D SteeringPipeline::GetLinearAcceleration(const TransformComponent* transform,
+		MovementComponent*                                                     movement,
+		const std::vector<NearbyTarget>&                                       nearbyTargets) const
 	{
 		Vector2D totalAcceleration = Vector2D::zero;
 
-		for (SteeringBehavior* steeringBehavior : m_behaviors)
+		const std::vector<SteeringBehavior*> behaviors{
+			&movement->m_arriveBehavior,
+			&movement->m_alignmentBehavior,
+			&movement->m_cohesionBehavior,
+			&movement->m_separationBehavior
+		};
+
+		for (SteeringBehavior* steeringBehavior : behaviors)
 		{
 			const float weight = steeringBehavior->GetWeight();
 
@@ -19,7 +28,7 @@ namespace Navigation
 				continue;
 			}
 
-			const Vector2D acceleration = steeringBehavior->GetLinearAcceleration();
+			const Vector2D acceleration = steeringBehavior->GetLinearAcceleration(transform, movement, nearbyTargets);
 
 			if (IsNaN(acceleration))
 			{
@@ -30,9 +39,9 @@ namespace Navigation
 		}
 
 		const float accelerationMagnitude = Magnitude(totalAcceleration);
-		if (accelerationMagnitude > movementComponent->GetMaxAcceleration())
+		if (accelerationMagnitude > movement->m_maxAcceleration)
 		{
-			totalAcceleration = totalAcceleration * (movementComponent->GetMaxAcceleration() / accelerationMagnitude);
+			totalAcceleration = totalAcceleration * (movement->m_maxAcceleration / accelerationMagnitude);
 		}
 
 		return totalAcceleration;

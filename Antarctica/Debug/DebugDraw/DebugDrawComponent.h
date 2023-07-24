@@ -1,10 +1,14 @@
 ﻿#pragma once
 
-#include "Assets/DynamicSubmesh.h"
-#include "Debug/DebugDrawManager.h"
-#include "Entities/RenderComponent.h"
+#include "Components/Component.h"
 
-class DebugDrawComponent : public Rendering::RenderComponent
+/*
+#include "Assets/DynamicSubmesh.h"
+#include "Common/Class.h"
+#include "Components/Component.h"
+#include "Debug/DebugDrawSystem.h"
+#include "Entities/RenderComponent.h"
+class DebugDrawComponent : public Renderer::RenderComponent
 {
 	struct DebugDrawElement
 	{
@@ -16,11 +20,11 @@ class DebugDrawComponent : public Rendering::RenderComponent
 
 		DynamicSubmesh m_submesh;
 
-		std::unique_ptr<Rendering::QueuedRenderObject> m_cachedRenderObject;
+		std::unique_ptr<Renderer::QueuedRenderObject> m_cachedRenderObject;
 
 		DebugDrawElement() = default;
 
-		explicit DebugDrawElement(DebugDrawManager::ElementBuilder&& builder);
+		explicit DebugDrawElement(DebugDrawSystem::ElementBuilder&& builder);
 	};
 
 public:
@@ -31,13 +35,21 @@ protected:
 
 	void OnCreated() override;
 
-	void PrepareForRender(Rendering::RenderQueue& renderQueue, const Frustum& cameraFrustum,
+	void PrepareForRender(Renderer::RenderQueue& renderQueue, const Frustum& cameraFrustum,
 						  std::atomic_uint32_t&  counter) override;
 
 private:
 
 	std::vector<std::unique_ptr<DebugDrawElement>> m_drawElements;
 
+	DEFINE_CLASS()
+};
+
+CREATE_CLASS(DebugDrawComponent)
+*/
+
+struct DebugDrawComponent : Component
+{
 	DEFINE_CLASS()
 };
 

@@ -9,6 +9,7 @@ class TimeManager : public Manager
 
 public:
 
+	[[nodiscard]] static float GetTimeStep() { return 1.0f / 60.0f; }
 	[[nodiscard]] float GetDeltaTime() const { return min(1.0f, m_deltaTime); }
 	[[nodiscard]] float GetTimeSinceStart() const { return m_timeSinceStart; }
 

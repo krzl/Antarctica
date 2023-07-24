@@ -2,14 +2,17 @@
 #include "CohesionBehavior.h"
 
 #include "ArriveBehavior.h"
-#include "Entities/MovementComponent.h"
-#include "GameObjects/GameObject.h"
+#include "Components/MovementComponent.h"
+#include "Components/TransformComponent.h"
+#include "Steering/SteeringSystem.h"
 
 namespace Navigation
 {
-	Vector2D CohesionBehavior::GetLinearAcceleration()
+	Vector2D CohesionBehavior::GetLinearAcceleration(const TransformComponent* transform,
+		const MovementComponent*                                               movement,
+		const std::vector<NearbyTarget>&                                       nearbyTargets)
 	{
-		if (!m_movement->HasTarget())
+		if (!movement->m_arriveBehavior.HasTarget())
 		{
 			return Vector2D::zero;
 		}
@@ -17,17 +20,18 @@ namespace Navigation
 
 		uint32_t actorCount = 0;
 
-		for (const MovementComponent* target : GetCachedTargets())
+		for (const NearbyTarget& target : nearbyTargets)
 		{
-			const float distanceSqr   = SquaredMag(target->GetOwner()->GetPosition().xy - m_movement->GetOwner()->GetPosition().xy);
-			const float cohesionRange = (m_movement->GetRadius() + target->GetRadius()) * m_cohesionScale;
+			const float distanceSqr   = Terathon::SquaredMag(target.m_transform->m_localPosition.xy - transform->m_localPosition.xy);
+			const float cohesionRange = (movement->m_radius + target.m_movement->m_radius) * m_cohesionScale;
 
-			if (distanceSqr < cohesionRange * cohesionRange && m_movement->GetVelocity() != Vector2D::zero &&
-				target->HasTarget() &&
-				SquaredMag(m_movement->GetTarget() - target->GetTarget()) < cohesionRange * cohesionRange)
+			if (distanceSqr < cohesionRange * cohesionRange && movement->m_velocity != Vector2D::zero && target.m_movement->m_arriveBehavior.
+				HasTarget() &&
+				SquaredMag(movement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget())
+				< cohesionRange * cohesionRange)
 			{
 				++actorCount;
-				heading += target->GetOwner()->GetPosition().xy;
+				heading += target.m_transform->m_localPosition.xy;
 			}
 		}
 
@@ -38,9 +42,9 @@ namespace Navigation
 
 		const Vector2D target = heading / actorCount;
 
-		const Vector2D direction = target - m_movement->GetOwner()->GetPosition().xy;
+		const Vector2D direction = target - transform->m_localPosition.xy;
 
-		const Vector2D targetVelocity = Normalize(direction) * m_movement->GetMaxSpeed();
-		return (targetVelocity - m_movement->GetVelocity()) * (m_movement->GetMaxAcceleration() / m_movement->GetMaxSpeed());
+		const Vector2D targetVelocity = Normalize(direction) * movement->m_maxSpeed;
+		return (targetVelocity - movement->m_velocity) * (movement->m_maxAcceleration / movement->m_maxSpeed);
 	}
 }

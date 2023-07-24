@@ -4,13 +4,13 @@ struct BoundingBox
 {
 	BoundingBox() = default;
 
-	BoundingBox(const Vector3D& lowerBoundary, const Vector3D& upperBoundary)
-		: m_lowerBoundary(lowerBoundary),
-		  m_upperBoundary(upperBoundary) {}
+	BoundingBox(const Vector3D& lowerBoundary, const Vector3D& upperBoundary) :
+		m_lowerBoundary(lowerBoundary),
+		m_upperBoundary(upperBoundary) {}
 
-	BoundingBox(const Point3D& lowerBoundary, const Point3D& upperBoundary)
-		: m_lowerBoundary(lowerBoundary),
-		  m_upperBoundary(upperBoundary) {}
+	BoundingBox(const Point3D& lowerBoundary, const Point3D& upperBoundary) :
+		m_lowerBoundary(lowerBoundary),
+		m_upperBoundary(upperBoundary) {}
 
 	bool Contains2D(const Point2D& point) const;
 	bool Contains(const Point3D& point) const;

@@ -1,10 +1,27 @@
 #include "stdafx.h"
 #include "Camera.h"
 
+#include "Archetypes/ArchetypeBuilder.h"
+#include "Components/CameraComponent.h"
+
 namespace Rendering
 {
+	Camera* Camera::m_camera;
+	
 	Camera::Camera()
 	{
-		m_camera = AddComponent<CameraComponent>();
+		m_camera = this;
+	}
+
+	Camera* Camera::Get()
+	{
+		return m_camera;
+	}
+
+	void Camera::DefineArchetype(ArchetypeBuilder& builder)
+	{
+		Entity::DefineArchetype(builder);
+
+		builder.AddComponent<CameraComponent>();
 	}
 }

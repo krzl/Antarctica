@@ -8,13 +8,14 @@ namespace Navigation
 	{
 	public:
 
-		explicit AlignmentBehavior(MovementComponent* movementComponent)
-			: SteeringBehavior(movementComponent)
+		explicit AlignmentBehavior()
 		{
 			SetWeight(0.4f);
 		}
 
-		Vector2D GetLinearAcceleration() override;
+		Vector2D GetLinearAcceleration(const TransformComponent* transform,
+			const MovementComponent*                             movement,
+			const std::vector<NearbyTarget>&                     nearbyTargets) override;
 
 		[[nodiscard]] float GetCohesionScale() const { return m_cohesionScale; }
 		void                SetCohesionScale(const float cohesionScale) { m_cohesionScale = cohesionScale; }

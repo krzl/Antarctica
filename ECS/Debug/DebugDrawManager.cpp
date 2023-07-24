@@ -3,25 +3,9 @@
 
 #include <numeric>
 
-#include "AssetManager.h"
-#include "Assets/Shader.h"
 #include "Managers/TimeManager.h"
 
-void DebugDrawManager::Init()
-{
-	m_shader = AssetManager::GetAsset<Shader>("../Resources/Shaders/debug_draw.hlsl");
-
-	m_attributeUsage = {
-		false,
-		false,
-		false,
-		1,
-		0,
-		0,
-		0,
-		0
-	};
-}
+void DebugDrawManager::Init() {}
 
 static BoundingBox GetBoundingBox(const std::vector<Point3D>& pointsList)
 {
@@ -34,8 +18,10 @@ static BoundingBox GetBoundingBox(const std::vector<Point3D>& pointsList)
 	return boundingBox;
 }
 
-static std::vector<Point3D> GeneratePointInCircle(uint32_t pointCount, const Point3D center, const Vector3D& direction,
-												  float    radius)
+static std::vector<Point3D> GeneratePointInCircle(uint32_t pointCount,
+	const Point3D                                          center,
+	const Vector3D&                                        direction,
+	float                                                  radius)
 {
 	std::vector<Point3D> points(pointCount);
 
@@ -77,8 +63,13 @@ static std::vector<Point3D> GeneratePointInCircle(uint32_t pointCount, const Poi
 	return points;
 }
 
-void DebugDrawManager::DrawBox(Point3D center, Quaternion rotation, float x, float y, float z, float duration,
-							  Color   color)
+void DebugDrawManager::DrawBox(Point3D center,
+	Quaternion                         rotation,
+	float                              x,
+	float                              y,
+	float                              z,
+	float                              duration,
+	Color                              color)
 {
 	const Vector3D xVec = rotation.GetDirectionX() * x / 2.0f;
 	const Vector3D yVec = rotation.GetDirectionY() * y / 2.0f;
@@ -96,7 +87,7 @@ void DebugDrawManager::DrawBox(Point3D center, Quaternion rotation, float x, flo
 	vertices[6] = vertices[2] + zVec * 2.0f;
 	vertices[7] = vertices[3] + zVec * 2.0f;
 
-	ElementBuilder builder = ReserveLines(12, SEGMENTS_PER_LINE);
+	std::shared_ptr<ElementBuilder> builder = ReserveLines(12, SEGMENTS_PER_LINE);
 
 	AppendLine(vertices[0], vertices[1], builder);
 	AppendLine(vertices[1], vertices[2], builder);
@@ -113,18 +104,21 @@ void DebugDrawManager::DrawBox(Point3D center, Quaternion rotation, float x, flo
 	AppendLine(vertices[2], vertices[6], builder);
 	AppendLine(vertices[3], vertices[7], builder);
 
-	builder.m_despawnTime    = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
-	builder.m_boundingBox    = GetBoundingBox(vertices);
-	builder.m_color          = color;
-	builder.m_shader         = m_shader;
-	builder.m_attributeUsage = m_attributeUsage;
+	builder->m_despawnTime = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
+	builder->m_boundingBox = GetBoundingBox(vertices);
+	builder->m_color       = color;
 
-	m_onDrawItemQueued.Dispatch(&builder);
+	m_onDrawItemQueued.Dispatch(builder);
 }
 
 
-void DebugDrawManager::DrawCylinder(Point3D center, Quaternion rotation, float height, float width, float duration,
-								   Color   color, uint32_t    segments)
+void DebugDrawManager::DrawCylinder(Point3D center,
+	Quaternion                              rotation,
+	float                                   height,
+	float                                   width,
+	float                                   duration,
+	Color                                   color,
+	uint32_t                                segments)
 {
 	const Vector3D up         = rotation.GetDirectionZ();
 	const float    halfHeight = height / 2.0f;
@@ -142,7 +136,7 @@ void DebugDrawManager::DrawCylinder(Point3D center, Quaternion rotation, float h
 		upperCircle[i] = lowerCircle[i] + offset;
 	}
 
-	ElementBuilder builder = ReserveLines(segments * 3, SEGMENTS_PER_LINE);
+	std::shared_ptr<ElementBuilder> builder = ReserveLines(segments * 3, SEGMENTS_PER_LINE);
 
 	// bottom cap
 	for (uint32_t i = 0; i < segments; ++i)
@@ -166,30 +160,30 @@ void DebugDrawManager::DrawCylinder(Point3D center, Quaternion rotation, float h
 	BoundingBox bbUpper = GetBoundingBox(upperCircle);
 	bbLower.Append(bbUpper);
 
-	builder.m_despawnTime    = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
-	builder.m_boundingBox    = bbLower;
-	builder.m_color          = color;
-	builder.m_shader         = m_shader;
-	builder.m_attributeUsage = m_attributeUsage;
+	builder->m_despawnTime = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
+	builder->m_boundingBox = bbLower;
+	builder->m_color       = color;
 
-	m_onDrawItemQueued.Dispatch(&builder);
+	m_onDrawItemQueued.Dispatch(builder);
 }
 
-void DebugDrawManager::DrawLine(const Point3D  start, const Point3D end, const float width, const float duration, const Color color,
-							   const uint32_t segments)
+void DebugDrawManager::DrawLine(const Point3D start,
+	const Point3D                             end,
+	const float                               width,
+	const float                               duration,
+	const Color                               color,
+	const uint32_t                            segments)
 {
-	ElementBuilder builder = ReserveLines(1, segments);
+	std::shared_ptr<ElementBuilder> builder = ReserveLines(1, segments);
 	AppendLine(start, end, builder, segments, width);
 
-	BoundingBox boundingBox = GetBoundingBox(builder.m_vertices);
+	BoundingBox boundingBox = GetBoundingBox(builder->m_vertices);
 
-	builder.m_despawnTime    = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
-	builder.m_boundingBox    = boundingBox;
-	builder.m_color          = color;
-	builder.m_shader         = m_shader;
-	builder.m_attributeUsage = m_attributeUsage;
+	builder->m_despawnTime = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
+	builder->m_boundingBox = boundingBox;
+	builder->m_color       = color;
 
-	m_onDrawItemQueued.Dispatch(&builder);
+	m_onDrawItemQueued.Dispatch(builder);
 }
 
 void DebugDrawManager::DrawSphere(const Point3D center, const float radius, const float duration, const Color color, const uint32_t segments)
@@ -199,7 +193,7 @@ void DebugDrawManager::DrawSphere(const Point3D center, const float radius, cons
 	vertices[0]                   = center + Vector3D(0.0f, 0.0f, radius);
 	vertices[vertices.size() - 1] = center - Vector3D(0.0f, 0.0f, radius);
 
-	ElementBuilder builder = ReserveLines(2 * segments * segments - 3 * segments, SEGMENTS_PER_LINE);
+	std::shared_ptr<ElementBuilder> builder = ReserveLines(2 * segments * segments - 3 * segments, SEGMENTS_PER_LINE);
 
 	for (uint32_t i = 0; i < segments - 2; ++i)
 	{
@@ -230,50 +224,47 @@ void DebugDrawManager::DrawSphere(const Point3D center, const float radius, cons
 		AppendLine(vertices[0], vertices[vertices.size() - 2 - i], builder);
 	}
 
-	builder.m_despawnTime    = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
-	builder.m_boundingBox    = BoundingBox(center - Vector3D(radius, radius, radius), center + Vector3D(radius, radius, radius));
-	builder.m_color          = color;
-	builder.m_shader         = m_shader;
-	builder.m_attributeUsage = m_attributeUsage;
+	builder->m_despawnTime = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
+	builder->m_boundingBox = BoundingBox(center - Vector3D(radius, radius, radius), center + Vector3D(radius, radius, radius));
+	builder->m_color       = color;
 
-	m_onDrawItemQueued.Dispatch(&builder);
+	m_onDrawItemQueued.Dispatch(builder);
 }
 
 void DebugDrawManager::DrawTriangles(std::vector<Point3D>&& pointsList, const float duration, const Color color)
 {
-	ElementBuilder builder;
+	std::shared_ptr<ElementBuilder> builder;
 
-	builder.m_vertices = std::move(pointsList);
+	builder->m_vertices = std::move(pointsList);
 
-	builder.m_indices.resize(builder.m_vertices.size());
-	std::iota(builder.m_indices.begin(), builder.m_indices.end(), 0);
+	builder->m_indices.resize(builder->m_vertices.size());
+	std::iota(builder->m_indices.begin(), builder->m_indices.end(), 0);
 
-	builder.m_despawnTime    = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
-	builder.m_boundingBox    = GetBoundingBox(builder.m_vertices);
-	builder.m_color          = color;
-	builder.m_shader         = m_shader;
-	builder.m_attributeUsage = m_attributeUsage;
+	builder->m_despawnTime = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
+	builder->m_boundingBox = GetBoundingBox(builder->m_vertices);
+	builder->m_color       = color;
 
-	m_onDrawItemQueued.Dispatch(&builder);
+	m_onDrawItemQueued.Dispatch(builder);
 }
 
-DebugDrawManager::ElementBuilder DebugDrawManager::ReserveLines(const uint32_t lineCount, const uint32_t segmentCount)
+std::shared_ptr<DebugDrawManager::ElementBuilder> DebugDrawManager::ReserveLines(const uint32_t lineCount, const uint32_t segmentCount)
 {
-	return ElementBuilder
-	{
+	return std::make_shared<ElementBuilder>(ElementBuilder{
 		0,
 		0,
 		std::vector<Point3D>(lineCount * segmentCount * 2),
 		std::vector<uint32_t>(lineCount * 3 * (4 * segmentCount - 4))
-	};
+	});
 }
 
-void DebugDrawManager::AppendLine(Point3D         start, Point3D end,
-								 ElementBuilder& drawElement,
-								 uint32_t        segmentCount, float width) const
+void DebugDrawManager::AppendLine(Point3D start,
+	Point3D                               end,
+	std::shared_ptr<ElementBuilder>&      drawElement,
+	uint32_t                              segmentCount,
+	float                                 width) const
 {
-	uint32_t& currentVertex = drawElement.m_currentVertex;
-	uint32_t& currentIndex  = drawElement.m_currentIndex;
+	uint32_t& currentVertex = drawElement->m_currentVertex;
+	uint32_t& currentIndex  = drawElement->m_currentIndex;
 
 	const Vector3D offset    = end - start;
 	const Vector3D direction = Normalize(offset);
@@ -289,27 +280,28 @@ void DebugDrawManager::AppendLine(Point3D         start, Point3D end,
 	// top and bottom cap
 	for (uint32_t i = 0; i < 2 * segmentCount - 4; ++i)
 	{
-		const bool isTop                      = i >= segmentCount - 2;
-		drawElement.m_indices[currentIndex++] = currentVertex + (isTop ? segmentCount : 0);
-		drawElement.m_indices[currentIndex++] = currentVertex + i + 2 + (isTop ? 2 : 0);
-		drawElement.m_indices[currentIndex++] = currentVertex + i + 1 + (isTop ? 2 : 0);
+		const bool isTop                       = i >= segmentCount - 2;
+		drawElement->m_indices[currentIndex++] = currentVertex + (isTop ? segmentCount : 0);
+		drawElement->m_indices[currentIndex++] = currentVertex + i + 2 + (isTop ? 2 : 0);
+		drawElement->m_indices[currentIndex++] = currentVertex + i + 1 + (isTop ? 2 : 0);
 	}
 
 	// sides
 	for (uint32_t i = 0; i < segmentCount; ++i)
 	{
-		const uint32_t j                      = (i + 1) % segmentCount;
-		drawElement.m_indices[currentIndex++] = currentVertex + i;
-		drawElement.m_indices[currentIndex++] = currentVertex + segmentCount + i;
-		drawElement.m_indices[currentIndex++] = currentVertex + segmentCount + j;
+		const uint32_t j                       = (i + 1) % segmentCount;
+		drawElement->m_indices[currentIndex++] = currentVertex + i;
+		drawElement->m_indices[currentIndex++] = currentVertex + segmentCount + i;
+		drawElement->m_indices[currentIndex++] = currentVertex + segmentCount + j;
 
-		drawElement.m_indices[currentIndex++] = currentVertex + segmentCount + j;
-		drawElement.m_indices[currentIndex++] = currentVertex + j;
-		drawElement.m_indices[currentIndex++] = currentVertex + i;
+		drawElement->m_indices[currentIndex++] = currentVertex + segmentCount + j;
+		drawElement->m_indices[currentIndex++] = currentVertex + j;
+		drawElement->m_indices[currentIndex++] = currentVertex + i;
 	}
 
-	memcpy(&drawElement.m_vertices[currentVertex], lowerCircle.data(), lowerCircle.size() * sizeof(Point3D));
-	memcpy(&drawElement.m_vertices[currentVertex + segmentCount], upperCircle.data(),
+	memcpy(&drawElement->m_vertices[currentVertex], lowerCircle.data(), lowerCircle.size() * sizeof(Point3D));
+	memcpy(&drawElement->m_vertices[currentVertex + segmentCount],
+		   upperCircle.data(),
 		   upperCircle.size() * sizeof(Point3D));
 
 	currentVertex += 2 * segmentCount;

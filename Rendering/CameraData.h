@@ -1,4 +1,5 @@
 #pragma once
+#include "Buffers/Types/PerCameraBuffer.h"
 
 namespace Rendering
 {
@@ -6,7 +7,7 @@ namespace Rendering
 
 	struct CameraData
 	{
-		ConstantBuffer* m_constantBuffer;
+		PerCameraBuffer m_constantBuffer;
 		float           m_order;
 
 		friend bool operator<(const CameraData& lhs, const CameraData& rhs)

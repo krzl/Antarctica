@@ -39,9 +39,9 @@ namespace Rendering::Dx12
 
 		void WaitForFrameCompletion() override;
 
-		void CreateRenderQueue(RenderQueue& objectsToRender) override;
+		void CreateRenderQueue(const RenderQueue& objectsToRender) override;
 
-		void SetupCamera(const Rendering::CameraData& camera) const override;
+		void SetupCamera(const CameraData& camera) override;
 		void SetupRenderTarget(const CameraData& camera) const override;
 		void DrawObjects(const CameraData& camera) override;
 		void FinalizeDrawing() override;
@@ -53,9 +53,9 @@ namespace Rendering::Dx12
 		void ExecuteAndPresent() override;
 		void Cleanup() override;
 
-		std::shared_ptr<DescriptorHeapHandle> CreateHeapHandle(uint32_t                    size  = 1,
-															   D3D12_DESCRIPTOR_HEAP_FLAGS flags =
-																   D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+		std::shared_ptr<DescriptorHeapHandle> CreateHeapHandle(uint32_t size  = 1,
+			D3D12_DESCRIPTOR_HEAP_FLAGS                                 flags =
+				D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
 		ID3D12Device* GetDevice() const
 		{
@@ -104,7 +104,7 @@ namespace Rendering::Dx12
 
 		std::array<ComPtr<ID3D12CommandAllocator>, Renderer::BUFFER_COUNT> m_frameCommandAllocators;
 
-		ComPtr<IDXGISwapChain>                                         m_swapchain;
+		ComPtr<IDXGISwapChain>                                     m_swapchain;
 		std::array<ComPtr<ID3D12Resource>, Renderer::BUFFER_COUNT> m_swapchainBuffers;
 
 		D3D12_VIEWPORT m_viewport    = {};
@@ -123,6 +123,8 @@ namespace Rendering::Dx12
 		std::vector<RenderObject> m_renderQueue;
 
 		ScratchBuffer m_scratchBuffer;
+
+		ScratchBufferHandle m_currentCameraBufferHandle;
 
 		uint32_t m_msNumQualityLevels = 0;
 

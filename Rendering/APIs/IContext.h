@@ -1,11 +1,4 @@
 #pragma once
-#include <iosfwd>
-#include <iosfwd>
-#include <vector>
-#include <vector>
-
-#include "RenderObject.h"
-#include "Entities/RenderComponent.h"
 
 class ComputeShader;
 class Settings;
@@ -17,6 +10,7 @@ namespace Platform
 
 namespace Rendering
 {
+	class RenderQueue;
 	struct SkinningObjectData;
 	struct QueuedRenderObject;
 	struct CameraData;
@@ -33,10 +27,10 @@ namespace Rendering
 
 		virtual void WaitForFrameCompletion() = 0;
 
-		virtual void CreateRenderQueue(RenderQueue& objectsToRender) = 0;
+		virtual void CreateRenderQueue(const RenderQueue& objectsToRender) = 0;
 
 		virtual void UpdateSkinning() = 0;
-		virtual void SetupCamera(const CameraData& camera) const = 0;
+		virtual void SetupCamera(const CameraData& camera) = 0;
 		virtual void SetupRenderTarget(const CameraData& camera) const = 0;
 		virtual void DrawObjects(const CameraData& camera) = 0;
 		virtual void FinalizeDrawing() = 0;

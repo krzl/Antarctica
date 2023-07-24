@@ -1,16 +1,19 @@
 ﻿#pragma once
 
+struct TransformComponent;
+
 namespace Navigation
 {
-	class MovementComponent;
+	struct NearbyTarget;
+	struct MovementComponent;
 	class SteeringBehavior;
 
 	class SteeringPipeline
 	{
 	public:
 
-		std::vector<SteeringBehavior*> m_behaviors;
-
-		Vector2D GetLinearAcceleration(const MovementComponent* movementComponent) const;
+		Vector2D GetLinearAcceleration(const TransformComponent* transform,
+			MovementComponent*                                   movement,
+			const std::vector<NearbyTarget>&                     nearbyTargets) const;
 	};
 }

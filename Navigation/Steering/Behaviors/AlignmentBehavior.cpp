@@ -1,14 +1,18 @@
 ﻿#include "stdafx.h"
 #include "AlignmentBehavior.h"
 
-#include "Entities/MovementComponent.h"
-#include "GameObjects/GameObject.h"
+#include "ArriveBehavior.h"
+#include "Components/MovementComponent.h"
+#include "Components/TransformComponent.h"
+#include "Steering/SteeringSystem.h"
 
 namespace Navigation
 {
-	Vector2D AlignmentBehavior::GetLinearAcceleration()
+	Vector2D AlignmentBehavior::GetLinearAcceleration(const TransformComponent* transform,
+		const MovementComponent*                                                movement,
+		const std::vector<NearbyTarget>&                                        nearbyTargets)
 	{
-		if (!m_movement->HasTarget())
+		if (!movement->m_arriveBehavior.HasTarget())
 		{
 			return Vector2D::zero;
 		}
@@ -16,18 +20,18 @@ namespace Navigation
 		Vector2D heading    = Vector2D::zero;
 		uint32_t actorCount = 0;
 
-		for (const MovementComponent* target : GetCachedTargets())
+		for (const NearbyTarget& target : nearbyTargets)
 		{
-			const float distance = SquaredMag(target->GetOwner()->GetPosition().xy - m_movement->GetOwner()->GetPosition().xy);
+			const float distance = SquaredMag(target.m_transform->m_localPosition.xy - transform->m_localPosition.xy);
 
-			const float cohesionRange = (m_movement->GetRadius() + target->GetRadius()) * m_cohesionScale;
+			const float cohesionRange = (movement->m_radius + target.m_movement->m_radius) * m_cohesionScale;
 
-			if (distance < cohesionRange && m_movement->GetVelocity() != Vector2D::zero &&
-				target->HasTarget() &&
-				Magnitude(target->GetTarget() - target->GetTarget()) < cohesionRange)
+			if (distance < cohesionRange && movement->m_velocity != Vector2D::zero &&
+				target.m_movement->m_arriveBehavior.HasTarget() &&
+				Magnitude(target.m_movement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget()) < cohesionRange)
 			{
 				++actorCount;
-				heading += Normalize(target->GetVelocity());
+				heading += Normalize(target.m_movement->m_velocity);
 			}
 		}
 
@@ -38,9 +42,9 @@ namespace Navigation
 
 		const Vector2D averageHeading = heading / actorCount;
 
-		const Vector2D desiredVelocity = averageHeading * m_movement->GetMaxSpeed();
+		const Vector2D desiredVelocity = averageHeading * movement->m_maxSpeed;
 
-		const Vector2D velocityChange = desiredVelocity - m_movement->GetVelocity();
-		return velocityChange * (m_movement->GetMaxAcceleration() / m_movement->GetMaxSpeed());
+		const Vector2D velocityChange = desiredVelocity - movement->m_velocity;
+		return velocityChange * (movement->m_maxAcceleration / movement->m_maxSpeed);
 	}
 }

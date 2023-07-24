@@ -18,7 +18,7 @@ namespace Rendering::Dx12
 		m_lastUpdateFrame = Dx12Context::Get().GetCurrentFenceId();
 		m_vertexCount     = submesh->GetVertexBuffer().GetElementCount();
 		m_indexCount      = submesh->GetIndexBuffer().GetElementCount();
-		m_attributes      = submesh->GetAttributes();
+		m_attributes      = submesh->GetAttributesUsage();
 
 		m_vertexBufferHandle = Dx12Context::Get().GetScratchBuffer().CreateHandle(
 			submesh->GetVertexBuffer().m_elementSize * m_vertexCount,

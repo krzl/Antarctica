@@ -1,10 +1,8 @@
 #include "stdafx.h"
 #include "Renderer.h"
 
+#include "CameraData.h"
 #include "APIs/IContext.h"
-#include "Entities/CameraComponent.h"
-#include "Entities/RenderComponent.h"
-#include "Time/Timer.h"
 
 namespace Rendering
 {
@@ -31,26 +29,21 @@ namespace Rendering
 		m_context->OnResize(window);
 	}
 
-	void Renderer::Render(const std::vector<GameObject*>& gameObjects)
+	void Renderer::Render(const RenderQueue& renderQueue, const std::vector<CameraData>& cameras)
 	{
-		RenderQueue                     objectsToRender = RenderComponent::GetObjectsToRender(gameObjects);
-		std::priority_queue<CameraData> cameras         = CameraComponent::GetAllCameraData();
-
 		m_context->WaitForFrameCompletion();
 
-		m_context->CreateRenderQueue(objectsToRender);
+		m_context->CreateRenderQueue(renderQueue);
 		m_context->UpdateSkinning();
 
-		while (!cameras.empty())
+		for (uint32_t i = 0; i < cameras.size(); ++i)
 		{
-			const CameraData& camera = cameras.top();
+			const CameraData& camera = cameras[i];
 
 			m_context->SetupCamera(camera);
 			m_context->SetupRenderTarget(camera);
 			m_context->DrawObjects(camera);
 			m_context->FinalizeDrawing();
-
-			cameras.pop();
 		}
 
 		m_context->ExecuteAndPresent();

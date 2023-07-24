@@ -1,20 +1,23 @@
 #include "stdafx.h"
+#include "Context.h"
 
 #include "AssetManager.h"
-#include "Context.h"
 #include "DynamicSubmesh.h"
+#include "RenderObject.h"
 #include "StaticSubmesh.h"
 #include "Submesh.h"
-#include "Assets/DynamicSubmesh.h"
+#include "Assets/Shader.h"
 #include "Assets/Skeleton.h"
 #include "Assets/SubmeshData.h"
 #include "Buffers/Types/PerCallBuffer.h"
+#include "Buffers/Types/PerObjectBuffer.h"
 #include "Shaders/ComputeShader.h"
 #include "Shaders/Shader.h"
+#include "Systems/RenderSystem.h"
 
 namespace Rendering::Dx12
 {
-	void Dx12Context::CreateRenderQueue(RenderQueue& objectsToRender)
+	void Dx12Context::CreateRenderQueue(const RenderQueue& objectsToRender)
 	{
 		m_renderQueue.clear();
 		m_renderQueue.reserve(objectsToRender.size());
@@ -85,7 +88,8 @@ namespace Rendering::Dx12
 					{
 						const std::shared_ptr<DescriptorHeapHandle> weightBufferHandle = GetScratchBuffer().CreateSRV(
 							sizeof(VertexWeights),
-							(uint32_t) skeleton.m_vertexWeights.size(), skeleton.m_vertexWeights.data());
+							(uint32_t) skeleton.m_vertexWeights.size(),
+							skeleton.m_vertexWeights.data());
 						renderObject.m_weightsBuffer   = weightBufferHandle;
 						weightBufferHandles[&skeleton] = weightBufferHandle;
 					}
@@ -135,16 +139,20 @@ namespace Rendering::Dx12
 
 
 				lastRenderObject->m_perCallBuffer = GetScratchBuffer().CreateHandle(
-					256, &perCallBuffer);
+					256,
+					&perCallBuffer);
 
 				if (accumulatedBoneTransforms.size() != 0)
 				{
 					ScratchBufferHandle skinningBuffer = GetScratchBuffer().CreateHandle(
 						sizeof(float) * 3 * instanceCount *
-						queuedObject->m_submesh->GetVertexBuffer().GetElementCount(), nullptr, true);
+						queuedObject->m_submesh->GetVertexBuffer().GetElementCount(),
+						nullptr,
+						true);
 
 					lastRenderObject->m_skinningBufferHandle = GetScratchBuffer().CreateUAV(
-						skinningBuffer, sizeof(float) * 3);
+						skinningBuffer,
+						sizeof(float) * 3);
 
 					lastRenderObject->m_boneTransforms = GetScratchBuffer().CreateSRV(
 						sizeof(float) * 16,

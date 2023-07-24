@@ -2,29 +2,32 @@
 #include "SeparationBehavior.h"
 
 #include "ArriveBehavior.h"
-#include "Entities/MovementComponent.h"
-#include "GameObjects/GameObject.h"
+#include "Components/MovementComponent.h"
+#include "Components/TransformComponent.h"
+#include "Steering/SteeringSystem.h"
 
 namespace Navigation
 {
-	Vector2D SeparationBehavior::GetLinearAcceleration()
+	Vector2D SeparationBehavior::GetLinearAcceleration(const TransformComponent* transform,
+		const MovementComponent*                                                 movement,
+		const std::vector<NearbyTarget>&                                         nearbyTargets)
 	{
 		Vector2D totalAcceleration = Vector2D::zero;
 
-		const float characterRadius = m_movement->GetRadius();
+		const float characterRadius = movement->m_radius;
 
 		uint32_t actorCount = 0;
 
-		for (const MovementComponent* target : GetCachedTargets())
+		for (const NearbyTarget& target : nearbyTargets)
 		{
-			const Vector2D direction = m_movement->GetOwner()->GetPosition().xy - target->GetOwner()->GetPosition().xy;
+			const Vector2D direction = transform->m_localPosition.xy - target.m_transform->m_localPosition.xy;
 			const float    distance  = Magnitude(direction);
 
-			const float otherRadius = target->GetRadius();
+			const float otherRadius = target.m_movement->m_radius;
 
 			const float radiusSum = characterRadius + otherRadius;
 
-			if (m_movement->HasTarget() && !target->HasTarget())
+			if (movement->m_arriveBehavior.HasTarget() && !target.m_movement->m_arriveBehavior.HasTarget())
 			{
 				continue;
 			}
@@ -45,14 +48,14 @@ namespace Navigation
 			return Vector2D::zero;
 		}
 
-		totalAcceleration *= m_movement->GetMaxAcceleration() / actorCount;
+		totalAcceleration *= movement->m_maxAcceleration / actorCount;
 
 		const float acceleration = Magnitude(totalAcceleration);
-		if (acceleration > m_movement->GetMaxAcceleration())
+		if (acceleration > movement->m_maxAcceleration)
 		{
-			totalAcceleration *= m_movement->GetMaxAcceleration() / acceleration;
+			totalAcceleration *= movement->m_maxAcceleration / acceleration;
 		}
 
-		return totalAcceleration / actorCount * m_movement->GetMaxAcceleration();
+		return totalAcceleration / actorCount * movement->m_maxAcceleration;
 	}
 }

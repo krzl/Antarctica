@@ -11,10 +11,13 @@ namespace Rendering::Dx12
 {
 	StaticSubmesh::~StaticSubmesh()
 	{
-		RELEASE_DX(m_indexBuffer);
+		//TODO: release resources
+		/*
+		 *RELEASE_DX(m_indexBuffer);
 		RELEASE_DX(m_indexUploadBuffer);
 		RELEASE_DX(m_vertexBuffer);
 		RELEASE_DX(m_vertexUploadBuffer);
+		*/
 	}
 
 	void StaticSubmesh::Init(const ::Submesh* submesh)
@@ -24,7 +27,7 @@ namespace Rendering::Dx12
 			return;
 		}
 
-		D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(submesh->GetVertexBuffer().m_data.size());
+		D3D12_RESOURCE_DESC                 resourceDesc    = CD3DX12_RESOURCE_DESC::Buffer(submesh->GetVertexBuffer().m_data.size());
 		std::vector<D3D12_SUBRESOURCE_DATA> subresourceData = {
 			{
 				submesh->GetVertexBuffer().m_data.data(),
@@ -33,8 +36,11 @@ namespace Rendering::Dx12
 			}
 		};
 
-		ResourceUploader::UploadResource(resourceDesc, subresourceData, D3D12_RESOURCE_STATE_GENERIC_READ,
-										 m_vertexUploadBuffer, m_vertexBuffer);
+		ResourceUploader::UploadResource(resourceDesc,
+										 subresourceData,
+										 D3D12_RESOURCE_STATE_GENERIC_READ,
+										 m_vertexUploadBuffer,
+										 m_vertexBuffer);
 
 		CreateVertexBufferViews(submesh);
 		CreateShaderResourceViews(submesh);
@@ -49,8 +55,11 @@ namespace Rendering::Dx12
 			}
 		};
 
-		ResourceUploader::UploadResource(resourceDesc, subresourceData, D3D12_RESOURCE_STATE_GENERIC_READ,
-										 m_indexUploadBuffer, m_indexBuffer);
+		ResourceUploader::UploadResource(resourceDesc,
+										 subresourceData,
+										 D3D12_RESOURCE_STATE_GENERIC_READ,
+										 m_indexUploadBuffer,
+										 m_indexBuffer);
 
 		m_indexBufferView = {
 			m_indexBuffer->GetGPUVirtualAddress(),
@@ -93,19 +102,22 @@ namespace Rendering::Dx12
 
 	void StaticSubmesh::CreateVertexBufferViews(const ::Submesh* submesh)
 	{
-		const AttributeOffsets& offsets = submesh->GetAttributes().GetAttributeOffsets();
+		const AttributeOffsets& offsets = submesh->GetAttributesUsage().GetAttributeOffsets();
 
 		for (uint8_t i = 0; i < (uint8_t) MeshAttribute::UNKNOWN; ++i)
 		{
 			const MeshAttribute attribute = (MeshAttribute) i;
-			AddVertexBufferView(submesh, (MeshAttribute) i,
+			AddVertexBufferView(submesh,
+								(MeshAttribute) i,
 								GetAttributeOffset(attribute, offsets),
 								GetAttributeDataSize(attribute, offsets));
 		}
 	}
 
-	void StaticSubmesh::AddVertexBufferView(const ::Submesh* submesh, const MeshAttribute attribute,
-											const uint16_t   offset, const uint16_t       dataSize)
+	void StaticSubmesh::AddVertexBufferView(const ::Submesh* submesh,
+		const MeshAttribute                                  attribute,
+		const uint16_t                                       offset,
+		const uint16_t                                       dataSize)
 	{
 		if (dataSize != 0)
 		{
@@ -122,7 +134,7 @@ namespace Rendering::Dx12
 
 	void StaticSubmesh::CreateShaderResourceViews(const ::Submesh* submesh)
 	{
-		const AttributeOffsets& offsets = submesh->GetAttributes().GetAttributeOffsets();
+		const AttributeOffsets& offsets = submesh->GetAttributesUsage().GetAttributeOffsets();
 
 		m_skinningHeapHandle = Dx12Context::Get().CreateHeapHandle(4);
 
@@ -132,8 +144,9 @@ namespace Rendering::Dx12
 		AddShaderResourceViews(submesh, MeshAttribute::BINORMAL, offsets.m_bitangentOffset);
 	}
 
-	void StaticSubmesh::AddShaderResourceViews(const ::Submesh* submesh, const MeshAttribute attribute,
-											   const uint16_t   offset)
+	void StaticSubmesh::AddShaderResourceViews(const ::Submesh* submesh,
+		const MeshAttribute                                     attribute,
+		const uint16_t                                          offset)
 	{
 		if (offset != 0 || attribute == MeshAttribute::POSITION)
 		{
@@ -151,7 +164,8 @@ namespace Rendering::Dx12
 				D3D12_BUFFER_SRV_FLAG_NONE
 			};
 
-			Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_vertexBuffer.Get(), &desc,
+			Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_vertexBuffer.Get(),
+																	 &desc,
 																	 m_skinningHeapHandle->GetCPUHandle(
 																		 m_skinnedAttributesCount));
 
