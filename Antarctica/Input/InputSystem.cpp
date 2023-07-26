@@ -5,9 +5,9 @@
 #include "Input/InputListener.h"
 #include "Input/InputManager.h"
 
-void InputSystem::Init(FrameCounter* frameCounter)
+void InputSystem::Init()
 {
-	System::Init(frameCounter);
+	System::Init();
 	
 	InputManager* inputManager = InputManager::GetInstance();
 

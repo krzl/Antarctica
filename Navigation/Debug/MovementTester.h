@@ -1,11 +1,10 @@
 #pragma once
+#include "Components/MovementComponent.h"
 
 struct TransformComponent;
 
 namespace Navigation
 {
-	struct MovementComponent;
-
 	class MovementTester
 	{
 	public:

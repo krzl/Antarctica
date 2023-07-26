@@ -9,10 +9,6 @@ struct TransformComponent : Component
 	Quaternion m_localRotation = Quaternion::identity;
 	Vector3D   m_localScale    = { 1.0f, 1.0f, 1.0f };
 
-	//TODO: ECS: move it to separate component
-	Transform4D m_localTransform  = Transform4D::identity;
-	Transform4D m_globalTransform = Transform4D::identity;
-
 	QuadtreePlacementRef m_quadtreePlacement;
 
 	//cache it?

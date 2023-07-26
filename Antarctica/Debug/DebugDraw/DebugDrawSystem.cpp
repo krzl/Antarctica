@@ -5,12 +5,13 @@
 #include "DebugDrawer.h"
 #include "RenderObject.h"
 #include "Assets/DynamicMesh.h"
+#include "Components/MeshComponent.h"
 #include "Entities/World.h"
 #include "Managers/TimeManager.h"
 
-void DebugDrawSystem::Init(FrameCounter* frameCounter)
+void DebugDrawSystem::Init()
 {
-	System::Init(frameCounter);
+	System::Init();
 
 	m_shader = AssetManager::GetAsset<Shader>("../Resources/Shaders/debug_draw.hlsl");
 

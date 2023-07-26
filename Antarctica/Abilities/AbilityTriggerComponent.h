@@ -1,8 +1,7 @@
 #pragma once
 
+#include "AbilityBinding.h"
 #include "Components/Component.h"
-
-struct AbilityBinding;
 
 struct AbilityTriggerComponent : Component
 {

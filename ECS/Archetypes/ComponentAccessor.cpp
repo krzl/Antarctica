@@ -6,7 +6,6 @@
 ComponentAccessor::ComponentAccessor(Entity* entity) :
 	m_entity(entity)
 {
-	//TODO: ECS: check if keeping the ids sorted is not ruining the performance
 	const uint64_t instanceId = entity->GetInstanceId();
 
 	m_archetype = entity->GetArchetype();

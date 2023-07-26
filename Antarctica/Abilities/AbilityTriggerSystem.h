@@ -1,10 +1,12 @@
 #pragma once
 
-#include "AbilityBinding.h"
 #include "AbilityStackComponent.h"
 #include "AbilityTriggerComponent.h"
-#include "Input/InputListener.h"
 #include "Systems/System.h"
+
+struct InputCommand;
+struct AbilityBinding;
+struct InputListenerComponent;
 
 class AbilityTriggerSystem : public System<AbilityTriggerComponent, AbilityStackComponent, InputListenerComponent>
 {
@@ -12,8 +14,6 @@ class AbilityTriggerSystem : public System<AbilityTriggerComponent, AbilityStack
 		AbilityTriggerComponent* abilityTrigger,
 		AbilityStackComponent*   abilityStack,
 		InputListenerComponent*  inputListener) override;
-
-	bool IsLockStepSystem() override { return true; }
 
 	static bool IsAbilityTriggered(const AbilityBinding& abilityBinding, const InputCommand& inputCommand);
 };

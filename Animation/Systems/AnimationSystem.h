@@ -9,7 +9,5 @@ namespace Anim
 	class AnimationSystem : public System<AnimatedMeshComponent>
 	{
 		void Update(uint64_t entityId, AnimatedMeshComponent* animatedMesh) override;
-
-		bool IsLockStepSystem() override { return false; }
 	};
 }

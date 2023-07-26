@@ -6,12 +6,15 @@
 #include "ImGuiManager.h"
 #include "ImGuiShader.h"
 #include "Assets/DynamicMesh.h"
+#include "Assets/Material.h"
 #include "Assets/Mesh.h"
+#include "Components/MeshComponent.h"
 #include "Core/Application.h"
+#include "Managers/TimeManager.h"
 
-void ImGuiSystem::Init(FrameCounter* frameCounter)
+void ImGuiSystem::Init()
 {
-	System::Init(frameCounter);
+	System::Init();
 
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();

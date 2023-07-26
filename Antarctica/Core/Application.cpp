@@ -3,21 +3,11 @@
 
 #include <Renderer.h>
 
-#include "Abilities/AbilitySystem.h"
-#include "Abilities/AbilityTriggerSystem.h"
 #include "Camera/PlayerCameraSystem.h"
-#include "Debug/DebugDraw/DebugDrawSystem.h"
-#include "Debug/ImGui/ImGuiSystem.h"
 #include "Entities/World.h"
 #include "Input/InputSystem.h"
 #include "Managers/Manager.h"
-#include "Steering/MovementSystem.h"
-#include "Steering/SteeringSystem.h"
-#include "Systems/AnimationSystem.h"
 #include "Systems/CullingSystem.h"
-#include "Systems/QuadtreeUpdateSystem.h"
-#include "Systems/RenderSystem.h"
-#include "Systems/SkinningSystem.h"
 
 Application* gApp = nullptr;
 
@@ -60,45 +50,9 @@ void Application::Start()
 		manager->Init();
 	}
 
-	m_inputSystem        = new InputSystem();
-	m_playerCameraSystem = new PlayerCameraSystem();
+	m_ecs.CreateSystems();
 
-	m_preStepLockSystems = std::initializer_list<SystemBase*>{
-		m_inputSystem,
-		m_playerCameraSystem,
-		new AbilityTriggerSystem(),
-	};
-
-	m_stepLockSystems = std::initializer_list<SystemBase*>{
-		new AbilitySystem(),
-		new Anim::AnimationSystem(),
-		new Navigation::SteeringSystem(),
-		new Navigation::MovementSystem(),
-		new QuadtreeUpdateSystem(),
-	};
-
-	m_renderSystem = new Rendering::RenderSystem();
-
-	m_postStepLockSystems = std::initializer_list<SystemBase*>{
-		new DebugDrawSystem(),
-		new Rendering::CullingSystem(),
-		new Rendering::SkinningSystem(),
-		new ImGuiSystem(),
-		m_renderSystem
-	};
-
-	for (SystemBase* system : m_preStepLockSystems)
-	{
-		system->Init(&m_frameCounter);
-	}
-	for (SystemBase* system : m_stepLockSystems)
-	{
-		system->Init(&m_frameCounter);
-	}
-	for (SystemBase* system : m_postStepLockSystems)
-	{
-		system->Init(&m_frameCounter);
-	}
+	GetSystem<Rendering::CullingSystem>()->m_frameCounter = &m_frameCounter;
 
 	m_window.SetupInputManager(*InputManager::GetInstance());
 
@@ -115,23 +69,11 @@ void Application::Run()
 	{
 		if (!m_isPaused)
 		{
-			m_inputSystem->ResetInput();
+			GetSystem<InputSystem>()->ResetInput();
 			m_window.Update();
 
 			++m_frameCounter.m_renderFrameCount;
 
-			for (SystemBase* system : m_preStepLockSystems)
-			{
-				system->OnFrameBegin();
-			}
-			for (SystemBase* system : m_stepLockSystems)
-			{
-				system->OnFrameBegin();
-			}
-			for (SystemBase* system : m_postStepLockSystems)
-			{
-				system->OnFrameBegin();
-			}
 
 			for (Manager* manager : m_managers)
 			{
@@ -139,37 +81,14 @@ void Application::Run()
 			}
 			m_world.Update();
 
-			for (SystemBase* system : m_preStepLockSystems)
-			{
-				system->Run();
-			}
-
+			m_ecs.RunBeginFrame();
 			++m_frameCounter.m_lockStepFrameCount;
-			for (SystemBase* system : m_stepLockSystems)
-			{
-				system->Run();
-			}
+			m_ecs.RunStepLock();
 		}
 
-		for (SystemBase* system : m_postStepLockSystems)
-		{
-			system->Run();
-		}
+		m_ecs.RunEndFrame();
 
-		for (SystemBase* system : m_preStepLockSystems)
-		{
-			system->OnFrameEnd();
-		}
-		for (SystemBase* system : m_stepLockSystems)
-		{
-			system->OnFrameEnd();
-		}
-		for (SystemBase* system : m_postStepLockSystems)
-		{
-			system->OnFrameEnd();
-		}
-
-		m_renderer.Render(m_renderSystem->GetRenderQueue(), m_playerCameraSystem->GetCameras());
+		m_renderer.Render(GetSystem<Rendering::RenderSystem>()->GetRenderQueue(), GetSystem<PlayerCameraSystem>()->GetCameras());
 	}
 
 	m_renderer.Cleanup();

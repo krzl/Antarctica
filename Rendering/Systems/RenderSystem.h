@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Assets/SubmeshData.h"
 #include "Components/MeshComponent.h"
 #include "Components/RenderComponent.h"
 #include "Components/TransformComponent.h"
@@ -11,9 +10,7 @@ class ComponentAccessor;
 
 namespace Rendering
 {
-	struct MeshComponent;
 	struct QueuedRenderObject;
-	struct RenderComponent;
 
 	class RenderQueue : public std::vector<QueuedRenderObject*> {};
 
@@ -28,7 +25,6 @@ namespace Rendering
 		void OnUpdateStart() override;
 		void OnUpdateEnd() override;
 		void Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderComponent*) override;
-		bool IsLockStepSystem() override { return false; }
 
 		Transform4D GetAttachedNodeTransform(ComponentAccessor& componentAccessor, const Mesh& mesh, int32_t nodeId, bool ignoreAttachmentRotation);
 		Transform4D GetAttachmentTransform(ComponentAccessor& componentAccessor,

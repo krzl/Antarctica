@@ -2,6 +2,9 @@
 #include "Debug/ImGui/ImGuiManager.h"
 
 #include "Archetypes/ArchetypeBuilder.h"
+#include "Components/MeshComponent.h"
+#include "Components/RenderComponent.h"
+#include "Components/TransformComponent.h"
 #include "Core/Application.h"
 #include "Debug/ImGui/ImGuiComponent.h"
 

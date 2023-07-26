@@ -3,10 +3,11 @@
 #include "CameraData.h"
 #include "CameraScrollComponent.h"
 #include "Components/CameraComponent.h"
-#include "Components/TransformComponent.h"
-#include "Core/Application.h"
-#include "Input/InputListener.h"
 #include "Systems/System.h"
+
+struct InputListenerComponent;
+
+struct TransformComponent;
 
 class PlayerCameraSystem : public System<TransformComponent, Rendering::CameraComponent, CameraScrollComponent, InputListenerComponent>
 {
@@ -21,8 +22,6 @@ class PlayerCameraSystem : public System<TransformComponent, Rendering::CameraCo
 	Matrix4D GetPerspectiveMatrix(const Rendering::CameraComponent* camera);
 
 	Frustum GetFrustum(Rendering::CameraComponent* camera) const;
-
-	bool IsLockStepSystem() override { return false; }
 
 public:
 

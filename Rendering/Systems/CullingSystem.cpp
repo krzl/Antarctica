@@ -3,6 +3,8 @@
 
 #include "Assets/Mesh.h"
 #include "Components/CameraComponent.h"
+#include "Components/ColliderComponent.h"
+#include "Components/MeshComponent.h"
 #include "Components/RenderCullComponent.h"
 #include "Components/TransformComponent.h"
 #include "Entities/Camera.h"

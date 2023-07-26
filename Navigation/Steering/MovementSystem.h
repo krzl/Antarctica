@@ -11,7 +11,5 @@ namespace Navigation
 	class MovementSystem : public System<TransformComponent, MovementComponent>
 	{
 		void Update(uint64_t entityId, TransformComponent* transform, MovementComponent* movement) override;
-
-		bool IsLockStepSystem() override { return true; }
 	};
 }

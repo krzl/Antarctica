@@ -5,10 +5,9 @@
 #include <Input/InputManager.h>
 #include <Settings/Settings.h>
 
+#include "SystemContainer.h"
 #include "Entities/World.h"
-#include "Input/InputSystem.h"
 #include "Managers/FrameCounter.h"
-#include "Managers/TimeManager.h"
 #include "Systems/RenderSystem.h"
 
 class PlayerCameraSystem;
@@ -49,6 +48,12 @@ public:
 		return m_world;
 	}
 
+	template<typename T, class = std::enable_if_t<std::is_base_of_v<SystemBase, T>>>
+	T* GetSystem()
+	{
+		return static_cast<T*>(m_ecs.GetSystem(typeid(T).hash_code()));
+	}
+
 	Dispatcher<> OnApplicationInitialized;
 
 private:
@@ -63,18 +68,12 @@ private:
 	bool m_isRunning = false;
 	bool m_isPaused  = false;
 
-	std::vector<SystemBase*> m_preStepLockSystems;
-	std::vector<SystemBase*> m_stepLockSystems;
-	std::vector<SystemBase*> m_postStepLockSystems;
-
 	World            m_world;
 	Platform::Window m_window;
 
-	InputSystem*        m_inputSystem        = nullptr;
-	PlayerCameraSystem* m_playerCameraSystem = nullptr;
-
-	Rendering::Renderer      m_renderer;
-	Rendering::RenderSystem* m_renderSystem = nullptr;
+	Rendering::Renderer m_renderer;
 
 	std::vector<Manager*> m_managers;
+
+	SystemContainer m_ecs;
 };

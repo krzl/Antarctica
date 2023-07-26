@@ -29,7 +29,7 @@ public:
 			static uint32_t componentIds[sizeof...(Types)];
 			TryAddNewArchetype<0>(allArchetypes[m_archetypesParsed++].get(), componentIds);
 		}
-		//TODO: ECS: disable multithreading on certain systems
+		//TODO: disable multi threading on certain systems
 		std::for_each(std::execution::par_unseq,
 					  m_archetypesMatched.begin(),
 					  m_archetypesMatched.end(),

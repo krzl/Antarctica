@@ -6,14 +6,12 @@
 
 class InputSystem : public System<InputListenerComponent>
 {
-	void Init(FrameCounter* frameCounter) override;
+	void Init() override;
 	void OnUpdateStart() override;
 
 	bool IsSelected(uint64_t entityId, const InputListenerComponent* inputListener) const;
 	void Update(uint64_t entityId, InputListenerComponent* inputListener) override;
 
-	bool IsLockStepSystem() override { return false; }
-	
 public:
 	
 	void ResetInput();

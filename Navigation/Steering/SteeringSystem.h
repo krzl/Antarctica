@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Components/MovementComponent.h"
 #include "Debug/MovementTester.h"
 #include "Systems/System.h"
 
@@ -16,7 +15,6 @@ namespace Navigation
 	{
 		void OnUpdateStart() override;
 		void Update(uint64_t entityId, TransformComponent* transform, MovementComponent* movement) override;
-		bool IsLockStepSystem() override { return true; }
 
 		MovementTester m_movementTester;
 	};
