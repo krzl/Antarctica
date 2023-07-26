@@ -8,7 +8,7 @@ namespace Navigation
 	struct NearbyTarget
 	{
 		const TransformComponent* m_transform = nullptr;
-		const MovementComponent*  m_movement  = nullptr;
+		const MovementComponent* m_movement   = nullptr;
 	};
 
 	class SteeringSystem : public System<TransformComponent, MovementComponent>

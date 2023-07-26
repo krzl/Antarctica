@@ -8,13 +8,13 @@ namespace Rendering::Dx12
 {
 	void UpdateDescriptor(const ShaderStage* shader, ShaderDescriptor& descriptor)
 	{
-		ID3D12ShaderReflection&  reflector  = *shader->GetReflector();
+		ID3D12ShaderReflection& reflector   = *shader->GetReflector();
 		const D3D12_SHADER_DESC& shaderDesc = shader->GetDescriptor();
 
 		for (uint32_t i = 0; i < shaderDesc.ConstantBuffers; ++i)
 		{
 			ID3D12ShaderReflectionConstantBuffer* constantBuffer = reflector.GetConstantBufferByIndex(i);
-			D3D12_SHADER_BUFFER_DESC              bufferDesc;
+			D3D12_SHADER_BUFFER_DESC bufferDesc;
 			constantBuffer->GetDesc(&bufferDesc);
 
 			D3D12_SHADER_INPUT_BIND_DESC bindDesc;
@@ -36,10 +36,10 @@ namespace Rendering::Dx12
 			for (uint32_t j = 0; j < bufferDesc.Variables; ++j)
 			{
 				ID3D12ShaderReflectionVariable* variable = constantBuffer->GetVariableByIndex(j);
-				D3D12_SHADER_VARIABLE_DESC      variableDesc;
+				D3D12_SHADER_VARIABLE_DESC variableDesc;
 				variable->GetDesc(&variableDesc);
 
-				std::string    name     = std::string(variableDesc.Name);
+				std::string name        = std::string(variableDesc.Name);
 				const uint64_t nameHash = std::hash<std::string>()(name);
 
 				variables.emplace_back(ShaderDescriptor::VariableDescriptor{
@@ -58,7 +58,7 @@ namespace Rendering::Dx12
 					memset(defaultBufferValue + variableDesc.StartOffset, 0, variableDesc.Size);
 				}
 			}
-			
+
 			const uint64_t nameHash = std::hash<std::string>()(bufferName);
 
 			descriptor.AddBufferDescriptor(ShaderDescriptor::BufferDescriptor{
@@ -80,7 +80,7 @@ namespace Rendering::Dx12
 			{
 				if (!descriptor.ContainsTextureId(desc.BindPoint))
 				{
-					std::string    name     = std::string(desc.Name);
+					std::string name        = std::string(desc.Name);
 					const uint64_t nameHash = std::hash<std::string>()(name);
 
 					descriptor.AddTextureDescriptor(ShaderDescriptor::TextureDescriptor{

@@ -5,7 +5,7 @@
 
 namespace Rendering::Dx12
 {
-	uint32_t                      DescriptorHeap::m_incrementSize = 0;
+	uint32_t DescriptorHeap::m_incrementSize = 0;
 	std::weak_ptr<DescriptorHeap> DescriptorHeap::m_currentlySetDescriptorHeap;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeapHandle::GetCPUHandle(const uint32_t offset) const
@@ -46,9 +46,7 @@ namespace Rendering::Dx12
 
 		if (m_incrementSize == 0)
 		{
-			m_incrementSize = Dx12Context::Get().GetDevice()->
-												 GetDescriptorHandleIncrementSize(
-													 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			m_incrementSize = Dx12Context::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		}
 	}
 
@@ -79,12 +77,12 @@ namespace Rendering::Dx12
 
 	int32_t DescriptorHeap::GetNextId(const uint32_t size) const
 	{
-		int32_t  startIndex  = -1;
+		int32_t startIndex   = -1;
 		uint32_t streakCount = 0;
 
 		for (uint32_t i = m_firstUnusedIndex; i < HEAP_SIZE; ++i)
 		{
-			if (const bool isFree = !m_usedHandles[i])
+			if (!m_usedHandles[i])
 			{
 				if (startIndex == -1)
 				{
@@ -125,7 +123,7 @@ namespace Rendering::Dx12
 		{
 			m_firstUnusedIndex += size;
 		}
-		
+
 		for (uint32_t i = 0; i < size; ++i)
 		{
 			m_usedHandles[nextId + i] = true;

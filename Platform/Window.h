@@ -21,28 +21,13 @@ namespace Platform
 
 		Dispatcher<> OnDestroyed;
 
-		[[nodiscard]] HWND GetHandle() const
-		{
-			return m_handle;
-		}
-
-		[[nodiscard]] float GetAspectRatio() const
-		{
-			return static_cast<float>(m_width) / static_cast<float>(m_height);
-		}
-
-		[[nodiscard]] uint32_t GetWidth() const
-		{
-			return m_width;
-		}
-
-		[[nodiscard]] uint32_t GetHeight() const
-		{
-			return m_height;
-		}
+		[[nodiscard]] HWND GetHandle() const { return m_handle; }
+		[[nodiscard]] float GetAspectRatio() const { return static_cast<float>(m_width) / static_cast<float>(m_height); }
+		[[nodiscard]] uint32_t GetWidth() const { return m_width; }
+		[[nodiscard]] uint32_t GetHeight() const { return m_height; }
 
 		Dispatcher<> OnResized;
-		
+
 	private:
 
 		LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

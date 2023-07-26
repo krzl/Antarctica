@@ -25,8 +25,8 @@ void Archetype::AddEntity(const Entity* entity, const std::vector<const Class*>&
 	{
 		m_componentData[i].resize(m_componentData[i].size() + m_componentTypeInfos[i].m_dataSize);
 
-		const uint32_t dataSize     = m_componentTypeInfos[i].m_dataSize;
-		void*          componentPtr = m_componentData[i].data() + dataSize * (m_entityIds.size() - 1);
+		const uint32_t dataSize = m_componentTypeInfos[i].m_dataSize;
+		void* componentPtr      = m_componentData[i].data() + dataSize * (m_entityIds.size() - 1);
 
 		classes[i]->CreateObjectPlacement(componentPtr);
 	}

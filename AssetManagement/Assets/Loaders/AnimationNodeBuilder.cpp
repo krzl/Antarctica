@@ -28,5 +28,5 @@ void AnimationNodeBuilder::SetScaleKeys(std::vector<ScaleKey>&& scaleKeys)
 AnimationNode AnimationNodeBuilder::Build()
 {
 	return AnimationNode(std::move(m_nodeName), std::move(m_baseTransform), std::move(m_positionKeys),
-						 std::move(m_rotationKeys), std::move(m_scaleKeys), std::move(m_children));
+		std::move(m_rotationKeys), std::move(m_scaleKeys), std::move(m_children));
 }

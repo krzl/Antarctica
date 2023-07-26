@@ -56,8 +56,7 @@ std::shared_ptr<Mesh> Terrain::ConstructMesh() const
 	return mesh;
 }
 
-void Terrain::ConstructSubmesh(const std::shared_ptr<Mesh> mesh, uint32_t xStart, const uint32_t xEnd, uint32_t yStart,
-							   uint32_t                    yEnd) const
+void Terrain::ConstructSubmesh(const std::shared_ptr<Mesh> mesh, uint32_t xStart, const uint32_t xEnd, uint32_t yStart, const uint32_t yEnd) const
 {
 	uint32_t currentIndex = 0;
 
@@ -68,8 +67,8 @@ void Terrain::ConstructSubmesh(const std::shared_ptr<Mesh> mesh, uint32_t xStart
 	const uint32_t indexCount  = (xEnd - xStart - 1) * (yEnd - yStart - 1);
 
 	std::vector<Vector3D> vertices(vertexCount);
-	std::vector<float>    texcoordSplatUV(vertexCount * 2);
-	std::vector<float>    texcoordWeights(vertexCount * 4);
+	std::vector<float> texcoordSplatUV(vertexCount * 2);
+	std::vector<float> texcoordWeights(vertexCount * 4);
 	std::vector<uint32_t> indices(indexCount * 6);
 
 	// ReSharper disable once CppInconsistentNaming
@@ -98,7 +97,7 @@ void Terrain::ConstructSubmesh(const std::shared_ptr<Mesh> mesh, uint32_t xStart
 			texcoordWeights[a1 * 4 + 1] = isFlat ? 0.0f : 1.0f;
 			texcoordWeights[a1 * 4 + 2] = 0.0f;
 			texcoordWeights[a1 * 4 + 3] = 0.0f;
-			
+
 			if (x != xEnd - 1 && y != yEnd - 1)
 			{
 				const uint32_t a2 = GetSubmeshIndex(x, y + 1);
@@ -114,8 +113,8 @@ void Terrain::ConstructSubmesh(const std::shared_ptr<Mesh> mesh, uint32_t xStart
 			}
 
 			vertices[a1] = Vector3D(x * GRID_CELL_TO_METER - xCenterOffset,
-									y * GRID_CELL_TO_METER - yCenterOffset,
-									TerrainHeightLevelToZ(GetHeight(x, y)));
+				y * GRID_CELL_TO_METER - yCenterOffset,
+				TerrainHeightLevelToZ(GetHeight(x, y)));
 
 			texcoordSplatUV[a1 * 2 + 0] = (float) x / 40.0f;
 			texcoordSplatUV[a1 * 2 + 1] = (float) y / 40.0f;

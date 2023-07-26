@@ -8,9 +8,8 @@
 
 namespace Navigation
 {
-	Vector2D CohesionBehavior::GetLinearAcceleration(const TransformComponent* transform,
-		const MovementComponent*                                               movement,
-		const std::vector<NearbyTarget>&                                       nearbyTargets)
+	Vector2D CohesionBehavior::GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
+													 const std::vector<NearbyTarget>& nearbyTargets)
 	{
 		if (!movement->m_arriveBehavior.HasTarget())
 		{
@@ -22,13 +21,13 @@ namespace Navigation
 
 		for (const NearbyTarget& target : nearbyTargets)
 		{
-			const float distanceSqr   = Terathon::SquaredMag(target.m_transform->m_localPosition.xy - transform->m_localPosition.xy);
+			const float distanceSqr   = SquaredMag(target.m_transform->m_localPosition.xy - transform->m_localPosition.xy);
 			const float cohesionRange = (movement->m_radius + target.m_movement->m_radius) * m_cohesionScale;
 
-			if (distanceSqr < cohesionRange * cohesionRange && movement->m_velocity != Vector2D::zero && target.m_movement->m_arriveBehavior.
-				HasTarget() &&
-				SquaredMag(movement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget())
-				< cohesionRange * cohesionRange)
+			if (distanceSqr < cohesionRange * cohesionRange &&
+				movement->m_velocity != Vector2D::zero
+				&& target.m_movement->m_arriveBehavior.HasTarget() &&
+				SquaredMag(movement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget()) < cohesionRange * cohesionRange)
 			{
 				++actorCount;
 				heading += target.m_transform->m_localPosition.xy;

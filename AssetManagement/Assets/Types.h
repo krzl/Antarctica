@@ -7,7 +7,7 @@ namespace Rendering
 	class NativeSubmesh;
 	class NativeTexture;
 	class NativeBuffer;
-	
+
 	extern void Deleter(NativeComputeShader*);
 	extern void Deleter(NativeShader*);
 	extern void Deleter(NativeSubmesh*);

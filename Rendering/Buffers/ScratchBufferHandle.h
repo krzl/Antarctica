@@ -11,7 +11,8 @@ namespace Rendering
 	{
 		friend class Dx12::ScratchBuffer;
 
-		ScratchBufferHandle() : ScratchBufferHandle(0, 0, 0, nullptr) {}
+		ScratchBufferHandle() :
+			ScratchBufferHandle(0, 0, 0, nullptr) {}
 
 		bool IsValid() const
 		{

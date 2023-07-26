@@ -6,8 +6,8 @@ class InputQueue;
 
 struct InputListenerComponent : Component
 {
-	InputQueue const* m_inputQueue   = nullptr;
-	bool              m_alwaysActive = false;
+	const InputQueue* m_inputQueue = nullptr;
+	bool m_alwaysActive            = false;
 
 	DEFINE_CLASS()
 };

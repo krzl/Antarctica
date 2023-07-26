@@ -6,7 +6,6 @@
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
 #include "Core/Application.h"
-#include "Debug/DebugDrawManager.h"
 #include "Entities/Camera.h"
 #include "Input/InputManager.h"
 #include "Steering/Behaviors/ArriveBehavior.h"
@@ -23,8 +22,8 @@ void MoveAbility::Init(Entity& entity)
 
 	Rendering::Camera* camera = Rendering::Camera::Get();
 
-	ComponentAccessor           cameraAccessor  = camera->GetComponentAccessor();
-	TransformComponent*         cameraTransform = cameraAccessor.GetComponent<TransformComponent>();
+	ComponentAccessor cameraAccessor            = camera->GetComponentAccessor();
+	TransformComponent* cameraTransform         = cameraAccessor.GetComponent<TransformComponent>();
 	Rendering::CameraComponent* cameraComponent = cameraAccessor.GetComponent<Rendering::CameraComponent>();
 
 	Matrix4D inversePerspectiveMatrix = Inverse(cameraComponent->m_perspectiveMatrix);
@@ -39,7 +38,7 @@ void MoveAbility::Init(Entity& entity)
 
 	Ray ray = { cameraTransform->m_localPosition, direction };
 
-	double  t = -ray.m_origin.z / ray.m_direction.z;
+	double t = -ray.m_origin.z / ray.m_direction.z;
 	Point3D intersectionPoint;
 	intersectionPoint.x = ray.m_origin.x + t * ray.m_direction.x;
 	intersectionPoint.y = ray.m_origin.y + t * ray.m_direction.y;
@@ -52,8 +51,8 @@ void MoveAbility::Start(Entity& entity)
 {
 	ComponentAccessor componentAccessor = entity.GetComponentAccessor();
 
-	Navigation::MovementComponent* movementComponent     = componentAccessor.GetComponent<Navigation::MovementComponent>();
-	Anim::AnimatedMeshComponent*   animatedMeshComponent = componentAccessor.GetComponent<Anim::AnimatedMeshComponent>();
+	Navigation::MovementComponent* movementComponent   = componentAccessor.GetComponent<Navigation::MovementComponent>();
+	Anim::AnimatedMeshComponent* animatedMeshComponent = componentAccessor.GetComponent<Anim::AnimatedMeshComponent>();
 
 	movementComponent->m_arriveBehavior.SetTarget(m_target);
 	animatedMeshComponent->m_animationSolver.SetTrigger(Anim::AnimTrigger::WALK, true);

@@ -41,8 +41,8 @@ public:
 			return;
 		}
 
-		const uint32_t index          = m_lookupList[id];
-		const T&       objectToInsert = m_list[m_list.size() - 1];
+		const uint32_t index    = m_lookupList[id];
+		const T& objectToInsert = m_list[m_list.size() - 1];
 
 		m_lookupList.erase(id);
 		m_lookupList[m_lookupFunction(objectToInsert)] = index;
@@ -67,7 +67,7 @@ public:
 private:
 
 	std::map<L, uint32_t> m_lookupList;
-	std::vector<T>        m_list;
+	std::vector<T> m_list;
 
 	std::function<L(const T&)> m_lookupFunction;
 };

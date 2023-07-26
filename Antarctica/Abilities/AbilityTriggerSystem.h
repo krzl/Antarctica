@@ -10,10 +10,8 @@ struct InputListenerComponent;
 
 class AbilityTriggerSystem : public System<AbilityTriggerComponent, AbilityStackComponent, InputListenerComponent>
 {
-	void Update(uint64_t         entityId,
-		AbilityTriggerComponent* abilityTrigger,
-		AbilityStackComponent*   abilityStack,
-		InputListenerComponent*  inputListener) override;
+	void Update(uint64_t entityId, AbilityTriggerComponent* abilityTrigger, AbilityStackComponent* abilityStack,
+				InputListenerComponent* inputListener) override;
 
 	static bool IsAbilityTriggered(const AbilityBinding& abilityBinding, const InputCommand& inputCommand);
 };

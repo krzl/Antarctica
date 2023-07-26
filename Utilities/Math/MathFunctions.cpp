@@ -23,8 +23,8 @@ Quaternion DirectionToQuaternion(Vector3D direction)
 Quaternion EulerToQuaternion(const float x, const float y, const float z)
 {
 	return Quaternion::MakeRotationX(DegToRad(x)) *
-		   Quaternion::MakeRotationY(DegToRad(y)) *
-		   Quaternion::MakeRotationZ(DegToRad(z));
+		Quaternion::MakeRotationY(DegToRad(y)) *
+		Quaternion::MakeRotationZ(DegToRad(z));
 }
 
 float LerpClamped(const float a, const float b, float alpha)
@@ -72,13 +72,13 @@ void DecomposeTransform(const Transform4D& transform, Vector3D& translation, Qua
 float GetDistanceSquaredFromLineToPoint(const Vector3D& direction, const Point3D& point)
 {
 	const float t = (point.x * direction.x + point.y * direction.y + point.z * direction.z) /
-					(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+		(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
 
 	Vector3D closestPointOnVector = { t * direction.x, t * direction.y, t * direction.z };
 
 	const float distanceSquared = (closestPointOnVector.x - point.x) * (closestPointOnVector.x - point.x) +
-								  (closestPointOnVector.y - point.y) * (closestPointOnVector.y - point.y) +
-								  (closestPointOnVector.z - point.z) * (closestPointOnVector.z - point.z);
+		(closestPointOnVector.y - point.y) * (closestPointOnVector.y - point.y) +
+		(closestPointOnVector.z - point.z) * (closestPointOnVector.z - point.z);
 
 	return distanceSquared;
 }
@@ -126,29 +126,29 @@ bool operator!=(const Point3D& lhs, const Point3D& rhs)
 bool operator==(const Vector2D& lhs, const Vector2D& rhs)
 {
 	return lhs.x == rhs.x &&
-		   lhs.y == rhs.y;
+		lhs.y == rhs.y;
 }
 
 bool operator==(const Vector3D& lhs, const Vector3D& rhs)
 {
 	return lhs.x == rhs.x &&
-		   lhs.y == rhs.y &&
-		   lhs.z == rhs.z;
+		lhs.y == rhs.y &&
+		lhs.z == rhs.z;
 }
 
 bool operator==(const Vector4D& lhs, const Vector4D& rhs)
 {
 	return lhs.x == rhs.x &&
-		   lhs.y == rhs.y &&
-		   lhs.z == rhs.z &&
-		   lhs.w == rhs.w;
+		lhs.y == rhs.y &&
+		lhs.z == rhs.z &&
+		lhs.w == rhs.w;
 }
 
 bool operator==(const Point3D& lhs, const Point3D& rhs)
 {
 	return lhs.x == rhs.x &&
-		   lhs.y == rhs.y &&
-		   lhs.z == rhs.z;
+		lhs.y == rhs.y &&
+		lhs.z == rhs.z;
 }
 
 float GetDistanceFromLineToPoint(const Vector3D& direction, const Point3D& point)

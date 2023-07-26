@@ -72,8 +72,7 @@ namespace Rendering::Dx12
 			D3D12_PIPELINE_STATE_FLAG_NONE
 		};
 
-		DXCALL(Dx12Context::Get().GetDevice()->
-			CreateComputePipelineState(&pipelineStateDesc, IID_PPV_ARGS(&m_pipelineState)));
+		DXCALL(Dx12Context::Get().GetDevice()-> CreateComputePipelineState(&pipelineStateDesc, IID_PPV_ARGS(&m_pipelineState)));
 		SetDebugName(m_pipelineState, m_path.data());
 	}
 

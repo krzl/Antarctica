@@ -27,7 +27,7 @@ namespace Rendering::Dx12
 		std::map<const Skeleton*, std::shared_ptr<DescriptorHeapHandle>> weightBufferHandles;
 
 		std::vector<PerObjectBuffer> accumulatedConstantBuffers;
-		std::vector<uint8_t>         accumulatedBoneTransforms;
+		std::vector<uint8_t> accumulatedBoneTransforms;
 
 		bool isCurrentBatched = false;
 
@@ -71,8 +71,7 @@ namespace Rendering::Dx12
 						foundAnyMeshToSkin = true;
 						if (m_skinningShader == nullptr)
 						{
-							m_skinningShader = AssetManager::GetAsset<::ComputeShader>(
-								"../Resources/Shaders/Compute/skinning.hlsl");
+							m_skinningShader = AssetManager::GetAsset<::ComputeShader>("../Resources/Shaders/Compute/skinning.hlsl");
 							m_skinningShader->SetNativeObject(NativeComputeShader::Create(m_skinningShader));
 						}
 					}
@@ -86,10 +85,8 @@ namespace Rendering::Dx12
 					}
 					else
 					{
-						const std::shared_ptr<DescriptorHeapHandle> weightBufferHandle = GetScratchBuffer().CreateSRV(
-							sizeof(VertexWeights),
-							(uint32_t) skeleton.m_vertexWeights.size(),
-							skeleton.m_vertexWeights.data());
+						const std::shared_ptr<DescriptorHeapHandle> weightBufferHandle = GetScratchBuffer().CreateSRV(sizeof(VertexWeights),
+							(uint32_t) skeleton.m_vertexWeights.size(), skeleton.m_vertexWeights.data());
 						renderObject.m_weightsBuffer   = weightBufferHandle;
 						weightBufferHandles[&skeleton] = weightBufferHandle;
 					}
@@ -102,20 +99,16 @@ namespace Rendering::Dx12
 
 			if (queuedObject->m_boneTransforms.size() != 0)
 			{
-				accumulatedBoneTransforms.resize(
-					queuedObject->m_boneTransforms.size() * sizeof(Matrix4D) * instanceCount);
-				memcpy(
-					accumulatedBoneTransforms.data() +
-					sizeof(Matrix4D) * queuedObject->m_boneTransforms.size() * (instanceCount - 1),
-					queuedObject->m_boneTransforms.data(),
-					queuedObject->m_boneTransforms.size() * sizeof(Matrix4D));
+				accumulatedBoneTransforms.resize(queuedObject->m_boneTransforms.size() * sizeof(Matrix4D) * instanceCount);
+				memcpy(accumulatedBoneTransforms.data() + sizeof(Matrix4D) * queuedObject->m_boneTransforms.size() * (instanceCount - 1),
+					queuedObject->m_boneTransforms.data(), queuedObject->m_boneTransforms.size() * sizeof(Matrix4D));
 			}
 
 
 			const bool isNextBatched =
 				(objectsToRender.size() != i + 1) &&
 				objectsToRender[i + 1]->m_submesh == queuedObject->m_submesh &&
-				//objectsToRender[i + 1]->->m_material == queuedObject->m_material &&
+				//objectsToRender[i + 1]->->m_material == queuedObject->m_material && //TODO: take into account material
 				objectsToRender[i + 1]->m_boneTransforms.size() == queuedObject->m_boneTransforms.size() &&
 				!objectsToRender[i + 1]->m_clipRect.has_value() &&
 				!queuedObject->m_clipRect.has_value();

@@ -34,7 +34,7 @@ namespace Rendering
 
 		//TODO: do it only for some static meshes?
 		RenderCullComponent* renderCull = accessor.GetComponent<RenderCullComponent>();
-		renderCull->m_cullSubmeshes = true;
+		renderCull->m_cullSubmeshes     = true;
 	}
 
 	void StaticMesh::SetMaterial(const std::shared_ptr<Material>& material, const uint32_t index)

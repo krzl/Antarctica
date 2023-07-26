@@ -7,7 +7,7 @@ class Entity;
 class Ability
 {
 	friend class Class;
-	
+
 public:
 
 	virtual ~Ability() = default;
@@ -36,7 +36,7 @@ protected:
 	virtual void Start(Entity& entity) = 0;
 	virtual bool Update(Entity& entity) = 0;
 	virtual void End(Entity& entity) = 0;
-	
+
 private:
 
 	bool m_hasStarted = false;

@@ -12,8 +12,7 @@ namespace Navigation
 	{
 	public:
 
-		Vector2D GetLinearAcceleration(const TransformComponent* transform,
-			MovementComponent*                                   movement,
-			const std::vector<NearbyTarget>&                     nearbyTargets) const;
+		Vector2D GetLinearAcceleration(const TransformComponent* transform, MovementComponent* movement,
+									   const std::vector<NearbyTarget>& nearbyTargets) const;
 	};
 }

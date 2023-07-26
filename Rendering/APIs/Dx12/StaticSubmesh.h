@@ -29,22 +29,20 @@ namespace Rendering::Dx12
 	private:
 
 		void CreateVertexBufferViews(const ::Submesh* submesh);
-		void AddVertexBufferView(const ::Submesh* submesh, MeshAttribute attribute, uint16_t offset,
-								 uint16_t         dataSize);
-
+		void AddVertexBufferView(const ::Submesh* submesh, MeshAttribute attribute, uint16_t offset, uint16_t dataSize);
 
 		void CreateShaderResourceViews(const ::Submesh* submesh);
 		void AddShaderResourceViews(const ::Submesh* submesh, MeshAttribute attribute, uint16_t offset);
 
 		D3D12_INDEX_BUFFER_VIEW m_indexBufferView = {};
-		ComPtr<ID3D12Resource>  m_indexBuffer;
-		ComPtr<ID3D12Resource>  m_indexUploadBuffer;
+		ComPtr<ID3D12Resource> m_indexBuffer;
+		ComPtr<ID3D12Resource> m_indexUploadBuffer;
 
 		std::map<MeshAttribute, D3D12_VERTEX_BUFFER_VIEW> m_vertexBufferViews;
-		ComPtr<ID3D12Resource>                            m_vertexBuffer;
-		ComPtr<ID3D12Resource>                            m_vertexUploadBuffer;
+		ComPtr<ID3D12Resource> m_vertexBuffer;
+		ComPtr<ID3D12Resource> m_vertexUploadBuffer;
 
 		std::shared_ptr<DescriptorHeapHandle> m_skinningHeapHandle;
-		uint32_t                              m_skinnedAttributesCount = 0;
+		uint32_t m_skinnedAttributesCount = 0;
 	};
 }

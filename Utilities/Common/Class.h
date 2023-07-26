@@ -3,7 +3,7 @@
 class Class
 {
 	typedef std::function<std::shared_ptr<void>()> DefaultConstructor;
-	typedef std::function<void(void*)>             PlacementConstructor;
+	typedef std::function<void(void*)> PlacementConstructor;
 
 public:
 
@@ -46,15 +46,8 @@ public:
 		return m_placementConstructor(ptr);
 	}
 
-	uint64_t GetId() const
-	{
-		return m_id;
-	}
-
-	uint64_t GetDataSize() const
-	{
-		return m_dataSize;
-	}
+	uint64_t GetId() const { return m_id; }
+	uint64_t GetDataSize() const { return m_dataSize; }
 
 private:
 
@@ -65,7 +58,7 @@ private:
 	const uint64_t m_id;
 	const uint64_t m_dataSize;
 
-	DefaultConstructor   m_constructor;
+	DefaultConstructor m_constructor;
 	PlacementConstructor m_placementConstructor;
 };
 

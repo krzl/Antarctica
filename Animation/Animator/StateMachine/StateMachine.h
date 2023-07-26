@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iosfwd>
 #include <vector>
 
 #include "Types.h"
@@ -25,7 +24,9 @@ namespace Anim
 			m_states(std::move(states)) { }
 
 		void Update(StateMachineData& stateMachineData, TriggerState& triggerState) const;
-		void CalculateMatrices(StateMachineData& stateMachineData, std::vector<Transform4D>& matrices, const std::vector<MeshNode>& meshNodes) const;
+
+		static void CalculateMatrices(const StateMachineData&      stateMachineData, std::vector<Transform4D>& matrices,
+									  const std::vector<MeshNode>& meshNodes);
 
 	private:
 

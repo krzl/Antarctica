@@ -49,17 +49,18 @@ public:
 
 private:
 
-	Logger() : m_level(DEBUG),
-			   m_filename("log.txt") {}
+	Logger() :
+		m_level(DEBUG),
+		m_filename("log.txt") {}
 
-	LogLevel    m_level;
+	LogLevel m_level;
 	std::string m_filename;
 
 	template<typename T, typename... Args>
 	std::string FormatMessage(std::string format, T&& arg, Args&&... args)
 	{
 		std::stringstream ss;
-		const size_t      pos = format.find("{}");
+		const size_t pos = format.find("{}");
 		if (pos != std::string::npos)
 		{
 			ss << format.substr(0, pos) << arg;

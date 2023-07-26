@@ -14,8 +14,8 @@ namespace Rendering::Dx12
 
 		ScratchBufferHandle CreateHandle(uint32_t size, const void* data = nullptr, bool isUav = false);
 
-		std::shared_ptr<DescriptorHeapHandle> CreateSRV(uint32_t    elementSize, uint32_t elementCount = 1,
-														const void* data                               = nullptr);
+		std::shared_ptr<DescriptorHeapHandle> CreateSRV(uint32_t elementSize, uint32_t elementCount = 1,
+														const void* data                            = nullptr);
 		std::shared_ptr<DescriptorHeapHandle> CreateSRV(const ScratchBufferHandle& handle, const uint32_t elementSize);
 
 		std::shared_ptr<DescriptorHeapHandle> CreateCBV(uint32_t size, const void* data = nullptr);
@@ -27,11 +27,11 @@ namespace Rendering::Dx12
 
 	private:
 
-		uint32_t            CreateNewBuffer(bool bIsUav);
-		bool                IsUavBuffer(uint32_t i) const;
+		uint32_t CreateNewBuffer(bool bIsUav);
+		bool IsUavBuffer(uint32_t i) const;
 		ScratchBufferHandle Allocate(const uint32_t size, bool bIsUav);
-		void                SetData(const void* data, uint32_t bufferId, uint32_t offset, uint32_t size) const;
-		uint8_t*            GetDataPtr(const ScratchBufferHandle& handle) const;
+		void SetData(const void* data, uint32_t bufferId, uint32_t offset, uint32_t size) const;
+		uint8_t* GetDataPtr(const ScratchBufferHandle& handle) const;
 
 		void SubmitBuffers() const;
 
@@ -41,7 +41,7 @@ namespace Rendering::Dx12
 
 		std::vector<ComPtr<ID3D12Resource>> m_buffers;
 		std::vector<ComPtr<ID3D12Resource>> m_uploadBuffers;
-		std::vector<char*>                  m_mappedBuffers;
-		std::vector<uint32_t>               m_bufferAllocationSizes;
+		std::vector<char*> m_mappedBuffers;
+		std::vector<uint32_t> m_bufferAllocationSizes;
 	};
 }

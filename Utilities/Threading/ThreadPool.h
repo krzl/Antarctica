@@ -1,13 +1,12 @@
 #pragma once
-#include "Time/Timer.h"
 
 template<typename T>
 class ThreadPool
 {
 public:
 
-	ThreadPool(std::function<void(T*)> function, const uint32_t threadCount)
-		: m_function(function)
+	ThreadPool(std::function<void(T*)> function, const uint32_t threadCount) :
+		m_function(function)
 	{
 		m_threads.resize(threadCount);
 		for (uint32_t i = 0; i < threadCount; ++i)
@@ -96,8 +95,8 @@ private:
 
 	static constexpr uint16_t MAX_ITEM_COUNT = 1024 * 16;
 
-	uint16_t                       m_awaitingTaskCount = 0;
-	uint16_t                       m_tasksRemaining = 0;
+	uint16_t m_awaitingTaskCount                  = 0;
+	uint16_t m_tasksRemaining                     = 0;
 	std::array<T*, MAX_ITEM_COUNT> m_awaitingList = {};
 
 	std::vector<std::thread> m_threads;

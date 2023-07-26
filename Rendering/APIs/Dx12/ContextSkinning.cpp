@@ -25,14 +25,12 @@ namespace Rendering::Dx12
 				m_commandList->SetComputeRootDescriptorTable(1, renderObject.m_boneTransforms->GetGPUHandle());
 
 				StaticSubmesh* staticSubmesh = static_cast<StaticSubmesh*>(renderObject.m_submesh);
-				
+
 				DescriptorHeapHandle& heapHandle = *staticSubmesh->GetSkinningHeapHandle();
 				m_commandList->SetComputeRootDescriptorTable(2, heapHandle.GetGPUHandle());
-
 				m_commandList->SetComputeRootDescriptorTable(3, renderObject.m_skinningBufferHandle->GetGPUHandle());
-				
-				m_commandList->Dispatch(ceil((float) renderObject.m_submesh->GetVertexCount() * renderObject.m_instanceCount / 64),
-										1, 1);
+
+				m_commandList->Dispatch(ceil((float) renderObject.m_submesh->GetVertexCount() * renderObject.m_instanceCount / 64), 1, 1);
 			}
 		}
 	}

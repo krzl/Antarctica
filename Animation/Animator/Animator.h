@@ -9,7 +9,7 @@ namespace Anim
 	{
 		friend class TreeBuilder;
 		friend class Solver;
-		
+
 	public:
 
 		explicit Animator(std::vector<std::shared_ptr<StateMachine>>&& stateMachines);

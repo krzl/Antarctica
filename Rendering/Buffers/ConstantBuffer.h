@@ -35,10 +35,10 @@ namespace Rendering
 		static constexpr uint8_t DIRTY_UPDATE_MASK = (1 << Renderer::BUFFER_COUNT) - 1;
 
 		std::array<NativeBuffer*, Renderer::BUFFER_COUNT> m_buffers = {};
-		std::vector<uint8_t>                             m_bufferData;
+		std::vector<uint8_t> m_bufferData;
 
 		uint32_t m_elementCount      = 0;
 		uint32_t m_bufferElementSize = 0;
-		uint8_t  m_updateMask        = DIRTY_UPDATE_MASK;
+		uint8_t m_updateMask         = DIRTY_UPDATE_MASK;
 	};
 }

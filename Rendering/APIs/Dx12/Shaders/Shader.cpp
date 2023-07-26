@@ -50,7 +50,7 @@ namespace Rendering::Dx12
 			if (it != materialData.GetTextures().end())
 			{
 				std::shared_ptr<::Texture> texture = it->second;
-				//texture->GetNativeObject()->Bind(a.);
+				//texture->GetNativeObject()->Bind(a.); //TODO: set textures here
 			}
 		}
 	}
@@ -110,7 +110,7 @@ namespace Rendering::Dx12
 		}
 	}
 
-	D3D12_RASTERIZER_DESC Shader::GetRasterizerDescription()
+	D3D12_RASTERIZER_DESC Shader::GetRasterizerDescription() const
 	{
 		auto rasterizerDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 
@@ -122,7 +122,7 @@ namespace Rendering::Dx12
 		return rasterizerDesc;
 	}
 
-	D3D12_BLEND_DESC Shader::GetBlendDescription()
+	D3D12_BLEND_DESC Shader::GetBlendDescription() const
 	{
 		if (m_shaderParams->m_blendingEnabled)
 		{
@@ -154,7 +154,7 @@ namespace Rendering::Dx12
 		return CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	}
 
-	D3D12_DEPTH_STENCIL_DESC Shader::GetDepthStencilDescription()
+	D3D12_DEPTH_STENCIL_DESC Shader::GetDepthStencilDescription() const
 	{
 		CD3DX12_DEPTH_STENCIL_DESC depthStencilDesc(D3D12_DEFAULT);
 
@@ -174,13 +174,13 @@ namespace Rendering::Dx12
 	void Shader::CreatePipelineState()
 	{
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElements = GetInputElements();
-		const std::vector<DXGI_FORMAT>        outputFormats = GetOutputFormats();
+		const std::vector<DXGI_FORMAT> outputFormats        = GetOutputFormats();
 
 		m_inputSlotBindings.clear();
 		for (D3D12_INPUT_ELEMENT_DESC& inputElement : inputElements)
 		{
 			const MeshAttribute attribute = GetMeshAttributeFromName(inputElement.SemanticName,
-																	 inputElement.SemanticIndex);
+				inputElement.SemanticIndex);
 			if (attribute != MeshAttribute::UNKNOWN)
 			{
 				m_inputSlotBindings[inputElement.InputSlot] = attribute;
@@ -238,8 +238,7 @@ namespace Rendering::Dx12
 			pipelineStateDesc.RTVFormats[i] = outputFormats[i];
 		}
 
-		Dx12Context::Get().GetDevice()->
-						   CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&m_pipelineState));
+		Dx12Context::Get().GetDevice()->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&m_pipelineState));
 
 		// ReSharper disable once CppUseStructuredBinding
 		for (const auto& inputElement : inputElements)
@@ -259,12 +258,12 @@ namespace Rendering::Dx12
 			D3D12_SIGNATURE_PARAMETER_DESC signatureParameter;
 			m_vs->GetReflector()->GetInputParameterDesc(i, &signatureParameter);
 
-			inputElements[i].SemanticName = _strdup(signatureParameter.SemanticName);
-			inputElements[i].SemanticIndex = signatureParameter.SemanticIndex;
-			inputElements[i].Format = GetLayoutElement(signatureParameter.Mask, signatureParameter.ComponentType);
-			inputElements[i].InputSlot = i;
-			inputElements[i].AlignedByteOffset = 0;
-			inputElements[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+			inputElements[i].SemanticName         = _strdup(signatureParameter.SemanticName);
+			inputElements[i].SemanticIndex        = signatureParameter.SemanticIndex;
+			inputElements[i].Format               = GetLayoutElement(signatureParameter.Mask, signatureParameter.ComponentType);
+			inputElements[i].InputSlot            = i;
+			inputElements[i].AlignedByteOffset    = 0;
+			inputElements[i].InputSlotClass       = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
 			inputElements[i].InstanceDataStepRate = 0;
 		}
 

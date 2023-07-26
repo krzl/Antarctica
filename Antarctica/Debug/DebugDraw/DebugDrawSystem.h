@@ -16,8 +16,8 @@ class DebugDrawSystem : public System<DebugDrawComponent, Rendering::MeshCompone
 	void OnUpdateEnd() override;
 
 	std::vector<std::shared_ptr<DebugDrawManager::ElementBuilder>> m_awaitingElements;
-	std::vector<float>                                             m_despawnTimes;
+	std::vector<float> m_despawnTimes;
 
 	std::shared_ptr<Shader> m_shader;
-	AttributeUsage          m_attributeUsage = {};
+	AttributeUsage m_attributeUsage = {};
 };

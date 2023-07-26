@@ -15,19 +15,15 @@ namespace Rendering::Dx12
 		return handle;
 	}
 
-	std::shared_ptr<DescriptorHeapHandle> ScratchBuffer::CreateSRV(const uint32_t elementSize,
-																   const uint32_t elementCount,
-																   const void*    data)
+	std::shared_ptr<DescriptorHeapHandle> ScratchBuffer::CreateSRV(const uint32_t elementSize, const uint32_t elementCount, const void* data)
 	{
 		const ScratchBufferHandle handle = CreateHandle(elementSize * elementCount, data);
 		return CreateSRV(handle, elementSize);
 	}
 
-	std::shared_ptr<DescriptorHeapHandle> ScratchBuffer::CreateSRV(const ScratchBufferHandle& handle,
-																   const uint32_t             elementSize)
+	std::shared_ptr<DescriptorHeapHandle> ScratchBuffer::CreateSRV(const ScratchBufferHandle& handle, const uint32_t elementSize)
 	{
 		std::shared_ptr<DescriptorHeapHandle> heapHandle = Dx12Context::Get().CreateHeapHandle();
-
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC desc
 		{
@@ -43,8 +39,7 @@ namespace Rendering::Dx12
 			D3D12_BUFFER_SRV_FLAG_NONE
 		};
 
-		Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_buffers[handle.m_bufferId].Get(), &desc,
-																 heapHandle->GetCPUHandle());
+		Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_buffers[handle.m_bufferId].Get(), &desc, heapHandle->GetCPUHandle());
 
 		return heapHandle;
 	}
@@ -75,8 +70,7 @@ namespace Rendering::Dx12
 		return m_buffers[scratchBufferHandle.m_bufferId]->GetGPUVirtualAddress() + scratchBufferHandle.m_offset;
 	}
 
-	std::shared_ptr<DescriptorHeapHandle> ScratchBuffer::CreateUAV(const ScratchBufferHandle& handle,
-																   const uint32_t             elementSize)
+	std::shared_ptr<DescriptorHeapHandle> ScratchBuffer::CreateUAV(const ScratchBufferHandle& handle, const uint32_t elementSize)
 	{
 		ID3D12Device* device = Dx12Context::Get().GetDevice();
 
@@ -94,8 +88,7 @@ namespace Rendering::Dx12
 
 		std::shared_ptr<DescriptorHeapHandle> heapHandle = Dx12Context::Get().CreateHeapHandle();
 
-		device->CreateUnorderedAccessView(m_buffers[handle.m_bufferId].Get(), nullptr, &uavDesc,
-										  heapHandle->GetCPUHandle());
+		device->CreateUnorderedAccessView(m_buffers[handle.m_bufferId].Get(), nullptr, &uavDesc, heapHandle->GetCPUHandle());
 
 		return heapHandle;
 	}
@@ -109,16 +102,11 @@ namespace Rendering::Dx12
 		ID3D12Device* device = Dx12Context::Get().GetDevice();
 
 		const CD3DX12_HEAP_PROPERTIES heapProperties(bIsUav ? D3D12_HEAP_TYPE_DEFAULT : D3D12_HEAP_TYPE_UPLOAD);
-		const CD3DX12_RESOURCE_DESC   bufferInfo = CD3DX12_RESOURCE_DESC::Buffer(
-			BUFFER_SIZE, bIsUav ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE);
+		const CD3DX12_RESOURCE_DESC bufferInfo = CD3DX12_RESOURCE_DESC::Buffer(BUFFER_SIZE,
+			bIsUav ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE);
 
-		device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
-										&bufferInfo,
-										bIsUav ?
-											D3D12_RESOURCE_STATE_UNORDERED_ACCESS :
-											D3D12_RESOURCE_STATE_GENERIC_READ,
-										nullptr,
-										IID_PPV_ARGS(&buffer));
+		device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &bufferInfo,
+			bIsUav ? D3D12_RESOURCE_STATE_UNORDERED_ACCESS : D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&buffer));
 
 		std::ostringstream scratchBufferStream;
 		scratchBufferStream << "Scratch Buffer " << bufferId;
@@ -184,8 +172,7 @@ namespace Rendering::Dx12
 		};
 	}
 
-	void ScratchBuffer::SetData(const void*    data, const uint32_t bufferId, const uint32_t offset,
-								const uint32_t size) const
+	void ScratchBuffer::SetData(const void* data, const uint32_t bufferId, const uint32_t offset, const uint32_t size) const
 	{
 		memcpy(m_mappedBuffers[bufferId] + offset, data, size);
 	}

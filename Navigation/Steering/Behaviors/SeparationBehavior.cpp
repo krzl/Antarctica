@@ -8,9 +8,8 @@
 
 namespace Navigation
 {
-	Vector2D SeparationBehavior::GetLinearAcceleration(const TransformComponent* transform,
-		const MovementComponent*                                                 movement,
-		const std::vector<NearbyTarget>&                                         nearbyTargets)
+	Vector2D SeparationBehavior::GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
+													   const std::vector<NearbyTarget>& nearbyTargets)
 	{
 		Vector2D totalAcceleration = Vector2D::zero;
 
@@ -21,7 +20,7 @@ namespace Navigation
 		for (const NearbyTarget& target : nearbyTargets)
 		{
 			const Vector2D direction = transform->m_localPosition.xy - target.m_transform->m_localPosition.xy;
-			const float    distance  = Magnitude(direction);
+			const float distance     = Magnitude(direction);
 
 			const float otherRadius = target.m_movement->m_radius;
 

@@ -11,32 +11,27 @@ namespace Rendering::Dx12
 										  ComPtr<ID3D12Resource>& uploadBuffer, ComPtr<ID3D12Resource>& buffer)
 	{
 		const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
-		Dx12Context::Get().GetDevice()->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
-																D3D12_RESOURCE_STATE_COMMON,
-																nullptr, IID_PPV_ARGS(&buffer));
+		Dx12Context::Get().GetDevice()->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_COMMON,
+			nullptr, IID_PPV_ARGS(&buffer));
 
 
-		const UINT64 uploadBufferSize = GetRequiredIntermediateSize(buffer.Get(), 0, (uint32_t) subresourceData.size());
+		const UINT64 uploadBufferSize                = GetRequiredIntermediateSize(buffer.Get(), 0, (uint32_t) subresourceData.size());
 		const CD3DX12_RESOURCE_DESC uploadBufferInfo = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
 
 		const CD3DX12_HEAP_PROPERTIES tempHeapProperties(D3D12_HEAP_TYPE_UPLOAD);
-		Dx12Context::Get().GetDevice()->CreateCommittedResource(&tempHeapProperties, D3D12_HEAP_FLAG_NONE,
-																&uploadBufferInfo,
-																D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-																IID_PPV_ARGS(&uploadBuffer));
+		Dx12Context::Get().GetDevice()->CreateCommittedResource(&tempHeapProperties, D3D12_HEAP_FLAG_NONE, &uploadBufferInfo,
+			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&uploadBuffer));
 
-		const CD3DX12_RESOURCE_BARRIER transitionToCopyDest = CD3DX12_RESOURCE_BARRIER::Transition(buffer.Get(),
-																								   D3D12_RESOURCE_STATE_COMMON,
-																								   D3D12_RESOURCE_STATE_COPY_DEST);
+		const CD3DX12_RESOURCE_BARRIER transitionToCopyDest = CD3DX12_RESOURCE_BARRIER::Transition(buffer.Get(), D3D12_RESOURCE_STATE_COMMON,
+			D3D12_RESOURCE_STATE_COPY_DEST);
 		Dx12Context::Get().GetCommandList()->ResourceBarrier(1, &transitionToCopyDest);
 
-		UpdateSubresources<10>(Dx12Context::Get().GetCommandList(), buffer.Get(), uploadBuffer.Get(),
-							   0, 0, (uint32_t) subresourceData.size(), subresourceData.data());
+		UpdateSubresources<10>(Dx12Context::Get().GetCommandList(), buffer.Get(), uploadBuffer.Get(), 0, 0, (uint32_t) subresourceData.size(),
+			subresourceData.data());
 
 
-		const CD3DX12_RESOURCE_BARRIER transitionToRead = CD3DX12_RESOURCE_BARRIER::Transition(buffer.Get(),
-																							   D3D12_RESOURCE_STATE_COPY_DEST,
-																							   targetState);
+		const CD3DX12_RESOURCE_BARRIER transitionToRead = CD3DX12_RESOURCE_BARRIER::Transition(buffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST,
+			targetState);
 		Dx12Context::Get().GetCommandList()->ResourceBarrier(1, &transitionToRead);
 	}
 }

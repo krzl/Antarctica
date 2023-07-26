@@ -11,14 +11,11 @@ namespace Rendering
 
 		virtual ~DynamicBuffer();
 
-		void     Init(const uint32_t elementCount, const uint32_t elementSize);
-		void     InitUAV(const uint32_t elementCount, const uint32_t elementSize);
+		void Init(const uint32_t elementCount, const uint32_t elementSize);
+		void InitUAV(const uint32_t elementCount, const uint32_t elementSize);
 		NativeBuffer* GetCurrentBuffer() const;
 
-		[[nodiscard]] bool IsInitialized() const
-		{
-			return m_elementCount != 0;
-		}
+		[[nodiscard]] bool IsInitialized() const { return m_elementCount != 0; }
 
 	protected:
 

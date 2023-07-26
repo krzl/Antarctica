@@ -18,10 +18,7 @@ static BoundingBox GetBoundingBox(const std::vector<Point3D>& pointsList)
 	return boundingBox;
 }
 
-static std::vector<Point3D> GeneratePointInCircle(uint32_t pointCount,
-	const Point3D                                          center,
-	const Vector3D&                                        direction,
-	float                                                  radius)
+static std::vector<Point3D> GeneratePointInCircle(uint32_t pointCount, const Point3D center, const Vector3D& direction, float radius)
 {
 	std::vector<Point3D> points(pointCount);
 
@@ -45,8 +42,8 @@ static std::vector<Point3D> GeneratePointInCircle(uint32_t pointCount,
 	a.Normalize();
 
 	Vector3D b(direction.y * a.z - direction.z * a.y,
-			   direction.z * a.x - direction.x * a.z,
-			   direction.x * a.y - direction.y * a.x);
+		direction.z * a.x - direction.x * a.z,
+		direction.x * a.y - direction.y * a.x);
 
 
 	for (uint32_t i = 0; i < pointCount; ++i)
@@ -63,13 +60,7 @@ static std::vector<Point3D> GeneratePointInCircle(uint32_t pointCount,
 	return points;
 }
 
-void DebugDrawManager::DrawBox(Point3D center,
-	Quaternion                         rotation,
-	float                              x,
-	float                              y,
-	float                              z,
-	float                              duration,
-	Color                              color)
+void DebugDrawManager::DrawBox(Point3D center, Quaternion rotation, float x, float y, float z, float duration, Color color)
 {
 	const Vector3D xVec = rotation.GetDirectionX() * x / 2.0f;
 	const Vector3D yVec = rotation.GetDirectionY() * y / 2.0f;
@@ -112,16 +103,10 @@ void DebugDrawManager::DrawBox(Point3D center,
 }
 
 
-void DebugDrawManager::DrawCylinder(Point3D center,
-	Quaternion                              rotation,
-	float                                   height,
-	float                                   width,
-	float                                   duration,
-	Color                                   color,
-	uint32_t                                segments)
+void DebugDrawManager::DrawCylinder(Point3D center, Quaternion rotation, float height, float width, float duration, Color color, uint32_t segments)
 {
-	const Vector3D up         = rotation.GetDirectionZ();
-	const float    halfHeight = height / 2.0f;
+	const Vector3D up      = rotation.GetDirectionZ();
+	const float halfHeight = height / 2.0f;
 
 	const Point3D start = center - up * halfHeight;
 	const Point3D end   = center + up * halfHeight;
@@ -167,12 +152,8 @@ void DebugDrawManager::DrawCylinder(Point3D center,
 	m_onDrawItemQueued.Dispatch(builder);
 }
 
-void DebugDrawManager::DrawLine(const Point3D start,
-	const Point3D                             end,
-	const float                               width,
-	const float                               duration,
-	const Color                               color,
-	const uint32_t                            segments)
+void DebugDrawManager::DrawLine(const Point3D start, const Point3D end, const float width, const float duration, const Color color,
+								const uint32_t segments)
 {
 	std::shared_ptr<ElementBuilder> builder = ReserveLines(1, segments);
 	AppendLine(start, end, builder, segments, width);
@@ -233,7 +214,7 @@ void DebugDrawManager::DrawSphere(const Point3D center, const float radius, cons
 
 void DebugDrawManager::DrawTriangles(std::vector<Point3D>&& pointsList, const float duration, const Color color)
 {
-	std::shared_ptr<ElementBuilder> builder;
+	const std::shared_ptr<ElementBuilder> builder;
 
 	builder->m_vertices = std::move(pointsList);
 
@@ -258,10 +239,10 @@ std::shared_ptr<DebugDrawManager::ElementBuilder> DebugDrawManager::ReserveLines
 }
 
 void DebugDrawManager::AppendLine(Point3D start,
-	Point3D                               end,
-	std::shared_ptr<ElementBuilder>&      drawElement,
-	uint32_t                              segmentCount,
-	float                                 width) const
+								  Point3D end,
+								  std::shared_ptr<ElementBuilder>& drawElement,
+								  uint32_t segmentCount,
+								  float width) const
 {
 	uint32_t& currentVertex = drawElement->m_currentVertex;
 	uint32_t& currentIndex  = drawElement->m_currentIndex;
@@ -300,9 +281,7 @@ void DebugDrawManager::AppendLine(Point3D start,
 	}
 
 	memcpy(&drawElement->m_vertices[currentVertex], lowerCircle.data(), lowerCircle.size() * sizeof(Point3D));
-	memcpy(&drawElement->m_vertices[currentVertex + segmentCount],
-		   upperCircle.data(),
-		   upperCircle.size() * sizeof(Point3D));
+	memcpy(&drawElement->m_vertices[currentVertex + segmentCount], upperCircle.data(), upperCircle.size() * sizeof(Point3D));
 
 	currentVertex += 2 * segmentCount;
 }

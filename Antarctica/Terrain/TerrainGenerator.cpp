@@ -29,18 +29,16 @@ std::shared_ptr<Terrain> TerrainGenerator::GenerateTerrain(const SpawnParameters
 	return terrain;
 }
 
-void TerrainGenerator::SpawnRandomIsland(Terrain& terrain, const SpawnParameters& params, const uint32_t startPosX,
-										 const uint32_t startPosY, const Terrain::HeightLevel level)
+void TerrainGenerator::SpawnRandomIsland(Terrain& terrain, const SpawnParameters& params, const uint32_t startPosX, const uint32_t startPosY,
+										 const Terrain::HeightLevel level)
 {
 	for (uint32_t i = 0; i < 2; ++i)
 	{
-		const int32_t startingHeight = Random::GetRandomUInt32(params.m_minIslandStartingSize,
-															   params.m_maxIslandStartingSize);
+		const int32_t startingHeight = Random::GetRandomUInt32(params.m_minIslandStartingSize, params.m_maxIslandStartingSize);
 		for (uint32_t j = 0; j < 2; ++j)
 		{
-			int32_t        currentHeight = startingHeight;
-			const uint32_t width         = Random::GetRandomInt32(params.m_minIslandStartingSize,
-																  params.m_maxIslandStartingSize);
+			int32_t currentHeight = startingHeight;
+			const uint32_t width  = Random::GetRandomInt32(params.m_minIslandStartingSize, params.m_maxIslandStartingSize);
 
 			for (uint32_t k = 0; k < width; ++k)
 			{
@@ -48,8 +46,7 @@ void TerrainGenerator::SpawnRandomIsland(Terrain& terrain, const SpawnParameters
 				{
 					const float heightWidthRatio = (float) currentHeight / (width - k);
 					const float slopeRatio       = LerpClamped(1.0f, params.m_slopeRatio, (float) k / (width - 1));
-					currentHeight += Random::GetRandomInt32(
-						heightWidthRatio * slopeRatio * -params.m_heightDegradationRate,
+					currentHeight += Random::GetRandomInt32(heightWidthRatio * slopeRatio * -params.m_heightDegradationRate,
 						params.m_maxHeightIncrease);
 				}
 				if (currentHeight <= 0)

@@ -45,13 +45,13 @@ void Character::SetupComponents(ComponentAccessor& accessor)
 	Entity::SetupComponents(accessor);
 
 
-	AbilityTriggerComponent*       abilityTrigger = accessor.GetComponent<AbilityTriggerComponent>();
-	Anim::AnimatedMeshComponent*   animatedMesh   = accessor.GetComponent<Anim::AnimatedMeshComponent>();
-	ColliderComponent*             collider       = accessor.GetComponent<ColliderComponent>();
-	InputListenerComponent*        input          = accessor.GetComponent<InputListenerComponent>();
-	Rendering::MeshComponent*      meshComponent  = accessor.GetComponent<Rendering::MeshComponent>();
-	Navigation::MovementComponent* movement       = accessor.GetComponent<Navigation::MovementComponent>();
-	TransformComponent*            transform      = accessor.GetComponent<TransformComponent>();
+	AbilityTriggerComponent* abilityTrigger   = accessor.GetComponent<AbilityTriggerComponent>();
+	Anim::AnimatedMeshComponent* animatedMesh = accessor.GetComponent<Anim::AnimatedMeshComponent>();
+	ColliderComponent* collider               = accessor.GetComponent<ColliderComponent>();
+	InputListenerComponent* input             = accessor.GetComponent<InputListenerComponent>();
+	Rendering::MeshComponent* meshComponent   = accessor.GetComponent<Rendering::MeshComponent>();
+	Navigation::MovementComponent* movement   = accessor.GetComponent<Navigation::MovementComponent>();
+	TransformComponent* transform             = accessor.GetComponent<TransformComponent>();
 
 
 	transform->m_localScale    = Vector3D(0.01f, 0.01f, 0.01f);
@@ -80,20 +80,20 @@ void Character::SetupComponents(ComponentAccessor& accessor)
 		const std::shared_ptr<AnimationState> workState = stateMachineBuilder.AddState<AnimationState>(workAnim);
 
 		idleState->AddTransition({
-									 true,
-									 0.3f,
-									 { { (uint32_t) AnimTrigger::WALK } },
-									 walkState.get()
-								 },
-								 true);
+				walkState.get(),
+				0.3f,
+				true,
+				{ { (uint32_t) AnimTrigger::WALK } },
+			},
+			true);
 
 		idleState->AddTransition({
-									 true,
-									 0.3f,
-									 { { (uint32_t) AnimTrigger::WORK } },
-									 workState.get()
-								 },
-								 true);
+				workState.get(),
+				0.3f,
+				true,
+				{ { (uint32_t) AnimTrigger::WORK } },
+			},
+			true);
 
 		const std::shared_ptr<StateMachine> stateMachine = stateMachineBuilder.Build(idleState);
 
@@ -106,15 +106,14 @@ void Character::SetupComponents(ComponentAccessor& accessor)
 	animatedMesh->m_animator = animator;
 	animatedMesh->m_animationSolver.ResetSolver(animator);
 
-	const std::shared_ptr<Texture> texture = AssetManager::GetAsset<Texture>(
-		"../Resources/Textures/TT_RTS_Units_blue.png");
+	const std::shared_ptr<Texture> texture = AssetManager::GetAsset<Texture>("../Resources/Textures/TT_RTS_Units_blue.png");
 
-	std::shared_ptr<Shader> shader   = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic.hlsl");
-	const auto              material = std::make_shared<Material>(shader);
+	std::shared_ptr<Shader> shader = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic.hlsl");
+	const auto material            = std::make_shared<Material>(shader);
 	material->SetTexture("tex", texture);
 
-	std::shared_ptr<Shader> shaderSkin   = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic_skinned.hlsl");
-	const auto              materialSkin = std::make_shared<Material>(shaderSkin);
+	std::shared_ptr<Shader> shaderSkin = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic_skinned.hlsl");
+	const auto materialSkin            = std::make_shared<Material>(shaderSkin);
 	materialSkin->SetTexture("tex", texture);
 	meshComponent->m_materials = { material, material, material, materialSkin };
 

@@ -12,7 +12,7 @@ public:
 	void TryAddMouseMoveCommand();
 	void Clear();
 
-	const InputCommand::MousePressInput*   GetMouseButtonPress(InputCommand::MouseButtonId mouseButtonId) const;
+	const InputCommand::MousePressInput* GetMouseButtonPress(InputCommand::MouseButtonId mouseButtonId) const;
 	const InputCommand::MouseReleaseInput* GetMouseButtonRelease(InputCommand::MouseButtonId mouseButtonId) const;
-	const InputCommand::MouseMoveInput*    GetMouseMove() const;
+	const InputCommand::MouseMoveInput* GetMouseMove() const;
 };

@@ -8,8 +8,8 @@
 struct MeshNode
 {
 	std::string m_name;
-	uint64_t    m_nameHash;
-	int32_t     m_parentNodeId;
+	uint64_t m_nameHash;
+	int32_t m_parentNodeId;
 	Transform4D m_globalTransform;
 	Transform4D m_localTransform;
 };
@@ -20,64 +20,24 @@ public:
 
 	void AddSubmesh(Submesh&& submesh);
 
-	void AddAnimation(const std::shared_ptr<Animation> animation)
-	{
-		m_animations.push_back(animation);
-	}
+	void AddAnimation(const std::shared_ptr<Animation> animation) { m_animations.push_back(animation); }
 
-	[[nodiscard]] uint32_t GetAnimationCount() const
-	{
-		return (uint32_t) m_animations.size();
-	}
+	[[nodiscard]] uint32_t GetAnimationCount() const { return (uint32_t) m_animations.size(); }
+	[[nodiscard]] std::shared_ptr<Animation> GetAnimation(const uint32_t i) const { return m_animations[i]; }
+	[[nodiscard]] const std::vector<std::shared_ptr<Animation>>& GetAnimations() const { return m_animations; }
 
-	[[nodiscard]] std::shared_ptr<Animation> GetAnimation(const uint32_t i) const
-	{
-		assert(i < GetAnimationCount());
-		return m_animations[i];
-	}
+	[[nodiscard]] uint32_t GetSubmeshCount() const { return (uint32_t) m_submeshes.size(); }
+	[[nodiscard]] const Submesh& GetSubmesh(const uint32_t i) const { return m_submeshes[i]; }
+	[[nodiscard]] const std::vector<Submesh>& GetSubmeshes() const { return m_submeshes; }
 
-	[[nodiscard]] const std::vector<std::shared_ptr<Animation>>& GetAnimations() const
-	{
-		return m_animations;
-	}
+	[[nodiscard]] const std::vector<MeshNode>& GetNodes() const { return m_nodes; }
 
-	[[nodiscard]] uint32_t GetSubmeshCount() const
-	{
-		return (uint32_t) m_submeshes.size();
-	}
-
-	[[nodiscard]] const Submesh& GetSubmesh(const uint32_t i) const
-	{
-		assert(i < GetSubmeshCount());
-		return m_submeshes[i];
-	}
-
-	[[nodiscard]] const std::vector<Submesh>& GetSubmeshes() const
-	{
-		return m_submeshes;
-	}
-
-	[[nodiscard]] const std::vector<MeshNode>& GetNodes() const
-	{
-		return m_nodes;
-	}
-
-	[[nodiscard]] const Transform4D& GetGlobalInverseMatrix() const
-	{
-		return m_globalInverseMatrix;
-	}
+	[[nodiscard]] const Transform4D& GetGlobalInverseMatrix() const { return m_globalInverseMatrix; }
+	void SetGlobalInverseMatrix(const Transform4D& globalInverseMatrix) { m_globalInverseMatrix = globalInverseMatrix; }
 
 	[[nodiscard]] BoundingBox GetBoundingBox() const { return m_boundingBox; }
 
-	void SetGlobalInverseMatrix(const Transform4D& globalInverseMatrix)
-	{
-		m_globalInverseMatrix = globalInverseMatrix;
-	}
-
-	void SetMeshNodeData(const std::vector<MeshNode>& nodes)
-	{
-		m_nodes = nodes;
-	}
+	void SetMeshNodeData(const std::vector<MeshNode>& nodes) { m_nodes = nodes; }
 
 protected:
 
@@ -88,7 +48,7 @@ protected:
 private:
 
 	std::vector<std::shared_ptr<Animation>> m_animations;
-	std::vector<MeshNode>                   m_nodes;
-	BoundingBox                             m_boundingBox         = {};
-	Transform4D                             m_globalInverseMatrix = Transform4D::identity;
+	std::vector<MeshNode> m_nodes;
+	BoundingBox m_boundingBox         = {};
+	Transform4D m_globalInverseMatrix = Transform4D::identity;
 };

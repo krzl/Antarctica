@@ -19,8 +19,7 @@ namespace Rendering
 
 	void DynamicBuffer::InitUAV(const uint32_t elementCount, const uint32_t elementSize)
 	{
-
-		this->m_elementCount = elementCount;
+		this->m_elementCount      = elementCount;
 		this->m_bufferElementSize = elementSize;
 
 		for (uint32_t i = 0; i < Renderer::BUFFER_COUNT; ++i)

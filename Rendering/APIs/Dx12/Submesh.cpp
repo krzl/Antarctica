@@ -10,7 +10,7 @@ namespace Rendering::Dx12
 	{
 		struct StrCmp
 		{
-			bool operator()(char const* a, char const* b) const
+			bool operator()(const char* a, const char* b) const
 			{
 				return std::strcmp(a, b) < 0;
 			}
@@ -82,7 +82,7 @@ namespace Rendering::Dx12
 	uint16_t GetAttributeDataSize(const MeshAttribute attribute, const AttributeOffsets& offsets)
 	{
 		const uint16_t attributeOffset = GetAttributeOffset(attribute, offsets);
-		uint16_t       nextOffset      = attributeOffset;
+		uint16_t nextOffset            = attributeOffset;
 
 		MeshAttribute nextAttribute = MeshAttribute::POSITION;
 		while (nextOffset <= attributeOffset)

@@ -8,7 +8,7 @@
 void InputSystem::Init()
 {
 	System::Init();
-	
+
 	InputManager* inputManager = InputManager::GetInstance();
 
 	inputManager->OnLeftMouseButtonPressed.AddListener([this]()

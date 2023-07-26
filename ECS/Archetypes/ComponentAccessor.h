@@ -23,6 +23,6 @@ private:
 
 	Entity* m_entity;
 
-	uint32_t         m_entityOffset;
+	uint32_t m_entityOffset;
 	const Archetype* m_archetype;
 };

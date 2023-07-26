@@ -6,7 +6,7 @@ struct AnimationNode;
 struct BoneWeight
 {
 	uint32_t m_boneId = 0;
-	float    m_weight = 0.0f;
+	float m_weight    = 0.0f;
 };
 
 struct VertexWeights
@@ -17,17 +17,17 @@ struct VertexWeights
 struct Bone
 {
 	std::string m_boneName;
-	uint64_t    m_boneNameHash;
-	Skeleton*   m_skeleton = nullptr;
-	Matrix4D    m_offsetMatrix;
-	Capsule     m_collider;
+	uint64_t m_boneNameHash;
+	Skeleton* m_skeleton = nullptr;
+	Matrix4D m_offsetMatrix;
+	Capsule m_collider;
 };
 
 struct Skeleton
 {
-	std::vector<Bone>          m_bones;
+	std::vector<Bone> m_bones;
 	std::vector<VertexWeights> m_vertexWeights;
-	Transform4D                m_globalInverseTransform;
+	Transform4D m_globalInverseTransform;
 
 	int32_t GetBoneId(const AnimationNode* node) const;
 

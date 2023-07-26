@@ -13,7 +13,7 @@ class InputSystem : public System<InputListenerComponent>
 	void Update(uint64_t entityId, InputListenerComponent* inputListener) override;
 
 public:
-	
+
 	void ResetInput();
 
 	std::set<Entity*> m_selectedEntities;

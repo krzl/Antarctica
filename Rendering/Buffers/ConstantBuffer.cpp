@@ -5,8 +5,7 @@
 
 namespace Rendering
 {
-	void ConstantBuffer::Init(const uint32_t elementCount, const uint32_t elementSize,
-							  const void*    initialData)
+	void ConstantBuffer::Init(const uint32_t elementCount, const uint32_t elementSize, const void* initialData)
 	{
 		DynamicBuffer::Init(elementCount, elementSize);
 

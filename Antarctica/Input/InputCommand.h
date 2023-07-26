@@ -29,14 +29,14 @@ struct InputCommand
 
 	struct MouseMoveInput
 	{
-		uint32_t m_posX,   m_posY;
-		int32_t  m_deltaX, m_deltaY;
+		uint32_t m_posX, m_posY;
+		int32_t m_deltaX, m_deltaY;
 	};
 
 	union
 	{
-		MousePressInput   m_mousePressInput;
+		MousePressInput m_mousePressInput;
 		MouseReleaseInput m_mouseReleaseInput;
-		MouseMoveInput    m_mouseMoveInput;
+		MouseMoveInput m_mouseMoveInput;
 	};
 };

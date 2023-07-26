@@ -19,10 +19,10 @@ public:
 
 private:
 
-	std::string                 m_nodeName;
-	Transform4D                 m_baseTransform;
-	std::vector<PositionKey>    m_positionKeys;
-	std::vector<RotationKey>    m_rotationKeys;
-	std::vector<ScaleKey>       m_scaleKeys;
+	std::string m_nodeName;
+	Transform4D m_baseTransform;
+	std::vector<PositionKey> m_positionKeys;
+	std::vector<RotationKey> m_rotationKeys;
+	std::vector<ScaleKey> m_scaleKeys;
 	std::vector<AnimationNode*> m_children;
 };

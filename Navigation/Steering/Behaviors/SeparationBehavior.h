@@ -13,12 +13,11 @@ namespace Navigation
 			SetWeight(1.0f);
 		}
 
-		Vector2D GetLinearAcceleration(const TransformComponent* transform,
-			const MovementComponent*                             movement,
-			const std::vector<NearbyTarget>&                     nearbyTargets) override;
+		Vector2D GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
+									   const std::vector<NearbyTarget>& nearbyTargets) override;
 
 		[[nodiscard]] float GetDecayCoefficient() const { return m_decayCoefficient; }
-		void                SetDecayCoefficient(const float radiusScale) { m_decayCoefficient = radiusScale; }
+		void SetDecayCoefficient(const float radiusScale) { m_decayCoefficient = radiusScale; }
 
 	private:
 

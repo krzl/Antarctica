@@ -5,9 +5,9 @@
 
 struct TransformComponent : Component
 {
-	Point3D    m_localPosition = Point3D::origin;
+	Point3D m_localPosition    = Point3D::origin;
 	Quaternion m_localRotation = Quaternion::identity;
-	Vector3D   m_localScale    = { 1.0f, 1.0f, 1.0f };
+	Vector3D m_localScale      = { 1.0f, 1.0f, 1.0f };
 
 	QuadtreePlacementRef m_quadtreePlacement;
 

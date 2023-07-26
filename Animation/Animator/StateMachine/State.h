@@ -15,14 +15,12 @@ namespace Anim
 
 		void AddTransition(Transition&& transition, bool isReversible);
 
-
-		virtual bool IsFinished(float currentTime) const { return true; }
+		virtual bool IsFinished(float currentTime) const;
 
 	protected:
 
-		virtual void CalculateBones(std::vector<Transform4D>& boneMatrices,
-			const std::vector<MeshNode>&                      meshNodes,
-			const float                                       currentTime) const = 0;
+		virtual void CalculateBones(std::vector<Transform4D>& boneMatrices, const std::vector<MeshNode>& meshNodes,
+									const float currentTime) const = 0;
 
 	private:
 

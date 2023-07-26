@@ -6,9 +6,8 @@
 
 namespace Navigation
 {
-	Vector2D SteeringPipeline::GetLinearAcceleration(const TransformComponent* transform,
-		MovementComponent*                                                     movement,
-		const std::vector<NearbyTarget>&                                       nearbyTargets) const
+	Vector2D SteeringPipeline::GetLinearAcceleration(const TransformComponent* transform, MovementComponent* movement,
+													 const std::vector<NearbyTarget>& nearbyTargets) const
 	{
 		Vector2D totalAcceleration = Vector2D::zero;
 

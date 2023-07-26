@@ -1,3 +1,4 @@
+// ReSharper disable CppInconsistentNaming
 #pragma once
 
 #include "Asset.h"
@@ -10,30 +11,30 @@ struct aiAnimation;
 struct PositionKey
 {
 	const Vector3D m_position;
-	const float    m_time;
+	const float m_time;
 };
 
 struct RotationKey
 {
 	const Quaternion m_rotation;
-	const float      m_time;
+	const float m_time;
 };
 
 struct ScaleKey
 {
 	const Vector3D m_scale;
-	const float    m_time;
+	const float m_time;
 };
 
 struct AnimationNode
 {
-	AnimationNode() { }
+	AnimationNode() = default;
 
-	AnimationNode(std::string&&                 nodeName,
-				  Transform4D&&                 baseTransform,
-				  std::vector<PositionKey>&&    positionKeys,
-				  std::vector<RotationKey>&&    rotationKeys,
-				  std::vector<ScaleKey>&&       scaleKeys,
+	AnimationNode(std::string&& nodeName,
+				  Transform4D&& baseTransform,
+				  std::vector<PositionKey>&& positionKeys,
+				  std::vector<RotationKey>&& rotationKeys,
+				  std::vector<ScaleKey>&& scaleKeys,
 				  std::vector<AnimationNode*>&& children) :
 		m_nodeName(std::move(nodeName)),
 		m_nodeNameHash(std::hash<std::string>()(m_nodeName)),
@@ -44,13 +45,13 @@ struct AnimationNode
 		m_children(std::move(children)) {}
 
 	std::string m_nodeName;
-	uint64_t    m_nodeNameHash;
+	uint64_t m_nodeNameHash;
 
 	Transform4D m_baseTransform = {};
 
 	std::vector<PositionKey> m_positionKeys;
 	std::vector<RotationKey> m_rotationKeys;
-	std::vector<ScaleKey>    m_scaleKeys;
+	std::vector<ScaleKey> m_scaleKeys;
 
 	std::vector<AnimationNode*> m_children;
 };
@@ -72,8 +73,8 @@ public:
 	Animation() = default;
 
 	[[nodiscard]] const std::vector<AnimationNode>& GetNodes() const { return m_nodes; }
-	[[nodiscard]] const AnimationNode*              GetRootNode() const { return m_rootNode; }
-	[[nodiscard]] float                             GetDuration() const { return m_duration; }
+	[[nodiscard]] const AnimationNode* GetRootNode() const { return m_rootNode; }
+	[[nodiscard]] float GetDuration() const { return m_duration; }
 
 protected:
 
@@ -86,5 +87,5 @@ private:
 private:
 
 	std::vector<AnimationNode> m_nodes;
-	AnimationNode*             m_rootNode;
+	AnimationNode* m_rootNode;
 };

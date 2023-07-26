@@ -19,7 +19,7 @@ QuadtreePlacementRef QuadtreeNode::AddEntity(Entity* entity, const BoundingBox& 
 {
 	m_isDirty = true;
 	++m_totalObjectCount;
-	
+
 	for (QuadtreeNode* childNode : m_childNodes)
 	{
 		if (childNode != nullptr && childNode->Contains(boundingBox))
@@ -165,8 +165,8 @@ Entity* QuadtreeNode::TraceObject(const RayIntersectionTester& ray, float& minDi
 	{
 		if (childNode != nullptr && ray.Intersect(childNode->m_boundingBox) < minDistance)
 		{
-			float   distance = minDistance;
-			Entity* object   = childNode->TraceObject(ray, distance);
+			float distance = minDistance;
+			Entity* object = childNode->TraceObject(ray, distance);
 			if (object && distance >= 0.0f && distance < minDistance)
 			{
 				closestObject = object;

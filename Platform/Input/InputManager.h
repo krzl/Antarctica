@@ -12,30 +12,11 @@ public:
 
 	InputManager();
 
-	[[nodiscard]] bool IsLeftMousePressed() const
-	{
-		return m_isLeftMousePressed;
-	}
-
-	[[nodiscard]] bool IsMiddleMousePressed() const
-	{
-		return m_isMiddleMousePressed;
-	}
-
-	[[nodiscard]] bool IsRightMousePressed() const
-	{
-		return m_isRightMousePressed;
-	}
-
-	[[nodiscard]] const MousePosition& GetMousePosition() const
-	{
-		return m_mousePosition;
-	}
-
-	[[nodiscard]] const std::pair<int32_t, int32_t>& GetMouseDelta() const
-	{
-		return m_mouseDelta;
-	}
+	[[nodiscard]] bool IsLeftMousePressed() const { return m_isLeftMousePressed; }
+	[[nodiscard]] bool IsMiddleMousePressed() const { return m_isMiddleMousePressed; }
+	[[nodiscard]] bool IsRightMousePressed() const { return m_isRightMousePressed; }
+	[[nodiscard]] const MousePosition& GetMousePosition() const { return m_mousePosition; }
+	[[nodiscard]] const std::pair<int32_t, int32_t>& GetMouseDelta() const { return m_mouseDelta; }
 
 	Dispatcher<> OnLeftMouseButtonPressed;
 	Dispatcher<> OnMiddleMouseButtonPressed;

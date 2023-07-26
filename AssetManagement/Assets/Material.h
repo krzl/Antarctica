@@ -18,30 +18,13 @@ public:
 	explicit Material(const std::shared_ptr<Shader>& shader) :
 		m_shader(shader) { }
 
-	[[nodiscard]] const std::shared_ptr<Shader>& GetShader() const
-	{
-		return m_shader;
-	}
+	[[nodiscard]] const std::shared_ptr<Shader>& GetShader() const { return m_shader; }
 
-	[[nodiscard]] float GetOrder() const
-	{
-		return m_order;
-	}
+	[[nodiscard]] float GetOrder() const { return m_order; }
+	void SetOrder(const float order) { m_order = order; }
 
-	void SetOrder(const float order)
-	{
-		m_order = order;
-	}
-
-	void SetTexture(const std::string& name, std::shared_ptr<Texture> texture)
-	{
-		m_textures[std::hash<std::string>()(name)] = std::move(texture);
-	}
-
-	[[nodiscard]] const std::unordered_map<uint64_t, std::shared_ptr<Texture>>& GetTextures() const
-	{
-		return m_textures;
-	}
+	[[nodiscard]] const std::unordered_map<uint64_t, std::shared_ptr<Texture>>& GetTextures() const { return m_textures; }
+	void SetTexture(const std::string& name, std::shared_ptr<Texture> texture) { m_textures[std::hash<std::string>()(name)] = std::move(texture); }
 
 	template<typename T, class = std::enable_if_t<sizeof(T) <= sizeof(MaterialVarData)>>
 	void SetVariable(const std::string& name, T var)
@@ -50,10 +33,7 @@ public:
 		memcpy(varData.m_data, &var, sizeof(T));
 	}
 
-	[[nodiscard]] const std::unordered_map<uint64_t, MaterialVarData>& GetShaderVariables() const
-	{
-		return m_shaderVariables;
-	}
+	[[nodiscard]] const std::unordered_map<uint64_t, MaterialVarData>& GetShaderVariables() const { return m_shaderVariables; }
 
 protected:
 
@@ -62,8 +42,8 @@ protected:
 private:
 
 	std::unordered_map<uint64_t, std::shared_ptr<Texture>> m_textures;
-	std::unordered_map<uint64_t, MaterialVarData>          m_shaderVariables;
+	std::unordered_map<uint64_t, MaterialVarData> m_shaderVariables;
 
 	std::shared_ptr<Shader> m_shader;
-	float                   m_order = 0;
+	float m_order = 0;
 };

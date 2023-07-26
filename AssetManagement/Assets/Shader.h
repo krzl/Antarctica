@@ -16,28 +16,13 @@ class Shader : public Asset
 
 public:
 
-	[[nodiscard]] const Rendering::NativeShader* GetNativeObject() const
-	{
-		return m_nativeObject.get();
-	}
+	[[nodiscard]] const Rendering::NativeShader* GetNativeObject() const { return m_nativeObject.get(); }
+	[[nodiscard]] Rendering::NativeShader* GetNativeObject() { return m_nativeObject.get(); }
+	void SetNativeObject(Rendering::NativeShader* nativePtr) { m_nativeObject = NativePtr(nativePtr, Rendering::Deleter); }
 
-	[[nodiscard]] Rendering::NativeShader* GetNativeObject()
-	{
-		return m_nativeObject.get();
-	}
-
-	void SetNativeObject(Rendering::NativeShader* nativePtr)
-	{
-		m_nativeObject = NativePtr(nativePtr, Rendering::Deleter);
-	}
-
-	[[nodiscard]] const std::string& GetPath() const
-	{
-		return m_path;
-	}
+	[[nodiscard]] const std::string& GetPath() const { return m_path; }
 
 	virtual std::unique_ptr<ShaderParams> GetShaderParams() { return std::unique_ptr<ShaderParams>(new ShaderParams); }
-
 
 protected:
 

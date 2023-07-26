@@ -18,11 +18,8 @@ void PlayerCameraSystem::OnUpdateStart()
 	m_cameras.clear();
 }
 
-void PlayerCameraSystem::Update(uint64_t entityId,
-	TransformComponent*                  transform,
-	Rendering::CameraComponent*          camera,
-	CameraScrollComponent*               cameraScroll,
-	InputListenerComponent*              inputListener)
+void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform, Rendering::CameraComponent* camera,
+								CameraScrollComponent* cameraScroll, InputListenerComponent* inputListener)
 {
 	if (inputListener->m_inputQueue != nullptr)
 	{
@@ -43,8 +40,7 @@ void PlayerCameraSystem::Update(uint64_t entityId,
 			if (const InputCommand::MouseMoveInput* mouseMove = inputListener->m_inputQueue->GetMouseMove())
 			{
 				const Vector3D positionDelta = Vector3D(-mouseMove->m_deltaX * cameraScroll->m_cameraSpeed,
-														mouseMove->m_deltaY * cameraScroll->m_cameraSpeed,
-														0.0f);
+					mouseMove->m_deltaY * cameraScroll->m_cameraSpeed, 0.0f);
 				transform->m_localPosition += positionDelta;
 			}
 		}
@@ -80,22 +76,10 @@ Matrix4D PlayerCameraSystem::GetPerspectiveMatrix(const Rendering::CameraCompone
 	const float b = (2.0f * camera->m_farZ * camera->m_nearZ) / (camera->m_nearZ - camera->m_farZ);
 
 	return Matrix4D(
-		1.0f / (tan * m_aspectRatio),
-		0.0f,
-		0.0f,
-		0.0f,
-		0.0f,
-		1.0f / tan,
-		0,
-		0.0f,
-		0.0f,
-		0.0f,
-		a,
-		b,
-		0.0f,
-		0.0f,
-		-1.0f,
-		0.0f
+		1.0f / (tan * m_aspectRatio), 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f / tan, 0, 0.0f,
+		0.0f, 0.0f, a, b,
+		0.0f, 0.0f, -1.0f, 0.0f
 	);
 }
 
@@ -124,24 +108,21 @@ Frustum PlayerCameraSystem::GetFrustum(Rendering::CameraComponent* camera) const
 	Point3D farBotRight = (Point3D) (pointFarBotRight / pointFarBotRight.w).xyz;
 
 	Point3D* frustumPoints[6][3] = {
-		{ &nearTopRight, &nearTopLeft, &nearBotLeft }, // near plane
-		{ &nearTopLeft, &farTopLeft, &farBotLeft }, // left plane
+		{ &nearTopRight, &nearTopLeft, &nearBotLeft },  // near plane
+		{ &nearTopLeft, &farTopLeft, &farBotLeft },     // left plane
 		{ &farTopRight, &nearTopRight, &nearBotRight }, // right plane
-		{ &farTopRight, &farTopLeft, &nearTopLeft }, // top plane
-		{ &nearBotRight, &nearBotLeft, &farBotLeft }, // bot plane
-		{ &farTopLeft, &farTopRight, &farBotRight } // far plane
+		{ &farTopRight, &farTopLeft, &nearTopLeft },    // top plane
+		{ &nearBotRight, &nearBotLeft, &farBotLeft },   // bot plane
+		{ &farTopLeft, &farTopRight, &farBotRight }     // far plane
 	};
 
 	Frustum frustum;
 
 	for (uint32_t i = 0; i < 6; ++i)
 	{
-		frustum.m_planes[i].m_direction = -Cross(*frustumPoints[i][0] - *frustumPoints[i][1],
-												 *frustumPoints[i][2] - *frustumPoints[i][1]);
-
+		frustum.m_planes[i].m_direction = -Cross(*frustumPoints[i][0] - *frustumPoints[i][1], *frustumPoints[i][2] - *frustumPoints[i][1]);
 		frustum.m_planes[i].m_direction = Normalize(frustum.m_planes[i].m_direction);
-
-		frustum.m_planes[i].m_distance = Dot(*frustumPoints[i][0], -frustum.m_planes[i].m_direction);
+		frustum.m_planes[i].m_distance  = Dot(*frustumPoints[i][0], -frustum.m_planes[i].m_direction);
 	}
 
 	return frustum;

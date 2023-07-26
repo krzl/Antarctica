@@ -35,8 +35,8 @@ namespace Rendering
 		virtual void DrawObjects(const CameraData& camera) = 0;
 		virtual void FinalizeDrawing() = 0;
 
-		virtual void     ExecuteAndPresent() = 0;
-		virtual void     Cleanup() = 0;
+		virtual void ExecuteAndPresent() = 0;
+		virtual void Cleanup() = 0;
 		virtual uint32_t GetCurrentBackbufferId() = 0;
 
 		static IContext* CreateContext();

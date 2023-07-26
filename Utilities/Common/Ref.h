@@ -154,5 +154,5 @@ public:
 private:
 
 	std::weak_ptr<T> m_ptr;
-	mutable T*       m_cachedPtr;
+	mutable T* m_cachedPtr;
 };

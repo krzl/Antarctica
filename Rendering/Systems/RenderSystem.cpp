@@ -43,8 +43,8 @@ namespace Rendering
 
 	void RenderSystem::Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderComponent* render)
 	{
-		ComponentAccessor          componentAccessor = World::Get()->GetEntity(entityId)->GetComponentAccessor();
-		const RenderCullComponent* renderCull        = componentAccessor.GetComponent<RenderCullComponent>();
+		ComponentAccessor componentAccessor   = World::Get()->GetEntity(entityId)->GetComponentAccessor();
+		const RenderCullComponent* renderCull = componentAccessor.GetComponent<RenderCullComponent>();
 		if (renderCull && renderCull->m_isCulled)
 		{
 			return;
@@ -116,19 +116,17 @@ namespace Rendering
 		return Transform4D::identity;
 	}
 
-	Transform4D RenderSystem::GetAttachedNodeTransform(ComponentAccessor& componentAccessor,
-		const Mesh&                                                       mesh,
-		int32_t                                                           nodeId,
-		bool                                                              ignoreAttachmentRotation)
+	Transform4D RenderSystem::GetAttachedNodeTransform(ComponentAccessor& componentAccessor, const Mesh& mesh, int32_t nodeId,
+													   bool ignoreAttachmentRotation)
 	{
 		if (Anim::AnimatedMeshComponent* animatedMesh = componentAccessor.GetComponent<Anim::AnimatedMeshComponent>())
 		{
 			Transform4D transform = animatedMesh->m_animationSolver.GetNodeTransforms()[nodeId];
 			if (ignoreAttachmentRotation)
 			{
-				Vector3D   translation;
+				Vector3D translation;
 				Quaternion rotation;
-				Vector3D   scale;
+				Vector3D scale;
 
 				DecomposeTransform(transform, translation, rotation, scale);
 

@@ -13,7 +13,7 @@ public:
 	Quadtree();
 
 	QuadtreePlacementRef AddEntity(Entity* entity, BoundingBox boundingBox);
-	void                 RemoveObject(Entity* entity);
+	void RemoveObject(Entity* entity);
 
 	[[nodiscard]] QuadtreeNode* GetRoot() const { return m_root; }
 
@@ -23,11 +23,11 @@ public:
 	struct TraceResult
 	{
 		Ref<Entity> m_object;
-		Point3D     m_tracePoint;
-		float       m_distance;
+		Point3D m_tracePoint;
+		float m_distance;
 	};
 
-	TraceResult          TraceObject(const RayIntersectionTester& ray) const;
+	TraceResult TraceObject(const RayIntersectionTester& ray) const;
 	std::vector<Entity*> Intersect(const Frustum& frustum) const;
 	std::vector<Entity*> FindNearby(const Sphere& sphere) const;
 

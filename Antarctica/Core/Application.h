@@ -28,25 +28,10 @@ public:
 
 	static Application& Get();
 
-	[[nodiscard]] Settings& GetAppSettings()
-	{
-		return m_appSettings;
-	}
-
-	[[nodiscard]] Rendering::Renderer& GetRenderer()
-	{
-		return m_renderer;
-	}
-
-	[[nodiscard]] Platform::Window& GetWindow()
-	{
-		return m_window;
-	}
-
-	[[nodiscard]] World& GetWorld()
-	{
-		return m_world;
-	}
+	[[nodiscard]] Settings& GetAppSettings() { return m_appSettings; }
+	[[nodiscard]] Rendering::Renderer& GetRenderer() { return m_renderer; }
+	[[nodiscard]] Platform::Window& GetWindow() { return m_window; }
+	[[nodiscard]] World& GetWorld() { return m_world; }
 
 	template<typename T, class = std::enable_if_t<std::is_base_of_v<SystemBase, T>>>
 	T* GetSystem()
@@ -61,14 +46,14 @@ private:
 	void Run();
 
 	InputManager m_inputManager;
-	Settings     m_appSettings;
+	Settings m_appSettings;
 
 	FrameCounter m_frameCounter = {};
 
 	bool m_isRunning = false;
 	bool m_isPaused  = false;
 
-	World            m_world;
+	World m_world;
 	Platform::Window m_window;
 
 	Rendering::Renderer m_renderer;

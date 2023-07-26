@@ -22,7 +22,7 @@ void Timer::Stop()
 		return;
 	}
 
-	m_isStopped = true;
+	m_isStopped   = true;
 	m_accumulator = GetTime();
 }
 

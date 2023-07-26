@@ -34,10 +34,10 @@ public:
 		m_nativeObject = NativePtr(nativePtr, Rendering::Deleter);
 	}
 
-	[[nodiscard]] const uint8_t*     GetData() const { return m_data; }
-	[[nodiscard]] int32_t            GetWidth() const { return m_width; }
-	[[nodiscard]] int32_t            GetHeight() const { return m_height; }
-	[[nodiscard]] int32_t            GetChannels() const { return m_channels; }
+	[[nodiscard]] const uint8_t* GetData() const { return m_data; }
+	[[nodiscard]] int32_t GetWidth() const { return m_width; }
+	[[nodiscard]] int32_t GetHeight() const { return m_height; }
+	[[nodiscard]] int32_t GetChannels() const { return m_channels; }
 	[[nodiscard]] const std::string& GetPath() const { return m_path; }
 
 protected:
@@ -48,10 +48,10 @@ private:
 
 	NativePtr m_nativeObject = NativePtr(nullptr, Rendering::Deleter);
 
-	const uint8_t* m_data     = nullptr;
-	int32_t        m_width    = 0;
-	int32_t        m_height   = 0;
-	int32_t        m_channels = 0;
+	const uint8_t* m_data = nullptr;
+	int32_t m_width       = 0;
+	int32_t m_height      = 0;
+	int32_t m_channels    = 0;
 
 	std::string m_path;
 };

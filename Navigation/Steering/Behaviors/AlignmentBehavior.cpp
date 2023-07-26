@@ -8,9 +8,8 @@
 
 namespace Navigation
 {
-	Vector2D AlignmentBehavior::GetLinearAcceleration(const TransformComponent* transform,
-		const MovementComponent*                                                movement,
-		const std::vector<NearbyTarget>&                                        nearbyTargets)
+	Vector2D AlignmentBehavior::GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
+													  const std::vector<NearbyTarget>& nearbyTargets)
 	{
 		if (!movement->m_arriveBehavior.HasTarget())
 		{

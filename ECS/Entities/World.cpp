@@ -32,9 +32,7 @@ uint64_t World::GenerateInstanceId() const
 	}
 }
 
-void World::SetupSpawnedEntity(const std::shared_ptr<Entity>& entity,
-	const uint64_t                                            instanceId,
-	const SpawnParams&                                        spawnParams)
+void World::SetupSpawnedEntity(const std::shared_ptr<Entity>& entity, const uint64_t instanceId, const SpawnParams& spawnParams)
 {
 	entity->m_self       = entity;
 	entity->m_instanceId = instanceId;
@@ -45,14 +43,13 @@ void World::SetupSpawnedEntity(const std::shared_ptr<Entity>& entity,
 
 	entity->SetName("Entity Id: " + std::to_string(instanceId));
 
-	ComponentAccessor accessor = entity->GetComponentAccessor();
+	ComponentAccessor accessor    = entity->GetComponentAccessor();
 	TransformComponent* transform = accessor.GetComponent<TransformComponent>();
 	if (transform)
 	{
 		transform->m_localPosition = spawnParams.m_position;
 		transform->m_localRotation = spawnParams.m_rotation;
 		transform->m_localScale    = spawnParams.m_scale;
-
 	}
 
 	entity->SetupComponents(accessor);

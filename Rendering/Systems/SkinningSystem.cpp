@@ -10,10 +10,7 @@
 
 namespace Rendering
 {
-	void SkinningSystem::Update(const uint64_t entityId,
-		Anim::AnimatedMeshComponent*           animatedMesh,
-		MeshComponent*                         mesh,
-		RenderComponent*                       render)
+	void SkinningSystem::Update(const uint64_t entityId, Anim::AnimatedMeshComponent* animatedMesh, MeshComponent* mesh, RenderComponent* render)
 	{
 		const RenderCullComponent* renderCull = World::Get()->GetEntity(entityId)->GetComponentAccessor().GetComponent<RenderCullComponent>();
 		if (renderCull && renderCull->m_isCulled)
@@ -31,7 +28,7 @@ namespace Rendering
 			{
 				continue;
 			}
-			
+
 			QueuedRenderObject& renderObject = render->m_renderHandles[i];
 
 			const std::vector<Matrix4D>& finalMatrices = animatedMesh->m_animationSolver.GetFinalMatrices()[i];

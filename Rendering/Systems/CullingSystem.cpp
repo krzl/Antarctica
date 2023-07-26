@@ -21,11 +21,8 @@ namespace Rendering
 		World::Get()->GetQuadtree().CalculateCulling(m_cameraFrustum, m_frameCounter->m_renderFrameCount);
 	}
 
-	void CullingSystem::Update(uint64_t entityId,
-		TransformComponent*             transform,
-		MeshComponent*                  mesh,
-		RenderCullComponent*            renderCull,
-		ColliderComponent*              collider)
+	void CullingSystem::Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderCullComponent* renderCull,
+							   ColliderComponent* collider)
 	{
 		if (m_frameCounter->m_renderFrameCount != transform->m_quadtreePlacement.GetNode()->GetLastSeenFrameId())
 		{
@@ -41,8 +38,7 @@ namespace Rendering
 				break;
 			case IntersectTestResult::INTERSECT:
 			{
-				const IntersectTestResult boundingBoxIntersection = Intersect(m_cameraFrustum, collider->m_transformedBoundingBox);
-				switch (boundingBoxIntersection)
+				switch (Intersect(m_cameraFrustum, collider->m_transformedBoundingBox))
 				{
 					case IntersectTestResult::OUTSIDE:
 						renderCull->m_isCulled = true;
@@ -56,7 +52,7 @@ namespace Rendering
 
 							for (uint32_t i = 0; i < mesh->m_mesh->GetSubmeshCount(); ++i)
 							{
-								const Submesh&    submesh     = mesh->m_mesh->GetSubmesh(i);
+								const Submesh& submesh        = mesh->m_mesh->GetSubmesh(i);
 								const BoundingBox boundingBox = submesh.GetBoundingBox().Transform(worldTransform);
 
 								if (Intersect(m_cameraFrustum, boundingBox) == IntersectTestResult::OUTSIDE)

@@ -7,7 +7,7 @@ template<typename... _Args>
 class DispatchHandle
 {
 	typedef std::function<void(_Args...)> FunctionType;
-	typedef Dispatcher<_Args...>          DispatcherType;
+	typedef Dispatcher<_Args...> DispatcherType;
 
 	friend class Dispatcher<_Args...>;
 
@@ -24,23 +24,23 @@ private:
 		m_id(id) { }
 
 	DispatcherType* m_dispatcher;
-	uint32_t        m_id;
+	uint32_t m_id;
 };
 
 template<typename... _Args>
 class Dispatcher
 {
 	typedef std::function<void(_Args...)> FunctionType;
-	typedef DispatchHandle<_Args...>      HandleType;
+	typedef DispatchHandle<_Args...> HandleType;
 
 	friend class DispatchHandle<_Args...>;
 
 	struct DispatchListElem
 	{
 		FunctionType m_function;
-		uint32_t     m_id;
-		Ref<void>    m_owner;
-		bool         m_clearWhenOwnerExpired;
+		uint32_t m_id;
+		Ref<void> m_owner;
+		bool m_clearWhenOwnerExpired;
 
 		DispatchListElem(FunctionType&& function, const uint32_t id, const Ref<void> owner) :
 			m_function(std::move(function)),

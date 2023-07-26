@@ -15,7 +15,7 @@ class System : public SystemBase
 	struct MatchedArchetype
 	{
 		const Archetype* m_archetype;
-		uint32_t         m_componentIds[sizeof...(Types)];
+		uint32_t m_componentIds[sizeof...(Types)];
 	};
 
 public:
@@ -31,19 +31,19 @@ public:
 		}
 		//TODO: disable multi threading on certain systems
 		std::for_each(std::execution::par_unseq,
-					  m_archetypesMatched.begin(),
-					  m_archetypesMatched.end(),
-					  [this](const MatchedArchetype& archetype)
-					  {
-						  std::atomic_uint32_t counter = 0;
-						  std::for_each(std::execution::par_unseq,
-									    archetype.m_archetype->m_entityIds.begin(),
-									    archetype.m_archetype->m_entityIds.end(),
-									    [this, archetype, &counter](const uint64_t entityId)
-									    {
-										    Run<0>(archetype, counter++, entityId);
-									    });
-					  });
+			m_archetypesMatched.begin(),
+			m_archetypesMatched.end(),
+			[this](const MatchedArchetype& archetype)
+			{
+				std::atomic_uint32_t counter = 0;
+				std::for_each(std::execution::par_unseq,
+					archetype.m_archetype->m_entityIds.begin(),
+					archetype.m_archetype->m_entityIds.end(),
+					[this, archetype, &counter](const uint64_t entityId)
+					{
+						Run<0>(archetype, counter++, entityId);
+					});
+			});
 
 		OnUpdateEnd();
 	}

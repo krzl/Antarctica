@@ -13,12 +13,11 @@ namespace Navigation
 
 		virtual ~SteeringBehavior() = default;
 
-		virtual Vector2D GetLinearAcceleration(const TransformComponent* transform,
-			const MovementComponent*                                     movement,
-			const std::vector<NearbyTarget>&                             nearbyTargets) = 0;
+		virtual Vector2D GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
+											   const std::vector<NearbyTarget>& nearbyTargets) = 0;
 
 		[[nodiscard]] float GetWeight() const { return m_weight; }
-		void                SetWeight(const float weight) { m_weight = weight; }
+		void SetWeight(const float weight) { m_weight = weight; }
 
 	private:
 

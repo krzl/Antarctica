@@ -8,8 +8,8 @@ public:
 	bool SaveSettings();
 
 	std::optional<std::string> GetString(const std::string& key) const;
-	std::optional<int32_t>     GetInt(const std::string& key) const;
-	std::optional<float>       GetFloat(const std::string& key) const;
+	std::optional<int32_t> GetInt(const std::string& key) const;
+	std::optional<float> GetFloat(const std::string& key) const;
 
 	void SetValue(const std::string& key, const std::string& value);
 	void SetValue(const std::string& key, int32_t value);

@@ -30,7 +30,7 @@ void ImGuiSystem::Init()
 	ImGui::GetMainViewport()->PlatformHandleRaw = (void*) Application::Get().GetWindow().GetHandle();
 
 	uint8_t* fontData;
-	int32_t  texWidth, texHeight, bytesPerPixel;
+	int32_t texWidth, texHeight, bytesPerPixel;
 
 	io.Fonts->GetTexDataAsRGBA32(&fontData, &texWidth, &texHeight, &bytesPerPixel);
 
@@ -38,7 +38,7 @@ void ImGuiSystem::Init()
 
 	m_shader   = AssetManager::GetAsset<ImGuiShader>("../Resources/Shaders/imgui.hlsl");
 	m_material = std::make_shared<Material>(m_shader);
-
+	
 	m_material->SetTexture("tex", m_texture);
 	m_material->SetOrder(5000.0f);
 
@@ -66,8 +66,8 @@ void ImGuiSystem::OnFrameBegin()
 	io.DisplaySize = ImVec2(window.GetWidth(), window.GetHeight());
 	io.DeltaTime   = TimeManager::GetInstance()->GetDeltaTime();
 
-	const auto&         inputSystem = InputManager::GetInstance();
-	const MousePosition mousePos    = inputSystem->GetMousePosition();
+	const auto& inputSystem      = InputManager::GetInstance();
+	const MousePosition mousePos = inputSystem->GetMousePosition();
 
 	io.MousePos     = ImVec2((float) mousePos.first, (float) mousePos.second);
 	io.MouseDown[0] = inputSystem->IsLeftMousePressed();
@@ -83,8 +83,8 @@ void ImGuiSystem::OnUpdateStart()
 
 struct Vertex
 {
-	Point3D  m_position;
-	Color    m_color;
+	Point3D m_position;
+	Color m_color;
 	Vector2D m_texcoord;
 };
 

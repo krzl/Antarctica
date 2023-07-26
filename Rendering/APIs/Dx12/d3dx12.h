@@ -829,7 +829,7 @@ struct CD3DX12_TEXTURE_COPY_LOCATION : public D3D12_TEXTURE_COPY_LOCATION
         Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
         PlacedFootprint = {};
     }
-    CD3DX12_TEXTURE_COPY_LOCATION(_In_ ID3D12Resource* pRes, D3D12_PLACED_SUBRESOURCE_FOOTPRINT const& Footprint) noexcept
+    CD3DX12_TEXTURE_COPY_LOCATION(_In_ ID3D12Resource* pRes, const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& Footprint) noexcept
     {
         pResource = pRes;
         Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
@@ -2456,12 +2456,12 @@ private:
     InnerStructType _Inner;
 public:
     CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT() noexcept : _Type(Type), _Inner(DefaultArg()) {}
-    CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT(InnerStructType const& i) noexcept : _Type(Type), _Inner(i) {}
-    CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT& operator=(InnerStructType const& i) noexcept { _Type = Type; _Inner = i; return *this; }
-    operator InnerStructType const&() const noexcept { return _Inner; }
+    CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT(const InnerStructType& i) noexcept : _Type(Type), _Inner(i) {}
+    CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT& operator=(const InnerStructType& i) noexcept { _Type = Type; _Inner = i; return *this; }
+    operator const InnerStructType&() const noexcept { return _Inner; }
     operator InnerStructType&() noexcept { return _Inner; }
     InnerStructType* operator&() noexcept { return &_Inner; }
-    InnerStructType const* operator&() const noexcept { return &_Inner; }
+	const InnerStructType* operator&() const noexcept { return &_Inner; }
 };
 #pragma warning(pop)
 typedef CD3DX12_PIPELINE_STATE_STREAM_SUBOBJECT< D3D12_PIPELINE_STATE_FLAGS,         D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_FLAGS>                             CD3DX12_PIPELINE_STATE_STREAM_FLAGS;

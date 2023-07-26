@@ -8,7 +8,7 @@ namespace Rendering
 	struct CameraData
 	{
 		PerCameraBuffer m_constantBuffer;
-		float           m_order;
+		float m_order;
 
 		friend bool operator<(const CameraData& lhs, const CameraData& rhs)
 		{

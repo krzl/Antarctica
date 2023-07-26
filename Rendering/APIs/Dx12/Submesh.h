@@ -28,8 +28,8 @@ namespace Rendering::Dx12
 	};
 
 	MeshAttribute GetMeshAttributeFromName(const char* attributeName, uint32_t index);
-	uint16_t      GetAttributeOffset(MeshAttribute attribute, const AttributeOffsets& offsets);
-	uint16_t      GetAttributeDataSize(MeshAttribute attribute, const AttributeOffsets& offsets);
+	uint16_t GetAttributeOffset(MeshAttribute attribute, const AttributeOffsets& offsets);
+	uint16_t GetAttributeDataSize(MeshAttribute attribute, const AttributeOffsets& offsets);
 
 	class Submesh
 	{

@@ -21,8 +21,8 @@ void main()
 	{
 		{
 			constexpr TerrainGenerator::SpawnParameters params;
-			const std::shared_ptr<Terrain>              terrain = TerrainGenerator::GenerateTerrain(params);
-			const std::shared_ptr<Mesh>                 mesh    = terrain->ConstructMesh();
+			const std::shared_ptr<Terrain> terrain = TerrainGenerator::GenerateTerrain(params);
+			const std::shared_ptr<Mesh> mesh       = terrain->ConstructMesh();
 
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>(
 				{
@@ -30,7 +30,7 @@ void main()
 					EulerToQuaternion(20.0f, 0.0f, 0.0f)
 				}
 			);
-			
+
 			Ref<Rendering::StaticMesh> terrainActor = Application::Get().GetWorld().Spawn<Rendering::StaticMesh>(
 				{
 					Point3D(0.0, 0.0f, 0.0f),
@@ -40,24 +40,22 @@ void main()
 				mesh);
 
 
-			const std::shared_ptr<Texture> ground = AssetManager::GetAsset<Texture>(
-				"../Resources/Textures/ground.png");
-
-			const std::shared_ptr<Texture> rock = AssetManager::GetAsset<Texture>(
-				"../Resources/Textures/rock.png");
-
+			const std::shared_ptr<Texture> ground = AssetManager::GetAsset<Texture>("../Resources/Textures/ground.png");
+			const std::shared_ptr<Texture> rock   = AssetManager::GetAsset<Texture>("../Resources/Textures/rock.png");
 			std::shared_ptr<Shader> terrainShader = AssetManager::GetAsset<Shader>("../Resources/Shaders/terrain.hlsl");
-			const auto              material      = std::make_shared<Material>(terrainShader);
+
+			const auto material = std::make_shared<Material>(terrainShader);
 			material->SetTexture("tex1", ground);
 			material->SetTexture("tex2", rock);
 			material->SetOrder(3);
 			terrainActor->SetMaterial(material);
-			
+
 #if defined(DEBUG) | defined(_DEBUG)
 			constexpr uint32_t gridSize = 4;
 #else
 			constexpr uint32_t gridSize = 20;
 #endif
+
 			for (uint32_t i = 0; i < gridSize; i++)
 			{
 				for (uint32_t j = 0; j < gridSize; j++)

@@ -14,7 +14,7 @@ namespace Rendering
 
 	private:
 
-		bool              m_isCulled;
+		bool m_isCulled;
 		std::bitset<1024> m_culledSubmeshes;
 
 

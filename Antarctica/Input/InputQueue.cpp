@@ -4,17 +4,17 @@
 #include "Input/InputManager.h"
 
 
-void InputQueue::AddMousePressCommand(InputCommand::MouseButtonId mouseButtonId, bool isPressed)
+void InputQueue::AddMousePressCommand(const InputCommand::MouseButtonId mouseButtonId, const bool isPressed)
 {
 	InputCommand command;
 	if (isPressed)
 	{
-		command.m_type                                 = InputCommand::Type::MOUSE_PRESS;
+		command.m_type                     = InputCommand::Type::MOUSE_PRESS;
 		command.m_mousePressInput.m_button = mouseButtonId;
 	}
 	else
 	{
-		command.m_type                                   = InputCommand::Type::MOUSE_RELEASE;
+		command.m_type                       = InputCommand::Type::MOUSE_RELEASE;
 		command.m_mouseReleaseInput.m_button = mouseButtonId;
 	}
 

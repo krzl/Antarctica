@@ -24,9 +24,9 @@ namespace Navigation
 		{
 			m_movementTester.UpdateComponent(movement, transform);
 		}
-		
+
 		const float maxRadiusToCheck = Max(movement->m_radius * movement->m_cohesionBehavior.GetCohesionScale(),
-										   movement->m_radius * movement->m_alignmentBehavior.GetCohesionScale());
+			movement->m_radius * movement->m_alignmentBehavior.GetCohesionScale());
 
 		std::vector<NearbyTarget> targets;
 		targets.reserve(25);
@@ -38,7 +38,7 @@ namespace Navigation
 			ComponentAccessor componentAccessor = entity->GetComponentAccessor();
 
 			const TransformComponent* nearbyTransform = componentAccessor.GetComponent<TransformComponent>();
-			const MovementComponent*  nearbyMovement  = componentAccessor.GetComponent<MovementComponent>();
+			const MovementComponent* nearbyMovement   = componentAccessor.GetComponent<MovementComponent>();
 
 			if (nearbyTransform && nearbyMovement && transform != nearbyTransform)
 			{
@@ -53,12 +53,13 @@ namespace Navigation
 			acceleration *= movement->m_decelerationFactor;
 		}
 
+		const float deltaTime = TimeManager::GetInstance()->GetTimeStep();
+
 		if (acceleration == Vector2D::zero)
 		{
 			if (SquaredMag(movement->m_velocity) != 0.0f)
 			{
-				const Vector2D velocityDelta = Normalize(movement->m_velocity) * movement->m_maxAcceleration * TimeManager::GetInstance()->
-					GetTimeStep();
+				const Vector2D velocityDelta = Normalize(movement->m_velocity) * movement->m_maxAcceleration * deltaTime;
 				if (SquaredMag(velocityDelta) > SquaredMag(movement->m_velocity))
 				{
 					movement->m_velocity = Vector2D::zero;
@@ -72,7 +73,7 @@ namespace Navigation
 		}
 		else
 		{
-			movement->m_velocity += acceleration * TimeManager::GetInstance()->GetTimeStep();
+			movement->m_velocity += acceleration * deltaTime;
 		}
 	}
 }

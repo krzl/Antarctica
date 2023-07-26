@@ -28,20 +28,10 @@ namespace Rendering::Dx12
 
 		ID3D12PipelineState* GetPipelineState() const;
 
-		[[nodiscard]] const ShaderDescriptor& GetShaderDescriptor() const
-		{
-			return m_shaderDescriptor;
-		}
+		[[nodiscard]] const ShaderDescriptor& GetShaderDescriptor() const { return m_shaderDescriptor; }
+		[[nodiscard]] ShaderDescriptor& GetShaderDescriptor() { return m_shaderDescriptor; }
 
-		[[nodiscard]] ShaderDescriptor& GetShaderDescriptor()
-		{
-			return m_shaderDescriptor;
-		}
-
-		[[nodiscard]] const std::map<uint32_t, MeshAttribute>& GetInputSlotBindings() const
-		{
-			return m_inputSlotBindings;
-		}
+		[[nodiscard]] const std::map<uint32_t, MeshAttribute>& GetInputSlotBindings() const { return m_inputSlotBindings; }
 
 		static NativeShader* Create(const std::shared_ptr<::Shader>& shader);
 
@@ -52,25 +42,25 @@ namespace Rendering::Dx12
 			m_lastCompileTime(0),
 			m_shaderParams(std::move(shaderParams)) { }
 
-		void                     PopulateShaderDescriptor();
-		D3D12_RASTERIZER_DESC    GetRasterizerDescription();
-		D3D12_BLEND_DESC         GetBlendDescription();
-		D3D12_DEPTH_STENCIL_DESC GetDepthStencilDescription();
-		void                     CreatePipelineState();
+		void PopulateShaderDescriptor();
+		D3D12_RASTERIZER_DESC GetRasterizerDescription() const;
+		D3D12_BLEND_DESC GetBlendDescription() const;
+		D3D12_DEPTH_STENCIL_DESC GetDepthStencilDescription() const;
+		void CreatePipelineState();
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> GetInputElements() const;
-		std::vector<DXGI_FORMAT>              GetOutputFormats() const;
+		std::vector<DXGI_FORMAT> GetOutputFormats() const;
 
 		static DXGI_FORMAT GetLayoutElement(const uint8_t mask, const D3D_REGISTER_COMPONENT_TYPE componentType);
 
 		std::string m_path;
 
-		ComPtr<ID3D12RootSignature>         m_rootSignature = nullptr;
+		ComPtr<ID3D12RootSignature> m_rootSignature         = nullptr;
 		mutable ComPtr<ID3D12PipelineState> m_pipelineState = nullptr;
 
 		std::map<uint32_t, MeshAttribute> m_inputSlotBindings;
 
-		time_t m_lastCompileTime;//TODO: Move to Asset class and add callback on asset changed
+		time_t m_lastCompileTime; //TODO: Move to Asset class and add callback on asset changed
 
 		ShaderDescriptor m_shaderDescriptor; //TODO: MOVE TO ASSET
 

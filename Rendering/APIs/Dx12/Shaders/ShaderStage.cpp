@@ -7,8 +7,8 @@
 
 namespace Rendering::Dx12
 {
-	ShaderStage::ShaderStage(const Type type)
-		: m_type(type) { }
+	ShaderStage::ShaderStage(const Type type) :
+		m_type(type) { }
 
 	static std::vector<std::pair<const char*, const char*>> entryPoints = {
 		{ "vs", "vs_5_0" },
@@ -36,9 +36,8 @@ namespace Rendering::Dx12
 		uint32_t retries = 1;
 		while (m_byteCode == nullptr && retries > 0)
 		{
-			const HRESULT res = D3DCompileFromFile(wPath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-												   entryPoint,
-												   target, compileFlags, 0, &m_byteCode, &errors);
+			const HRESULT res = D3DCompileFromFile(wPath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, target, compileFlags, 0,
+				&m_byteCode, &errors);
 
 			if (res != ERROR_SHARING_VIOLATION)
 			{
@@ -64,9 +63,8 @@ namespace Rendering::Dx12
 	{
 		ComPtr<ID3D12RootSignature> rootSignature;
 
-		Dx12Context::Get().GetDevice()->CreateRootSignature(0, m_byteCode->GetBufferPointer(),
-															m_byteCode->GetBufferSize(),
-															IID_PPV_ARGS(rootSignature.ReleaseAndGetAddressOf()));
+		Dx12Context::Get().GetDevice()->CreateRootSignature(0, m_byteCode->GetBufferPointer(), m_byteCode->GetBufferSize(),
+			IID_PPV_ARGS(rootSignature.ReleaseAndGetAddressOf()));
 
 		return rootSignature;
 	}

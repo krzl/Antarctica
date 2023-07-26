@@ -8,8 +8,8 @@ AttributeUsage::operator uint32_t() const
 	union CastHelper
 	{
 		AttributeUsage m_usage;
-		uint32_t       m_value;
-	}                  helper;
+		uint32_t m_value;
+	} helper;
 
 	helper.m_usage = *this;
 
@@ -90,9 +90,4 @@ void Submesh::SetupNodeAttachment(const int32_t nodeId, const bool ignoreRotatio
 {
 	m_attachNodeId             = nodeId;
 	m_ignoreAttachmentRotation = ignoreRotation;
-}
-
-const BoundingBox& Submesh::GetBoundingBox() const
-{
-	return m_boundingBox;
 }

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Random.h"
 
-#include <ctime>
 #include <random>
 
 static std::random_device rd;

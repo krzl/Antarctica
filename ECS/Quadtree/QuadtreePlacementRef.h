@@ -23,5 +23,5 @@ private:
 		m_object(object) { }
 
 	QuadtreeNode* m_node = nullptr;
-	Entity*       m_object;
+	Entity* m_object;
 };

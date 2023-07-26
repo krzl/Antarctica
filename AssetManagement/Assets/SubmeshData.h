@@ -4,12 +4,11 @@
 
 #include "Skeleton.h"
 #include "Types.h"
-#include "Debug/DebugDrawManager.h"
 
 struct MeshBuffer
 {
 	std::vector<uint8_t> m_data;
-	uint32_t             m_elementSize;
+	uint32_t m_elementSize;
 
 	MeshBuffer(const std::vector<uint8_t>& data, const uint32_t elementSize, const uint32_t elementCount) :
 		m_data(data),
@@ -90,11 +89,8 @@ struct Submesh
 
 	Submesh() = default;
 
-	explicit Submesh(std::string&& name,
-		const MeshBuffer&&         vertexBuffer,
-		const MeshBuffer&&         indexBuffer,
-		const AttributeUsage       attributes,
-		const BoundingBox&         boundingBox) :
+	explicit Submesh(std::string&& name, const MeshBuffer&& vertexBuffer, const MeshBuffer&& indexBuffer, const AttributeUsage attributes,
+					 const BoundingBox& boundingBox) :
 		m_name(std::move(name)),
 		m_vertexBuffer(std::move(vertexBuffer)),
 		m_indexBuffer(std::move(indexBuffer)),
@@ -103,90 +99,45 @@ struct Submesh
 		m_ignoreAttachmentRotation(false),
 		m_boundingBox(boundingBox) { }
 
-	[[nodiscard]] const MeshBuffer& GetVertexBuffer() const
-	{
-		return m_vertexBuffer;
-	}
+	[[nodiscard]] const MeshBuffer& GetVertexBuffer() const { return m_vertexBuffer; }
+	[[nodiscard]] MeshBuffer& GetVertexBuffer() { return m_vertexBuffer; }
 
-	[[nodiscard]] MeshBuffer& GetVertexBuffer()
-	{
-		return m_vertexBuffer;
-	}
+	[[nodiscard]] const MeshBuffer& GetIndexBuffer(const uint32_t index = 0) const { return m_indexBuffer; }
+	[[nodiscard]] MeshBuffer& GetIndexBuffer(const uint32_t index = 0) { return m_indexBuffer; }
 
-	[[nodiscard]] const MeshBuffer& GetIndexBuffer(const uint32_t index = 0) const
-	{
-		return m_indexBuffer;
-	}
+	[[nodiscard]] const AttributeUsage& GetAttributesUsage() const { return m_attributes; }
+	void SetAttributesUsage(const AttributeUsage usage) { m_attributes = usage; }
 
-	[[nodiscard]] MeshBuffer& GetIndexBuffer(const uint32_t index = 0)
-	{
-		return m_indexBuffer;
-	}
+	[[nodiscard]] const Skeleton& GetSkeleton() const { return m_skeleton; }
+	void SetSkeleton(Skeleton&& skeleton) { m_skeleton = std::move(skeleton); }
 
-	[[nodiscard]] const AttributeUsage& GetAttributesUsage() const
-	{
-		return m_attributes;
-	}
+	[[nodiscard]] Rendering::NativeSubmesh* GetNativeObject() const { return m_nativeObject.get(); }
+	void SetNativeObject(Rendering::NativeSubmesh* nativePtr) const { m_nativeObject = NativePtr(nativePtr, Rendering::Deleter); }
 
-	void SetAttributesUsage(const AttributeUsage usage)
-	{
-		m_attributes = usage;
-	}
+	const std::string& GetName() const { return m_name; }
 
-	[[nodiscard]] const Skeleton& GetSkeleton() const
-	{
-		return m_skeleton;
-	}
-
-	void SetSkeleton(Skeleton&& skeleton)
-	{
-		m_skeleton = std::move(skeleton);
-	}
-
-	[[nodiscard]] Rendering::NativeSubmesh* GetNativeObject() const
-	{
-		return m_nativeObject.get();
-	}
-
-	void SetNativeObject(Rendering::NativeSubmesh* nativePtr) const
-	{
-		m_nativeObject = NativePtr(nativePtr, Rendering::Deleter);
-	}
-
-	const std::string& GetName() const
-	{
-		return m_name;
-	}
-
-	void SetupNodeAttachment(int32_t nodeId, bool ignoreRotation) const;
-
-	int32_t GetAttachmentNodeId() const
-	{
-		return m_attachNodeId;
-	}
+	int32_t GetAttachmentNodeId() const { return m_attachNodeId; }
 
 	[[nodiscard]] bool GetIgnoreAttachmentRotation() const { return m_ignoreAttachmentRotation; }
 
-	const BoundingBox& GetBoundingBox() const;
-
-	void SetBoundingBox(const BoundingBox& boundingBox)
-	{
-		m_boundingBox = boundingBox;
-	}
+	const BoundingBox& GetBoundingBox() const { return m_boundingBox; }
+	void SetBoundingBox(const BoundingBox& boundingBox) { m_boundingBox = boundingBox; }
 
 	bool IsDynamic() const { return m_isDynamic; }
 	void SetDynamic() { m_isDynamic = true; }
 
+	void SetupNodeAttachment(int32_t nodeId, bool ignoreRotation) const;
+
 protected:
 
-	std::string     m_name;
-	MeshBuffer      m_vertexBuffer;
-	MeshBuffer      m_indexBuffer;
-	Skeleton        m_skeleton;
-	AttributeUsage  m_attributes;
+	std::string m_name;
+	MeshBuffer m_vertexBuffer;
+	MeshBuffer m_indexBuffer;
+	Skeleton m_skeleton;
+	AttributeUsage m_attributes;
 	mutable int32_t m_attachNodeId = -1;
-	mutable bool    m_ignoreAttachmentRotation;
-	bool            m_isDynamic = false;
+	mutable bool m_ignoreAttachmentRotation;
+	bool m_isDynamic = false;
 
 	BoundingBox m_boundingBox;
 

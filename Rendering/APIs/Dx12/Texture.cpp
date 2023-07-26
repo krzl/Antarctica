@@ -40,12 +40,12 @@ namespace Rendering::Dx12
 
 
 		ResourceUploader::UploadResource(textureDesc, { textureData }, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-										 m_textureUploadBuffer, m_texture);
+			m_textureUploadBuffer, m_texture);
 
 		m_heapHandle = Dx12Context::Get().CreateHeapHandle();
 
 		Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_texture.Get(), &srvDesc,
-																 m_heapHandle->GetCPUHandle());
+			m_heapHandle->GetCPUHandle());
 
 		SetDebugName(m_texture, texture->GetPath().data());
 	}

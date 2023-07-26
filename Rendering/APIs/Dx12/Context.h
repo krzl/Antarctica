@@ -12,14 +12,14 @@ namespace Rendering::Dx12
 {
 	struct RenderObject
 	{
-		NativeShader*                                             m_shader;
-		NativeSubmesh*                                            m_submesh;
-		std::shared_ptr<DescriptorHeapHandle>                     m_perObjectBuffer;
-		ScratchBufferHandle                                       m_perCallBuffer;
-		std::map<uint32_t, NativeTexture*>                        m_textures;
+		NativeShader* m_shader;
+		NativeSubmesh* m_submesh;
+		std::shared_ptr<DescriptorHeapHandle> m_perObjectBuffer;
+		ScratchBufferHandle m_perCallBuffer;
+		std::map<uint32_t, NativeTexture*> m_textures;
 		std::map<uint32_t, std::shared_ptr<DescriptorHeapHandle>> m_constantBuffers;
-		uint32_t                                                  m_instanceCount;
-		std::optional<Rect>                                       m_clipRect;
+		uint32_t m_instanceCount;
+		std::optional<Rect> m_clipRect;
 
 		std::shared_ptr<DescriptorHeapHandle> m_skinningBufferHandle;
 		std::shared_ptr<DescriptorHeapHandle> m_boneTransforms;
@@ -31,7 +31,7 @@ namespace Rendering::Dx12
 	public:
 
 		static Dx12Context& Get();
-		explicit            Dx12Context();
+		explicit Dx12Context();
 
 		void Init(const Platform::Window& window, const Settings& settings) override;
 		void FlushCommandQueue() override;
@@ -53,62 +53,41 @@ namespace Rendering::Dx12
 		void ExecuteAndPresent() override;
 		void Cleanup() override;
 
-		std::shared_ptr<DescriptorHeapHandle> CreateHeapHandle(uint32_t size  = 1,
-			D3D12_DESCRIPTOR_HEAP_FLAGS                                 flags =
-				D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+		std::shared_ptr<DescriptorHeapHandle> CreateHeapHandle(uint32_t size                     = 1,
+															   D3D12_DESCRIPTOR_HEAP_FLAGS flags =
+																   D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
-		ID3D12Device* GetDevice() const
-		{
-			return m_device.Get();
-		}
+		ID3D12Device* GetDevice() const { return m_device.Get(); }
 
-		[[nodiscard]] IDXGIFactory4* GetDXGIFactory() const
-		{
-			return m_dxgiFactory.Get();
-		}
+		[[nodiscard]] IDXGIFactory4* GetDXGIFactory() const { return m_dxgiFactory.Get(); }
 
-		[[nodiscard]] ID3D12GraphicsCommandList* GetCommandList() const
-		{
-			return m_commandList.Get();
-		}
+		[[nodiscard]] ID3D12GraphicsCommandList* GetCommandList() const { return m_commandList.Get(); }
 
-		[[nodiscard]] uint32_t GetMsNumQualityLevels() const
-		{
-			return m_msNumQualityLevels;
-		}
+		[[nodiscard]] uint32_t GetMsNumQualityLevels() const { return m_msNumQualityLevels; }
 
-		[[nodiscard]] uint32_t GetCurrentBackbufferId() const
-		{
-			return m_currentBackbufferId;
-		}
+		[[nodiscard]] uint32_t GetCurrentBackbufferId() const { return m_currentBackbufferId; }
 
-		[[nodiscard]] uint32_t GetCurrentFenceId() const
-		{
-			return m_currentFenceId;
-		}
+		[[nodiscard]] uint32_t GetCurrentFenceId() const { return m_currentFenceId; }
 
-		[[nodiscard]] ScratchBuffer& GetScratchBuffer()
-		{
-			return m_scratchBuffer;
-		}
+		[[nodiscard]] ScratchBuffer& GetScratchBuffer() { return m_scratchBuffer; }
 
 	private:
 
 		ComPtr<IDXGIFactory4> m_dxgiFactory;
-		ComPtr<ID3D12Device>  m_device;
+		ComPtr<ID3D12Device> m_device;
 
-		ComPtr<ID3D12Fence>               m_commandFence;
-		ComPtr<ID3D12CommandQueue>        m_commandQueue;
-		ComPtr<ID3D12CommandAllocator>    m_directCommandAllocator;
+		ComPtr<ID3D12Fence> m_commandFence;
+		ComPtr<ID3D12CommandQueue> m_commandQueue;
+		ComPtr<ID3D12CommandAllocator> m_directCommandAllocator;
 		ComPtr<ID3D12GraphicsCommandList> m_commandList;
 
 		std::array<ComPtr<ID3D12CommandAllocator>, Renderer::BUFFER_COUNT> m_frameCommandAllocators;
 
-		ComPtr<IDXGISwapChain>                                     m_swapchain;
+		ComPtr<IDXGISwapChain> m_swapchain;
 		std::array<ComPtr<ID3D12Resource>, Renderer::BUFFER_COUNT> m_swapchainBuffers;
 
-		D3D12_VIEWPORT m_viewport    = {};
-		D3D12_RECT     m_scissorRect = {};
+		D3D12_VIEWPORT m_viewport = {};
+		D3D12_RECT m_scissorRect  = {};
 
 		ComPtr<ID3D12Resource> m_depthStencilBuffer;
 
@@ -116,8 +95,8 @@ namespace Rendering::Dx12
 		uint32_t m_dsvDescriptorSize = 0;
 
 		std::vector<std::shared_ptr<DescriptorHeap>> m_srvDescriptorHeaps;
-		ComPtr<ID3D12DescriptorHeap>                 m_rtvDescriptorHeap;
-		ComPtr<ID3D12DescriptorHeap>                 m_dsvDescriptorHeap;
+		ComPtr<ID3D12DescriptorHeap> m_rtvDescriptorHeap;
+		ComPtr<ID3D12DescriptorHeap> m_dsvDescriptorHeap;
 
 
 		std::vector<RenderObject> m_renderQueue;

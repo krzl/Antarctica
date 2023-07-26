@@ -19,9 +19,9 @@ struct Archetype
 	const std::vector<ComponentTypeInfo> m_componentTypeInfos;
 
 	std::vector<std::vector<uint8_t>> m_componentData;
-	std::vector<uint64_t>             m_entityIds;
+	std::vector<uint64_t> m_entityIds;
 
-	void     AddEntity(const Entity* entity, const std::vector<const Class*>& classes);
+	void AddEntity(const Entity* entity, const std::vector<const Class*>& classes);
 
 	static const std::vector<std::unique_ptr<Archetype>>& GetAllArchetypes() { return m_allArchetypes; }
 

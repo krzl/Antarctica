@@ -28,10 +28,10 @@ namespace Anim
 			transition.m_state->AddTransition(
 				Transition
 				{
-					transition.m_canInterrupt,
+					this,
 					transition.m_transitionTime,
+					transition.m_canInterrupt,
 					invertedConditions,
-					this
 				},
 				false
 			);
@@ -40,8 +40,12 @@ namespace Anim
 		m_transitions.emplace_back(std::move(transition));
 	}
 
-	const Transition* State::GetNextState(TriggerState& triggerState,
-		const float                                                    currentTime) const
+	bool State::IsFinished(float currentTime) const
+	{
+		return true;
+	}
+
+	const Transition* State::GetNextState(TriggerState& triggerState, const float currentTime) const
 	{
 		const bool isCurrentStateFinished = IsFinished(currentTime);
 

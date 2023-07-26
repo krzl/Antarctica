@@ -20,15 +20,8 @@ namespace Rendering::Dx12
 
 		void Bind();
 
-		[[nodiscard]] const ShaderDescriptor& GetShaderDescriptor() const
-		{
-			return m_shaderDescriptor;
-		}
-
-		[[nodiscard]] ShaderDescriptor& GetShaderDescriptor()
-		{
-			return m_shaderDescriptor;
-		}
+		[[nodiscard]] const ShaderDescriptor& GetShaderDescriptor() const { return m_shaderDescriptor; }
+		[[nodiscard]] ShaderDescriptor& GetShaderDescriptor() { return m_shaderDescriptor; }
 
 		static NativeComputeShader* Create(const std::shared_ptr<::ComputeShader>& shader);
 
@@ -46,9 +39,9 @@ namespace Rendering::Dx12
 		ComPtr<ID3D12RootSignature> m_rootSignature = nullptr;
 		ComPtr<ID3D12PipelineState> m_pipelineState = nullptr;
 
-		time_t m_lastCompileTime;//TODO: Move to Asset class and add callback on asset changed
+		time_t m_lastCompileTime; //TODO: Move to Asset class and add callback on asset changed
 
-		ShaderDescriptor m_shaderDescriptor;//TODO: MOVE TO ASSET
+		ShaderDescriptor m_shaderDescriptor; //TODO: MOVE TO ASSET
 
 		std::unique_ptr<ShaderStage> m_cs;
 	};

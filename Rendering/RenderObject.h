@@ -12,10 +12,10 @@ namespace Rendering
 
 	struct QueuedRenderObject
 	{
-		const Submesh*    m_submesh;
-		Material*           m_material;
-		float               m_order;
-		PerObjectBuffer     m_perObjectBuffer;
+		const Submesh* m_submesh;
+		Material* m_material;
+		float m_order;
+		PerObjectBuffer m_perObjectBuffer;
 		std::optional<Rect> m_clipRect;
 
 		std::vector<Matrix4D> m_boneTransforms;
@@ -29,7 +29,7 @@ namespace Rendering
 				l = lhs.m_order;
 				r = rhs.m_order;
 			}
-			/*else if (lhs.m_material != rhs.m_material)
+			/*else if (lhs.m_material != rhs.m_material) //TODO: take material into account
 			{
 				l = reinterpret_cast<uint64_t>(lhs.m_material);
 				r = reinterpret_cast<uint64_t>(rhs.m_material);
@@ -66,11 +66,11 @@ namespace Rendering
 		QueuedRenderObject() = default;
 
 		QueuedRenderObject(const Submesh* submesh,
-			Material*                     material,
-			const float                   order,
-			const PerObjectBuffer&        perObjectBuffer,
-			const std::vector<Matrix4D>&  boneTransforms = std::vector<Matrix4D>(),
-			const std::optional<Rect>&    clipRect       = std::optional<Rect>()) :
+						   Material* material,
+						   const float order,
+						   const PerObjectBuffer& perObjectBuffer,
+						   const std::vector<Matrix4D>& boneTransforms = std::vector<Matrix4D>(),
+						   const std::optional<Rect>& clipRect         = std::optional<Rect>()) :
 			m_submesh(submesh),
 			m_material(material),
 			m_order(order),

@@ -5,9 +5,9 @@ Quaternion EulerToQuaternion(float x, float y, float z);
 
 float LerpClamped(float a, float b, float alpha);
 
-Vector3D   LerpClamped(const Vector3D& a, const Vector3D& b, float alpha);
-Point3D    LerpClamped(const Point3D& a, const Point3D& b, float alpha);
-Color      LerpClamped(const Color& a, const Color& b, float alpha);
+Vector3D LerpClamped(const Vector3D& a, const Vector3D& b, float alpha);
+Point3D LerpClamped(const Point3D& a, const Point3D& b, float alpha);
+Color LerpClamped(const Color& a, const Color& b, float alpha);
 Quaternion SlerpClamped(const Quaternion& a, const Quaternion& b, float alpha);
 
 float DegToRad(float deg);

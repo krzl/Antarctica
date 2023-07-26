@@ -49,9 +49,8 @@ void Platform::Window::Init(const Settings& appSettings)
 	const int windowWidth  = rect.right - rect.left;
 	const int windowHeight = rect.bottom - rect.top;
 
-	m_handle = CreateWindow("MainWndClass", appSettings.GetString("window.title").value().c_str(),
-							WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, windowWidth, windowHeight, 0, 0,
-							wc.hInstance, 0);
+	m_handle = CreateWindow("MainWndClass", appSettings.GetString("window.title").value().c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+		windowWidth, windowHeight, 0, 0, wc.hInstance, 0);
 	if (!m_handle)
 	{
 		throw std::exception("CreateWindow Failed.");
@@ -78,7 +77,7 @@ void Platform::Window::Update()
 	}
 }
 
-LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam, const LPARAM lParam)
+LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, const WPARAM wParam, const LPARAM lParam)
 {
 	switch (msg)
 	{
@@ -104,24 +103,24 @@ LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam
 			}
 			else if (wParam == SIZE_MAXIMIZED)
 			{
-				m_hasFocus            = true;
-				m_isMinimized         = false;
-				m_isMaximized         = true;
+				m_hasFocus    = true;
+				m_isMinimized = false;
+				m_isMaximized = true;
 				OnResized.Dispatch();
 			}
 			else if (wParam == SIZE_RESTORED)
 			{
 				if (m_isMinimized)
 				{
-					m_hasFocus            = true;
-					m_isMinimized         = false;
+					m_hasFocus    = true;
+					m_isMinimized = false;
 					OnResized.Dispatch();
 				}
 
 				else if (m_isMaximized)
 				{
-					m_hasFocus            = true;
-					m_isMaximized         = false;
+					m_hasFocus    = true;
+					m_isMaximized = false;
 					OnResized.Dispatch();
 				}
 				else if (m_isResizing)
@@ -142,7 +141,7 @@ LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, WPARAM wParam
 
 		case WM_EXITSIZEMOVE:
 			m_hasFocus = true;
-			m_isResizing          = false;
+			m_isResizing = false;
 			OnResized.Dispatch();
 			return 0;
 

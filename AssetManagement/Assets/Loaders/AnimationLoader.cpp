@@ -20,8 +20,7 @@ Vector3D AIVectorCast(const aiVector3D& vector)
 
 Transform4D AIMatrixCast(const aiMatrix4x4& matrix)
 {
-	return Transform4D(
-		Matrix3D(matrix.a1, matrix.a2, matrix.a3, matrix.b1, matrix.b2, matrix.b3, matrix.c1, matrix.c2, matrix.c3),
+	return Transform4D(Matrix3D(matrix.a1, matrix.a2, matrix.a3, matrix.b1, matrix.b2, matrix.b3, matrix.c1, matrix.c2, matrix.c3),
 		Vector3D(matrix.a4, matrix.b4, matrix.c4));
 }
 
@@ -50,8 +49,8 @@ uint32_t GetChildNodeCount(const aiNode* aiNode)
 	return nodeCount + aiNode->mNumChildren;
 }
 
-AnimationNode& ImportNode(std::vector<AnimationNode>& nodes, float&     duration, const aiAnimation* aiAnimation,
-						  const aiNode*               aiNode, uint32_t& currentIndex)
+AnimationNode& ImportNode(std::vector<AnimationNode>& nodes, float& duration, const aiAnimation* aiAnimation, const aiNode* aiNode,
+						  uint32_t& currentIndex)
 {
 	AnimationNodeBuilder builder(std::string(aiNode->mName.C_Str()), AIMatrixCast(aiNode->mTransformation));
 

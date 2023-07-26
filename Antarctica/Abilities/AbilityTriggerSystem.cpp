@@ -9,10 +9,8 @@
 #include "Input/InputListener.h"
 #include "Input/InputQueue.h"
 
-void AbilityTriggerSystem::Update(const uint64_t entityId,
-	AbilityTriggerComponent*                     abilityTrigger,
-	AbilityStackComponent*                       abilityStack,
-	InputListenerComponent*                      inputListener)
+void AbilityTriggerSystem::Update(const uint64_t entityId, AbilityTriggerComponent* abilityTrigger, AbilityStackComponent* abilityStack,
+								  InputListenerComponent* inputListener)
 {
 	if (inputListener->m_inputQueue == nullptr)
 	{

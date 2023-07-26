@@ -27,12 +27,10 @@ namespace Rendering
 		void Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderComponent*) override;
 
 		Transform4D GetAttachedNodeTransform(ComponentAccessor& componentAccessor, const Mesh& mesh, int32_t nodeId, bool ignoreAttachmentRotation);
-		Transform4D GetAttachmentTransform(ComponentAccessor& componentAccessor,
-			const MeshComponent*                              mesh,
-			uint32_t                                          submeshId);
+		Transform4D GetAttachmentTransform(ComponentAccessor& componentAccessor, const MeshComponent* mesh, uint32_t submeshId);
 
 		std::atomic_uint32_t m_counter;
-		RenderQueue          m_renderQueue;
-		Frustum              m_cameraFrustum = {};
+		RenderQueue m_renderQueue;
+		Frustum m_cameraFrustum = {};
 	};
 }

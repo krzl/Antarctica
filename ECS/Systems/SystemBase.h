@@ -9,7 +9,7 @@ public:
 	virtual ~SystemBase() = default;
 
 	virtual void Init() {}
-	
+
 	virtual void OnFrameBegin() {}
 	virtual void OnFrameEnd() {}
 	virtual void OnStepLockBegin() {}

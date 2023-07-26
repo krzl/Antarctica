@@ -21,9 +21,9 @@ namespace Navigation
 
 		float m_maxRotation = 7.0f;
 
-		AlignmentBehavior  m_alignmentBehavior;
-		ArriveBehavior     m_arriveBehavior;
-		CohesionBehavior   m_cohesionBehavior;
+		AlignmentBehavior m_alignmentBehavior;
+		ArriveBehavior m_arriveBehavior;
+		CohesionBehavior m_cohesionBehavior;
 		SeparationBehavior m_separationBehavior;
 
 		SteeringPipeline m_steeringPipeline;

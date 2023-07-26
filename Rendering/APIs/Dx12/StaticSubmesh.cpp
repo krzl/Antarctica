@@ -27,7 +27,8 @@ namespace Rendering::Dx12
 			return;
 		}
 
-		D3D12_RESOURCE_DESC                 resourceDesc    = CD3DX12_RESOURCE_DESC::Buffer(submesh->GetVertexBuffer().m_data.size());
+		D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(submesh->GetVertexBuffer().m_data.size());
+
 		std::vector<D3D12_SUBRESOURCE_DATA> subresourceData = {
 			{
 				submesh->GetVertexBuffer().m_data.data(),
@@ -37,10 +38,10 @@ namespace Rendering::Dx12
 		};
 
 		ResourceUploader::UploadResource(resourceDesc,
-										 subresourceData,
-										 D3D12_RESOURCE_STATE_GENERIC_READ,
-										 m_vertexUploadBuffer,
-										 m_vertexBuffer);
+			subresourceData,
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			m_vertexUploadBuffer,
+			m_vertexBuffer);
 
 		CreateVertexBufferViews(submesh);
 		CreateShaderResourceViews(submesh);
@@ -55,11 +56,7 @@ namespace Rendering::Dx12
 			}
 		};
 
-		ResourceUploader::UploadResource(resourceDesc,
-										 subresourceData,
-										 D3D12_RESOURCE_STATE_GENERIC_READ,
-										 m_indexUploadBuffer,
-										 m_indexBuffer);
+		ResourceUploader::UploadResource(resourceDesc, subresourceData, D3D12_RESOURCE_STATE_GENERIC_READ, m_indexUploadBuffer, m_indexBuffer);
 
 		m_indexBufferView = {
 			m_indexBuffer->GetGPUVirtualAddress(),
@@ -107,17 +104,11 @@ namespace Rendering::Dx12
 		for (uint8_t i = 0; i < (uint8_t) MeshAttribute::UNKNOWN; ++i)
 		{
 			const MeshAttribute attribute = (MeshAttribute) i;
-			AddVertexBufferView(submesh,
-								(MeshAttribute) i,
-								GetAttributeOffset(attribute, offsets),
-								GetAttributeDataSize(attribute, offsets));
+			AddVertexBufferView(submesh, (MeshAttribute) i, GetAttributeOffset(attribute, offsets), GetAttributeDataSize(attribute, offsets));
 		}
 	}
 
-	void StaticSubmesh::AddVertexBufferView(const ::Submesh* submesh,
-		const MeshAttribute                                  attribute,
-		const uint16_t                                       offset,
-		const uint16_t                                       dataSize)
+	void StaticSubmesh::AddVertexBufferView(const ::Submesh* submesh, const MeshAttribute attribute, const uint16_t offset, const uint16_t dataSize)
 	{
 		if (dataSize != 0)
 		{
@@ -145,8 +136,8 @@ namespace Rendering::Dx12
 	}
 
 	void StaticSubmesh::AddShaderResourceViews(const ::Submesh* submesh,
-		const MeshAttribute                                     attribute,
-		const uint16_t                                          offset)
+											   const MeshAttribute attribute,
+											   const uint16_t offset)
 	{
 		if (offset != 0 || attribute == MeshAttribute::POSITION)
 		{
@@ -165,9 +156,9 @@ namespace Rendering::Dx12
 			};
 
 			Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_vertexBuffer.Get(),
-																	 &desc,
-																	 m_skinningHeapHandle->GetCPUHandle(
-																		 m_skinnedAttributesCount));
+				&desc,
+				m_skinningHeapHandle->GetCPUHandle(
+					m_skinnedAttributesCount));
 
 			m_skinnedAttributesCount++;
 		}

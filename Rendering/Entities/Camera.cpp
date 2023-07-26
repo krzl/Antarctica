@@ -7,7 +7,7 @@
 namespace Rendering
 {
 	Camera* Camera::m_camera;
-	
+
 	Camera::Camera()
 	{
 		m_camera = this;

@@ -9,7 +9,7 @@ struct Frustum
 		INTERSECT,
 		INSIDE
 	};
-	
+
 	Plane m_planes[6];
 
 	IntersectTestResult Intersect2D(const BoundingBox& boundingBox) const;

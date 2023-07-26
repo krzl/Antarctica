@@ -12,16 +12,13 @@ namespace Rendering::Dx12
 		m_bufferSize        = ((elementSize * m_elementCount) + 255) & ~255;
 
 		const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
-		const CD3DX12_RESOURCE_DESC   bufferInfo = CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize);
+		const CD3DX12_RESOURCE_DESC bufferInfo = CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize);
 
 
 		ID3D12Device* device = Dx12Context::Get().GetDevice();
 
-		device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
-										&bufferInfo, D3D12_RESOURCE_STATE_GENERIC_READ,
-										nullptr,
-										IID_PPV_ARGS(&m_buffer)
-		);
+		device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &bufferInfo, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+			IID_PPV_ARGS(&m_buffer));
 
 		heapHandle = Dx12Context::Get().CreateHeapHandle();
 
@@ -49,17 +46,13 @@ namespace Rendering::Dx12
 		m_bufferSize        = ((elementSize * m_elementCount) + 255) & ~255;
 
 		const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
-		const CD3DX12_RESOURCE_DESC   bufferInfo = CD3DX12_RESOURCE_DESC::Buffer(
-			m_bufferSize, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+		const CD3DX12_RESOURCE_DESC bufferInfo = CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 
 
 		ID3D12Device* device = Dx12Context::Get().GetDevice();
 
-		device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
-										&bufferInfo, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-										nullptr,
-										IID_PPV_ARGS(&m_buffer)
-		);
+		device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &bufferInfo, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, nullptr,
+			IID_PPV_ARGS(&m_buffer));
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {
 			DXGI_FORMAT_UNKNOWN,
@@ -81,8 +74,7 @@ namespace Rendering::Dx12
 	void Buffer::Bind(const uint32_t slot, const uint32_t index) const
 	{
 		ID3D12GraphicsCommandList* commandList = Dx12Context::Get().GetCommandList();
-		commandList->SetGraphicsRootConstantBufferView(
-			slot, m_buffer->GetGPUVirtualAddress() + index * m_bufferElementSize);
+		commandList->SetGraphicsRootConstantBufferView(slot, m_buffer->GetGPUVirtualAddress() + index * m_bufferElementSize);
 	}
 
 	void Buffer::BindCompute(const uint32_t slot, const uint32_t index) const

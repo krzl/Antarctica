@@ -59,15 +59,14 @@ Capsule GetCapsuleFromVertices(const std::vector<Point3D>& points)
 	return capsule;
 }
 
-static void ProcessMeshNodeData(Mesh&                  mesh, const aiNode* node, const int32_t parentNodeId,
-								std::vector<MeshNode>& nodes, Transform4D  globalTransform)
+static void ProcessMeshNodeData(Mesh& mesh, const aiNode* node, const int32_t parentNodeId, std::vector<MeshNode>& nodes, Transform4D globalTransform)
 {
 	const uint32_t index = static_cast<uint32_t>(nodes.size());
 
 	const Transform4D localTransform = AIMatrixCast(node->mTransformation);
 	globalTransform                  = globalTransform * localTransform;
 
-	std::string    name     = node->mName.C_Str();
+	std::string name        = node->mName.C_Str();
 	const uint64_t nameHash = std::hash<std::string>()(name);
 
 	const MeshNode& meshNode = nodes.emplace_back(MeshNode
@@ -102,8 +101,7 @@ static void ProcessMeshNodeData(Mesh&                  mesh, const aiNode* node,
 bool Mesh::Load(const std::string& path)
 {
 	const aiScene* scene = aiImportFile(path.c_str(),
-										aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_PopulateArmatureData |
-										aiProcess_FlipWindingOrder);
+		aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_PopulateArmatureData | aiProcess_FlipWindingOrder);
 
 	std::vector<MeshBuffer> indexDataList;
 	std::vector<MeshBuffer> vertexDataList;
@@ -146,18 +144,18 @@ bool Mesh::Load(const std::string& path)
 			for (uint32_t i = 0; i < submesh->GetNumColorChannels(); i++)
 			{
 				memcpy(&colors[i * submesh->mNumVertices], submesh->mColors[0],
-					   sizeof submesh->mColors[0] * submesh->mNumVertices);
+					sizeof submesh->mColors[0] * submesh->mNumVertices);
 			}
 			builder.SetColors(std::move(colors));
 		}
 		for (uint32_t uvChannel = 0; uvChannel < Min(submesh->GetNumUVChannels(), 4u); uvChannel++)
 		{
-			const uint8_t      channelCount = submesh->mNumUVComponents[uvChannel];
+			const uint8_t channelCount = submesh->mNumUVComponents[uvChannel];
 			std::vector<float> texcoords(channelCount * submesh->mNumVertices);
 			for (uint32_t i = 0; i < submesh->mNumVertices; i++)
 			{
 				memcpy(&texcoords[i * channelCount], &submesh->mTextureCoords[uvChannel][i],
-					   sizeof(float) * channelCount);
+					sizeof(float) * channelCount);
 			}
 			builder.SetTexcoords(std::move(texcoords), uvChannel);
 		}
@@ -174,7 +172,7 @@ bool Mesh::Load(const std::string& path)
 
 			for (uint32_t boneId = 0; boneId < submesh->mNumBones; ++boneId)
 			{
-				Bone&         bone   = skeleton.m_bones[boneId];
+				Bone& bone           = skeleton.m_bones[boneId];
 				const aiBone* aiBone = submesh->mBones[boneId];
 
 				bone.m_skeleton     = &skeleton;
@@ -182,12 +180,13 @@ bool Mesh::Load(const std::string& path)
 				bone.m_boneNameHash = std::hash<std::string>()(bone.m_boneName);
 				bone.m_offsetMatrix = AIMatrixCast(aiBone->mOffsetMatrix);
 
-				uint32_t             verticesFound = 0;
+				uint32_t verticesFound = 0;
 				std::vector<Point3D> verticesForCollider(aiBone->mNumWeights);
 
 				for (uint32_t weightId = 0; weightId < aiBone->mNumWeights; ++weightId)
 				{
 					const uint32_t vertexId = aiBone->mWeights[weightId].mVertexId;
+
 					skeleton.m_vertexWeights[vertexId].m_boneWeights[weightCounters[vertexId]++] = BoneWeight{
 						boneId,
 						aiBone->mWeights[weightId].mWeight,
@@ -215,8 +214,8 @@ bool Mesh::Load(const std::string& path)
 
 	for (uint32_t animationId = 0; animationId < scene->mNumAnimations; ++animationId)
 	{
-		aiAnimation*               aiAnimation = scene->mAnimations[animationId];
-		std::shared_ptr<Animation> animation   = std::make_shared<Animation>();
+		aiAnimation* aiAnimation             = scene->mAnimations[animationId];
+		std::shared_ptr<Animation> animation = std::make_shared<Animation>();
 		ImportAnimation(*animation, aiAnimation, scene->mRootNode);
 		AddAnimation(animation);
 	}

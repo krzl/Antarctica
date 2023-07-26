@@ -3,7 +3,7 @@
 class Asset
 {
 	friend class AssetManager;
-	
+
 public:
 
 	virtual ~Asset() = default;

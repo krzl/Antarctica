@@ -25,7 +25,7 @@ namespace Rendering::Dx12
 		~Buffer();
 
 	private:
-		
+
 		ComPtr<ID3D12Resource> m_buffer;
 
 		uint32_t m_elementCount      = 0;
