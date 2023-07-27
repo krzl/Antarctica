@@ -1,7 +1,6 @@
 #pragma once
 
 #include <execution>
-#include <iterator>
 
 #include "SystemBase.h"
 #include "Archetypes/Archetype.h"
@@ -29,21 +28,42 @@ public:
 			static uint32_t componentIds[sizeof...(Types)];
 			TryAddNewArchetype<0>(allArchetypes[m_archetypesParsed++].get(), componentIds);
 		}
-		//TODO: disable multi threading on certain systems
-		std::for_each(std::execution::par_unseq,
-			m_archetypesMatched.begin(),
-			m_archetypesMatched.end(),
-			[this](const MatchedArchetype& archetype)
-			{
-				std::atomic_uint32_t counter = 0;
-				std::for_each(std::execution::par_unseq,
-					archetype.m_archetype->m_entityIds.begin(),
-					archetype.m_archetype->m_entityIds.end(),
-					[this, archetype, &counter](const uint64_t entityId)
-					{
-						Run<0>(archetype, counter++, entityId);
-					});
-			});
+		if (m_isMultiThreaded)
+		{
+			std::for_each(std::execution::par_unseq,
+				m_archetypesMatched.begin(),
+				m_archetypesMatched.end(),
+				[this](const MatchedArchetype& archetype)
+				{
+					std::atomic_uint32_t counter = 0;
+					std::for_each(std::execution::par_unseq,
+						archetype.m_archetype->m_entityIds.begin(),
+						archetype.m_archetype->m_entityIds.end(),
+						[this, archetype, &counter](const uint64_t entityId)
+						{
+							const uint32_t id = counter++;
+							Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
+						});
+				});
+		}
+		else
+		{
+			std::for_each(std::execution::seq,
+				m_archetypesMatched.begin(),
+				m_archetypesMatched.end(),
+				[this](const MatchedArchetype& archetype)
+				{
+					std::atomic_uint32_t counter = 0;
+					std::for_each(std::execution::seq,
+						archetype.m_archetype->m_entityIds.begin(),
+						archetype.m_archetype->m_entityIds.end(),
+						[this, archetype, &counter](const uint64_t entityId)
+						{
+							const uint32_t id = counter++;
+							Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
+						});
+				});
+		}
 
 		OnUpdateEnd();
 	}

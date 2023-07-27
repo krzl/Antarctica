@@ -150,7 +150,7 @@ Entity* QuadtreeNode::TraceObject(const RayIntersectionTester& ray, float& minDi
 
 	for (Entity* object : m_entities)
 	{
-		float distance = ray.Intersect(object->GetBoundingBox());
+		const float distance = ray.Intersect(object->GetBoundingBox());
 
 		if (distance < 0.0f || minDistance <= distance)
 		{

@@ -18,6 +18,7 @@ public:
 
 	bool Contains(L id) const
 	{
+		// ReSharper disable once CppUseAssociativeContains
 		return m_lookupList.find(id) != m_lookupList.end();
 	}
 

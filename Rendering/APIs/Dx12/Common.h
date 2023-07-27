@@ -1,6 +1,5 @@
 #pragma once
 
-#include <d3d12shader.h>
 #include "APIs/Dx12/d3dx12.h"
 
 using Microsoft::WRL::ComPtr;

@@ -6,6 +6,11 @@
 #include "Entities/World.h"
 #include "Input/InputListener.h"
 
+AbilitySystem::AbilitySystem()
+{
+	m_isMultiThreaded = false;
+}
+
 void AbilitySystem::Update(const uint64_t entityId, AbilityStackComponent* abilityStack, InputListenerComponent* inputListener)
 {
 	if (abilityStack->m_stack.size() == 0)

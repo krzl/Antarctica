@@ -25,7 +25,7 @@ namespace Anim
 
 		void Update(StateMachineData& stateMachineData, TriggerState& triggerState) const;
 
-		static void CalculateMatrices(const StateMachineData&      stateMachineData, std::vector<Transform4D>& matrices,
+		static void CalculateMatrices(const StateMachineData& stateMachineData, std::vector<Transform4D>& matrices,
 									  const std::vector<MeshNode>& meshNodes);
 
 	private:

@@ -5,7 +5,7 @@
 #include <Input/InputManager.h>
 #include <Settings/Settings.h>
 
-#include "SystemContainer.h"
+#include "ECS.h"
 #include "Entities/World.h"
 #include "Managers/FrameCounter.h"
 #include "Systems/RenderSystem.h"
@@ -20,6 +20,9 @@ class Application
 {
 public:
 
+	Application() {}
+
+	void CreateSystems();
 	void Start();
 	void Stop();
 
@@ -60,5 +63,5 @@ private:
 
 	std::vector<Manager*> m_managers;
 
-	SystemContainer m_ecs;
+	ECS m_ecs;
 };

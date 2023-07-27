@@ -91,7 +91,7 @@ void World::AddToPendingDestroy(Ref<Entity> entity)
 {
 	if (Entity* ptr = *entity)
 	{
-		if (std::shared_ptr<Entity>* sharedPtr = m_entities.Find(ptr->GetInstanceId()))
+		if (m_entities.Find(ptr->GetInstanceId()))
 		{
 			m_pendingDestroyList.insert(ptr->GetInstanceId());
 		}

@@ -2,19 +2,23 @@
 
 class SystemBase;
 
-class SystemContainer
+class ECS
 {
 	friend class Application;
 
-	~SystemContainer();
-
-	void CreateSystems();
+	~ECS();
 
 	void RunBeginFrame();
 	void RunStepLock();
 	void RunEndFrame();
 
 	void ExecuteForAllSystems(std::function<void(SystemBase*)> function) const;
+
+	template<typename T, class = std::enable_if_t<std::is_base_of_v<SystemBase, T>>>
+	T* GetSystem()
+	{
+		return static_cast<T*>(GetSystem(typeid(T).hash_code()));
+	}
 
 	SystemBase* GetSystem(uint64_t hash);
 

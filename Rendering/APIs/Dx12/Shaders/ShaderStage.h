@@ -1,8 +1,10 @@
 #pragma once
 
+#include <d3d12shader.h>
+
 #include "../Common.h"
 
-//TODO: DONT INCLUDE WINDOWS EVERYWHERE
+//TODO: DON'T INCLUDE WINDOWS EVERYWHERE
 #undef DOMAIN
 
 namespace Rendering::Dx12

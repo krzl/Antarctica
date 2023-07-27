@@ -176,7 +176,7 @@ namespace Rendering::Dx12
 
 	NativeSubmesh* StaticSubmesh::Create(const ::Submesh* submesh)
 	{
-		auto nativeSubmesh = new StaticSubmesh();
+		StaticSubmesh* const nativeSubmesh = new StaticSubmesh();
 		nativeSubmesh->Init(submesh);
 		return nativeSubmesh;
 	}

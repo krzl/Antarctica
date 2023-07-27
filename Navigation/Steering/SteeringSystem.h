@@ -13,7 +13,11 @@ namespace Navigation
 
 	class SteeringSystem : public System<TransformComponent, MovementComponent>
 	{
-		void OnUpdateStart() override;
+		friend class Application;
+
+		void DrawMovementTester();
+		void OnStepLockStart() override;
+		void OnStepLockEnd() override;
 		void Update(uint64_t entityId, TransformComponent* transform, MovementComponent* movement) override;
 
 		MovementTester m_movementTester;

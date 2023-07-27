@@ -37,6 +37,6 @@ InputManager::InputManager()
 void InputManager::Update()
 {
 	m_mouseDelta = std::pair(m_mousePosition.first - m_oldMousePosition.first,
-							 m_mousePosition.second - m_oldMousePosition.second);
+		m_mousePosition.second - m_oldMousePosition.second);
 	m_oldMousePosition = m_mousePosition;
 }

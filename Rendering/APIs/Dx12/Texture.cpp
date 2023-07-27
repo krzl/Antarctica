@@ -58,10 +58,6 @@ namespace Rendering::Dx12
 			lastAssignedFenceId = Renderer::Get().GetCurrentBackbufferId();
 		}
 
-		const uint64_t incrementSize = Dx12Context::Get().GetDevice()->
-														  GetDescriptorHandleIncrementSize(
-															  D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
 		Dx12Context::Get().GetCommandList()->SetGraphicsRootDescriptorTable(index, m_heapHandle->GetGPUHandle());
 	}
 

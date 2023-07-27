@@ -30,7 +30,7 @@ void main()
 					EulerToQuaternion(20.0f, 0.0f, 0.0f)
 				}
 			);
-
+			
 			Ref<Rendering::StaticMesh> terrainActor = Application::Get().GetWorld().Spawn<Rendering::StaticMesh>(
 				{
 					Point3D(0.0, 0.0f, 0.0f),
@@ -49,7 +49,7 @@ void main()
 			material->SetTexture("tex2", rock);
 			material->SetOrder(3);
 			terrainActor->SetMaterial(material);
-
+			
 #if defined(DEBUG) | defined(_DEBUG)
 			constexpr uint32_t gridSize = 4;
 #else

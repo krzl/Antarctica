@@ -34,8 +34,8 @@ IntersectTestResult Intersect2D(const Sphere& sphere, const BoundingBox& boundin
 	else
 		closestPoint.y = sphere.m_center.y;
 
-	const Vector2D offset   = sphere.m_center.GetPoint2D() - closestPoint;
-	const float    distance = offset.x * offset.x + offset.y * offset.y;
+	const Vector2D offset = sphere.m_center.GetPoint2D() - closestPoint;
+	const float distance  = offset.x * offset.x + offset.y * offset.y;
 
 	if (distance <= sphere.m_radius * sphere.m_radius)
 	{
@@ -99,8 +99,8 @@ IntersectTestResult Intersect(const Sphere& sphere, const BoundingBox& boundingB
 	else
 		closestPoint.z = sphere.m_center.z;
 
-	const Vector3D offset   = sphere.m_center - closestPoint;
-	const float    distance = Dot(offset, offset);
+	const Vector3D offset = sphere.m_center - closestPoint;
+	const float distance  = Dot(offset, offset);
 
 	if (distance <= sphere.m_radius * sphere.m_radius)
 	{

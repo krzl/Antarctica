@@ -59,12 +59,16 @@ namespace Anim
 		}
 	}
 
-	void StateMachine::CalculateMatrices(const StateMachineData&      stateMachineData, std::vector<Transform4D>& matrices,
+	void StateMachine::CalculateMatrices(const StateMachineData& stateMachineData, std::vector<Transform4D>& matrices,
 										 const std::vector<MeshNode>& meshNodes)
 	{
-		stateMachineData.m_currentState->CalculateBones(matrices,
-			meshNodes,
-			stateMachineData.m_currentTime);
+		if (stateMachineData.m_currentState == nullptr)
+		{
+			matrices.assign(meshNodes.size(), Transform4D());
+			return;
+		}
+		
+		stateMachineData.m_currentState->CalculateBones(matrices, meshNodes, stateMachineData.m_currentTime);
 
 		if (stateMachineData.m_previousState)
 		{

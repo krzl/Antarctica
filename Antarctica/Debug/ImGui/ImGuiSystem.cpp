@@ -56,9 +56,9 @@ void ImGuiSystem::Init()
 	};
 }
 
-void ImGuiSystem::OnFrameBegin()
+void ImGuiSystem::OnFrameStart()
 {
-	System::OnFrameBegin();
+	System::OnFrameStart();
 
 	const Platform::Window& window = Application::Get().GetWindow();
 
@@ -74,6 +74,8 @@ void ImGuiSystem::OnFrameBegin()
 	io.MouseDown[1] = inputSystem->IsRightMousePressed();
 
 	ImGui::NewFrame();
+
+	m_onNewFrame.Dispatch();
 }
 
 void ImGuiSystem::OnUpdateStart()

@@ -50,9 +50,7 @@ void Application::Start()
 		manager->Init();
 	}
 
-	m_ecs.CreateSystems();
-
-	GetSystem<Rendering::CullingSystem>()->m_frameCounter = &m_frameCounter;
+	CreateSystems();
 
 	m_window.SetupInputManager(*InputManager::GetInstance());
 
@@ -82,8 +80,15 @@ void Application::Run()
 			m_world.Update();
 
 			m_ecs.RunBeginFrame();
-			++m_frameCounter.m_lockStepFrameCount;
-			m_ecs.RunStepLock();
+
+			m_frameCounter.CalculateStepLockFramesToExecute();
+
+			while (m_frameCounter.m_stepLockFramesPending > 0)
+			{
+				--m_frameCounter.m_stepLockFramesPending;
+				++m_frameCounter.m_stepLockFrameCount;
+				m_ecs.RunStepLock();
+			}
 		}
 
 		m_ecs.RunEndFrame();

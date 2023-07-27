@@ -16,7 +16,7 @@ namespace Rendering
 class ImGuiSystem : public System<ImGuiComponent, Rendering::MeshComponent>
 {
 	void Init() override;
-	void OnFrameBegin() override;
+	void OnFrameStart() override;
 	void OnUpdateStart() override;
 	void Update(uint64_t entityId, ImGuiComponent* imgui, Rendering::MeshComponent* mesh) override;
 
@@ -25,4 +25,8 @@ class ImGuiSystem : public System<ImGuiComponent, Rendering::MeshComponent>
 	std::shared_ptr<Texture> m_texture;
 
 	AttributeUsage m_attributeUsage = {};
+
+public:
+	
+	Dispatcher<> m_onNewFrame;
 };

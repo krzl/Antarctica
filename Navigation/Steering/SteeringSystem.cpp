@@ -1,26 +1,38 @@
 ﻿#include "stdafx.h"
 #include "SteeringSystem.h"
 
-#include "assimp/code/AssetLib/Blender/BlenderScene.h"
 #include "Behaviors/AlignmentBehavior.h"
 #include "Behaviors/ArriveBehavior.h"
 #include "Behaviors/CohesionBehavior.h"
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
 #include "Entities/World.h"
+
+#include "Managers/FrameCounter.h"
 #include "Managers/TimeManager.h"
 
 namespace Navigation
 {
-	void SteeringSystem::OnUpdateStart()
+	void SteeringSystem::DrawMovementTester()
 	{
-		System::OnUpdateStart();
 		m_movementTester.DrawMenu();
+	}
+
+	void SteeringSystem::OnStepLockStart()
+	{
+		System::OnStepLockStart();
+		m_movementTester.m_hasComponentsToTest = false;
+	}
+
+	void SteeringSystem::OnStepLockEnd()
+	{
+		System::OnStepLockEnd();
+		m_movementTester.m_hasValuesChanged = false;
 	}
 
 	void SteeringSystem::Update(uint64_t entityId, TransformComponent* transform, MovementComponent* movement)
 	{
-		if (movement->m_enableMovementTester)
+		if (movement->m_enableMovementTester && m_frameCounter->m_stepLockFramesPending == 0)
 		{
 			m_movementTester.UpdateComponent(movement, transform);
 		}

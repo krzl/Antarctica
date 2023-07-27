@@ -22,7 +22,5 @@ namespace Rendering
 					ColliderComponent* collider) override;
 
 		Frustum m_cameraFrustum = {};
-
-		FrameCounter* m_frameCounter;
 	};
 }

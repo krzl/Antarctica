@@ -54,7 +54,7 @@ namespace Rendering::Dx12
 	{
 		std::shared_ptr<DescriptorHeapHandle> heapHandle = Dx12Context::Get().CreateHeapHandle();
 
-		D3D12_CONSTANT_BUFFER_VIEW_DESC desc
+		const D3D12_CONSTANT_BUFFER_VIEW_DESC desc
 		{
 			GetGpuPointer(handle),
 			handle.GetByteSize()

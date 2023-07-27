@@ -75,8 +75,8 @@ namespace Rendering
 			m_material(material),
 			m_order(order),
 			m_perObjectBuffer(perObjectBuffer),
-			m_boneTransforms(boneTransforms),
-			m_clipRect(clipRect) {}
+			m_clipRect(clipRect),
+			m_boneTransforms(boneTransforms) {}
 
 		QueuedRenderObject(const QueuedRenderObject& other) :
 			m_submesh(other.m_submesh),

@@ -15,9 +15,6 @@ namespace Navigation
 			return;
 		}
 
-		m_hasValuesChanged    = false;
-		m_hasComponentsToTest = false;
-
 		ImGui::Begin("Agent steering");
 
 		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::Weight", &m_arriveWeight, 0.0f, 2.0f);
@@ -41,8 +38,6 @@ namespace Navigation
 		ImGui::NewLine();
 		ImGui::Checkbox("ShowDebug", &m_showDebug);
 		ImGui::End();
-
-		m_hasComponentsToTest = false;
 	}
 
 	void MovementTester::UpdateComponent(MovementComponent* movement, const TransformComponent* transform)

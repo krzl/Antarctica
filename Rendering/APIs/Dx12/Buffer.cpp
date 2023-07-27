@@ -92,11 +92,6 @@ namespace Rendering::Dx12
 		{
 			count = m_elementCount - offset;
 		}
-		const D3D12_RANGE range =
-		{
-			offset,
-			offset + count * m_bufferElementSize
-		};
 
 		void* mappedMemory;
 		m_buffer->Map(0, nullptr, &mappedMemory);
