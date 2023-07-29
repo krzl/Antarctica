@@ -36,7 +36,9 @@ InputManager::InputManager()
 
 void InputManager::Update()
 {
-	m_mouseDelta = std::pair(m_mousePosition.first - m_oldMousePosition.first,
-		m_mousePosition.second - m_oldMousePosition.second);
+	m_mouseDelta = Point2DInt{
+		m_mousePosition.x - m_oldMousePosition.x,
+		m_mousePosition.y - m_oldMousePosition.y
+	};
 	m_oldMousePosition = m_mousePosition;
 }

@@ -13,10 +13,10 @@
 void MoveAbility::Init(Entity& entity)
 {
 	//TODO: ECS: move mouse picking somewhere else (perhaps to camera itself?)
-	const MousePosition pos = InputManager::GetInstance()->GetMousePosition();
+	const Point2DInt pos = InputManager::GetInstance()->GetMousePosition();
 
-	const float ndcX = (2.0f * pos.first) / Application::Get().GetWindow().GetWidth() - 1.0f;
-	const float ndcY = 1.0f - (2.0f * pos.second) / Application::Get().GetWindow().GetHeight();
+	const float ndcX = (2.0f * pos.x) / Application::Get().GetWindow().GetWidth() - 1.0f;
+	const float ndcY = 1.0f - (2.0f * pos.y) / Application::Get().GetWindow().GetHeight();
 
 	const Vector4D clipCoords = Vector4D(ndcX, ndcY, 1.0f, 1.0f);
 

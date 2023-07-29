@@ -25,17 +25,17 @@ void InputQueue::TryAddMouseMoveCommand()
 {
 	const InputManager* inputManager = InputManager::GetInstance();
 
-	const std::pair<int32_t, int32_t> mouseDelta = inputManager->GetMouseDelta();
+	const Point2DInt mouseDelta = inputManager->GetMouseDelta();
 
-	if (mouseDelta.first != 0 || mouseDelta.second != 0)
+	if (mouseDelta.x != 0 || mouseDelta.y != 0)
 	{
 		InputCommand command;
 
 		command.m_type                    = InputCommand::Type::MOUSE_MOVE;
-		command.m_mouseMoveInput.m_posX   = inputManager->GetMousePosition().first;
-		command.m_mouseMoveInput.m_posY   = inputManager->GetMousePosition().second;
-		command.m_mouseMoveInput.m_deltaX = inputManager->GetMouseDelta().first;
-		command.m_mouseMoveInput.m_deltaY = inputManager->GetMouseDelta().second;
+		command.m_mouseMoveInput.m_posX   = inputManager->GetMousePosition().x;
+		command.m_mouseMoveInput.m_posY   = inputManager->GetMousePosition().y;
+		command.m_mouseMoveInput.m_deltaX = inputManager->GetMouseDelta().x;
+		command.m_mouseMoveInput.m_deltaY = inputManager->GetMouseDelta().y;
 
 		m_commands.emplace_back(std::move(command));
 	}

@@ -50,7 +50,7 @@ namespace Anim
 		}
 		else
 		{
-			stateMachineData.m_currentTime += TimeManager::GetInstance()->GetDeltaTime();
+			stateMachineData.m_currentTime += TimeManager::GetTimeStep();
 
 			if (stateMachineData.m_previousState != nullptr && stateMachineData.m_currentTime > stateMachineData.m_transitionTime)
 			{

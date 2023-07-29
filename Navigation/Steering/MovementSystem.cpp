@@ -11,12 +11,7 @@ namespace Navigation
 	{
 		if (movement->m_velocity != Vector2D::zero)
 		{
-			if (SquaredMag(movement->m_velocity) > movement->m_maxSpeed * movement->m_maxSpeed)
-			{
-				movement->m_velocity = Normalize(movement->m_velocity) * movement->m_maxSpeed;
-			}
-
-			const float deltaTime = TimeManager::GetInstance()->GetTimeStep();
+			constexpr float deltaTime = TimeManager::GetTimeStep();
 
 			transform->m_localPosition += Vector3D(movement->m_velocity, 0.0f) * deltaTime;
 

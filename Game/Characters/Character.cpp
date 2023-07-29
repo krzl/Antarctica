@@ -51,11 +51,8 @@ void Character::SetupComponents(ComponentAccessor& accessor)
 	InputListenerComponent* input             = accessor.GetComponent<InputListenerComponent>();
 	Rendering::MeshComponent* meshComponent   = accessor.GetComponent<Rendering::MeshComponent>();
 	Navigation::MovementComponent* movement   = accessor.GetComponent<Navigation::MovementComponent>();
-	TransformComponent* transform             = accessor.GetComponent<TransformComponent>();
 
-
-	transform->m_localScale    = Vector3D(0.01f, 0.01f, 0.01f);
-	transform->m_localRotation = EulerToQuaternion(90.0, 180.0f, 0.0f);
+	meshComponent->m_transform = EulerToQuaternion(90.0, 180.0f, 0.0f).GetRotationMatrix() * Transform4D::MakeScale(0.01f);
 
 	const std::shared_ptr<Mesh> mesh = AssetManager::GetAsset<Mesh>(
 		"../Resources/Meshes/TT_RTS_Demo_Character.FBX");

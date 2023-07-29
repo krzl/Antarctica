@@ -15,8 +15,8 @@ public:
 	[[nodiscard]] bool IsLeftMousePressed() const { return m_isLeftMousePressed; }
 	[[nodiscard]] bool IsMiddleMousePressed() const { return m_isMiddleMousePressed; }
 	[[nodiscard]] bool IsRightMousePressed() const { return m_isRightMousePressed; }
-	[[nodiscard]] const MousePosition& GetMousePosition() const { return m_mousePosition; }
-	[[nodiscard]] const std::pair<int32_t, int32_t>& GetMouseDelta() const { return m_mouseDelta; }
+	[[nodiscard]] const Point2DInt& GetMousePosition() const { return m_mousePosition; }
+	[[nodiscard]] const Point2DInt& GetMouseDelta() const { return m_mouseDelta; }
 
 	Dispatcher<> OnLeftMouseButtonPressed;
 	Dispatcher<> OnMiddleMouseButtonPressed;
@@ -38,8 +38,8 @@ private:
 	bool m_isMiddleMousePressed = false;
 	bool m_isRightMousePressed  = false;
 
-	MousePosition m_mousePosition;
-	MousePosition m_oldMousePosition;
+	Point2DInt m_mousePosition;
+	Point2DInt m_oldMousePosition;
 
-	std::pair<int32_t, int32_t> m_mouseDelta = std::pair(0, 0);
+	Point2DInt m_mouseDelta = { 0, 0 };
 };

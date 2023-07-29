@@ -41,7 +41,7 @@ void InputHandler::ProcessMouseInput(const UINT msg, const WPARAM wParam, const 
 	const int32_t x = GET_X_LPARAM(lParam);
 	const int32_t y = GET_Y_LPARAM(lParam);
 
-	m_inputManager->m_mousePosition = MousePosition(x, y);
+	m_inputManager->m_mousePosition = Point2DInt{ x, y };
 
 	switch (msg)
 	{

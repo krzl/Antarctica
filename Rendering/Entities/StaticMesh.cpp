@@ -32,6 +32,10 @@ namespace Rendering
 		ColliderComponent* collider = accessor.GetComponent<ColliderComponent>();
 		collider->m_boundingBox     = m_mesh->GetBoundingBox();
 
+		const TransformComponent* transformComponent = accessor.GetComponent<TransformComponent>();
+		RenderComponent* renderComponent             = accessor.GetComponent<RenderComponent>();
+		renderComponent->m_worldTransform            = transformComponent->GetWorldTransform();
+
 		//TODO: do it only for some static meshes?
 		RenderCullComponent* renderCull = accessor.GetComponent<RenderCullComponent>();
 		renderCull->m_cullSubmeshes     = true;

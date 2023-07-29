@@ -87,5 +87,13 @@ namespace Navigation
 		{
 			movement->m_velocity += acceleration * deltaTime;
 		}
+
+		if (movement->m_velocity != Vector2D::zero)
+		{
+			if (SquaredMag(movement->m_velocity) > movement->m_maxSpeed * movement->m_maxSpeed)
+			{
+				movement->m_velocity = Normalize(movement->m_velocity) * movement->m_maxSpeed;
+			}
+		}
 	}
 }

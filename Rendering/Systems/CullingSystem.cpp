@@ -22,7 +22,7 @@ namespace Rendering
 	}
 
 	void CullingSystem::Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderCullComponent* renderCull,
-							   ColliderComponent* collider)
+							   ColliderComponent* collider, RenderComponent* render)
 	{
 		if (m_frameCounter->m_renderFrameCount != transform->m_quadtreePlacement.GetNode()->GetLastSeenFrameId())
 		{
@@ -48,7 +48,7 @@ namespace Rendering
 						renderCull->m_culledSubmeshes.reset();
 						if (renderCull->m_cullSubmeshes && mesh->m_mesh->GetSubmeshCount() > 1)
 						{
-							const Transform4D worldTransform = transform->GetWorldTransform();
+							const Transform4D worldTransform = render->m_worldTransform;
 
 							for (uint32_t i = 0; i < mesh->m_mesh->GetSubmeshCount(); ++i)
 							{

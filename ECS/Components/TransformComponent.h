@@ -11,7 +11,6 @@ struct TransformComponent : Component
 
 	QuadtreePlacementRef m_quadtreePlacement;
 
-	//cache it?
 	Transform4D GetWorldTransform() const
 	{
 		return Transform4D::MakeTranslation(m_localPosition) *

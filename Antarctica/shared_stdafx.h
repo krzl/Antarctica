@@ -53,6 +53,7 @@ using Terathon::Quaternion;
 #include "../Utilities/Math/Intersections.h"
 #include "../Utilities/Math/MathFunctions.h"
 #include "../Utilities/Math/Plane.h"
+#include "../Utilities/Math/Point2DInt.h"
 #include "../Utilities/Math/Ray.h"
 #include "../Utilities/Math/Rect.h"
 #include "../Utilities/Math/Sphere.h"
@@ -65,5 +66,3 @@ using Terathon::Quaternion;
 #if defined(DEBUG) | defined(_DEBUG)
 #include <dxgidebug.h>
 #endif
-
-typedef std::pair<uint32_t, uint32_t> MousePosition;

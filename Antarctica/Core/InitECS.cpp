@@ -14,6 +14,7 @@
 #include "Systems/QuadtreeUpdateSystem.h"
 #include "Systems/RenderSystem.h"
 #include "Systems/SkinningSystem.h"
+#include "Systems/TransformUpdateSystem.h"
 
 void Application::CreateSystems()
 {
@@ -28,6 +29,7 @@ void Application::CreateSystems()
 	m_ecs.AddSystem<Navigation::SteeringSystem>(ECS::STEP_LOCK);
 
 	m_ecs.AddSystem<DebugDrawSystem>(ECS::POST_STEP_LOCK);
+	m_ecs.AddSystem<TransformUpdateSystem>(ECS::POST_STEP_LOCK);
 	m_ecs.AddSystem<Rendering::CullingSystem>(ECS::POST_STEP_LOCK);
 	m_ecs.AddSystem<Rendering::SkinningSystem>(ECS::POST_STEP_LOCK);
 	m_ecs.AddSystem<ImGuiSystem>(ECS::POST_STEP_LOCK);

@@ -55,7 +55,7 @@ namespace Rendering
 			return;
 		}
 
-		Transform4D worldTransform = transform->GetWorldTransform();
+		Transform4D worldTransform = render->m_worldTransform;
 
 		render->m_renderHandles.resize(mesh->m_mesh->GetSubmeshCount());
 
@@ -74,7 +74,7 @@ namespace Rendering
 				material = &*mesh->m_materials[i];
 			}
 
-			const Transform4D worldMatrix = worldTransform * GetAttachmentTransform(componentAccessor, mesh, i);
+			const Transform4D worldMatrix = worldTransform * mesh->m_transform * GetAttachmentTransform(componentAccessor, mesh, i);
 
 			renderHandle.m_submesh                     = &mesh->m_mesh->GetSubmesh(i);
 			renderHandle.m_material                    = material;

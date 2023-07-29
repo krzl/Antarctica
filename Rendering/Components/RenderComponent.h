@@ -12,6 +12,8 @@ namespace Rendering
 	{
 		std::vector<QueuedRenderObject> m_renderHandles;
 
+		Transform4D m_worldTransform;
+
 		DEFINE_CLASS()
 	};
 

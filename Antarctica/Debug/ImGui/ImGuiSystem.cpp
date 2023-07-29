@@ -44,16 +44,7 @@ void ImGuiSystem::Init()
 
 	World::Get()->Spawn<ImGuiManager>({});
 
-	m_attributeUsage = {
-		false,
-		false,
-		false,
-		1,
-		2,
-		0,
-		0,
-		0
-	};
+	m_attributeUsage = { false, false, false, 1, 2, 0, 0, 0 };
 }
 
 void ImGuiSystem::OnFrameStart()
@@ -67,9 +58,9 @@ void ImGuiSystem::OnFrameStart()
 	io.DeltaTime   = TimeManager::GetInstance()->GetDeltaTime();
 
 	const auto& inputSystem      = InputManager::GetInstance();
-	const MousePosition mousePos = inputSystem->GetMousePosition();
+	const Point2DInt mousePos = inputSystem->GetMousePosition();
 
-	io.MousePos     = ImVec2((float) mousePos.first, (float) mousePos.second);
+	io.MousePos     = ImVec2((float) mousePos.x, (float) mousePos.y);
 	io.MouseDown[0] = inputSystem->IsLeftMousePressed();
 	io.MouseDown[1] = inputSystem->IsRightMousePressed();
 
