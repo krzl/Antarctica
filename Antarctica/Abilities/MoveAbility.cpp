@@ -1,50 +1,23 @@
 #include "stdafx.h"
 #include "MoveAbility.h"
 
+#include "Camera/PlayerCameraSystem.h"
 #include "Components/AnimatedMeshComponent.h"
-#include "Components/CameraComponent.h"
 #include "Components/MovementComponent.h"
-#include "Components/TransformComponent.h"
 #include "Core/Application.h"
 #include "Entities/Camera.h"
-#include "Input/InputManager.h"
 #include "Steering/Behaviors/ArriveBehavior.h"
 
-void MoveAbility::Init(Entity& entity)
+bool MoveAbility::Init(Entity& entity)
 {
-	//TODO: ECS: move mouse picking somewhere else (perhaps to camera itself?)
-	const Point2DInt pos = InputManager::GetInstance()->GetMousePosition();
+	const std::optional<Point3D>& cursorWorldPosition = Application::GetSystem<PlayerCameraSystem>()->GetCursorWorldPosition();
+	if (cursorWorldPosition.has_value())
+	{
+		m_target = cursorWorldPosition.value();
+		return true;
+	}
 
-	const float ndcX = (2.0f * pos.x) / Application::Get().GetWindow().GetWidth() - 1.0f;
-	const float ndcY = 1.0f - (2.0f * pos.y) / Application::Get().GetWindow().GetHeight();
-
-	const Vector4D clipCoords = Vector4D(ndcX, ndcY, 1.0f, 1.0f);
-
-	Rendering::Camera* camera = Rendering::Camera::Get();
-
-	ComponentAccessor cameraAccessor            = camera->GetComponentAccessor();
-	TransformComponent* cameraTransform         = cameraAccessor.GetComponent<TransformComponent>();
-	Rendering::CameraComponent* cameraComponent = cameraAccessor.GetComponent<Rendering::CameraComponent>();
-
-	Matrix4D inversePerspectiveMatrix = Inverse(cameraComponent->m_perspectiveMatrix);
-	Vector4D eyeCoordinates           = inversePerspectiveMatrix * clipCoords;
-	eyeCoordinates /= eyeCoordinates.w;
-
-	Matrix4D inverseViewMatrix = Inverse(cameraComponent->m_viewMatrix);
-	Vector4D rayWorld          = inverseViewMatrix * eyeCoordinates;
-
-	Vector3D direction = rayWorld.xyz - cameraTransform->m_localPosition;
-	direction          = direction.Normalize();
-
-	Ray ray = { cameraTransform->m_localPosition, direction };
-
-	double t = -ray.m_origin.z / ray.m_direction.z;
-	Point3D intersectionPoint;
-	intersectionPoint.x = ray.m_origin.x + t * ray.m_direction.x;
-	intersectionPoint.y = ray.m_origin.y + t * ray.m_direction.y;
-	intersectionPoint.z = ray.m_origin.z + t * ray.m_direction.z;
-
-	m_target = intersectionPoint;
+	return false;
 }
 
 void MoveAbility::Start(Entity& entity)

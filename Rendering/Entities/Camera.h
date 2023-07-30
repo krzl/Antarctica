@@ -12,7 +12,7 @@ namespace Rendering
 
 		void DefineArchetype(ArchetypeBuilder& builder) override;
 
-		//TODO: ECS: grant access to camera in other way (maybe variable in certain systems) (also remove all managers and do it like this?)
+		//TODO: grant access to camera in other way (maybe variable in certain systems)
 		static Camera* Get();
 
 	private:

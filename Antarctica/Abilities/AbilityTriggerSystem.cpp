@@ -26,15 +26,16 @@ void AbilityTriggerSystem::Update(const uint64_t entityId, AbilityTriggerCompone
 				Entity* entity = *World::Get()->GetEntity(entityId);
 
 				std::shared_ptr<Ability> ability = std::static_pointer_cast<Ability>(abilityBinding.m_abilityClass->CreateObject());
-				ability->Init(*entity);
-
-				//TODO: Check if append modifier key was held
-				if (!abilityTrigger->m_alwaysAppendAbilities)
+				if (ability->Init(*entity))
 				{
-					abilityStack->m_stack = {};
+					//TODO: Check if append modifier key was held
+					if (!abilityTrigger->m_alwaysAppendAbilities)
+					{
+						abilityStack->m_stack = {};
+					}
+					abilityStack->m_stack.push(std::move(ability));
+					return;
 				}
-				abilityStack->m_stack.push(std::move(ability));
-				return;
 			}
 		}
 	}

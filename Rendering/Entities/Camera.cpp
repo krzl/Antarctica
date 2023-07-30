@@ -3,6 +3,7 @@
 
 #include "Archetypes/ArchetypeBuilder.h"
 #include "Components/CameraComponent.h"
+#include "Components/TransformComponent.h"
 
 namespace Rendering
 {
@@ -23,5 +24,6 @@ namespace Rendering
 		Entity::DefineArchetype(builder);
 
 		builder.AddComponent<CameraComponent>();
+		builder.AddComponent<TransformComponent>();
 	}
 }

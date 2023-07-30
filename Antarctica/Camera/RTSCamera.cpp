@@ -3,7 +3,6 @@
 
 #include "CameraScrollComponent.h"
 #include "Archetypes/ArchetypeBuilder.h"
-#include "Components/TransformComponent.h"
 #include "Input/InputListener.h"
 
 void RTSCamera::DefineArchetype(ArchetypeBuilder& builder)
@@ -11,7 +10,6 @@ void RTSCamera::DefineArchetype(ArchetypeBuilder& builder)
 	Camera::DefineArchetype(builder);
 
 	builder.AddComponent<CameraScrollComponent>();
-	builder.AddComponent<TransformComponent>();
 	builder.AddComponent<InputListenerComponent>();
 }
 

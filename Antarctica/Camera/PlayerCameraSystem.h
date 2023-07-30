@@ -22,11 +22,14 @@ class PlayerCameraSystem : public System<TransformComponent, Rendering::CameraCo
 
 public:
 
-	std::vector<Rendering::CameraData>& GetCameras();
+	[[nodiscard]] const std::optional<Point3D>& GetCursorWorldPosition() const { return m_cursorWorldPosition; }
+	[[nodiscard]] std::vector<Rendering::CameraData>& GetCameras();
 
 private:
 
-	std::vector<Rendering::CameraData> m_cameras;
-
 	float m_aspectRatio = 1.0f;
+
+	std::optional<Point3D> m_cursorWorldPosition;
+
+	std::vector<Rendering::CameraData> m_cameras;
 };

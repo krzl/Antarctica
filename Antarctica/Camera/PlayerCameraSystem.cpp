@@ -9,6 +9,9 @@
 #include "Components/CameraComponent.h"
 #include "Components/TransformComponent.h"
 #include "Core/Application.h"
+
+#include "Entities/Camera.h"
+
 #include "Input/InputListener.h"
 #include "Input/InputQueue.h"
 
@@ -63,7 +66,33 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 		camera->m_order
 	});
 
-	//TODO: ECS: handle mouse picking
+	
+	const Point2DInt pos = InputManager::GetInstance()->GetMousePosition();
+
+	const float ndcX = (2.0f * pos.x) / Application::Get().GetWindow().GetWidth() - 1.0f;
+	const float ndcY = 1.0f - (2.0f * pos.y) / Application::Get().GetWindow().GetHeight();
+
+	const Vector4D clipCoords = Vector4D(ndcX, ndcY, 1.0f, 1.0f);
+
+	Matrix4D inversePerspectiveMatrix = Inverse(camera->m_perspectiveMatrix);
+	Vector4D eyeCoordinates = inversePerspectiveMatrix * clipCoords;
+	eyeCoordinates /= eyeCoordinates.w;
+
+	Matrix4D inverseViewMatrix = Inverse(camera->m_viewMatrix);
+	Vector4D rayWorld = inverseViewMatrix * eyeCoordinates;
+
+	Vector3D direction = rayWorld.xyz - transform->m_localPosition;
+	direction = direction.Normalize();
+
+	Ray ray = { transform->m_localPosition, direction };
+
+	double t = -ray.m_origin.z / ray.m_direction.z;
+	Point3D intersectionPoint;
+	intersectionPoint.x = ray.m_origin.x + t * ray.m_direction.x;
+	intersectionPoint.y = ray.m_origin.y + t * ray.m_direction.y;
+	intersectionPoint.z = ray.m_origin.z + t * ray.m_direction.z;
+
+	m_cursorWorldPosition = intersectionPoint;
 
 	//TODO: handle selection of entities
 }

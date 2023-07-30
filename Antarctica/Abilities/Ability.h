@@ -14,7 +14,7 @@ public:
 
 	bool HasStarted() const { return m_hasStarted; }
 
-	virtual void Init(Entity& entity) = 0;
+	virtual bool Init(Entity& entity) = 0;
 
 	bool Run(Entity& entity)
 	{
