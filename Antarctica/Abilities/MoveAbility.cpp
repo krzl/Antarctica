@@ -10,7 +10,7 @@
 
 bool MoveAbility::Init(Entity& entity)
 {
-	const std::optional<Point3D>& cursorWorldPosition = Application::GetSystem<PlayerCameraSystem>()->GetCursorWorldPosition();
+	const std::optional<Point3D>& cursorWorldPosition = Application::Get().GetSystem<PlayerCameraSystem>()->GetCursorWorldPosition();
 	if (cursorWorldPosition.has_value())
 	{
 		m_target = cursorWorldPosition.value();

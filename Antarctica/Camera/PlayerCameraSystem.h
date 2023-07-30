@@ -3,9 +3,9 @@
 #include "CameraData.h"
 #include "CameraScrollComponent.h"
 #include "Components/CameraComponent.h"
+#include "Input/InputListener.h"
 #include "Systems/System.h"
 
-struct InputListenerComponent;
 
 struct TransformComponent;
 
