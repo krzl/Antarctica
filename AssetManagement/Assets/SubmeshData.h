@@ -10,7 +10,7 @@ struct MeshBuffer
 	std::vector<uint8_t> m_data;
 	uint32_t m_elementSize;
 
-	MeshBuffer(const std::vector<uint8_t>& data, const uint32_t elementSize, const uint32_t elementCount) :
+	MeshBuffer(const std::vector<uint8_t>& data, const uint32_t elementSize) :
 		m_data(data),
 		m_elementSize(elementSize) {}
 
@@ -102,8 +102,8 @@ struct Submesh
 	[[nodiscard]] const MeshBuffer& GetVertexBuffer() const { return m_vertexBuffer; }
 	[[nodiscard]] MeshBuffer& GetVertexBuffer() { return m_vertexBuffer; }
 
-	[[nodiscard]] const MeshBuffer& GetIndexBuffer(const uint32_t index = 0) const { return m_indexBuffer; }
-	[[nodiscard]] MeshBuffer& GetIndexBuffer(const uint32_t index = 0) { return m_indexBuffer; }
+	[[nodiscard]] const MeshBuffer& GetIndexBuffer() const { return m_indexBuffer; }
+	[[nodiscard]] MeshBuffer& GetIndexBuffer() { return m_indexBuffer; }
 
 	[[nodiscard]] const AttributeUsage& GetAttributesUsage() const { return m_attributes; }
 	void SetAttributesUsage(const AttributeUsage usage) { m_attributes = usage; }

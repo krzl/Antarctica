@@ -17,6 +17,12 @@ std::vector<Vector3D> CastToVector(const uint32_t count, const aiVector3D& input
 	return std::vector(inputArray, inputArray + count);
 }
 
+std::vector<Point3D> CastToPoints(const uint32_t count, const aiVector3D& input)
+{
+	const auto inputArray = reinterpret_cast<const Point3D*>(&input);
+	return std::vector(inputArray, inputArray + count);
+}
+
 Capsule GetCapsuleFromVertices(const std::vector<Point3D>& points)
 {
 	float biggestDistance = 0;
@@ -125,7 +131,7 @@ bool Mesh::Load(const std::string& path)
 			memcpy(&indices[i * 3], submesh->mFaces[i].mIndices, sizeof uint32_t * 3);
 		}
 
-		std::vector<Vector3D> vertices = CastToVector(submesh->mNumVertices, *submesh->mVertices);
+		std::vector<Point3D> vertices = CastToPoints(submesh->mNumVertices, *submesh->mVertices);
 
 		SubmeshBuilder builder(submesh->mName.C_Str(), std::move(vertices), indices);
 

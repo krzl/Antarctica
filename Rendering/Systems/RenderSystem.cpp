@@ -30,7 +30,7 @@ namespace Rendering
 	{
 		m_counter = 0;
 		//TODO: make it expand when almost full
-		m_renderQueue.resize(1024 * 64);
+		m_renderQueue.resize(1024 * 64 * 64);
 
 		m_cameraFrustum = Camera::Get()->GetComponentAccessor().GetComponent<CameraComponent>()->m_frustum;
 	}

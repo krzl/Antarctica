@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "SubmeshBuilder.h"
 
-SubmeshBuilder::SubmeshBuilder(std::string&& name, std::vector<Vector3D>&& positions, std::vector<uint32_t>& indices) :
+SubmeshBuilder::SubmeshBuilder(std::string&& name, std::vector<Point3D>&& positions, std::vector<uint32_t>& indices) :
 	m_name(std::move(name)),
 	m_indices(reinterpret_cast<uint8_t*>(indices.data()),
 		reinterpret_cast<uint8_t*>(indices.data()) + indices.size() * 4),
@@ -72,11 +72,9 @@ static void AppendVertexData(std::vector<T>& newData, std::vector<uint8_t>& vert
 
 Submesh SubmeshBuilder::Build()
 {
-	const uint32_t indexCount = static_cast<uint32_t>(m_indices.size() / sizeof(uint32_t));
-	MeshBuffer indexBuffer    = {
+	MeshBuffer indexBuffer = {
 		std::move(m_indices),
-		sizeof(uint32_t),
-		indexCount
+		sizeof(uint32_t)
 	};
 
 	const AttributeUsage attributes = GetAttributeUsage();
@@ -124,8 +122,7 @@ Submesh SubmeshBuilder::Build()
 
 	MeshBuffer vertexBuffer = {
 		std::move(vertices),
-		stride,
-		static_cast<uint32_t>(m_positions.size())
+		stride
 	};
 
 	Submesh submesh(std::move(m_name), std::move(vertexBuffer), std::move(indexBuffer), attributes,

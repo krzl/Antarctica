@@ -4,9 +4,6 @@
 #include "Assets/Mesh.h"
 #include "Assets/Loaders/SubmeshBuilder.h"
 
-#define GRID_CELL_TO_METER (1.0f/4.0f)
-#define GRID_LEVEL_HEIGHT_TO_METER 1.5f
-
 Terrain::HeightLevel Terrain::GetHeight(const uint32_t x, const uint32_t y) const
 {
 	return m_heightMap[GetHeightMapArrayIndex(x, y)];
@@ -25,7 +22,29 @@ uint32_t Terrain::GetHeightMapArrayIndex(const uint32_t x, const uint32_t y) con
 	return x + y * m_width;
 }
 
-static float TerrainHeightLevelToZ(const Terrain::HeightLevel level)
+Point3D Terrain::GetPos(const uint32_t id) const
+{
+	const float xCenterOffset = m_width * GRID_CELL_TO_METER / 2.0f;
+	const float yCenterOffset = m_height * GRID_CELL_TO_METER / 2.0f;
+
+	return Point3D((id % m_width) * GRID_CELL_TO_METER - xCenterOffset,
+		(id / m_width) * GRID_CELL_TO_METER - yCenterOffset,
+		TerrainHeightLevelToZ(m_heightMap[id]));
+}
+
+uint32_t Terrain::GetHeightDifference(const uint32_t a, const uint32_t b, const uint32_t c) const
+{
+	const HeightLevel aHeight = m_heightMap[a];
+	const HeightLevel bHeight = m_heightMap[b];
+	const HeightLevel cHeight = m_heightMap[c];
+
+	const HeightLevel min = Min(aHeight, Min(bHeight, cHeight));
+	const HeightLevel max = Max(aHeight, Max(bHeight, cHeight));
+
+	return max - min;
+}
+
+float Terrain::TerrainHeightLevelToZ(const HeightLevel level)
 {
 	const float rampRatio = (float) (Clamp(level % 5, 1, 4) - 1) / 4.0f;
 	return ((float) (level / 5) + rampRatio) * GRID_LEVEL_HEIGHT_TO_METER;
@@ -64,15 +83,15 @@ void Terrain::ConstructSubmesh(const std::shared_ptr<Mesh> mesh, uint32_t xStart
 	const float yCenterOffset = m_height * GRID_CELL_TO_METER / 2.0f;
 
 	const uint32_t vertexCount = (xEnd - xStart) * (yEnd - yStart);
-	const uint32_t indexCount  = (xEnd - xStart - 1) * (yEnd - yStart - 1);
+	const uint32_t indexCount  = (xEnd - xStart - 1) * (yEnd - yStart - 1) * 6;
 
-	std::vector<Vector3D> vertices(vertexCount);
+	std::vector<Point3D> vertices(vertexCount);
 	std::vector<float> texcoordSplatUV(vertexCount * 2);
 	std::vector<float> texcoordWeights(vertexCount * 4);
-	std::vector<uint32_t> indices(indexCount * 6);
+	std::vector<uint32_t> indices(indexCount);
 
 	// ReSharper disable once CppInconsistentNaming
-	auto GetSubmeshIndex = [xStart, xEnd, yStart, this](const uint32_t x, const uint32_t y)
+	auto GetSubmeshIndex = [xStart, xEnd, yStart](const uint32_t x, const uint32_t y)
 	{
 		return (x - xStart) + (y - yStart) * (xEnd - xStart);
 	};

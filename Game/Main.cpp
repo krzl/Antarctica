@@ -6,6 +6,9 @@
 
 #include "Camera/RTSCamera.h"
 #include "Characters/Character.h"
+
+#include "Debug/DebugDrawManager.h"
+
 #include "Terrain/Terrain.h"
 #include "Terrain/TerrainGenerator.h"
 
@@ -49,11 +52,16 @@ void main()
 			material->SetTexture("tex2", rock);
 			material->SetOrder(3);
 			terrainActor->SetMaterial(material);
-			
+
+			const Navigation::NavMesh navMesh = terrain->CreateNavMesh();
+
+			//DebugDrawManager::GetInstance()->DrawTriangles(navMesh.m_vertices, navMesh.m_traversableIndices, 100.0f, Color::white);
+			//DebugDrawManager::GetInstance()->DrawTrianglesLines(navMesh.m_vertices, navMesh.m_nonTraversableIndices, 1000.0f, Color::magenta);
+
 #if defined(DEBUG) | defined(_DEBUG)
 			constexpr uint32_t gridSize = 4;
 #else
-			constexpr uint32_t gridSize = 20;
+			constexpr uint32_t gridSize = 7;
 #endif
 
 			for (uint32_t i = 0; i < gridSize; i++)

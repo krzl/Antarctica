@@ -29,6 +29,16 @@ struct Color
 		a = (float) aChar / 255.0f;
 	}
 
+	friend bool operator==(const Color& lhs, const Color& rhs)
+	{
+		return lhs.r == rhs.r
+			&& lhs.g == rhs.g
+			&& lhs.b == rhs.b
+			&& lhs.a == rhs.a;
+	}
+
+	friend bool operator!=(const Color& lhs, const Color& rhs) { return !(lhs == rhs); }
+
 	static Color red;
 	static Color green;
 	static Color blue;

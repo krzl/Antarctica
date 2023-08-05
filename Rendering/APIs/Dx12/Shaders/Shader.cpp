@@ -112,7 +112,12 @@ namespace Rendering::Dx12
 
 	D3D12_RASTERIZER_DESC Shader::GetRasterizerDescription() const
 	{
-		auto rasterizerDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+		CD3DX12_RASTERIZER_DESC rasterizerDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+
+		if (m_shaderParams->m_isWireframe)
+		{
+			rasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
+		}
 
 		if (m_shaderParams->m_isDoubleSided)
 		{
@@ -328,7 +333,7 @@ namespace Rendering::Dx12
 
 	NativeShader* Shader::Create(const std::shared_ptr<::Shader>& shader)
 	{
-		return static_cast<NativeShader*>(new Shader(shader->GetPath(), shader->GetShaderParams()));
+		return static_cast<NativeShader*>(new Shader(shader->GetPath(), shader->CreateShaderParams()));
 	}
 }
 

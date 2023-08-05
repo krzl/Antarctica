@@ -212,9 +212,9 @@ void DebugDrawManager::DrawSphere(const Point3D center, const float radius, cons
 	m_onDrawItemQueued.Dispatch(builder);
 }
 
-void DebugDrawManager::DrawTriangles(std::vector<Point3D>&& pointsList, const float duration, const Color color)
+void DebugDrawManager::DrawTriangles(std::vector<Point3D> pointsList, const float duration, const Color color)
 {
-	const std::shared_ptr<ElementBuilder> builder;
+	const std::shared_ptr<ElementBuilder> builder = std::make_shared<ElementBuilder>();
 
 	builder->m_vertices = std::move(pointsList);
 
@@ -224,6 +224,55 @@ void DebugDrawManager::DrawTriangles(std::vector<Point3D>&& pointsList, const fl
 	builder->m_despawnTime = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
 	builder->m_boundingBox = GetBoundingBox(builder->m_vertices);
 	builder->m_color       = color;
+
+	builder->m_drawWireframe = true;
+
+	m_onDrawItemQueued.Dispatch(builder);
+}
+
+void DebugDrawManager::DrawTriangles(std::vector<Point3D> vertices, std::vector<uint32_t> indices, const float duration, const Color color,
+									 const bool isWireframe)
+{
+	if (indices.size() == 0)
+	{
+		return;
+	}
+
+	const std::shared_ptr<ElementBuilder> builder = std::make_shared<ElementBuilder>();
+
+	builder->m_vertices = std::move(vertices);
+	builder->m_indices  = std::move(indices);
+
+	builder->m_despawnTime = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
+	builder->m_boundingBox = GetBoundingBox(builder->m_vertices);
+	builder->m_color       = color;
+
+	builder->m_drawWireframe = isWireframe;
+
+	m_onDrawItemQueued.Dispatch(builder);
+}
+
+void DebugDrawManager::DrawTrianglesLines(const std::vector<Point3D> vertices, const std::vector<uint32_t> indices, const float duration,
+										  const Color color)
+{
+	if (indices.size() == 0)
+	{
+		return;
+	}
+
+	std::shared_ptr<ElementBuilder> builder = ReserveLines((uint32_t) indices.size() / 2, 4);
+
+
+	for (uint32_t i = 0; i < indices.size() / 2; ++i)
+	{
+		AppendLine(vertices[indices[i * 2 + 0]], vertices[indices[i * 2 + 1]], builder, 4);
+	}
+
+	builder->m_despawnTime = TimeManager::GetInstance()->GetTimeSinceStart() + duration;
+	builder->m_boundingBox = GetBoundingBox(builder->m_vertices);
+	builder->m_color       = color;
+
+	builder->m_drawWireframe = false;
 
 	m_onDrawItemQueued.Dispatch(builder);
 }

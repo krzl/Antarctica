@@ -22,12 +22,14 @@ class DebugDrawManager : public Manager
 	{
 		uint32_t m_currentVertex = 0;
 		uint32_t m_currentIndex = 0;
-		std::vector<Point3D> m_vertices;
-		std::vector<uint32_t> m_indices;
+		std::vector<Point3D> m_vertices = {};
+		std::vector<uint32_t> m_indices = {};
 
 		float m_despawnTime = 0.0f;
 		BoundingBox m_boundingBox;
 		Color m_color;
+
+		bool m_drawWireframe = false;
 	};
 
 protected:
@@ -37,15 +39,18 @@ protected:
 public:
 
 	void DrawLine(Point3D start, Point3D end, float width, float duration = 0.0f, Color color = Color::red, uint32_t segments = 8);
-	void DrawTriangles(std::vector<Point3D>&& pointsList, float duration = 0.0f, Color color = Color::red);
+	void DrawTriangles(std::vector<Point3D> pointsList, float duration = 0.0f, Color color = Color::red);
+	void DrawTriangles(std::vector<Point3D> vertices, std::vector<uint32_t> indices, float duration = 0.0f, Color color = Color::red, bool isWireframe = true);
 	void DrawSphere(Point3D center, float radius, float duration = 0.0f, Color color = Color::red, uint32_t segments = 12);
 	void DrawCylinder(Point3D center, Quaternion rotation, float height, float width, float duration = 0.0f,
 					  Color color = Color::red, uint32_t segments = 8);
 	void DrawBox(Point3D center, Quaternion rotation, float x, float y, float z, float duration = 0.0f, Color color = Color::red);
 
+	void DrawTrianglesLines(std::vector<Point3D> vertices, std::vector<uint32_t> indices, float duration = 0.0f, Color color = Color::red);
+
 private:
 
-	static constexpr uint32_t SEGMENTS_PER_LINE = 6;
+	static constexpr uint32_t SEGMENTS_PER_LINE = 4;
 	static constexpr float LINE_WIDTH = 0.03f;
 
 	Dispatcher<std::shared_ptr<ElementBuilder>> m_onDrawItemQueued;

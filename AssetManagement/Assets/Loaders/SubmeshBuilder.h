@@ -6,7 +6,7 @@ class SubmeshBuilder
 {
 public:
 
-	explicit SubmeshBuilder(std::string&& name, std::vector<Vector3D>&& positions, std::vector<uint32_t>& indices);
+	explicit SubmeshBuilder(std::string&& name, std::vector<Point3D>&& positions, std::vector<uint32_t>& indices);
 
 	void SetNormals(std::vector<Vector3D>&& normals);
 	void SetTangents(std::vector<Vector3D>&& tangents);
@@ -17,7 +17,7 @@ public:
 
 	[[nodiscard]] const std::string& GetName() const { return m_name; }
 	[[nodiscard]] const std::vector<uint8_t>& GetIndices() const { return m_indices; }
-	[[nodiscard]] const std::vector<Vector3D>& GetPositions() const { return m_positions; }
+	[[nodiscard]] const std::vector<Point3D>& GetPositions() const { return m_positions; }
 	[[nodiscard]] const std::vector<Vector3D>& GetNormals() const { return m_normals; }
 	[[nodiscard]] const std::vector<Vector3D>& GetTangents() const { return m_tangents; }
 	[[nodiscard]] const std::vector<Vector3D>& GetBitangents() const { return m_bitangents; }
@@ -38,7 +38,7 @@ private:
 
 	std::string m_name;
 	std::vector<uint8_t> m_indices;
-	std::vector<Vector3D> m_positions;
+	std::vector<Point3D> m_positions;
 	std::vector<Vector3D> m_normals;
 	std::vector<Vector3D> m_tangents;
 	std::vector<Vector3D> m_bitangents;

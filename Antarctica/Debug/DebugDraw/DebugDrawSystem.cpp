@@ -6,6 +6,9 @@
 #include "RenderObject.h"
 #include "Assets/DynamicMesh.h"
 #include "Components/MeshComponent.h"
+
+#include "Debug/WireframeShader.h"
+
 #include "Entities/World.h"
 #include "Managers/TimeManager.h"
 
@@ -13,7 +16,8 @@ void DebugDrawSystem::Init()
 {
 	System::Init();
 
-	m_shader = AssetManager::GetAsset<Shader>("../Resources/Shaders/debug_draw.hlsl");
+	m_shader          = AssetManager::GetAsset<Shader>("../Resources/Shaders/debug_draw.hlsl");
+	m_wireframeShader = std::make_shared<WireframeShader>("../Resources/Shaders/debug_draw.hlsl");
 
 	m_attributeUsage = {
 		false,
@@ -66,11 +70,11 @@ void DebugDrawSystem::Update(uint64_t entityId, DebugDrawComponent* debugDraw, R
 		}
 	}
 
-	for (const auto& awaitingElement : m_awaitingElements)
+	for (const std::shared_ptr<DebugDrawManager::ElementBuilder>& awaitingElement : m_awaitingElements)
 	{
 		m_despawnTimes.emplace_back(awaitingElement->m_despawnTime);
 
-		std::shared_ptr<Material> material = std::make_shared<Material>(m_shader);
+		std::shared_ptr<Material> material = std::make_shared<Material>(awaitingElement->m_drawWireframe ? m_wireframeShader : m_shader);
 		material->SetVariable<Color>("color", awaitingElement->m_color);
 		mesh->m_materials.emplace_back(material);
 

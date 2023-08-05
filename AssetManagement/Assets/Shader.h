@@ -8,6 +8,7 @@ struct ShaderParams
 	bool m_isDoubleSided    = false;
 	bool m_blendingEnabled  = false;
 	bool m_depthTestEnabled = true;
+	bool m_isWireframe      = false;
 };
 
 class Shader : public Asset
@@ -22,15 +23,15 @@ public:
 
 	[[nodiscard]] const std::string& GetPath() const { return m_path; }
 
-	virtual std::unique_ptr<ShaderParams> GetShaderParams() { return std::unique_ptr<ShaderParams>(new ShaderParams); }
+	virtual std::unique_ptr<ShaderParams> CreateShaderParams() { return std::unique_ptr<ShaderParams>(new ShaderParams); }
 
 protected:
 
 	bool Load(const std::string& path) override;
 
-private:
-
 	std::string m_path;
+
+private:
 
 	NativePtr m_nativeObject = NativePtr(nullptr, Rendering::Deleter);
 };

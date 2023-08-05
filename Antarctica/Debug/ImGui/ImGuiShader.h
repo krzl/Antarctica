@@ -6,5 +6,5 @@ class ImGuiShader : public Shader
 {
 public:
 
-	std::unique_ptr<ShaderParams> GetShaderParams() override;
+	std::unique_ptr<ShaderParams> CreateShaderParams() override;
 };
