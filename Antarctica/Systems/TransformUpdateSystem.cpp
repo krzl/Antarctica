@@ -13,11 +13,7 @@
 void TransformUpdateSystem::OnUpdateStart()
 {
 	System::OnUpdateStart();
-	m_stepLockProgress = m_frameCounter->GetNextStepLockProgress();
-	if (m_stepLockProgress > 1.0f)
-	{
-		__debugbreak();
-	}
+	m_stepLockProgress = Min(1.0f, m_frameCounter->GetNextStepLockProgress());
 }
 
 void TransformUpdateSystem::Update(const uint64_t entityId, TransformComponent* transform, MoveableComponent* moveable,

@@ -219,7 +219,7 @@ Navigation::NavMesh Terrain::CreateNavMesh() const
 		}
 	}
 
-	for (NavMeshEdge& edge : edges)
+	for (const NavMeshEdge& edge : edges)
 	{
 		DebugDrawManager::GetInstance()->DrawLine(GetPos(edge.m_start), GetPos(edge.m_end), 0.1f, 1000.0f, Color::green, 5);
 	}
