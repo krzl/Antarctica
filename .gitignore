@@ -15,3 +15,6 @@ Release/*
 */*.dir/*
 x64/*
 [B|b]uild/*
+*/imgui.ini
+*/log.txt
+out/build/*
