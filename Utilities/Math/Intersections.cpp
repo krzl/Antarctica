@@ -3,6 +3,8 @@
 
 #include "Sphere.h"
 
+#include "assimp/code/AssetLib/3MF/3MFXmlTags.h"
+
 IntersectTestResult Intersect2D(const Sphere& sphere, const BoundingBox& boundingBox)
 {
 	const Point2D topLeft  = Point2D(boundingBox.m_lowerBoundary.x, boundingBox.m_upperBoundary.y);
@@ -172,6 +174,64 @@ IntersectTestResult Intersect(const Frustum& frustum, const BoundingBox& boundin
 	}
 
 	return result;
+}
+
+static uint32_t GetSegmentOrientation(const Point2D& a, const Point2D& b, const Point2D& c)
+{
+	const float value = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
+
+	if (value == 0.0f)
+	{
+		return 0;
+	}
+
+	return value > 0 ? 1 : 2;
+}
+
+static bool IsOnSegment(const Point2D& p1, const Point2D& p2, const Point2D& p)
+{
+	const bool a = Min(p1.x, p2.x) <= p.x;
+	const bool b = p.x <= Max(p1.x, p2.x);
+	const bool c = Min(p1.y, p2.y) <= p.y;
+	const bool d = p.y <= Max(p1.y, p2.y);
+	
+	return a && b && c && d;
+}
+
+bool Intersect(const Point2D& a1, const Point2D& a2, const Point2D& b1, const Point2D& b2)
+{
+	const uint32_t d1 = GetSegmentOrientation(a1, a2, b1);
+	const uint32_t d2 = GetSegmentOrientation(a1, a2, b2);
+	const uint32_t d3 = GetSegmentOrientation(b1, b2, a1);
+	const uint32_t d4 = GetSegmentOrientation(b1, b2, a2);
+
+	if (d1 != d2 && d3 != d4)
+	{
+		return true;
+	}
+	if (d1 == 0 && IsOnSegment(a1, a2, b1))
+	{
+		return true;
+	}
+	if (d2 == 0 && IsOnSegment(a1, a2, b2))
+	{
+		return true;
+	}
+	if (d3 == 0 && IsOnSegment(b1, b2, a1))
+	{
+		return true;
+	}
+	if (d4 == 0 && IsOnSegment(b1, b2, a2))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool Intersect2D(const Point3D& a1, const Point3D& a2, const Point3D& b1, const Point3D& b2)
+{
+	return Intersect(Point2D(a1.x, a1.y), Point2D(a2.x, a2.y), Point2D(b1.x, b1.y), Point2D(b2.x, b2.y));
 }
 
 bool IsOverlapping2D(const Sphere& sphere, const BoundingBox& boundingBox)

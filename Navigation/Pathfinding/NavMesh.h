@@ -4,85 +4,65 @@ struct Submesh;
 
 namespace Navigation
 {
+	class Terrain;
+
 	class NavMesh
 	{
 		struct Node;
 
-		enum class ConnectionType
-		{
-			NOT_WALKABLE,
-			WALKABLE,
-		};
-
-		struct Connection
-		{
-			uint32_t m_otherNodeId = UNINITIALIZED_NODE_ID;
-			float m_cost;
-			ConnectionType m_type;
-
-			static constexpr uint32_t UNINITIALIZED_NODE_ID = 0xFFFFFFFF;
-		};
-
-		struct Node
-		{
-			Point3D m_position;
-			Point3D m_edges[2];
-			Connection m_connections[4];
-
-			void AddConnection(Connection&& connection);
-		};
-
 		struct Triangle
 		{
-			Point3D m_points[3];
-			uint32_t m_nodeIds[3];
-		};
+			static constexpr uint32_t NULL_ID = 0xFFFFFFFF;
 
-		union NodeLookupKey
-		{
-			// ReSharper disable once CppInconsistentNaming
-			friend std::size_t hash_value(const NodeLookupKey& obj)
-			{
-				std::size_t seed = 0x7A0D0D9A;
-				seed ^= (seed << 6) + (seed >> 2) + 0x6FB2E052 + static_cast<std::size_t>(obj.m_key);
-				return seed;
-			}
-
-			
-
-			friend bool operator<(const NodeLookupKey& lhs, const NodeLookupKey& rhs) { return lhs.m_key < rhs.m_key; }
-			friend bool operator<=(const NodeLookupKey& lhs, const NodeLookupKey& rhs) { return !(rhs < lhs); }
-			friend bool operator>(const NodeLookupKey& lhs, const NodeLookupKey& rhs) { return rhs < lhs; }
-			friend bool operator>=(const NodeLookupKey& lhs, const NodeLookupKey& rhs) { return !(lhs < rhs); }
-
-			struct
-			{
-				uint32_t m_a;
-				uint32_t m_b;
-			};
-
-			uint64_t m_key;
+			std::array<uint32_t, 3> m_vertices          = { NULL_ID, NULL_ID, NULL_ID };
+			std::array<uint32_t, 3> m_adjacentTriangles = { NULL_ID, NULL_ID, NULL_ID };
 		};
 
 	public:
 
-		explicit NavMesh();
+		struct Edge
+		{
+			uint32_t m_start;
+			uint32_t m_end;
+		};
 
-		//FOR VISUALIZATION ONLY
-		std::vector<Point3D> m_vertices;
+		explicit NavMesh(const std::vector<Point3D>& vertices, std::vector<Edge>&& edges, const Terrain& terrain);
+
+		void AddVertex(const Point3D& vertex);
+		void AddConstraint(const Edge& edge);
+
 		std::vector<uint32_t> m_traversableIndices;
 		std::vector<uint32_t> m_nonTraversableIndices;
 
 	private:
 
-		void AddNodes(const std::vector<Point3D>& vertices, const std::vector<uint32_t>& indices,
-					  std::map<NodeLookupKey, uint32_t>& nodeLookup,
-					  const ConnectionType connectionType, const uint32_t indexOffset);
+		void SetTriangle(uint32_t triangleId, const Triangle& triangle);
+		void RemoveTriangle(uint32_t triangleId);
 
-		uint32_t GetNodeId(std::map<NodeLookupKey, uint32_t>& lookup, const std::vector<Point3D>& vertices,
-						   const uint32_t indexA, const uint32_t indexB);
+		uint32_t FindTriangleId(const Point3D& vertex);
 
-		std::vector<Node> m_nodes;
+		bool TriangleFlipTest(uint32_t vertexId, const Triangle& triangle, uint32_t oppositeVertexId) const;
+		bool IsConvex(const Edge& edge) const;
+
+		bool DoesEdgeAlreadyExist(const Edge& edge);
+
+		void GetEdgeTriangles(const Edge& edge, uint32_t& aTriangleId, uint32_t& bTriangleId) const;
+
+		void FlipDiagonal(uint32_t aTriangleId, uint32_t bTriangleId, uint32_t aVertexId = Triangle::NULL_ID, uint32_t bVertexId = Triangle::NULL_ID);
+		Edge FlipDiagonal(const Edge& edge);
+
+		static uint32_t FindOppositeSideVertexId(const Triangle& searchTriangle, const Triangle& compareTriangle);
+		static uint32_t GetAdjacentTriangleId(const std::vector<unsigned>& adjacentTriangles, const std::vector<unsigned>::iterator& it,
+											  bool seekLeft);
+
+		static void GetNextVerticesClockwise(const Triangle& triangle, uint32_t startingVertexId, uint32_t& p1, uint32_t& p2);
+
+		uint32_t FindInitialConstraintTriangle(const Edge& edge) const;
+
+
+		std::vector<Point3D> m_vertices;
+		std::vector<std::unordered_set<uint32_t>> m_vertexToTriangleMap;
 		std::vector<Triangle> m_triangles;
+		std::vector<Edge> m_edges;
 	};
 }

@@ -23,13 +23,13 @@ void main()
 	app.OnApplicationInitialized.AddListener([]()
 	{
 		{
-			constexpr TerrainGenerator::SpawnParameters params;
-			const std::shared_ptr<Terrain> terrain = TerrainGenerator::GenerateTerrain(params);
-			const std::shared_ptr<Mesh> mesh       = terrain->ConstructMesh();
+			constexpr Navigation::TerrainGenerator::SpawnParameters params;
+			const std::shared_ptr<Navigation::Terrain> terrain = Navigation::TerrainGenerator::GenerateTerrain(params);
+			const std::shared_ptr<Mesh> mesh                   = terrain->ConstructMesh();
 
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>(
 				{
-					Point3D(0, 0, 20),
+					Point3D(0, 0, 30),
 					EulerToQuaternion(20.0f, 0.0f, 0.0f)
 				}
 			);

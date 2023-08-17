@@ -53,7 +53,7 @@ public:
 				m_archetypesMatched.end(),
 				[this](const MatchedArchetype& archetype)
 				{
-					std::atomic_uint32_t counter = 0;
+					uint32_t counter = 0;
 					std::for_each(std::execution::seq,
 						archetype.m_archetype->m_entityIds.begin(),
 						archetype.m_archetype->m_entityIds.end(),

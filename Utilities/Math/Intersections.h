@@ -46,4 +46,7 @@ IntersectTestResult Intersect2D(const Sphere& sphere, const BoundingBox& boundin
 IntersectTestResult Intersect(const Sphere& sphere, const BoundingBox& boundingBox);
 IntersectTestResult Intersect(const Frustum& frustum, const BoundingBox& boundingBox);
 
+bool Intersect(const Point2D& a1, const Point2D& a2, const Point2D& b1, const Point2D& b2);
+bool Intersect2D(const Point3D& a1, const Point3D& a2, const Point3D& b1, const Point3D& b2);
+
 bool IsOverlapping2D(const Sphere& sphere, const BoundingBox& boundingBox);

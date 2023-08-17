@@ -214,6 +214,11 @@ void DebugDrawManager::DrawSphere(const Point3D center, const float radius, cons
 
 void DebugDrawManager::DrawTriangles(std::vector<Point3D> pointsList, const float duration, const Color color)
 {
+	if (pointsList.size() == 0)
+	{
+		return;
+	}
+	
 	const std::shared_ptr<ElementBuilder> builder = std::make_shared<ElementBuilder>();
 
 	builder->m_vertices = std::move(pointsList);
@@ -225,7 +230,7 @@ void DebugDrawManager::DrawTriangles(std::vector<Point3D> pointsList, const floa
 	builder->m_boundingBox = GetBoundingBox(builder->m_vertices);
 	builder->m_color       = color;
 
-	builder->m_drawWireframe = true;
+	builder->m_drawWireframe = false;
 
 	m_onDrawItemQueued.Dispatch(builder);
 }
