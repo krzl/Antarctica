@@ -230,7 +230,6 @@ namespace Navigation
 			}
 		}
 
-
 		std::vector<NavMesh::Edge> finalEdges;
 		finalEdges.reserve(edges.size());
 
@@ -239,10 +238,6 @@ namespace Navigation
 			finalEdges.emplace_back(NavMesh::Edge{ verticesIdMap[edge.m_start], verticesIdMap[edge.m_end] });
 		}
 
-		for (NavMesh::Edge& edge : finalEdges)
-		{
-			//DebugDrawManager::GetInstance()->DrawLine(vertices[edge.m_start], vertices[edge.m_end], 0.1f, 1000.f);
-		}
-
 		return NavMesh(std::move(vertices), std::move(finalEdges), *this);
-	}}
+	}
+}

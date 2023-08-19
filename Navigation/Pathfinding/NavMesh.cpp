@@ -164,6 +164,23 @@ namespace Navigation
 		}
 	}
 
+	static uint32_t GetSegmentOrientation(const Point2D& a, const Point2D& b, const Point2D& c)
+	{
+		const float value = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
+
+		if (value == 0.0f)
+		{
+			return 0;
+		}
+
+		return value > 0 ? 1 : 2;
+	}
+
+	static uint32_t GetSegmentOrientation(const Point3D& a, const Point3D& b, const Point3D& c)
+	{
+		return GetSegmentOrientation(Point2D(a.x, a.y), Point2D(b.x, b.y), Point2D(c.x, c.y));
+	}
+
 	void NavMesh::SetTriangle(const uint32_t triangleId, const Triangle& triangle)
 	{
 		m_triangles[triangleId] = triangle;
@@ -171,6 +188,15 @@ namespace Navigation
 		for (uint32_t i = 0; i < 3; ++i)
 		{
 			m_vertexToTriangleMap[triangle.m_vertices[i]].insert(triangleId);
+		}
+
+		const Point2D a(m_vertices[triangle.m_vertices[0]].x, m_vertices[triangle.m_vertices[0]].y);
+		const Point2D b(m_vertices[triangle.m_vertices[1]].x, m_vertices[triangle.m_vertices[1]].y);
+		const Point2D c(m_vertices[triangle.m_vertices[2]].x, m_vertices[triangle.m_vertices[2]].y);
+
+		if (GetSegmentOrientation(a, b, c) == 2 || GetSegmentOrientation(b, c, a) == 2 || GetSegmentOrientation(c, a, b) == 2)
+		{
+			__debugbreak();
 		}
 	}
 
@@ -213,7 +239,7 @@ namespace Navigation
 		return (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x) > 0.0f;
 	}
 
-	uint32_t NavMesh::FindTriangleId(const Point3D& vertex)
+	uint32_t NavMesh::FindTriangleId(const Point3D& vertex) const
 	{
 		uint32_t currentTriangleId = 0;
 
@@ -481,10 +507,51 @@ namespace Navigation
 
 			const Point3D& p1 = m_vertices[p1Id];
 			const Point3D& p2 = m_vertices[p2Id];
-
+			
+			if (GetSegmentOrientation(m_vertices[edge.m_start], p1, p2) == 0)
+			{
+				continue;
+			}
 			if (Intersect2D(m_vertices[edge.m_start], m_vertices[edge.m_end], p1, p2))
 			{
 				return triangleId;
+			}
+		}
+		
+		for (const uint32_t triangleId : m_vertexToTriangleMap[edge.m_start])
+		{
+			uint32_t p1Id;
+			uint32_t p2Id;
+
+			const Triangle& triangle = m_triangles[triangleId];
+
+			GetNextVerticesClockwise(triangle, edge.m_start, p1Id, p2Id);
+
+			const Point3D& p1 = m_vertices[p1Id];
+			const Point3D& p2 = m_vertices[p2Id];
+
+			if (GetSegmentOrientation(m_vertices[edge.m_start], p1, p2) == 0)
+			{
+				uint32_t aTriangleId;
+				uint32_t bTriangleId;
+				GetEdgeTriangles({ p1Id, p2Id }, aTriangleId, bTriangleId);
+
+				const Triangle& oppositeTriangle = m_triangles[aTriangleId != triangleId ? aTriangleId : bTriangleId];
+
+				const uint32_t oppositeVertexId = FindOppositeSideVertexId(oppositeTriangle, triangle);
+
+				if (oppositeVertexId == edge.m_end)
+				{
+					return triangleId;
+				}
+
+				const bool a = Intersect2D(m_vertices[edge.m_start], m_vertices[edge.m_end], p1, m_vertices[oppositeVertexId]);
+				const bool b = Intersect2D(m_vertices[edge.m_start], m_vertices[edge.m_end], m_vertices[oppositeVertexId], p2);
+
+				if (a || b)
+				{
+					return triangleId;
+				}
 			}
 		}
 
@@ -556,6 +623,59 @@ namespace Navigation
 		return false;
 	}
 
+	std::queue<NavMesh::Edge> NavMesh::GetIntersectingEdges(const Edge& edge) const
+	{
+		uint32_t currentTriangleId = FindInitialConstraintTriangle(edge);
+		Triangle currentTriangle   = m_triangles[currentTriangleId];
+		uint32_t p1Id;
+		uint32_t p2Id;
+		GetNextVerticesClockwise(currentTriangle, edge.m_start, p1Id, p2Id);
+
+		std::queue<Edge> intersectingEdges;
+		uint32_t nextTriangleId = p1Id == currentTriangle.m_vertices[0] ?
+									  currentTriangle.m_adjacentTriangles[0] :
+									  p1Id == currentTriangle.m_vertices[1] ?
+										  currentTriangle.m_adjacentTriangles[1] :
+										  currentTriangle.m_adjacentTriangles[2];
+
+		Edge currentEdge = intersectingEdges.emplace(Edge{ p1Id, p2Id });
+
+		while (true)
+		{
+			const uint32_t oppositeVertexId = FindOppositeSideVertexId(m_triangles[nextTriangleId], currentTriangle);
+
+			if (oppositeVertexId == edge.m_end)
+			{
+				return intersectingEdges;
+			}
+
+			currentTriangleId = nextTriangleId;
+			currentTriangle   = m_triangles[currentTriangleId];
+
+			if (Intersect2D(m_vertices[edge.m_start], m_vertices[edge.m_end], m_vertices[currentEdge.m_start],
+				m_vertices[oppositeVertexId]))
+			{
+				nextTriangleId = currentEdge.m_start == currentTriangle.m_vertices[0] ?
+									 currentTriangle.m_adjacentTriangles[0] :
+									 currentEdge.m_start == currentTriangle.m_vertices[1] ?
+										 currentTriangle.m_adjacentTriangles[1] :
+										 currentTriangle.m_adjacentTriangles[2];
+
+				currentEdge = intersectingEdges.emplace(Edge{ currentEdge.m_start, oppositeVertexId });
+			}
+			else
+			{
+				nextTriangleId = oppositeVertexId == currentTriangle.m_vertices[0] ?
+									 currentTriangle.m_adjacentTriangles[0] :
+									 oppositeVertexId == currentTriangle.m_vertices[1] ?
+										 currentTriangle.m_adjacentTriangles[1] :
+										 currentTriangle.m_adjacentTriangles[2];
+
+				currentEdge = intersectingEdges.emplace(Edge{ oppositeVertexId, currentEdge.m_end });
+			}
+		}
+	}
+
 	void NavMesh::AddConstraint(const Edge& edge)
 	{
 		if (DoesEdgeAlreadyExist(edge))
@@ -563,57 +683,7 @@ namespace Navigation
 			return;
 		}
 
-		std::queue<Edge> intersectingEdges;
-
-		uint32_t currentTriangleId = FindInitialConstraintTriangle(edge);
-		Triangle currentTriangle   = m_triangles[currentTriangleId];
-		uint32_t p1Id;
-		uint32_t p2Id;
-		GetNextVerticesClockwise(currentTriangle, edge.m_start, p1Id, p2Id);
-
-		uint32_t nextTriangleId = p1Id == currentTriangle.m_vertices[0] ?
-									  currentTriangle.m_adjacentTriangles[0] :
-									  (p1Id == currentTriangle.m_vertices[1] ?
-										   currentTriangle.m_adjacentTriangles[1] :
-										   currentTriangle.m_adjacentTriangles[2]);
-		{
-			Edge currentEdge = intersectingEdges.emplace(Edge{ p1Id, p2Id });
-
-			while (true)
-			{
-				const uint32_t oppositeVertexId = FindOppositeSideVertexId(m_triangles[nextTriangleId], currentTriangle);
-
-				if (oppositeVertexId == edge.m_end)
-				{
-					break;
-				}
-
-				currentTriangleId = nextTriangleId;
-				currentTriangle   = m_triangles[currentTriangleId];
-
-				if (Intersect2D(m_vertices[edge.m_start], m_vertices[edge.m_end], m_vertices[currentEdge.m_start],
-					m_vertices[oppositeVertexId]))
-				{
-					nextTriangleId = currentEdge.m_start == currentTriangle.m_vertices[0] ?
-										 currentTriangle.m_adjacentTriangles[0] :
-										 (currentEdge.m_start == currentTriangle.m_vertices[1] ?
-											  currentTriangle.m_adjacentTriangles[1] :
-											  currentTriangle.m_adjacentTriangles[2]);
-
-					currentEdge = intersectingEdges.emplace(Edge{ currentEdge.m_start, oppositeVertexId });
-				}
-				else
-				{
-					nextTriangleId = oppositeVertexId == currentTriangle.m_vertices[0] ?
-										 currentTriangle.m_adjacentTriangles[0] :
-										 (oppositeVertexId == currentTriangle.m_vertices[1] ?
-											  currentTriangle.m_adjacentTriangles[1] :
-											  currentTriangle.m_adjacentTriangles[2]);
-
-					currentEdge = intersectingEdges.emplace(Edge{ oppositeVertexId, currentEdge.m_end });
-				}
-			}
-		}
+		std::queue<Edge> intersectingEdges = GetIntersectingEdges(edge);
 
 		std::queue<Edge> newlyCreatedEdges;
 

@@ -44,7 +44,7 @@ namespace Navigation
 		uint32_t m_height = 0;
 		std::vector<HeightLevel> m_heightMap;
 		
-		static constexpr float GRID_CELL_TO_METER         = 1.0f / 1.0f;
+		static constexpr float GRID_CELL_TO_METER         = 1.0f / 16.0f;
 		static constexpr float GRID_LEVEL_HEIGHT_TO_METER = 5.0f;
 	};
 }

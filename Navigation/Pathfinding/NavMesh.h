@@ -39,12 +39,13 @@ namespace Navigation
 		void SetTriangle(uint32_t triangleId, const Triangle& triangle);
 		void RemoveTriangle(uint32_t triangleId);
 
-		uint32_t FindTriangleId(const Point3D& vertex);
+		uint32_t FindTriangleId(const Point3D& vertex) const;
 
 		bool TriangleFlipTest(uint32_t vertexId, const Triangle& triangle, uint32_t oppositeVertexId) const;
 		bool IsConvex(const Edge& edge) const;
 
 		bool DoesEdgeAlreadyExist(const Edge& edge);
+		std::queue<Edge> GetIntersectingEdges(const Edge& edge) const;
 
 		void GetEdgeTriangles(const Edge& edge, uint32_t& aTriangleId, uint32_t& bTriangleId) const;
 
