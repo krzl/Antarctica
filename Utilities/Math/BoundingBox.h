@@ -20,6 +20,7 @@ struct BoundingBox
 	bool Overlap(const BoundingBox& other) const;
 
 	Point3D GetCenter() const;
+	Vector3D GetExtent() const;
 
 	void Append(const Point3D point);
 	void Append(const BoundingBox& other);

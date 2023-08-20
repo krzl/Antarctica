@@ -49,7 +49,7 @@ namespace Navigation
 			AddConstraint(Edge{ m_edges[i].m_start + 3, m_edges[i].m_end + 3 });
 		}
 
-		{
+		/*{
 			std::vector<Point3D> vertexList;
 			vertexList.reserve(m_triangles.size() * 3);
 
@@ -69,7 +69,7 @@ namespace Navigation
 			}
 
 			DebugDrawManager::GetInstance()->DrawTriangles(vertexList, 1000.0f, Color::green);
-		}
+		}*/
 	}
 
 	void NavMesh::AddVertex(const Point3D& vertex)
@@ -241,7 +241,7 @@ namespace Navigation
 
 	uint32_t NavMesh::FindTriangleId(const Point3D& vertex) const
 	{
-		uint32_t currentTriangleId = 0;
+		uint32_t currentTriangleId = m_triangles.size() - 1;
 
 		while (true)
 		{
@@ -507,7 +507,7 @@ namespace Navigation
 
 			const Point3D& p1 = m_vertices[p1Id];
 			const Point3D& p2 = m_vertices[p2Id];
-			
+
 			if (GetSegmentOrientation(m_vertices[edge.m_start], p1, p2) == 0)
 			{
 				continue;
@@ -517,7 +517,7 @@ namespace Navigation
 				return triangleId;
 			}
 		}
-		
+
 		for (const uint32_t triangleId : m_vertexToTriangleMap[edge.m_start])
 		{
 			uint32_t p1Id;
@@ -737,6 +737,23 @@ namespace Navigation
 
 				newlyCreatedEdges.emplace(newEdge);
 			}
+		}
+	}
+
+	void NavMesh::AddObstacle(const std::vector<Point3D>& vertices)
+	{
+		const uint32_t startIndex = m_vertices.size();
+
+		for (const Point3D& vertex : vertices)
+		{
+			AddVertex(vertex);
+		}
+
+		for (uint32_t i = 0; i < vertices.size() + 1; ++i)
+		{
+			const uint32_t edgeStart = startIndex + i;
+			const uint32_t edgeEnd   = i == vertices.size() - 1 ? startIndex : edgeStart + 1;
+			AddConstraint(Edge{ edgeStart, edgeEnd });
 		}
 	}
 }

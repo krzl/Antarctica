@@ -7,6 +7,7 @@
 #include "Systems/System.h"
 
 
+class BVH;
 struct TransformComponent;
 
 class PlayerCameraSystem : public System<TransformComponent, Rendering::CameraComponent, CameraScrollComponent, InputListenerComponent>
@@ -24,6 +25,8 @@ public:
 
 	[[nodiscard]] const std::optional<Point3D>& GetCursorWorldPosition() const { return m_cursorWorldPosition; }
 	[[nodiscard]] std::vector<Rendering::CameraData>& GetCameras();
+
+	std::shared_ptr<BVH> m_terrainBvh;
 
 private:
 

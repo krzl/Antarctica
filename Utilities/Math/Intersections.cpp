@@ -194,7 +194,7 @@ static bool IsOnSegment(const Point2D& p1, const Point2D& p2, const Point2D& p)
 	const bool b = p.x <= Max(p1.x, p2.x);
 	const bool c = Min(p1.y, p2.y) <= p.y;
 	const bool d = p.y <= Max(p1.y, p2.y);
-	
+
 	return a && b && c && d;
 }
 
@@ -232,6 +232,47 @@ bool Intersect(const Point2D& a1, const Point2D& a2, const Point2D& b1, const Po
 bool Intersect2D(const Point3D& a1, const Point3D& a2, const Point3D& b1, const Point3D& b2)
 {
 	return Intersect(Point2D(a1.x, a1.y), Point2D(a2.x, a2.y), Point2D(b1.x, b1.y), Point2D(b2.x, b2.y));
+}
+
+float Intersect(const Ray& ray, const Triangle& triangle)
+{
+	const Vector3D edge1 = triangle.m_vertices[1] - triangle.m_vertices[0];
+	const Vector3D edge2 = triangle.m_vertices[2] - triangle.m_vertices[0];
+	const Vector3D h     = Cross(ray.m_direction, edge2);
+
+	const float a = Dot(edge1, h);
+
+	if (a > -0.00001f && a < 0.00001f)
+	{
+		//Ray is parallel to triangle
+		return -1.0f;
+	}
+
+	const float f    = 1.0f / a;
+	const Vector3D s = ray.m_origin - triangle.m_vertices[0];
+
+	const float u = f * Dot(s, h);
+
+	if (u < 0.0f || u > 1.0f)
+	{
+		return -1.0f;
+	}
+
+	const Vector3D q = Cross(s, edge1);
+	const float v    = f * Dot(ray.m_direction, q);
+
+	if (v < 0.0f || v > 1.0f)
+	{
+		return - 1.0f;
+	}
+
+	const float t = f * Dot(edge2, q);
+	if (t > 0.0001f)
+	{
+		return t;
+	}
+
+	return -1.0f;
 }
 
 bool IsOverlapping2D(const Sphere& sphere, const BoundingBox& boundingBox)

@@ -31,6 +31,8 @@ namespace Navigation
 		void AddVertex(const Point3D& vertex);
 		void AddConstraint(const Edge& edge);
 
+		void AddObstacle(const std::vector<Point3D>& vertices);
+
 		std::vector<uint32_t> m_traversableIndices;
 		std::vector<uint32_t> m_nonTraversableIndices;
 

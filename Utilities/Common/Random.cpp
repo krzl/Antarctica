@@ -4,7 +4,7 @@
 #include <random>
 
 static std::random_device rd;
-static std::mt19937 generator(rd());
+static std::mt19937 generator(16);
 
 int32_t Random::GetRandomInt32(const int32_t min, const int32_t max)
 {

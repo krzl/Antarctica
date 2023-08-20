@@ -4,13 +4,16 @@
 #include <complex>
 
 #include "CameraData.h"
+
+#include "Assets/BVH.h"
+
 #include "Buffers/Types/PerCameraBuffer.h"
 #include "Camera/CameraScrollComponent.h"
 #include "Components/CameraComponent.h"
 #include "Components/TransformComponent.h"
 #include "Core/Application.h"
 
-#include "Entities/Camera.h"
+#include "Debug/DebugDrawManager.h"
 
 #include "Input/InputListener.h"
 #include "Input/InputQueue.h"
@@ -66,7 +69,7 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 		camera->m_order
 	});
 
-	
+
 	const Point2DInt pos = InputManager::GetInstance()->GetMousePosition();
 
 	const float ndcX = (2.0f * pos.x) / Application::Get().GetWindow().GetWidth() - 1.0f;
@@ -75,24 +78,27 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 	const Vector4D clipCoords = Vector4D(ndcX, ndcY, 1.0f, 1.0f);
 
 	Matrix4D inversePerspectiveMatrix = Inverse(camera->m_perspectiveMatrix);
-	Vector4D eyeCoordinates = inversePerspectiveMatrix * clipCoords;
+	Vector4D eyeCoordinates           = inversePerspectiveMatrix * clipCoords;
 	eyeCoordinates /= eyeCoordinates.w;
 
 	Matrix4D inverseViewMatrix = Inverse(camera->m_viewMatrix);
-	Vector4D rayWorld = inverseViewMatrix * eyeCoordinates;
+	Vector4D rayWorld          = inverseViewMatrix * eyeCoordinates;
 
 	Vector3D direction = rayWorld.xyz - transform->m_localPosition;
-	direction = direction.Normalize();
+	direction          = direction.Normalize();
 
-	Ray ray = { transform->m_localPosition, direction };
+	const Ray ray = { transform->m_localPosition, direction };
 
-	double t = -ray.m_origin.z / ray.m_direction.z;
-	Point3D intersectionPoint;
-	intersectionPoint.x = ray.m_origin.x + t * ray.m_direction.x;
-	intersectionPoint.y = ray.m_origin.y + t * ray.m_direction.y;
-	intersectionPoint.z = ray.m_origin.z + t * ray.m_direction.z;
-
-	m_cursorWorldPosition = intersectionPoint;
+	Timer time;
+	time.Start();
+	m_cursorWorldPosition = m_terrainBvh->Intersect(ray);
+	time.Stop();
+	LOG(DEBUG, "AA", "{}", time.GetTime());
+	
+	if (m_cursorWorldPosition.has_value())
+	{
+		DebugDrawManager::GetInstance()->DrawSphere(m_cursorWorldPosition.value(), 0.1f);
+	}
 
 	//TODO: handle selection of entities
 }

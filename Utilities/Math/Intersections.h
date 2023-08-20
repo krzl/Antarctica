@@ -1,9 +1,5 @@
 ﻿#pragma once
 
-#include "Ray.h"
-
-struct Sphere;
-
 struct RayIntersectionTester
 {
 	Ray m_ray;
@@ -48,5 +44,7 @@ IntersectTestResult Intersect(const Frustum& frustum, const BoundingBox& boundin
 
 bool Intersect(const Point2D& a1, const Point2D& a2, const Point2D& b1, const Point2D& b2);
 bool Intersect2D(const Point3D& a1, const Point3D& a2, const Point3D& b1, const Point3D& b2);
+
+float Intersect(const Ray& ray, const Triangle& triangle);
 
 bool IsOverlapping2D(const Sphere& sphere, const BoundingBox& boundingBox);

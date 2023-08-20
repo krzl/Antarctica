@@ -51,7 +51,12 @@ bool BoundingBox::Overlap(const BoundingBox& other) const
 
 Point3D BoundingBox::GetCenter() const
 {
-	return (m_upperBoundary - m_lowerBoundary) / 2.0f + m_lowerBoundary;
+	return GetExtent() + m_lowerBoundary;
+}
+
+Vector3D BoundingBox::GetExtent() const
+{
+	return (m_upperBoundary - m_lowerBoundary) / 2.0f;
 }
 
 void BoundingBox::Append(const Point3D point)

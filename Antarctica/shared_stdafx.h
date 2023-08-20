@@ -51,13 +51,15 @@ using Terathon::Quaternion;
 #include "../Utilities/Math/BoundingBox.h"
 #include "../Utilities/Math/Capsule.h"
 #include "../Utilities/Math/Frustum.h"
-#include "../Utilities/Math/Intersections.h"
 #include "../Utilities/Math/MathFunctions.h"
 #include "../Utilities/Math/Plane.h"
 #include "../Utilities/Math/Point2DInt.h"
 #include "../Utilities/Math/Ray.h"
 #include "../Utilities/Math/Rect.h"
 #include "../Utilities/Math/Sphere.h"
+#include "../Utilities/Math/Triangle.h"
+
+#include "../Utilities/Math/Intersections.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <d3d12.h>

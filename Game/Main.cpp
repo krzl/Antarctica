@@ -4,6 +4,8 @@
 #include <Core/Application.h>
 #include <Entities/StaticMesh.h>
 
+#include "Assets/BVH.h"
+
 #include "Camera/RTSCamera.h"
 #include "Characters/Character.h"
 
@@ -11,6 +13,8 @@
 
 #include "Terrain/Terrain.h"
 #include "Terrain/TerrainGenerator.h"
+
+#include "Camera/PlayerCameraSystem.h"
 
 void main()
 {
@@ -33,7 +37,7 @@ void main()
 					EulerToQuaternion(20.0f, 0.0f, 0.0f)
 				}
 			);
-			
+
 			Ref<Rendering::StaticMesh> terrainActor = Application::Get().GetWorld().Spawn<Rendering::StaticMesh>(
 				{
 					Point3D(0.0, 0.0f, 0.0f),
@@ -54,9 +58,16 @@ void main()
 			terrainActor->SetMaterial(material);
 
 			const Navigation::NavMesh navMesh = terrain->CreateNavMesh();
-			
+
+			Timer time;
+			time.Start();
+			Application::Get().GetSystem<PlayerCameraSystem>()->m_terrainBvh = std::make_shared<BVH>(mesh);
+			time.Stop();
+			LOG(DEBUG, "A", "{}", time.GetTime());
 			//DebugDrawManager::GetInstance()->DrawTriangles(navMesh.m_vertices, navMesh.m_traversableIndices, 100.0f, Color::white);
 			//DebugDrawManager::GetInstance()->DrawTrianglesLines(navMesh.m_vertices, navMesh.m_nonTraversableIndices, 1000.0f, Color::magenta);
+
+
 
 #if defined(DEBUG) | defined(_DEBUG)
 			constexpr uint32_t gridSize = 4;
