@@ -10,6 +10,8 @@
 
 bool MoveAbility::Init(Entity& entity)
 {
+	m_entity = &entity;
+
 	const std::optional<Point3D>& cursorWorldPosition = Application::Get().GetSystem<PlayerCameraSystem>()->GetCursorWorldPosition();
 	if (cursorWorldPosition.has_value())
 	{
@@ -20,9 +22,9 @@ bool MoveAbility::Init(Entity& entity)
 	return false;
 }
 
-void MoveAbility::Start(Entity& entity)
+void MoveAbility::Start()
 {
-	ComponentAccessor componentAccessor = entity.GetComponentAccessor();
+	const ComponentAccessor& componentAccessor = m_entity->GetComponentAccessor();
 
 	Navigation::MovementComponent* movementComponent   = componentAccessor.GetComponent<Navigation::MovementComponent>();
 	Anim::AnimatedMeshComponent* animatedMeshComponent = componentAccessor.GetComponent<Anim::AnimatedMeshComponent>();
@@ -31,17 +33,17 @@ void MoveAbility::Start(Entity& entity)
 	animatedMeshComponent->m_animationSolver.SetTrigger(Anim::AnimTrigger::WALK, true);
 }
 
-bool MoveAbility::Update(Entity& entity)
+bool MoveAbility::Update()
 {
-	ComponentAccessor componentAccessor = entity.GetComponentAccessor();
+	const ComponentAccessor& componentAccessor = m_entity->GetComponentAccessor();
 
 	const Navigation::MovementComponent* movementComponent = componentAccessor.GetComponent<Navigation::MovementComponent>();
 	return movementComponent->m_arriveBehavior.HasArrived();
 }
 
-void MoveAbility::End(Entity& entity)
+void MoveAbility::End()
 {
-	ComponentAccessor componentAccessor = entity.GetComponentAccessor();
+	const ComponentAccessor& componentAccessor = m_entity->GetComponentAccessor();
 
 	Navigation::MovementComponent* movementComponent = componentAccessor.GetComponent<Navigation::MovementComponent>();
 	movementComponent->m_arriveBehavior.ClearTarget();

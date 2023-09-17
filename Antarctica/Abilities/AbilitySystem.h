@@ -3,9 +3,8 @@
 #include "Systems/System.h"
 
 struct AbilityStackComponent;
-struct InputListenerComponent;
 
-class AbilitySystem : public System<AbilityStackComponent, InputListenerComponent>
+class AbilitySystem : public System<AbilityStackComponent>
 {
 public:
 
@@ -13,5 +12,5 @@ public:
 
 private:
 	
-	void Update(uint64_t entityId, AbilityStackComponent* abilityStack, InputListenerComponent* inputListener) override;
+	void Update(uint64_t entityId, AbilityStackComponent* abilityStack) override;
 };

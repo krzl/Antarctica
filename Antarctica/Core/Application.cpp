@@ -5,9 +5,7 @@
 
 #include "Camera/PlayerCameraSystem.h"
 #include "Entities/World.h"
-#include "Input/InputSystem.h"
 #include "Managers/Manager.h"
-#include "Systems/CullingSystem.h"
 
 Application* gApp = nullptr;
 
@@ -67,7 +65,6 @@ void Application::Run()
 	{
 		if (!m_isPaused)
 		{
-			GetSystem<InputSystem>()->ResetInput();
 			m_window.Update();
 
 			++m_frameCounter.m_renderFrameCount;

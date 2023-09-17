@@ -1,31 +1,29 @@
 #pragma once
 
-#include <memory>
-#include <memory>
-
 #include "Assets/Material.h"
-#include "Assets/Mesh.h"
 #include "Entities/Entity.h"
+
+class DynamicMesh;
 
 namespace Rendering
 {
 	struct MeshComponent;
 
-	class StaticMesh : public Entity
+	class DynamicMeshEntity : public Entity
 	{
 	public:
 
-		explicit StaticMesh(const std::shared_ptr<Mesh>& mesh);
+		explicit DynamicMeshEntity(const std::shared_ptr<DynamicMesh>& mesh);
 
 		void SetMaterial(const std::shared_ptr<Material>& material, uint32_t index = 0);
 
 	protected:
 
 		void DefineArchetype(ArchetypeBuilder& builder) override;
-		void SetupComponents(ComponentAccessor& accessor) override;
+		void SetupComponents(const ComponentAccessor& accessor) override;
 
 	private:
 
-		std::shared_ptr<Mesh> m_mesh;
+		std::shared_ptr<DynamicMesh> m_mesh = nullptr;
 	};
 }

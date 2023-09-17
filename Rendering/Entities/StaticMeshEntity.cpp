@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "StaticMesh.h"
+#include "StaticMeshEntity.h"
 
 #include "Archetypes/ArchetypeBuilder.h"
 #include "Components/ColliderComponent.h"
@@ -10,10 +10,10 @@
 
 namespace Rendering
 {
-	StaticMesh::StaticMesh(const std::shared_ptr<Mesh>& mesh) :
+	StaticMeshEntity::StaticMeshEntity(const std::shared_ptr<Mesh>& mesh) :
 		m_mesh(mesh) {}
 
-	void StaticMesh::DefineArchetype(ArchetypeBuilder& builder)
+	void StaticMeshEntity::DefineArchetype(ArchetypeBuilder& builder)
 	{
 		Entity::DefineArchetype(builder);
 
@@ -24,7 +24,7 @@ namespace Rendering
 		builder.AddComponent<RenderComponent>();
 	}
 
-	void StaticMesh::SetupComponents(ComponentAccessor& accessor)
+	void StaticMeshEntity::SetupComponents(const ComponentAccessor& accessor)
 	{
 		MeshComponent* meshComponent = accessor.GetComponent<MeshComponent>();
 		meshComponent->m_mesh        = m_mesh;
@@ -41,7 +41,7 @@ namespace Rendering
 		renderCull->m_cullSubmeshes     = true;
 	}
 
-	void StaticMesh::SetMaterial(const std::shared_ptr<Material>& material, const uint32_t index)
+	void StaticMeshEntity::SetMaterial(const std::shared_ptr<Material>& material, const uint32_t index)
 	{
 		MeshComponent* meshComponent = GetComponentAccessor().GetComponent<MeshComponent>();
 		assert(index < 8);

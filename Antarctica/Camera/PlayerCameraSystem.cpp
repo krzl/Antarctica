@@ -5,6 +5,12 @@
 
 #include "CameraData.h"
 
+#include "Abilities/Ability.h"
+#include "Abilities/AbilityBinding.h"
+#include "Abilities/AbilityStackComponent.h"
+#include "Abilities/AbilityTriggerComponent.h"
+#include "Abilities/Activators/AbilityActivator.h"
+
 #include "Assets/BVH.h"
 
 #include "Buffers/Types/PerCameraBuffer.h"
@@ -13,42 +19,75 @@
 #include "Components/TransformComponent.h"
 #include "Core/Application.h"
 
-#include "Debug/DebugDrawManager.h"
-
-#include "Input/InputListener.h"
 #include "Input/InputQueue.h"
+
+void PlayerCameraSystem::Init()
+{
+	System::Init();
+
+	InputManager* inputManager = InputManager::GetInstance();
+
+	inputManager->OnLeftMouseButtonPressed.AddListener([this]()
+	{
+		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::LEFT, true);
+	});
+
+	inputManager->OnMiddleMouseButtonPressed.AddListener([this]()
+	{
+		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::MIDDLE, true);
+	});
+
+	inputManager->OnRightMouseButtonPressed.AddListener([this]()
+	{
+		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::RIGHT, true);
+	});
+
+	inputManager->OnLeftMouseButtonReleased.AddListener([this]()
+	{
+		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::LEFT, false);
+	});
+
+	inputManager->OnMiddleMouseButtonReleased.AddListener([this]()
+	{
+		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::MIDDLE, false);
+	});
+
+	inputManager->OnRightMouseButtonReleased.AddListener([this]()
+	{
+		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::RIGHT, false);
+	});
+}
 
 void PlayerCameraSystem::OnUpdateStart()
 {
 	m_aspectRatio = Application::Get().GetWindow().GetAspectRatio();
 	m_cameras.clear();
+
+	m_inputQueue.TryAddMouseMoveCommand();
 }
 
 void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform, Rendering::CameraComponent* camera,
-								CameraScrollComponent* cameraScroll, InputListenerComponent* inputListener)
+								CameraScrollComponent* cameraScroll)
 {
-	if (inputListener->m_inputQueue != nullptr)
+	if (m_inputQueue.GetMouseButtonPress(InputCommand::MouseButtonId::MIDDLE))
 	{
-		if (inputListener->m_inputQueue->GetMouseButtonPress(InputCommand::MouseButtonId::MIDDLE))
+		cameraScroll->m_isDragging = true;
+	}
+	else
+	{
+		if (m_inputQueue.GetMouseButtonRelease(InputCommand::MouseButtonId::MIDDLE))
 		{
-			cameraScroll->m_isDragging = true;
+			cameraScroll->m_isDragging = false;
 		}
-		else
-		{
-			if (inputListener->m_inputQueue->GetMouseButtonRelease(InputCommand::MouseButtonId::MIDDLE))
-			{
-				cameraScroll->m_isDragging = false;
-			}
-		}
+	}
 
-		if (cameraScroll->m_isDragging)
+	if (cameraScroll->m_isDragging)
+	{
+		if (const InputCommand::MouseMoveInput* mouseMove = m_inputQueue.GetMouseMove())
 		{
-			if (const InputCommand::MouseMoveInput* mouseMove = inputListener->m_inputQueue->GetMouseMove())
-			{
-				const Vector3D positionDelta = Vector3D(-mouseMove->m_deltaX * cameraScroll->m_cameraSpeed,
-					mouseMove->m_deltaY * cameraScroll->m_cameraSpeed, 0.0f);
-				transform->m_localPosition += positionDelta;
-			}
+			const Vector3D positionDelta = Vector3D(-mouseMove->m_deltaX * cameraScroll->m_cameraSpeed,
+				mouseMove->m_deltaY * cameraScroll->m_cameraSpeed, 0.0f);
+			transform->m_localPosition += positionDelta;
 		}
 	}
 
@@ -89,21 +128,51 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 
 	const Ray ray = { transform->m_localPosition, direction };
 
-	Timer time;
-	time.Start();
 	m_cursorWorldPosition = m_terrainBvh->Intersect(ray);
-	time.Stop();
-	LOG(DEBUG, "AA", "{}", time.GetTime());
-	
-	if (m_cursorWorldPosition.has_value())
-	{
-		DebugDrawManager::GetInstance()->DrawSphere(m_cursorWorldPosition.value(), 0.1f);
-	}
 
 	//TODO: handle selection of entities
+
+	if (m_selectionGroupEntity != nullptr && m_abilityActivator == nullptr)
+	{
+		TryTriggerAbilitiesFromSelection();
+	}
+
+	if (m_abilityActivator != nullptr)
+	{
+		m_abilityActivator->Update();
+
+		if (m_abilityActivator->ShouldBeCancelled())
+		{
+			m_abilityActivator->OnFinished();
+			m_abilityActivator.reset();
+		}
+		else
+		{
+			if (m_inputQueue.GetMouseButtonPress(InputCommand::MouseButtonId::LEFT))
+			{
+				if (const bool activateAbility = m_abilityActivator->CanBeFinished())
+				{
+					if (Entity* suitableEntity = FindSuitableEntityForAbility(m_abilityActivator->m_abilityId))
+					{
+						ActivateAbility(suitableEntity, m_abilityActivator->m_abilityId);
+					}
+					else
+					{
+						m_abilityActivator->OnFinished();
+						m_abilityActivator.reset();
+					}
+				}
+				else
+				{
+					m_abilityActivator->OnFinished();
+					m_abilityActivator.reset();
+				}
+			}
+		}
+	}
 }
 
-Matrix4D PlayerCameraSystem::GetPerspectiveMatrix(const Rendering::CameraComponent* camera)
+Matrix4D PlayerCameraSystem::GetPerspectiveMatrix(const Rendering::CameraComponent* camera) const
 {
 	const float tan = Terathon::Tan(0.5f * DegToRad(camera->m_fov));
 
@@ -166,4 +235,192 @@ Frustum PlayerCameraSystem::GetFrustum(Rendering::CameraComponent* camera) const
 std::vector<Rendering::CameraData>& PlayerCameraSystem::GetCameras()
 {
 	return m_cameras;
+}
+
+void PlayerCameraSystem::AddToSelection(Entity* entity)
+{
+	if (m_selectedEntities.size() == 0)
+	{
+		m_selectionGroupEntity = entity;
+	}
+
+	m_selectedEntities.emplace(entity);
+}
+
+void PlayerCameraSystem::SetupTerrainBvh(const std::shared_ptr<Mesh> terrain)
+{
+	m_terrainBvh = std::make_shared<BVH>();
+	m_terrainBvh->Init(terrain);
+}
+
+void PlayerCameraSystem::OnUpdateEnd()
+{
+	m_inputQueue.Clear();
+}
+
+void PlayerCameraSystem::TryTriggerAbilitiesFromSelection()
+{
+	const ComponentAccessor& accessor             = m_selectionGroupEntity->GetComponentAccessor();
+	const AbilityTriggerComponent* abilityTrigger = accessor.GetComponent<AbilityTriggerComponent>();
+	if (abilityTrigger)
+	{
+		for (const InputCommand& inputCommand : m_inputQueue.m_commands)
+		{
+			for (const AbilityBinding& abilityBinding : abilityTrigger->m_abilityBindings)
+			{
+				if (IsAbilityInputPressed(abilityBinding, inputCommand))
+				{
+					m_abilityActivator              = abilityBinding.m_activatorCreator();
+					m_abilityActivator->m_abilityId = abilityBinding.m_abilityId;
+
+					Entity* suitableEntity = FindSuitableEntityForAbility(abilityBinding.m_abilityId);
+					if (!suitableEntity)
+					{
+						m_abilityActivator.reset();
+						continue;
+					}
+
+					if (m_abilityActivator->ShouldTriggerImmediately())
+					{
+						ActivateAbility(suitableEntity, abilityBinding.m_abilityId);
+					}
+				}
+			}
+		}
+	}
+}
+
+bool PlayerCameraSystem::IsAbilityInputPressed(const AbilityBinding& abilityBinding, const InputCommand& inputCommand)
+{
+	if (inputCommand.m_type != abilityBinding.m_inputType)
+	{
+		return false;
+	}
+
+	switch (inputCommand.m_type)
+	{
+		case InputCommand::Type::MOUSE_PRESS:
+			return (uint32_t) inputCommand.m_mousePressInput.m_button == abilityBinding.m_inputId;
+		case InputCommand::Type::MOUSE_RELEASE:
+			return (uint32_t) inputCommand.m_mouseReleaseInput.m_button == abilityBinding.m_inputId;
+		case InputCommand::Type::MOUSE_MOVE:
+			return true;
+		default:
+			return false;
+	}
+}
+
+bool PlayerCameraSystem::CanEntityActivateAbility(const AbilityTriggerComponent* abilityTrigger, const std::string& abilityId)
+{
+	if (abilityTrigger)
+	{
+		for (const AbilityBinding& binding : abilityTrigger->m_abilityBindings)
+		{
+			if (binding.m_abilityId == abilityId)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+Entity* PlayerCameraSystem::FindSuitableEntityForAbility(const std::string& abilityId) const
+{
+	if (m_abilityActivator->ShouldActivateForAllSelected())
+	{
+		for (Entity* entity : m_selectedEntities)
+		{
+			const ComponentAccessor& accessor             = entity->GetComponentAccessor();
+			const AbilityTriggerComponent* abilityTrigger = accessor.GetComponent<AbilityTriggerComponent>();
+
+			if (CanEntityActivateAbility(abilityTrigger, abilityId) && m_abilityActivator->GetEntitySuitability(entity) >= 0.0f)
+			{
+				return entity;
+			}
+		}
+	}
+	else
+	{
+		float bestSuitability      = -1.0f;
+		Entity* mostSuitableEntity = nullptr;
+
+		for (Entity* selectedEntity : m_selectedEntities)
+		{
+			const ComponentAccessor& accessor             = selectedEntity->GetComponentAccessor();
+			const AbilityTriggerComponent* abilityTrigger = accessor.GetComponent<AbilityTriggerComponent>();
+
+			if (CanEntityActivateAbility(abilityTrigger, abilityId))
+			{
+				const float suitability = m_abilityActivator->GetEntitySuitability(selectedEntity);
+				if (suitability >= 0.0f && (suitability < bestSuitability || mostSuitableEntity == nullptr))
+				{
+					bestSuitability    = suitability;
+					mostSuitableEntity = selectedEntity;
+				}
+			}
+		}
+
+		return mostSuitableEntity;
+	}
+
+	return nullptr;
+}
+
+void PlayerCameraSystem::ActivateAbility(Entity* entity, const std::string& abilityId)
+{
+	if (m_abilityActivator->ShouldActivateForAllSelected())
+	{
+		for (Entity* selectedEntity : m_selectedEntities)
+		{
+			const ComponentAccessor& accessor             = entity->GetComponentAccessor();
+			const AbilityTriggerComponent* abilityTrigger = accessor.GetComponent<AbilityTriggerComponent>();
+
+			if (CanEntityActivateAbility(abilityTrigger, abilityId) && m_abilityActivator->GetEntitySuitability(selectedEntity) < 0.0f)
+			{
+				continue;
+			}
+
+			AbilityStackComponent* abilityStack = accessor.GetComponent<AbilityStackComponent>();
+
+			if (abilityStack)
+			{
+				continue;
+			}
+
+			const std::shared_ptr<Ability> ability = m_abilityActivator->Activate(selectedEntity);
+			ability->Tick();
+			AddAbilityToStack(abilityStack, ability);
+		}
+	}
+	else
+	{
+		const ComponentAccessor& accessor   = entity->GetComponentAccessor();
+		AbilityStackComponent* abilityStack = accessor.GetComponent<AbilityStackComponent>();
+
+		const std::shared_ptr<Ability> ability = m_abilityActivator->Activate(entity);
+		ability->Tick();
+		AddAbilityToStack(abilityStack, ability);
+	}
+
+	m_abilityActivator->OnFinished();
+
+	m_abilityActivator.reset();
+}
+
+void PlayerCameraSystem::AddAbilityToStack(AbilityStackComponent* abilityStack, std::shared_ptr<Ability> ability) const
+{
+	//TODO: Check if append modifier key was held
+	if constexpr (true)
+	{
+		while (!abilityStack->m_stack.empty())
+		{
+			const std::shared_ptr<Ability> oldAbility = abilityStack->m_stack.front();
+			abilityStack->m_stack.pop();
+
+			oldAbility->Cancel();
+		}
+	}
+	abilityStack->m_stack.push(std::move(ability));
 }

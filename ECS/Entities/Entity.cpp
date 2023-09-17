@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Entity.h"
 
+#include "World.h"
+
 #include "Archetypes/ArchetypeBuilder.h"
 #include "Components/ColliderComponent.h"
 #include "Components/TransformComponent.h"
@@ -11,7 +13,7 @@
 void Entity::FinalizeArchetype(ArchetypeBuilder& archetypeBuilder)
 {
 	m_archetype = archetypeBuilder.Build();
-	m_archetype->AddEntity(this, archetypeBuilder.m_classes);
+	m_archetype->AddEntity(this);
 }
 
 void Entity::CreateArchetype()
@@ -21,9 +23,19 @@ void Entity::CreateArchetype()
 	FinalizeArchetype(builder);
 }
 
+const ComponentAccessor& Entity::GetComponentAccessor()
+{
+	if (!m_componentAccessor.IsValid(m_instanceId))
+	{
+		m_componentAccessor.Setup(this);
+	}
+
+	return m_componentAccessor;
+}
+
 BoundingBox Entity::GetBoundingBox()
 {
-	ComponentAccessor accessor = GetComponentAccessor();
+	const ComponentAccessor& accessor = GetComponentAccessor();
 	if (ColliderComponent* collider = accessor.GetComponent<ColliderComponent>())
 	{
 		return collider->m_transformedBoundingBox;
@@ -35,4 +47,10 @@ BoundingBox Entity::GetBoundingBox()
 	}
 
 	return BoundingBox();
+}
+
+void Entity::Destroy()
+{
+	World::Get()->AddToPendingDestroy(m_self);
+	m_archetype->RemoveEntity(this);
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Key.h"
+
 #include "Managers/Manager.h"
 
 class InputManager : public Manager
@@ -26,7 +28,12 @@ public:
 	Dispatcher<> OnMiddleMouseButtonReleased;
 	Dispatcher<> OnRightMouseButtonReleased;
 
+	Dispatcher<Key> OnKeyPressed;
+	Dispatcher<Key> OnKeyReleased;
+
 	Dispatcher<int, int> OnMouseMove;
+
+	bool IsKeyPressed(Key key) const;
 
 protected:
 
@@ -37,6 +44,8 @@ private:
 	bool m_isLeftMousePressed   = false;
 	bool m_isMiddleMousePressed = false;
 	bool m_isRightMousePressed  = false;
+
+	std::bitset<(uint32_t) Key::KEY_ENUM_COUNT> m_heldKeys;
 
 	Point2DInt m_mousePosition;
 	Point2DInt m_oldMousePosition;

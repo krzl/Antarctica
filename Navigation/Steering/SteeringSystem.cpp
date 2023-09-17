@@ -47,7 +47,7 @@ namespace Navigation
 
 		for (Entity* entity : nearbyEntities)
 		{
-			ComponentAccessor componentAccessor = entity->GetComponentAccessor();
+			const ComponentAccessor& componentAccessor = entity->GetComponentAccessor();
 
 			const TransformComponent* nearbyTransform = componentAccessor.GetComponent<TransformComponent>();
 			const MovementComponent* nearbyMovement   = componentAccessor.GetComponent<MovementComponent>();

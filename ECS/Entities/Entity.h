@@ -33,14 +33,14 @@ public:
 
 	[[nodiscard]] const Archetype* GetArchetype() const { return m_archetype; }
 
-	[[nodiscard]] ComponentAccessor GetComponentAccessor() { return ComponentAccessor(this); }
+	[[nodiscard]] const ComponentAccessor& GetComponentAccessor();
 
 	[[nodiscard]] BoundingBox GetBoundingBox();
 
 protected:
 
 	virtual void DefineArchetype(ArchetypeBuilder& builder) {}
-	virtual void SetupComponents(ComponentAccessor& accessor) {}
+	virtual void SetupComponents(const ComponentAccessor& accessor) {}
 
 private:
 
@@ -49,6 +49,8 @@ private:
 
 	Archetype* m_archetype;
 	uint64_t m_instanceId;
+
+	ComponentAccessor m_componentAccessor;
 
 	Ref<Entity> m_self;
 	World* m_world;

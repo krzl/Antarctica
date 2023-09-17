@@ -43,8 +43,8 @@ namespace Rendering
 
 	void RenderSystem::Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderComponent* render)
 	{
-		ComponentAccessor componentAccessor   = World::Get()->GetEntity(entityId)->GetComponentAccessor();
-		const RenderCullComponent* renderCull = componentAccessor.GetComponent<RenderCullComponent>();
+		const ComponentAccessor& componentAccessor = World::Get()->GetEntity(entityId)->GetComponentAccessor();
+		const RenderCullComponent* renderCull      = componentAccessor.GetComponent<RenderCullComponent>();
 		if (renderCull && renderCull->m_isCulled)
 		{
 			return;
@@ -105,7 +105,7 @@ namespace Rendering
 		}
 	}
 
-	Transform4D RenderSystem::GetAttachmentTransform(ComponentAccessor& componentAccessor, const MeshComponent* mesh, const uint32_t submeshId)
+	Transform4D RenderSystem::GetAttachmentTransform(const ComponentAccessor& componentAccessor, const MeshComponent* mesh, const uint32_t submeshId)
 	{
 		const Submesh& submesh = mesh->m_mesh->GetSubmesh(submeshId);
 		if (submesh.GetAttachmentNodeId() != -1)
@@ -116,7 +116,7 @@ namespace Rendering
 		return Transform4D::identity;
 	}
 
-	Transform4D RenderSystem::GetAttachedNodeTransform(ComponentAccessor& componentAccessor, const Mesh& mesh, int32_t nodeId,
+	Transform4D RenderSystem::GetAttachedNodeTransform(const ComponentAccessor& componentAccessor, const Mesh& mesh, int32_t nodeId,
 													   bool ignoreAttachmentRotation)
 	{
 		if (Anim::AnimatedMeshComponent* animatedMesh = componentAccessor.GetComponent<Anim::AnimatedMeshComponent>())

@@ -25,7 +25,7 @@ uint64_t World::GenerateInstanceId() const
 	{
 		const uint64_t candidate = Random::GetRandomUInt64();
 
-		if (!m_entities.Contains(candidate))
+		if (!m_entities.Contains(candidate) && candidate != 0)
 		{
 			return candidate;
 		}
@@ -43,8 +43,8 @@ void World::SetupSpawnedEntity(const std::shared_ptr<Entity>& entity, const uint
 
 	entity->SetName("Entity Id: " + std::to_string(instanceId));
 
-	ComponentAccessor accessor    = entity->GetComponentAccessor();
-	TransformComponent* transform = accessor.GetComponent<TransformComponent>();
+	const ComponentAccessor& accessor = entity->GetComponentAccessor();
+	TransformComponent* transform     = accessor.GetComponent<TransformComponent>();
 	if (transform)
 	{
 		transform->m_localPosition = spawnParams.m_position;
@@ -103,7 +103,7 @@ void World::AddToPendingDestroy(Ref<Entity> entity)
 				m_pendingSpawnEntities.erase(it2);
 			}
 		}
-		//TODO: only for moveable components
+
 		m_quadtree.RemoveObject(ptr);
 	}
 }

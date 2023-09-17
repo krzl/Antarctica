@@ -2,11 +2,9 @@
 #include "Application.h"
 
 #include "Abilities/AbilitySystem.h"
-#include "Abilities/AbilityTriggerSystem.h"
 #include "Camera/PlayerCameraSystem.h"
 #include "Debug/DebugDraw/DebugDrawSystem.h"
 #include "Debug/ImGui/ImGuiSystem.h"
-#include "Input/InputSystem.h"
 #include "Steering/MovementSystem.h"
 #include "Steering/SteeringSystem.h"
 #include "Systems/AnimationSystem.h"
@@ -18,9 +16,7 @@
 
 void Application::CreateSystems()
 {
-	m_ecs.AddSystem<InputSystem>(ECS::PRE_STEP_LOCK);
 	m_ecs.AddSystem<PlayerCameraSystem>(ECS::PRE_STEP_LOCK);
-	m_ecs.AddSystem<AbilityTriggerSystem>(ECS::PRE_STEP_LOCK);
 
 	m_ecs.AddSystem<AbilitySystem>(ECS::STEP_LOCK);
 	m_ecs.AddSystem<Anim::AnimationSystem>(ECS::STEP_LOCK);

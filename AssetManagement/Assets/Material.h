@@ -16,6 +16,7 @@ public:
 	};
 
 	explicit Material(const std::shared_ptr<Shader>& shader) :
+		m_shaderParams{ shader->CreateDefaultShaderParams() },
 		m_shader(shader) { }
 
 	[[nodiscard]] const std::shared_ptr<Shader>& GetShader() const { return m_shader; }
@@ -33,6 +34,10 @@ public:
 		memcpy(varData.m_data, &var, sizeof(T));
 	}
 
+	[[nodiscard]] ShaderParams GetShaderParams() const { return m_shaderParams; }
+	[[nodiscard]] ShaderParams& GetShaderParams() { return m_shaderParams; }
+	void SetShaderParams(const ShaderParams shaderParams) { m_shaderParams = shaderParams; }
+
 	[[nodiscard]] const std::unordered_map<uint64_t, MaterialVarData>& GetShaderVariables() const { return m_shaderVariables; }
 
 protected:
@@ -43,6 +48,8 @@ private:
 
 	std::unordered_map<uint64_t, std::shared_ptr<Texture>> m_textures;
 	std::unordered_map<uint64_t, MaterialVarData> m_shaderVariables;
+
+	ShaderParams m_shaderParams;
 
 	std::shared_ptr<Shader> m_shader;
 	float m_order = 0;

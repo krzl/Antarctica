@@ -35,7 +35,7 @@ QuadtreePlacementRef Quadtree::AddEntity(Entity* entity, const BoundingBox bound
 
 void Quadtree::RemoveObject(Entity* entity)
 {
-	ComponentAccessor accessor = entity->GetComponentAccessor();
+	const ComponentAccessor& accessor = entity->GetComponentAccessor();
 	if (const TransformComponent* transform = accessor.GetComponent<TransformComponent>())
 	{
 		QuadtreeNode* node = transform->m_quadtreePlacement.m_node;

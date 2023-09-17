@@ -46,7 +46,8 @@ namespace Rendering::Dx12
 				{
 					shader->SetNativeObject(Shader::Create(shader));
 				}
-				renderObject.m_shader = shader->GetNativeObject();
+				renderObject.m_shader       = shader->GetNativeObject();
+				renderObject.m_shaderParams = queuedObject->m_material->GetShaderParams();
 
 				UpdateMaterial(queuedObject->m_material, renderObject);
 

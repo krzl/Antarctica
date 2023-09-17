@@ -3,15 +3,13 @@
 
 #include "Ability.h"
 #include "AbilityStackComponent.h"
-#include "Entities/World.h"
-#include "Input/InputListener.h"
 
 AbilitySystem::AbilitySystem()
 {
 	m_isMultiThreaded = false;
 }
 
-void AbilitySystem::Update(const uint64_t entityId, AbilityStackComponent* abilityStack, InputListenerComponent* inputListener)
+void AbilitySystem::Update(const uint64_t entityId, AbilityStackComponent* abilityStack)
 {
 	if (abilityStack->m_stack.size() == 0)
 	{
@@ -19,9 +17,7 @@ void AbilitySystem::Update(const uint64_t entityId, AbilityStackComponent* abili
 	}
 	const std::shared_ptr<Ability>& ability = abilityStack->m_stack.front();
 
-	Entity* entity = *World::Get()->GetEntity(entityId);
-
-	if (ability->Run(*entity))
+	if (ability->Tick())
 	{
 		abilityStack->m_stack.pop();
 	}

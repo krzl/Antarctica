@@ -360,7 +360,7 @@ namespace Rendering::Dx12
 	{
 		for (RenderObject& renderObject : m_renderQueue)
 		{
-			renderObject.m_shader->Bind();
+			renderObject.m_shader->Bind(renderObject.m_shaderParams);
 
 			for (const auto& texture : renderObject.m_textures)
 			{

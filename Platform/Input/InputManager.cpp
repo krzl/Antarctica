@@ -32,6 +32,21 @@ InputManager::InputManager()
 	{
 		m_isRightMousePressed = false;
 	});
+
+	OnKeyPressed.AddListener([this](const Key key)
+	{
+		m_heldKeys.set((uint32_t) key, true);
+	});
+
+	OnKeyReleased.AddListener([this](const Key key)
+	{
+		m_heldKeys.set((uint32_t) key, false);
+	});
+}
+
+bool InputManager::IsKeyPressed(const Key key) const
+{
+	return m_heldKeys.test((uint32_t) key);
 }
 
 void InputManager::Update()

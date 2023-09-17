@@ -4,7 +4,6 @@
 #include "AssetManager.h"
 #include "imgui.h"
 #include "ImGuiManager.h"
-#include "ImGuiShader.h"
 #include "Assets/DynamicMesh.h"
 #include "Assets/Material.h"
 #include "Assets/Mesh.h"
@@ -36,9 +35,13 @@ void ImGuiSystem::Init()
 
 	m_texture = std::make_shared<Texture>(fontData, texWidth, texHeight, bytesPerPixel / 4, "ImGui Texture");
 
-	m_shader   = AssetManager::GetAsset<ImGuiShader>("../Resources/Shaders/imgui.hlsl");
+	m_shader   = AssetManager::GetAsset<Shader>("../Resources/Shaders/imgui.hlsl");
 	m_material = std::make_shared<Material>(m_shader);
-	
+
+	m_material->GetShaderParams().m_depthTestEnabled = false;
+	m_material->GetShaderParams().m_blendingEnabled  = true;
+	m_material->GetShaderParams().m_isDoubleSided    = true;
+
 	m_material->SetTexture("tex", m_texture);
 	m_material->SetOrder(5000.0f);
 
@@ -57,7 +60,7 @@ void ImGuiSystem::OnFrameStart()
 	io.DisplaySize = ImVec2(window.GetWidth(), window.GetHeight());
 	io.DeltaTime   = TimeManager::GetInstance()->GetDeltaTime();
 
-	const auto& inputSystem      = InputManager::GetInstance();
+	const auto& inputSystem   = InputManager::GetInstance();
 	const Point2DInt mousePos = inputSystem->GetMousePosition();
 
 	io.MousePos     = ImVec2((float) mousePos.x, (float) mousePos.y);

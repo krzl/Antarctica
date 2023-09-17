@@ -24,7 +24,7 @@ class BVH
 
 public:
 
-	explicit BVH(const std::shared_ptr<Mesh>& mesh);
+	void Init(const std::shared_ptr<Mesh>& mesh);
 
 	std::optional<Point3D> Intersect(const Ray& ray) const;
 

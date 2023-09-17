@@ -9,7 +9,8 @@ namespace Rendering
 {
 	Camera* Camera::m_camera;
 
-	Camera::Camera()
+	Camera::Camera():
+		Entity{}
 	{
 		m_camera = this;
 	}

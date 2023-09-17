@@ -11,9 +11,9 @@ BVH::Node::Node(BVH& bvh, const uint32_t startIndex, const uint32_t triCount, co
 	{
 		return;
 	}
-	
+
 	CalculateBoundingBox(bvh);
-	
+
 	if (triCount > MAX_LEAF_TRIANGLE_COUNT)
 	{
 		const uint32_t splitPoint = SplitTriangles(bvh, m_boundingBox.GetCenter(), verticalSplit);
@@ -92,7 +92,7 @@ void BVH::Node::IntersectNode(const BVH& bvh, const Ray& ray, float& distance) c
 	}
 }
 
-BVH::BVH(const std::shared_ptr<Mesh>& mesh)
+void BVH::Init(const std::shared_ptr<Mesh>& mesh)
 {
 	m_mesh = mesh;
 

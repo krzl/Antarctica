@@ -4,8 +4,6 @@
 #include "Debug/DebugDrawManager.h"
 #include "Systems/System.h"
 
-class WireframeShader;
-
 namespace Rendering
 {
 	struct MeshComponent;
@@ -21,7 +19,7 @@ class DebugDrawSystem : public System<DebugDrawComponent, Rendering::MeshCompone
 	std::vector<float> m_despawnTimes;
 
 	std::shared_ptr<Shader> m_shader;
-	std::shared_ptr<WireframeShader> m_wireframeShader;
+	std::shared_ptr<Shader> m_wireframeShader;
 	AttributeUsage m_attributeUsage = {};
 
 };

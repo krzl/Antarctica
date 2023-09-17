@@ -20,13 +20,12 @@ namespace Rendering::Dx12
 
 		~Shader();
 
-		bool IsCompiled() const;
-		void Compile();
+		bool IsCompiled(ShaderParams shaderParams) const;
+		void Compile(ShaderParams shaderParams);
 
-		void Bind();
-		void BindMaterial(const Material& materialData) const;
+		void Bind(ShaderParams shaderParams);
 
-		ID3D12PipelineState* GetPipelineState() const;
+		ID3D12PipelineState* GetPipelineState(ShaderParams shaderParams) const;
 
 		[[nodiscard]] const ShaderDescriptor& GetShaderDescriptor() const { return m_shaderDescriptor; }
 		[[nodiscard]] ShaderDescriptor& GetShaderDescriptor() { return m_shaderDescriptor; }
@@ -37,16 +36,15 @@ namespace Rendering::Dx12
 
 	private:
 
-		explicit Shader(std::string path, std::unique_ptr<ShaderParams> shaderParams) :
+		explicit Shader(std::string path) :
 			m_path(std::move(path)),
-			m_lastCompileTime(0),
-			m_shaderParams(std::move(shaderParams)) { }
+			m_lastCompileTime(0) { }
 
 		void PopulateShaderDescriptor();
-		D3D12_RASTERIZER_DESC GetRasterizerDescription() const;
-		D3D12_BLEND_DESC GetBlendDescription() const;
-		D3D12_DEPTH_STENCIL_DESC GetDepthStencilDescription() const;
-		void CreatePipelineState();
+		static D3D12_RASTERIZER_DESC GetRasterizerDescription(ShaderParams shaderParams);
+		static D3D12_BLEND_DESC GetBlendDescription(ShaderParams shaderParams);
+		static D3D12_DEPTH_STENCIL_DESC GetDepthStencilDescription(ShaderParams shaderParams);
+		void CreatePipelineState(ShaderParams shaderParams);
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> GetInputElements() const;
 		std::vector<DXGI_FORMAT> GetOutputFormats() const;
@@ -56,15 +54,13 @@ namespace Rendering::Dx12
 		std::string m_path;
 
 		ComPtr<ID3D12RootSignature> m_rootSignature         = nullptr;
-		mutable ComPtr<ID3D12PipelineState> m_pipelineState = nullptr;
+		mutable std::map<uint8_t, ComPtr<ID3D12PipelineState>> m_pipelineStates;
 
 		std::map<uint32_t, MeshAttribute> m_inputSlotBindings;
 
 		time_t m_lastCompileTime; //TODO: Move to Asset class and add callback on asset changed
 
 		ShaderDescriptor m_shaderDescriptor; //TODO: MOVE TO ASSET
-
-		std::unique_ptr<ShaderParams> m_shaderParams;
 
 		std::unique_ptr<ShaderStage> m_vs;
 		std::unique_ptr<ShaderStage> m_ps;

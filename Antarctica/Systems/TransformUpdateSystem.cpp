@@ -19,7 +19,7 @@ void TransformUpdateSystem::OnUpdateStart()
 void TransformUpdateSystem::Update(const uint64_t entityId, TransformComponent* transform, MoveableComponent* moveable,
 								   Rendering::RenderComponent* render)
 {
-	ComponentAccessor componentAccessor           = World::Get()->GetEntity(entityId)->GetComponentAccessor();
+	const ComponentAccessor& componentAccessor    = World::Get()->GetEntity(entityId)->GetComponentAccessor();
 	const Navigation::MovementComponent* movement = componentAccessor.GetComponent<Navigation::MovementComponent>();
 
 	if (movement != nullptr && movement->m_velocity != Vector2D::zero)

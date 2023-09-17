@@ -7,6 +7,9 @@
 
 #include "ECS.h"
 #include "Entities/World.h"
+
+#include "Game/GameState.h"
+
 #include "Managers/FrameCounter.h"
 #include "Systems/RenderSystem.h"
 
@@ -35,6 +38,7 @@ public:
 	[[nodiscard]] Rendering::Renderer& GetRenderer() { return m_renderer; }
 	[[nodiscard]] Platform::Window& GetWindow() { return m_window; }
 	[[nodiscard]] World& GetWorld() { return m_world; }
+	[[nodiscard]] GameState& GetGameState() { return m_gameState; }
 
 	template<typename T, class = std::enable_if_t<std::is_base_of_v<SystemBase, T>>>
 	T* GetSystem()
@@ -58,6 +62,8 @@ private:
 
 	World m_world;
 	Platform::Window m_window;
+
+	GameState m_gameState;
 
 	Rendering::Renderer m_renderer;
 

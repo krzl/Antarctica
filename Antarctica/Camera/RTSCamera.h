@@ -9,5 +9,4 @@ class RTSCamera : public Rendering::Camera
 protected:
 
 	void DefineArchetype(ArchetypeBuilder& builder) override;
-	void SetupComponents(ComponentAccessor& accessor) override;
 };

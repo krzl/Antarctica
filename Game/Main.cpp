@@ -2,14 +2,10 @@
 
 #include <AssetManager.h>
 #include <Core/Application.h>
-#include <Entities/StaticMesh.h>
-
-#include "Assets/BVH.h"
+#include <Entities/StaticMeshEntity.h>
 
 #include "Camera/RTSCamera.h"
 #include "Characters/Character.h"
-
-#include "Debug/DebugDrawManager.h"
 
 #include "Terrain/Terrain.h"
 #include "Terrain/TerrainGenerator.h"
@@ -27,9 +23,13 @@ void main()
 	app.OnApplicationInitialized.AddListener([]()
 	{
 		{
+			GameState& gameState = Application::Get().GetGameState();
+
 			constexpr Navigation::TerrainGenerator::SpawnParameters params;
-			const std::shared_ptr<Navigation::Terrain> terrain = Navigation::TerrainGenerator::GenerateTerrain(params);
-			const std::shared_ptr<Mesh> mesh                   = terrain->ConstructMesh();
+
+			gameState.GenerateTerrain(params);
+
+			const std::shared_ptr<Mesh> mesh = gameState.GetTerrain()->ConstructMesh();
 
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>(
 				{
@@ -38,7 +38,7 @@ void main()
 				}
 			);
 
-			Ref<Rendering::StaticMesh> terrainActor = Application::Get().GetWorld().Spawn<Rendering::StaticMesh>(
+			Ref<Rendering::StaticMeshEntity> terrainActor = Application::Get().GetWorld().Spawn<Rendering::StaticMeshEntity>(
 				{
 					Point3D(0.0, 0.0f, 0.0f),
 					EulerToQuaternion(0.0f, 0.0f, 0.0f),
@@ -57,11 +57,14 @@ void main()
 			material->SetOrder(3);
 			terrainActor->SetMaterial(material);
 
-			const Navigation::NavMesh navMesh = terrain->CreateNavMesh();
 
 			Timer time;
 			time.Start();
-			Application::Get().GetSystem<PlayerCameraSystem>()->m_terrainBvh = std::make_shared<BVH>(mesh);
+
+			PlayerCameraSystem* playerCameraSystem = Application::Get().GetSystem<PlayerCameraSystem>();
+
+			playerCameraSystem->SetupTerrainBvh(mesh);
+
 			time.Stop();
 			LOG(DEBUG, "A", "{}", time.GetTime());
 			//DebugDrawManager::GetInstance()->DrawTriangles(navMesh.m_vertices, navMesh.m_traversableIndices, 100.0f, Color::white);
@@ -85,6 +88,8 @@ void main()
 					Ref character = Application::Get().GetWorld().Spawn<Character>(
 						{ Point3D(x * 0.65f, y * 0.65, 0.0f) });
 					character->SetName("Character " + std::to_string((gridSize * i) + j));
+
+					playerCameraSystem->AddToSelection(*character);
 				}
 			}
 		}

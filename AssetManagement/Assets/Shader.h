@@ -5,10 +5,25 @@
 
 struct ShaderParams
 {
-	bool m_isDoubleSided    = false;
-	bool m_blendingEnabled  = false;
-	bool m_depthTestEnabled = true;
-	bool m_isWireframe      = false;
+	uint8_t m_isDoubleSided : 1;
+	uint8_t m_blendingEnabled : 1;
+	uint8_t m_depthTestEnabled : 1;
+	uint8_t m_isWireframe : 1;
+
+	ShaderParams()
+	{
+		m_isDoubleSided    = false;
+		m_blendingEnabled  = false;
+		m_depthTestEnabled = true;
+		m_isWireframe      = false;
+	}
+
+
+	// ReSharper disable once CppNonExplicitConversionOperator
+	operator uint8_t() const
+	{
+		return *reinterpret_cast<const uint8_t*>(this);
+	}
 };
 
 class Shader : public Asset
@@ -23,7 +38,7 @@ public:
 
 	[[nodiscard]] const std::string& GetPath() const { return m_path; }
 
-	virtual std::unique_ptr<ShaderParams> CreateShaderParams() { return std::unique_ptr<ShaderParams>(new ShaderParams); }
+	virtual ShaderParams CreateDefaultShaderParams() { return ShaderParams(); }
 
 protected:
 

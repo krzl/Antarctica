@@ -3,9 +3,9 @@
 
 namespace Navigation
 {
-	std::shared_ptr<Terrain> TerrainGenerator::GenerateTerrain(const SpawnParameters& params)
+	Terrain* TerrainGenerator::GenerateTerrain(const SpawnParameters& params)
 	{
-		std::shared_ptr<Terrain> terrain(new Terrain);
+		Terrain* terrain = new Terrain();
 
 		terrain->m_width  = params.m_width;
 		terrain->m_height = params.m_height;
@@ -21,9 +21,9 @@ namespace Navigation
 				const uint32_t x = Random::GetRandomUInt32(0, terrain->m_width - 1);
 				const uint32_t y = Random::GetRandomUInt32(0, terrain->m_height - 1);
 
-				if (terrain->GetHeight(x, y) == 0)
+				if (terrain->GetHeightLevel(x, y) == 0)
 				{
-					SpawnRandomIsland(*terrain, params, x, y, -5);
+					SpawnRandomIsland(*terrain, params, x, y, 5);
 					break;
 				}
 			}
@@ -32,8 +32,8 @@ namespace Navigation
 		return terrain;
 	}
 
-	void TerrainGenerator::SpawnRandomIsland(Terrain& terrain, const SpawnParameters& params, const uint32_t startPosX, const uint32_t startPosY,
-											 const Terrain::HeightLevel level)
+	void TerrainGenerator::SpawnRandomIsland(Terrain& terrain, const SpawnParameters& params, const uint32_t startPosX,
+											 const uint32_t startPosY, const Terrain::HeightLevel level)
 	{
 		for (uint32_t i = 0; i < 2; ++i)
 		{

@@ -45,7 +45,7 @@ namespace Navigation
 		};
 	}
 
-	NavMesh Terrain::CreateNavMesh() const
+	NavMesh* Terrain::CreateNavMesh() const
 	{
 		const uint32_t vertexCount = m_width * m_height;
 
@@ -238,6 +238,6 @@ namespace Navigation
 			finalEdges.emplace_back(NavMesh::Edge{ verticesIdMap[edge.m_start], verticesIdMap[edge.m_end] });
 		}
 
-		return NavMesh(std::move(vertices), std::move(finalEdges), *this);
+		return new NavMesh(std::move(vertices), std::move(finalEdges), *this);
 	}
 }

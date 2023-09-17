@@ -6,7 +6,7 @@
 
 namespace Navigation
 {
-	Terrain::HeightLevel Terrain::GetHeight(const uint32_t x, const uint32_t y) const
+	Terrain::HeightLevel Terrain::GetHeightLevel(const uint32_t x, const uint32_t y) const
 	{
 		return m_heightMap[GetHeightMapArrayIndex(x, y)];
 	}
@@ -22,6 +22,11 @@ namespace Navigation
 	uint32_t Terrain::GetHeightMapArrayIndex(const uint32_t x, const uint32_t y) const
 	{
 		return x + y * m_width;
+	}
+
+	Point3D Terrain::GetPos(const uint32_t x, const uint32_t y) const
+	{
+		return GetPos(GetHeightMapArrayIndex(x, y));
 	}
 
 	Point3D Terrain::GetPos(const uint32_t id) const
@@ -47,11 +52,18 @@ namespace Navigation
 			return true;
 		}
 
-		const HeightLevel a = GetHeight((uint32_t) x + 1, (uint32_t) y);
-		const HeightLevel b = GetHeight((uint32_t) x, (uint32_t) y + 1);
-		const HeightLevel c = (1 - Terathon::Frac(x)) > Terathon::Frac(y) ? GetHeight((uint32_t) x, (uint32_t) y) : GetHeight((uint32_t) x + 1, (uint32_t) y + 1);
+		const HeightLevel a = GetHeightLevel((uint32_t) x + 1, (uint32_t) y);
+		const HeightLevel b = GetHeightLevel((uint32_t) x, (uint32_t) y + 1);
+		const HeightLevel c = (1 - Terathon::Frac(x)) > Terathon::Frac(y) ?
+								  GetHeightLevel((uint32_t) x, (uint32_t) y) :
+								  GetHeightLevel((uint32_t) x + 1, (uint32_t) y + 1);
 
 		return Max(a, Max(b, c)) - Min(a, Min(b, c)) > 1;
+	}
+
+	std::optional<Point3D> Terrain::Intersect(const Ray& ray) const
+	{
+		return m_bvh.Intersect(ray);
 	}
 
 	uint32_t Terrain::GetHeightDifference(const uint32_t a, const uint32_t b, const uint32_t c) const
@@ -72,7 +84,7 @@ namespace Navigation
 		return ((float) (level / 5) + rampRatio) * GRID_LEVEL_HEIGHT_TO_METER;
 	}
 
-	std::shared_ptr<Mesh> Terrain::ConstructMesh() const
+	std::shared_ptr<Mesh> Terrain::ConstructMesh()
 	{
 		std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 
@@ -93,6 +105,8 @@ namespace Navigation
 				ConstructSubmesh(mesh, xStart, xEnd, yStart, yEnd);
 			}
 		}
+
+		m_bvh.Init(mesh);
 
 		return mesh;
 	}
@@ -125,14 +139,14 @@ namespace Navigation
 				const uint32_t a1 = GetSubmeshIndex(x, y);
 
 				const bool isFlat =
-					GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x), Clamp(0u, m_height - 1, y + 1)) &&
-					GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y)) &&
-					GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y + 1)) &&
-					GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y)) &&
-					GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y + 1)) &&
-					GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x), Clamp(0u, m_height - 1, y - 1)) &&
-					GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y - 1)) &&
-					GetHeight(x, y) == GetHeight(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y - 1));
+					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x), Clamp(0u, m_height - 1, y + 1)) &&
+					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y)) &&
+					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y + 1)) &&
+					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y)) &&
+					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y + 1)) &&
+					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x), Clamp(0u, m_height - 1, y - 1)) &&
+					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y - 1)) &&
+					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y - 1));
 
 				texcoordWeights[a1 * 4 + 0] = isFlat ? 1.0f : 0.0f;
 				texcoordWeights[a1 * 4 + 1] = isFlat ? 0.0f : 1.0f;
@@ -155,7 +169,7 @@ namespace Navigation
 
 				vertices[a1] = Vector3D(x * GRID_CELL_TO_METER - xCenterOffset,
 					y * GRID_CELL_TO_METER - yCenterOffset,
-					TerrainHeightLevelToZ(GetHeight(x, y)));
+					TerrainHeightLevelToZ(GetHeightLevel(x, y)));
 
 				texcoordSplatUV[a1 * 2 + 0] = (float) x / 40.0f;
 				texcoordSplatUV[a1 * 2 + 1] = (float) y / 40.0f;

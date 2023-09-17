@@ -19,7 +19,7 @@ void DebugDrawer::DefineArchetype(ArchetypeBuilder& builder)
 	builder.AddComponent<Rendering::RenderCullComponent>();
 }
 
-void DebugDrawer::SetupComponents(ComponentAccessor& accessor)
+void DebugDrawer::SetupComponents(const ComponentAccessor& accessor)
 {
 	Entity::SetupComponents(accessor);
 }

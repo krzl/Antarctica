@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "ScratchBuffer.h"
 #include "APIs/IContext.h"
+#include "Assets/Shader.h"
 
 class Material;
 
@@ -19,6 +20,7 @@ namespace Rendering::Dx12
 		std::map<uint32_t, NativeTexture*> m_textures;
 		std::map<uint32_t, std::shared_ptr<DescriptorHeapHandle>> m_constantBuffers;
 		uint32_t m_instanceCount;
+		ShaderParams m_shaderParams;
 		std::optional<Rect> m_clipRect;
 
 		std::shared_ptr<DescriptorHeapHandle> m_skinningBufferHandle;

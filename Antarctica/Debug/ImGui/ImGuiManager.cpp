@@ -18,7 +18,7 @@ void ImGuiManager::DefineArchetype(ArchetypeBuilder& builder)
 	builder.AddComponent<ImGuiComponent>();
 }
 
-void ImGuiManager::SetupComponents(ComponentAccessor& accessor)
+void ImGuiManager::SetupComponents(const ComponentAccessor& accessor)
 {
 	Entity::SetupComponents(accessor);
 }

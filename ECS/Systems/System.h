@@ -42,7 +42,10 @@ public:
 						[this, archetype, &counter](const uint64_t entityId)
 						{
 							const uint32_t id = counter++;
-							Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
+							if (entityId != 0)
+							{
+								Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
+							}
 						});
 				});
 		}
@@ -60,7 +63,10 @@ public:
 						[this, archetype, &counter](const uint64_t entityId)
 						{
 							const uint32_t id = counter++;
-							Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
+							if (entityId != 0)
+							{
+								Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
+							}
 						});
 				});
 		}
@@ -107,7 +113,7 @@ private:
 	template<std::size_t Index, typename... Ts>
 	std::enable_if_t<Index != sizeof...(Types)> Run(const MatchedArchetype& archetype, const uint32_t id, const uint64_t entityId, Ts... ts)
 	{
-		using ComponentType = std::tuple_element_t<Index, std::tuple<Types...>>;
+		typedef std::tuple_element_t<Index, std::tuple<Types...>> ComponentType;
 
 		const uint32_t componentId    = archetype.m_componentIds[Index];
 		ComponentType* componentStart = (ComponentType*) archetype.m_archetype->m_componentData[componentId].data();

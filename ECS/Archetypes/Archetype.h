@@ -17,17 +17,23 @@ struct Archetype
 	};
 
 	const std::vector<ComponentTypeInfo> m_componentTypeInfos;
+	const std::vector<const Class*> m_classes;
 
 	std::vector<std::vector<uint8_t>> m_componentData;
 	std::vector<uint64_t> m_entityIds;
 
-	void AddEntity(const Entity* entity, const std::vector<const Class*>& classes);
+	void AddEntity(const Entity* entity);
+	void RemoveEntity(Entity* entity);
+
+	uint32_t GetNewEntityOffset(const Entity* entity);
 
 	static const std::vector<std::unique_ptr<Archetype>>& GetAllArchetypes() { return m_allArchetypes; }
 
 private:
 
 	explicit Archetype(const std::vector<const Class*>& classes);
+
+	std::priority_queue<uint32_t> m_emptySlots;
 
 	static std::vector<std::unique_ptr<Archetype>> m_allArchetypes;
 };

@@ -4,6 +4,7 @@ class Class
 {
 	typedef std::function<std::shared_ptr<void>()> DefaultConstructor;
 	typedef std::function<void(void*)> PlacementConstructor;
+	typedef std::function<void(void*)> Destructor;
 
 public:
 
@@ -21,6 +22,11 @@ public:
 		clazz.m_placementConstructor = [=](void* ptr)
 		{
 			new(ptr) T();
+		};
+
+		clazz.m_destructor = [=](void* ptr)
+		{
+			((T*) ptr)->~T();
 		};
 
 		return clazz;
@@ -46,6 +52,11 @@ public:
 		return m_placementConstructor(ptr);
 	}
 
+	void DeleteObject(void* ptr) const
+	{
+		return m_destructor(ptr);
+	}
+
 	uint64_t GetId() const { return m_id; }
 	uint64_t GetDataSize() const { return m_dataSize; }
 
@@ -60,6 +71,7 @@ private:
 
 	DefaultConstructor m_constructor;
 	PlacementConstructor m_placementConstructor;
+	Destructor m_destructor;
 };
 
 #define DEFINE_CLASS()											\

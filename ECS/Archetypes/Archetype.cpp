@@ -17,24 +17,57 @@ static std::vector<Archetype::ComponentTypeInfo> CreateComponentInfos(const std:
 	return infos;
 }
 
-void Archetype::AddEntity(const Entity* entity, const std::vector<const Class*>& classes)
-{
-	m_entityIds.emplace_back(entity->GetInstanceId());
-
-	for (uint32_t i = 0; i < m_componentTypeInfos.size(); ++i)
-	{
-		m_componentData[i].resize(m_componentData[i].size() + m_componentTypeInfos[i].m_dataSize);
-
-		const uint32_t dataSize = m_componentTypeInfos[i].m_dataSize;
-		void* componentPtr      = m_componentData[i].data() + dataSize * (m_entityIds.size() - 1);
-
-		classes[i]->CreateObjectPlacement(componentPtr);
-	}
-}
-
 Archetype::Archetype(const std::vector<const Class*>& classes) :
-	m_componentTypeInfos(CreateComponentInfos(classes))
+	m_componentTypeInfos(CreateComponentInfos(classes)),
+	m_classes(classes)
 {
 	m_componentData.resize(classes.size());
 	m_allArchetypes.emplace_back(this);
+}
+
+uint32_t Archetype::GetNewEntityOffset(const Entity* entity)
+{
+	if (m_emptySlots.size() == 0)
+	{
+		m_entityIds.emplace_back(entity->GetInstanceId());
+
+		for (uint32_t i = 0; i < m_componentTypeInfos.size(); ++i)
+		{
+			m_componentData[i].resize(m_componentData[i].size() + m_componentTypeInfos[i].m_dataSize);
+		}
+
+		return m_entityIds.size() - 1;
+	}
+
+	const uint32_t offset = m_emptySlots.top();
+	m_emptySlots.pop();
+	m_entityIds[offset] = entity->GetInstanceId();
+	return offset;
+}
+
+void Archetype::AddEntity(const Entity* entity)
+{
+	const uint32_t insertPosition = GetNewEntityOffset(entity);
+
+	for (uint32_t i = 0; i < m_componentTypeInfos.size(); ++i)
+	{
+		const uint32_t dataSize = m_componentTypeInfos[i].m_dataSize;
+		void* componentPtr      = m_componentData[i].data() + dataSize * insertPosition;
+
+		m_classes[i]->CreateObjectPlacement(componentPtr);
+	}
+}
+
+void Archetype::RemoveEntity(Entity* entity)
+{
+	const uint32_t position = entity->GetComponentAccessor().m_entityOffset;
+	m_emptySlots.emplace(position);
+	m_entityIds[position] = 0;
+
+	for (uint32_t i = 0; i < m_componentTypeInfos.size(); ++i)
+	{
+		const uint32_t dataSize = m_componentTypeInfos[i].m_dataSize;
+		void* componentPtr      = m_componentData[i].data() + dataSize * position;
+		m_classes[i]->DeleteObject(componentPtr);
+	}
 }

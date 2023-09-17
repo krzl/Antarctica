@@ -1,13 +1,9 @@
 #pragma once
 
-#include "Common/Class.h"
-
 class Entity;
 
 class Ability
 {
-	friend class Class;
-
 public:
 
 	virtual ~Ability() = default;
@@ -16,29 +12,35 @@ public:
 
 	virtual bool Init(Entity& entity) = 0;
 
-	bool Run(Entity& entity)
+	bool Tick()
 	{
 		if (!m_hasStarted)
 		{
 			m_hasStarted = true;
-			Start(entity);
+			Start();
 		}
-		const bool hasFinished = Update(entity);
+		const bool hasFinished = Update();
 		if (hasFinished)
 		{
-			End(entity);
+			End();
 		}
 		return hasFinished;
 	}
 
+	virtual void Cancel()
+	{
+		End();
+	}
+
 protected:
 
-	virtual void Start(Entity& entity) = 0;
-	virtual bool Update(Entity& entity) = 0;
-	virtual void End(Entity& entity) = 0;
+	virtual void Start() = 0;
+	virtual bool Update() = 0;
+	virtual void End() = 0;
+
+	Entity* m_entity = nullptr;
 
 private:
 
 	bool m_hasStarted = false;
-	const Class* m_class;
 };

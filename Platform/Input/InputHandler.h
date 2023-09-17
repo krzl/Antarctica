@@ -15,6 +15,8 @@ public:
 private:
 
 	void ProcessMouseInput(UINT msg, WPARAM wParam, LPARAM lParam) const;
+	void HandleInputPress(WPARAM keycode) const;
+	void HandleInputRelease(WPARAM keycode) const;
 
 	InputManager* m_inputManager = nullptr;
 };

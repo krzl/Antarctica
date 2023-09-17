@@ -7,8 +7,6 @@ struct AbilityTriggerComponent : Component
 {
 	std::vector<AbilityBinding> m_abilityBindings;
 
-	bool m_alwaysAppendAbilities = false;
-
 	DEFINE_CLASS();
 };
 

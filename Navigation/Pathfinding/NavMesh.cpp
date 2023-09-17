@@ -241,7 +241,7 @@ namespace Navigation
 
 	uint32_t NavMesh::FindTriangleId(const Point3D& vertex) const
 	{
-		uint32_t currentTriangleId = m_triangles.size() - 1;
+		uint32_t currentTriangleId = (uint32_t) m_triangles.size() - 1;
 
 		while (true)
 		{
@@ -742,7 +742,7 @@ namespace Navigation
 
 	void NavMesh::AddObstacle(const std::vector<Point3D>& vertices)
 	{
-		const uint32_t startIndex = m_vertices.size();
+		const uint32_t startIndex = (uint32_t) m_vertices.size();
 
 		for (const Point3D& vertex : vertices)
 		{

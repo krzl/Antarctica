@@ -6,6 +6,8 @@
 #include "Abilities/AbilityStackComponent.h"
 #include "Abilities/AbilityTriggerComponent.h"
 #include "Abilities/MoveAbility.h"
+#include "Abilities/Activators/BuildStructureActivator.h"
+
 #include "Animator/AnimatorBuilder.h"
 #include "Animator/StateMachine/AnimationState.h"
 #include "Animator/StateMachine/StateMachineBuilder.h"
@@ -21,7 +23,6 @@
 #include "Components/RenderComponent.h"
 #include "Components/RenderCullComponent.h"
 #include "Components/TransformComponent.h"
-#include "Input/InputListener.h"
 
 void Character::DefineArchetype(ArchetypeBuilder& builder)
 {
@@ -31,7 +32,6 @@ void Character::DefineArchetype(ArchetypeBuilder& builder)
 	builder.AddComponent<AbilityTriggerComponent>();
 	builder.AddComponent<Anim::AnimatedMeshComponent>();
 	builder.AddComponent<ColliderComponent>();
-	builder.AddComponent<InputListenerComponent>();
 	builder.AddComponent<Rendering::MeshComponent>();
 	builder.AddComponent<MoveableComponent>();
 	builder.AddComponent<Navigation::MovementComponent>();
@@ -40,7 +40,7 @@ void Character::DefineArchetype(ArchetypeBuilder& builder)
 	builder.AddComponent<TransformComponent>();
 }
 
-void Character::SetupComponents(ComponentAccessor& accessor)
+void Character::SetupComponents(const ComponentAccessor& accessor)
 {
 	Entity::SetupComponents(accessor);
 
@@ -48,7 +48,6 @@ void Character::SetupComponents(ComponentAccessor& accessor)
 	AbilityTriggerComponent* abilityTrigger   = accessor.GetComponent<AbilityTriggerComponent>();
 	Anim::AnimatedMeshComponent* animatedMesh = accessor.GetComponent<Anim::AnimatedMeshComponent>();
 	ColliderComponent* collider               = accessor.GetComponent<ColliderComponent>();
-	InputListenerComponent* input             = accessor.GetComponent<InputListenerComponent>();
 	Rendering::MeshComponent* meshComponent   = accessor.GetComponent<Rendering::MeshComponent>();
 	Navigation::MovementComponent* movement   = accessor.GetComponent<Navigation::MovementComponent>();
 
@@ -118,11 +117,24 @@ void Character::SetupComponents(ComponentAccessor& accessor)
 
 	collider->m_boundingBox = mesh->GetBoundingBox();
 
+	/*abilityTrigger->m_abilityBindings.emplace_back(AbilityBinding{
+		"MoveAbility",
+		InputCommand::Type::MOUSE_PRESS,
+		(uint32_t)InputCommand::MouseButtonId::RIGHT,
+		[]()
+		{
+
+		}
+	});
+	*/
+
 	abilityTrigger->m_abilityBindings.emplace_back(AbilityBinding{
+		"BuildObstacle",
 		InputCommand::Type::MOUSE_PRESS,
 		(uint32_t) InputCommand::MouseButtonId::RIGHT,
-		&MoveAbility::GetClass()
+		[]()
+		{
+			return std::make_shared<BuildStructureActivator>(3, 3);
+		}
 	});
-
-	input->m_alwaysActive = true;
 }

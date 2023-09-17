@@ -5,70 +5,42 @@
 #include "ShaderUtils.h"
 #include "../Context.h"
 #include "APIs/Dx12/Submesh.h"
-#include "APIs/Dx12/Texture.h"
 #include "Assets/Material.h"
 
 namespace Rendering::Dx12
 {
-	Shader::~Shader()
+	void Shader::Bind(const ShaderParams shaderParams)
 	{
-		RELEASE_DX(m_rootSignature);
-	}
-
-	void Shader::Bind()
-	{
-		if (!IsCompiled())
+		if (!IsCompiled(shaderParams))
 		{
-			Compile();
+			Compile(shaderParams);
 		}
 
 		ID3D12GraphicsCommandList* commandList = Dx12Context::Get().GetCommandList();
 
-		commandList->SetPipelineState(m_pipelineState.Get());
+		commandList->SetPipelineState(m_pipelineStates[shaderParams].Get());
 		commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 	}
 
-	void Shader::BindMaterial(const Material& materialData) const
+	ID3D12PipelineState* Shader::GetPipelineState(const ShaderParams shaderParams) const
 	{
-		for (const auto& [_, nameHash, id] : m_shaderDescriptor.GetTextures())
-		{
-			auto it = materialData.GetTextures().find(nameHash);
-			if (it != materialData.GetTextures().end())
-			{
-				std::shared_ptr<::Texture> texture = it->second;
-				if (texture->GetNativeObject() == nullptr)
-				{
-					texture->SetNativeObject(Texture::Create(texture));
-				}
-				texture->GetNativeObject()->Bind(id);
-			}
-		}
-
-		for (const auto& a : m_shaderDescriptor.GetBuffers())
-		{
-			auto it = materialData.GetTextures().find(a.m_nameHash);
-			if (it != materialData.GetTextures().end())
-			{
-				std::shared_ptr<::Texture> texture = it->second;
-				//texture->GetNativeObject()->Bind(a.); //TODO: set textures here
-			}
-		}
+		return m_pipelineStates[shaderParams].Get();
 	}
 
-	ID3D12PipelineState* Shader::GetPipelineState() const
+	bool Shader::IsCompiled(const ShaderParams shaderParams) const
 	{
-		return m_pipelineState.Get();
-	}
-
-	bool Shader::IsCompiled() const
-	{
+		if (m_pipelineStates.find(shaderParams) == m_pipelineStates.end())
+		{
+			return false;
+		}
+		
 		struct stat fileStat;
 		stat(m_path.c_str(), &fileStat);
 
 		return m_lastCompileTime >= fileStat.st_mtime;
 	}
 
-	void Shader::Compile()
+	void Shader::Compile(const ShaderParams shaderParams)
 	{
 		std::unique_ptr<ShaderStage>* stages[] = { &m_vs, &m_ps, &m_ds, &m_hs, &m_gs };
 		for (uint32_t i = 0; i < std::size(stages); i++)
@@ -89,7 +61,7 @@ namespace Rendering::Dx12
 		m_rootSignature = m_vs->CreateRootSignature();
 		SetDebugName(m_rootSignature, m_path.data());
 
-		CreatePipelineState();
+		CreatePipelineState(shaderParams);
 
 		PopulateShaderDescriptor();
 
@@ -110,16 +82,16 @@ namespace Rendering::Dx12
 		}
 	}
 
-	D3D12_RASTERIZER_DESC Shader::GetRasterizerDescription() const
+	D3D12_RASTERIZER_DESC Shader::GetRasterizerDescription(const ShaderParams shaderParams)
 	{
 		CD3DX12_RASTERIZER_DESC rasterizerDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 
-		if (m_shaderParams->m_isWireframe)
+		if (shaderParams.m_isWireframe)
 		{
 			rasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
 		}
 
-		if (m_shaderParams->m_isDoubleSided)
+		if (shaderParams.m_isDoubleSided)
 		{
 			rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 		}
@@ -127,9 +99,9 @@ namespace Rendering::Dx12
 		return rasterizerDesc;
 	}
 
-	D3D12_BLEND_DESC Shader::GetBlendDescription() const
+	D3D12_BLEND_DESC Shader::GetBlendDescription(const ShaderParams shaderParams)
 	{
-		if (m_shaderParams->m_blendingEnabled)
+		if (shaderParams.m_blendingEnabled)
 		{
 			D3D12_BLEND_DESC blendDesc;
 			blendDesc.AlphaToCoverageEnable  = false;
@@ -159,16 +131,16 @@ namespace Rendering::Dx12
 		return CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	}
 
-	D3D12_DEPTH_STENCIL_DESC Shader::GetDepthStencilDescription() const
+	D3D12_DEPTH_STENCIL_DESC Shader::GetDepthStencilDescription(const ShaderParams shaderParams)
 	{
 		CD3DX12_DEPTH_STENCIL_DESC depthStencilDesc(D3D12_DEFAULT);
 
-		if (!m_shaderParams->m_depthTestEnabled)
+		if (!shaderParams.m_depthTestEnabled)
 		{
 			depthStencilDesc.DepthEnable = false;
 			depthStencilDesc.DepthFunc   = D3D12_COMPARISON_FUNC_ALWAYS;
 		}
-		else if (m_shaderParams->m_blendingEnabled)
+		else if (shaderParams.m_blendingEnabled)
 		{
 			depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 		}
@@ -176,7 +148,7 @@ namespace Rendering::Dx12
 		return depthStencilDesc;
 	}
 
-	void Shader::CreatePipelineState()
+	void Shader::CreatePipelineState(const ShaderParams shaderParams)
 	{
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElements = GetInputElements();
 		const std::vector<DXGI_FORMAT> outputFormats        = GetOutputFormats();
@@ -215,10 +187,10 @@ namespace Rendering::Dx12
 				m_gs->GetByteCode().Get() != nullptr ? m_gs->GetByteCode()->GetBufferSize() : 0
 			},
 			{},
-			GetBlendDescription(),
+			GetBlendDescription(shaderParams),
 			UINT_MAX,
-			GetRasterizerDescription(),
-			GetDepthStencilDescription(),
+			GetRasterizerDescription(shaderParams),
+			GetDepthStencilDescription(shaderParams),
 			{
 				inputElements.data(),
 				(uint32_t) inputElements.size()
@@ -243,7 +215,9 @@ namespace Rendering::Dx12
 			pipelineStateDesc.RTVFormats[i] = outputFormats[i];
 		}
 
-		Dx12Context::Get().GetDevice()->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&m_pipelineState));
+		ComPtr<ID3D12PipelineState>& pipelineState = m_pipelineStates[shaderParams];
+
+		Dx12Context::Get().GetDevice()->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&pipelineState));
 
 		// ReSharper disable once CppUseStructuredBinding
 		for (const auto& inputElement : inputElements)
@@ -251,7 +225,7 @@ namespace Rendering::Dx12
 			delete[] inputElement.SemanticName;
 		}
 
-		SetDebugName(m_pipelineState, m_path.c_str());
+		SetDebugName(pipelineState, m_path.c_str());
 	}
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> Shader::GetInputElements() const
@@ -333,7 +307,12 @@ namespace Rendering::Dx12
 
 	NativeShader* Shader::Create(const std::shared_ptr<::Shader>& shader)
 	{
-		return static_cast<NativeShader*>(new Shader(shader->GetPath(), shader->CreateShaderParams()));
+		return static_cast<NativeShader*>(new Shader(shader->GetPath()));
+	}
+
+	Shader::~Shader()
+	{
+		RELEASE_DX(m_rootSignature);
 	}
 }
 
