@@ -42,4 +42,5 @@ private:
 
 	bool m_isGridPositionSet = false;
 	bool m_canBePlaced       = false;
+	bool m_isValid           = false;
 };

@@ -54,6 +54,11 @@ BuildStructureActivator::BuildStructureActivator(const uint32_t width, const uin
 			0
 		});
 	}
+
+	if (!m_buildingGrid)
+	{
+		m_buildingGrid = Application::Get().GetGameState().GetBuildingGrid();
+	}
 }
 
 void BuildStructureActivator::Update()
@@ -68,10 +73,7 @@ void BuildStructureActivator::Update()
 		return;
 	}
 
-	if (!m_buildingGrid)
-	{
-		m_buildingGrid = Application::Get().GetGameState().GetBuildingGrid();
-	}
+	m_isValid = true;
 
 	Point2DInt centerGridPosition = m_buildingGrid->GetGridPosition(cursorPosition.value());
 	centerGridPosition.x          = Clamp<uint32_t>((m_width - 1) / 2, m_buildingGrid->GetWidth() - m_width / 2 - 1, centerGridPosition.x);
@@ -100,7 +102,7 @@ bool BuildStructureActivator::CanBeFinished()
 
 bool BuildStructureActivator::ShouldBeCancelled()
 {
-	return m_buildingGrid == nullptr;
+	return !m_isValid;
 }
 
 std::shared_ptr<Ability> BuildStructureActivator::Activate(Entity* entity)
