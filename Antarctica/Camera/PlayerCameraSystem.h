@@ -33,7 +33,7 @@ class PlayerCameraSystem : public System<TransformComponent, Rendering::CameraCo
 	void TryTriggerAbilitiesFromSelection();
 	Entity* FindSuitableEntityForAbility(const std::string& abilityId) const;
 	void ActivateAbility(Entity* entity, const std::string& abilityId);
-	void AddAbilityToStack(AbilityStackComponent* abilityStack, std::shared_ptr<Ability> ability) const;
+	void AddAbilityToStack(AbilityStackComponent* abilityStack, std::shared_ptr<Ability> ability, Entity* entity) const;
 
 	static bool IsAbilityInputPressed(const AbilityBinding& abilityBinding, const InputCommand& inputCommand);
 	static bool CanEntityActivateAbility(const AbilityTriggerComponent* abilityTrigger, const std::string& abilityId);

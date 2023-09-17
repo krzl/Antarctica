@@ -7,6 +7,7 @@
 #include "Abilities/AbilityTriggerComponent.h"
 #include "Abilities/MoveAbility.h"
 #include "Abilities/Activators/BuildStructureActivator.h"
+#include "Abilities/Activators/InstantMoveActivator.h"
 
 #include "Animator/AnimatorBuilder.h"
 #include "Animator/StateMachine/AnimationState.h"
@@ -117,16 +118,15 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 
 	collider->m_boundingBox = mesh->GetBoundingBox();
 
-	/*abilityTrigger->m_abilityBindings.emplace_back(AbilityBinding{
+	abilityTrigger->m_abilityBindings.emplace_back(AbilityBinding{
 		"MoveAbility",
 		InputCommand::Type::MOUSE_PRESS,
-		(uint32_t)InputCommand::MouseButtonId::RIGHT,
+		(uint32_t) InputCommand::MouseButtonId::RIGHT,
 		[]()
 		{
-
+			return std::make_shared<InstantMoveActivator>();
 		}
 	});
-	*/
 
 	abilityTrigger->m_abilityBindings.emplace_back(AbilityBinding{
 		"BuildObstacle",

@@ -2,18 +2,12 @@
 #include "BuildStructureActivator.h"
 
 #include "AssetManager.h"
-
 #include "Abilities/BuildAbility.h"
-
 #include "Assets/DynamicMesh.h"
-
+#include "Camera/PlayerCameraSystem.h"
 #include "Core/Application.h"
-
 #include "Entities/DynamicMeshEntity.h"
 #include "Entities/World.h"
-
-#include "Camera/PlayerCameraSystem.h"
-
 #include "Game/BuildingGrid.h"
 #include "Game/GameState.h"
 

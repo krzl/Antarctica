@@ -1,9 +1,6 @@
 #pragma once
 
 #include "AbilityActivator.h"
-
-#include "Core/Application.h"
-
 #include "Game/BuildingGrid.h"
 
 namespace Rendering

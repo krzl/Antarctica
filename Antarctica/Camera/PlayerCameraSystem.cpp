@@ -160,7 +160,7 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 		{
 			if (m_inputQueue.GetMouseButtonPress(InputCommand::MouseButtonId::LEFT))
 			{
-				if (const bool activateAbility = m_abilityActivator->CanBeFinished())
+				if (m_abilityActivator->CanBeFinished())
 				{
 					if (Entity* suitableEntity = FindSuitableEntityForAbility(m_abilityActivator->m_abilityId))
 					{
@@ -292,6 +292,7 @@ void PlayerCameraSystem::TryTriggerAbilitiesFromSelection()
 
 					if (m_abilityActivator->ShouldTriggerImmediately())
 					{
+						m_abilityActivator->Update();
 						ActivateAbility(suitableEntity, abilityBinding.m_abilityId);
 					}
 				}
@@ -388,7 +389,7 @@ void PlayerCameraSystem::ActivateAbility(Entity* entity, const std::string& abil
 	{
 		for (Entity* selectedEntity : m_selectedEntities)
 		{
-			const ComponentAccessor& accessor             = entity->GetComponentAccessor();
+			const ComponentAccessor& accessor             = selectedEntity->GetComponentAccessor();
 			const AbilityTriggerComponent* abilityTrigger = accessor.GetComponent<AbilityTriggerComponent>();
 
 			if (CanEntityActivateAbility(abilityTrigger, abilityId) && m_abilityActivator->GetEntitySuitability(selectedEntity) < 0.0f)
@@ -398,14 +399,13 @@ void PlayerCameraSystem::ActivateAbility(Entity* entity, const std::string& abil
 
 			AbilityStackComponent* abilityStack = accessor.GetComponent<AbilityStackComponent>();
 
-			if (abilityStack)
+			if (!abilityStack)
 			{
 				continue;
 			}
 
 			const std::shared_ptr<Ability> ability = m_abilityActivator->Activate(selectedEntity);
-			ability->Tick();
-			AddAbilityToStack(abilityStack, ability);
+			AddAbilityToStack(abilityStack, ability, selectedEntity);
 		}
 	}
 	else
@@ -414,8 +414,7 @@ void PlayerCameraSystem::ActivateAbility(Entity* entity, const std::string& abil
 		AbilityStackComponent* abilityStack = accessor.GetComponent<AbilityStackComponent>();
 
 		const std::shared_ptr<Ability> ability = m_abilityActivator->Activate(entity);
-		ability->Tick();
-		AddAbilityToStack(abilityStack, ability);
+		AddAbilityToStack(abilityStack, ability, entity);
 	}
 
 	m_abilityActivator->OnFinished();
@@ -423,7 +422,7 @@ void PlayerCameraSystem::ActivateAbility(Entity* entity, const std::string& abil
 	m_abilityActivator.reset();
 }
 
-void PlayerCameraSystem::AddAbilityToStack(AbilityStackComponent* abilityStack, std::shared_ptr<Ability> ability) const
+void PlayerCameraSystem::AddAbilityToStack(AbilityStackComponent* abilityStack, std::shared_ptr<Ability> ability, Entity* entity) const
 {
 	//TODO: Check if append modifier key was held
 	if constexpr (true)
@@ -436,5 +435,7 @@ void PlayerCameraSystem::AddAbilityToStack(AbilityStackComponent* abilityStack, 
 			oldAbility->Cancel();
 		}
 	}
+	ability->Init(*entity);
+	ability->Tick();
 	abilityStack->m_stack.push(std::move(ability));
 }

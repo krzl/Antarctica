@@ -8,18 +8,13 @@
 #include "Entities/Camera.h"
 #include "Steering/Behaviors/ArriveBehavior.h"
 
+MoveAbility::MoveAbility(const Point3D& target) :
+	m_target(target) {}
+
 bool MoveAbility::Init(Entity& entity)
 {
 	m_entity = &entity;
-
-	const std::optional<Point3D>& cursorWorldPosition = Application::Get().GetSystem<PlayerCameraSystem>()->GetCursorWorldPosition();
-	if (cursorWorldPosition.has_value())
-	{
-		m_target = cursorWorldPosition.value();
-		return true;
-	}
-
-	return false;
+	return true;
 }
 
 void MoveAbility::Start()
