@@ -27,34 +27,44 @@ void PlayerCameraSystem::Init()
 
 	InputManager* inputManager = InputManager::GetInstance();
 
-	inputManager->OnLeftMouseButtonPressed.AddListener([this]()
+	inputManager->OnLeftMouseButtonPressed.AddListener([this]
 	{
 		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::LEFT, true);
 	});
 
-	inputManager->OnMiddleMouseButtonPressed.AddListener([this]()
+	inputManager->OnMiddleMouseButtonPressed.AddListener([this]
 	{
 		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::MIDDLE, true);
 	});
 
-	inputManager->OnRightMouseButtonPressed.AddListener([this]()
+	inputManager->OnRightMouseButtonPressed.AddListener([this]
 	{
 		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::RIGHT, true);
 	});
 
-	inputManager->OnLeftMouseButtonReleased.AddListener([this]()
+	inputManager->OnLeftMouseButtonReleased.AddListener([this]
 	{
 		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::LEFT, false);
 	});
 
-	inputManager->OnMiddleMouseButtonReleased.AddListener([this]()
+	inputManager->OnMiddleMouseButtonReleased.AddListener([this]
 	{
 		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::MIDDLE, false);
 	});
 
-	inputManager->OnRightMouseButtonReleased.AddListener([this]()
+	inputManager->OnRightMouseButtonReleased.AddListener([this]
 	{
 		m_inputQueue.AddMousePressCommand(InputCommand::MouseButtonId::RIGHT, false);
+	});
+
+	inputManager->OnKeyPressed.AddListener([this](const Key key)
+	{
+		m_inputQueue.AddKeyPressCommand(key, true);
+	});
+
+	inputManager->OnKeyReleased.AddListener([this](const Key key)
+	{
+		m_inputQueue.AddKeyPressCommand(key, false);
 	});
 }
 
@@ -165,7 +175,7 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 				else
 				{
 					m_abilityActivator->OnFinished();
-					m_abilityActivator.reset();  
+					m_abilityActivator.reset();
 				}
 			}
 		}
@@ -305,6 +315,10 @@ bool PlayerCameraSystem::IsAbilityInputPressed(const AbilityBinding& abilityBind
 			return (uint32_t) inputCommand.m_mouseReleaseInput.m_button == abilityBinding.m_inputId;
 		case InputCommand::Type::MOUSE_MOVE:
 			return true;
+		case InputCommand::Type::KEY_PRESS:
+			return (uint32_t) inputCommand.m_keyPressInput.m_button == abilityBinding.m_inputId;
+		case InputCommand::Type::KEY_RELEASE:
+			return (uint32_t) inputCommand.m_keyReleaseInput.m_button == abilityBinding.m_inputId;
 		default:
 			return false;
 	}

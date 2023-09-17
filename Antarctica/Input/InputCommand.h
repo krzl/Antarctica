@@ -1,13 +1,16 @@
 ﻿#pragma once
 
+#include "Input/Key.h"
+
 struct InputCommand
 {
-	//TODO: add keyboard press/elease
 	enum class Type
 	{
 		MOUSE_PRESS,
 		MOUSE_RELEASE,
 		MOUSE_MOVE,
+		KEY_PRESS,
+		KEY_RELEASE
 	} m_type;
 
 	enum class MouseButtonId
@@ -33,10 +36,22 @@ struct InputCommand
 		int32_t m_deltaX, m_deltaY;
 	};
 
+	struct KeyPressInput
+	{
+		Key m_button;
+	};
+
+	struct KeyReleaseInput
+	{
+		Key m_button;
+	};
+
 	union
 	{
 		MousePressInput m_mousePressInput;
 		MouseReleaseInput m_mouseReleaseInput;
 		MouseMoveInput m_mouseMoveInput;
+		KeyPressInput m_keyPressInput;
+		KeyReleaseInput m_keyReleaseInput;
 	};
 };

@@ -166,6 +166,7 @@ LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, const WPARAM 
 		case WM_RBUTTONUP:
 		case WM_MOUSEMOVE:
 		case WM_KEYUP:
+		case WM_KEYDOWN:
 			m_inputHandler.ProcessMessage(msg, wParam, lParam);
 			return 0;
 		default:

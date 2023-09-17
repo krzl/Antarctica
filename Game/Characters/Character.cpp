@@ -130,8 +130,8 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 
 	abilityTrigger->m_abilityBindings.emplace_back(AbilityBinding{
 		"BuildObstacle",
-		InputCommand::Type::MOUSE_PRESS,
-		(uint32_t) InputCommand::MouseButtonId::RIGHT,
+		InputCommand::Type::KEY_PRESS,
+		(uint32_t) Key::B,
 		[]()
 		{
 			return std::make_shared<BuildStructureActivator>(3, 3);
