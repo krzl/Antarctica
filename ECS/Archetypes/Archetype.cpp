@@ -36,7 +36,7 @@ uint32_t Archetype::GetNewEntityOffset(const Entity* entity)
 			m_componentData[i].resize(m_componentData[i].size() + m_componentTypeInfos[i].m_dataSize);
 		}
 
-		return m_entityIds.size() - 1;
+		return (uint32_t) m_entityIds.size() - 1;
 	}
 
 	const uint32_t offset = m_emptySlots.top();

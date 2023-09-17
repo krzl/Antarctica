@@ -66,7 +66,7 @@ void main()
 			playerCameraSystem->SetupTerrainBvh(mesh);
 
 			time.Stop();
-			LOG(DEBUG, "A", "{}", time.GetTime());
+
 			//DebugDrawManager::GetInstance()->DrawTriangles(navMesh.m_vertices, navMesh.m_traversableIndices, 100.0f, Color::white);
 			//DebugDrawManager::GetInstance()->DrawTrianglesLines(navMesh.m_vertices, navMesh.m_nonTraversableIndices, 1000.0f, Color::magenta);
 

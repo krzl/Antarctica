@@ -5,11 +5,6 @@
 class DynamicMesh : public Mesh
 {
 public:
-
-	~DynamicMesh()
-	{
-		
-	}
 	
 	[[nodiscard]] std::vector<Submesh>& GetSubmeshes() { return m_submeshes; }
 	

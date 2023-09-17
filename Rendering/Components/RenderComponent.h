@@ -12,11 +12,6 @@ namespace Rendering
 	{
 		std::vector<QueuedRenderObject> m_renderHandles;
 
-		~RenderComponent()
-		{
-			LOG(DEBUG, "A", "TEST");
-		}
-
 		Transform4D m_worldTransform;
 
 		DEFINE_CLASS()

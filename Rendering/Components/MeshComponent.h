@@ -15,11 +15,6 @@ namespace Rendering
 		std::vector<std::shared_ptr<Material>> m_materials;
 		std::vector<std::optional<Rect>> m_rectMasks;
 
-		~MeshComponent()
-		{
-			
-		}
-
 		Transform4D m_transform = Transform4D::identity;
 		
 		bool m_useMeshForCollision = false;

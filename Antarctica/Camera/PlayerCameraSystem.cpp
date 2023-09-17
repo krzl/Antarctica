@@ -165,7 +165,7 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 				else
 				{
 					m_abilityActivator->OnFinished();
-					m_abilityActivator.reset();
+					m_abilityActivator.reset();  
 				}
 			}
 		}
