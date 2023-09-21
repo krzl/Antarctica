@@ -36,7 +36,7 @@ namespace Navigation
 
 		return Point3D((id % m_width) * GRID_CELL_TO_METER - xCenterOffset,
 			(id / m_width) * GRID_CELL_TO_METER - yCenterOffset,
-			TerrainHeightLevelToZ(m_heightMap[id]));
+			HeightLevelToZ(m_heightMap[id]));
 	}
 
 	bool Terrain::IsOnSlope(const Point3D& point) const
@@ -78,7 +78,7 @@ namespace Navigation
 		return max - min;
 	}
 
-	float Terrain::TerrainHeightLevelToZ(const HeightLevel level)
+	float Terrain::HeightLevelToZ(const HeightLevel level)
 	{
 		const float rampRatio = (float) (Clamp(level % 5, 1, 4) - 1) / 4.0f;
 		return ((float) (level / 5) + rampRatio) * GRID_LEVEL_HEIGHT_TO_METER;
@@ -169,7 +169,7 @@ namespace Navigation
 
 				vertices[a1] = Vector3D(x * GRID_CELL_TO_METER - xCenterOffset,
 					y * GRID_CELL_TO_METER - yCenterOffset,
-					TerrainHeightLevelToZ(GetHeightLevel(x, y)));
+					HeightLevelToZ(GetHeightLevel(x, y)));
 
 				texcoordSplatUV[a1 * 2 + 0] = (float) x / 40.0f;
 				texcoordSplatUV[a1 * 2 + 1] = (float) y / 40.0f;

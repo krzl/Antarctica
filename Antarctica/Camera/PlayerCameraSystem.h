@@ -24,15 +24,16 @@ class PlayerCameraSystem : public System<TransformComponent, Rendering::CameraCo
 	void Init() override;
 
 	void OnUpdateStart() override;
-	void UpdateDragIndicator(CameraDragSelectComponent* cameraDrag) const;
-	void CreateDragIndicator(CameraDragSelectComponent* cameraDrag) const;
 	void OnUpdateEnd() override;
 
 	void Update(uint64_t entityId, TransformComponent* transform, Rendering::CameraComponent* camera, CameraScrollComponent* cameraScroll,
 				CameraDragSelectComponent* cameraDrag) override;
 
 	Matrix4D GetPerspectiveMatrix(const Rendering::CameraComponent* camera) const;
-	Frustum GetFrustum(Rendering::CameraComponent* camera) const;
+	Frustum GetFrustum(Rendering::CameraComponent* camera, Rect sectionRect) const;
+	Ray GetCameraRay(TransformComponent* transform, Rendering::CameraComponent* camera) const;
+	std::vector<Entity*> GetEntitiesFromScreenArea(TransformComponent* cameraTransform, Rendering::CameraComponent* camera,
+												   Point2DInt startPos, Point2DInt endPos) const;
 
 	void TryTriggerAbilitiesFromSelection();
 	Entity* FindSuitableEntityForAbility(const std::string& abilityId) const;
@@ -49,7 +50,19 @@ public:
 	//TODO: Remove
 	[[nodiscard]] std::vector<Rendering::CameraData>& GetCameras();
 
+
+
+	//TODO: Handle selection in another file
+	//TODO: Remove entities from selection when destroyed
 	void AddToSelection(Entity* entity);
+	void ClearSelection();
+
+	//TODO: Handle selection in another file
+	void CreateDragIndicator(CameraDragSelectComponent* cameraDrag) const;
+	void UpdateDragIndicator(TransformComponent* cameraTransform, Rendering::CameraComponent* camera, CameraDragSelectComponent* cameraDrag) const;
+	void OnDragEnd(TransformComponent* cameraTransform, Rendering::CameraComponent* camera, CameraDragSelectComponent* cameraDrag);
+
+
 
 	void SetupTerrainBvh(const std::shared_ptr<Mesh> terrain);
 

@@ -111,10 +111,12 @@ void BuildingGrid::UpdatePlacementSubmesh(Submesh& submesh, const Point2DInt& st
 			Point3D& c = pointArray[currentSegmentId * 4 + 2];
 			Point3D& d = pointArray[currentSegmentId * 4 + 3];
 
-			a = m_terrain->GetPos(x, y);
-			b = m_terrain->GetPos(x + 1, y);
-			c = m_terrain->GetPos(x, y + 1);
-			d = m_terrain->GetPos(x + 1, y + 1);
+			a   = m_terrain->GetPos(x, y);
+			b   = m_terrain->GetPos(x + 1, y);
+			c   = m_terrain->GetPos(x, y + 1);
+			d   = m_terrain->GetPos(x + 1, y + 1);
+			
+			a.z = b.z = c.z = d.z = m_terrain->HeightLevelToZ(level);
 
 			Color& aColor = colorArray[currentSegmentId * 4 + 0];
 			Color& bColor = colorArray[currentSegmentId * 4 + 1];

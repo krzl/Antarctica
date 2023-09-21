@@ -24,6 +24,12 @@ namespace Rendering
 	void CullingSystem::Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderCullComponent* renderCull,
 							   ColliderComponent* collider, RenderComponent* render)
 	{
+		if (renderCull->m_neverCull)
+		{
+			renderCull->m_isCulled = false;
+			return;
+		}
+		
 		if (m_frameCounter->m_renderFrameCount != transform->m_quadtreePlacement.GetNode()->GetLastSeenFrameId())
 		{
 			renderCull->m_isCulled = true;

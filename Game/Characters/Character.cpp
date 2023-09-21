@@ -5,7 +5,7 @@
 #include "Abilities/AbilityBinding.h"
 #include "Abilities/AbilityStackComponent.h"
 #include "Abilities/AbilityTriggerComponent.h"
-#include "Abilities/MoveAbility.h"
+#include "Abilities/SelectableComponent.h"
 #include "Abilities/Activators/BuildStructureActivator.h"
 #include "Abilities/Activators/InstantMoveActivator.h"
 
@@ -39,6 +39,7 @@ void Character::DefineArchetype(ArchetypeBuilder& builder)
 	builder.AddComponent<Rendering::RenderComponent>();
 	builder.AddComponent<Rendering::RenderCullComponent>();
 	builder.AddComponent<TransformComponent>();
+	builder.AddComponent<SelectableComponent>();
 }
 
 void Character::SetupComponents(const ComponentAccessor& accessor)
@@ -116,7 +117,7 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 
 	movement->m_radius = 0.3f;
 
-	collider->m_boundingBox = mesh->GetBoundingBox();
+	collider->m_boundingBox = mesh->GetBoundingBox().Transform(meshComponent->m_transform);
 
 	abilityTrigger->m_abilityBindings.emplace_back(AbilityBinding{
 		"MoveAbility",

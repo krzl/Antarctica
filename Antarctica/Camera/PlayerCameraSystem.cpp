@@ -10,6 +10,7 @@
 #include "Abilities/AbilityBinding.h"
 #include "Abilities/AbilityStackComponent.h"
 #include "Abilities/AbilityTriggerComponent.h"
+#include "Abilities/SelectableComponent.h"
 #include "Abilities/Activators/AbilityActivator.h"
 
 #include "Assets/BVH.h"
@@ -18,6 +19,7 @@
 #include "Buffers/Types/PerCameraBuffer.h"
 #include "Camera/CameraScrollComponent.h"
 #include "Components/CameraComponent.h"
+#include "Components/RenderCullComponent.h"
 #include "Components/TransformComponent.h"
 #include "Core/Application.h"
 
@@ -108,7 +110,7 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 	camera->m_viewMatrix        = Inverse(Transform4D::MakeTranslation(transform->m_localPosition) * transform->m_localRotation.GetRotationMatrix());
 	camera->m_perspectiveMatrix = GetPerspectiveMatrix(camera);
 
-	camera->m_frustum = GetFrustum(camera);
+	camera->m_frustum = GetFrustum(camera, Rect{ { 0, 0 }, { 1, 1 } });
 
 	const Matrix4D viewProj = camera->m_perspectiveMatrix * camera->m_viewMatrix;
 
@@ -122,25 +124,7 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 		camera->m_order
 	});
 
-
-	const Point2DInt pos = InputManager::GetInstance()->GetMousePosition();
-
-	const float ndcX = (2.0f * pos.x) / Application::Get().GetWindow().GetWidth() - 1.0f;
-	const float ndcY = 1.0f - (2.0f * pos.y) / Application::Get().GetWindow().GetHeight();
-
-	const Vector4D clipCoords = Vector4D(ndcX, ndcY, 1.0f, 1.0f);
-
-	Matrix4D inversePerspectiveMatrix = Inverse(camera->m_perspectiveMatrix);
-	Vector4D eyeCoordinates           = inversePerspectiveMatrix * clipCoords;
-	eyeCoordinates /= eyeCoordinates.w;
-
-	Matrix4D inverseViewMatrix = Inverse(camera->m_viewMatrix);
-	Vector4D rayWorld          = inverseViewMatrix * eyeCoordinates;
-
-	Vector3D direction = rayWorld.xyz - transform->m_localPosition;
-	direction          = direction.Normalize();
-
-	const Ray ray = { transform->m_localPosition, direction };
+	const Ray ray = GetCameraRay(transform, camera);
 
 	m_cursorWorldPosition = m_terrainBvh->Intersect(ray);
 
@@ -150,12 +134,11 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 		{
 			if (m_inputQueue.GetMouseButtonRelease(InputCommand::MouseButtonId::LEFT))
 			{
-				cameraDrag->m_isDragging                                                                                    = false;
-				cameraDrag->m_dragIndicator->GetComponentAccessor().GetComponent<Rendering::RenderComponent>()->m_isEnabled = false;
+				OnDragEnd(transform, camera, cameraDrag);
 			}
 			else
 			{
-				UpdateDragIndicator(cameraDrag);
+				UpdateDragIndicator(transform, camera, cameraDrag);
 			}
 		}
 		else if (m_inputQueue.GetMouseButtonPress(InputCommand::MouseButtonId::LEFT))
@@ -171,7 +154,7 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 
 			cameraDrag->m_isDragging        = true;
 			cameraDrag->m_dragStartPosition = InputManager::GetInstance()->GetMousePosition();
-			UpdateDragIndicator(cameraDrag);
+			UpdateDragIndicator(transform, camera, cameraDrag);
 		}
 	}
 
@@ -230,18 +213,23 @@ Matrix4D PlayerCameraSystem::GetPerspectiveMatrix(const Rendering::CameraCompone
 	);
 }
 
-Frustum PlayerCameraSystem::GetFrustum(Rendering::CameraComponent* camera) const
+Frustum PlayerCameraSystem::GetFrustum(Rendering::CameraComponent* camera, Rect sectionRect) const
 {
 	Matrix4D matrix = Inverse(camera->m_perspectiveMatrix * camera->m_viewMatrix);
 
-	Vector4D pointFearTopLeft  = matrix * Point3D(-1.0f, 1.0f, -1.0f);
-	Vector4D pointFearTopRight = matrix * Point3D(1.0f, 1.0f, -1.0f);
-	Vector4D pointFearBotLeft  = matrix * Point3D(-1.0f, -1.0f, -1.0f);
-	Vector4D pointFearBotRight = matrix * Point3D(1.0f, -1.0f, -1.0f);
-	Vector4D pointFarTopLeft   = matrix * Point3D(-1.0f, 1.0f, 1.0f);
-	Vector4D pointFarTopRight  = matrix * Point3D(1.0f, 1.0f, 1.0f);
-	Vector4D pointFarBotLeft   = matrix * Point3D(-1.0f, -1.0f, 1.0f);
-	Vector4D pointFarBotRight  = matrix * Point3D(1.0f, -1.0f, 1.0f);
+	sectionRect.m_lowerBoundary.x = sectionRect.m_lowerBoundary.x * 2.0f - 1.0f;
+	sectionRect.m_lowerBoundary.y = sectionRect.m_lowerBoundary.y * 2.0f - 1.0f;
+	sectionRect.m_upperBoundary.x = sectionRect.m_upperBoundary.x * 2.0f - 1.0f;
+	sectionRect.m_upperBoundary.y = sectionRect.m_upperBoundary.y * 2.0f - 1.0f;
+
+	Vector4D pointFearTopLeft  = matrix * Point3D(sectionRect.m_lowerBoundary.x, sectionRect.m_upperBoundary.y, -1.0f);
+	Vector4D pointFearTopRight = matrix * Point3D(sectionRect.m_upperBoundary.x, sectionRect.m_upperBoundary.y, -1.0f);
+	Vector4D pointFearBotLeft  = matrix * Point3D(sectionRect.m_lowerBoundary.x, sectionRect.m_lowerBoundary.y, -1.0f);
+	Vector4D pointFearBotRight = matrix * Point3D(sectionRect.m_upperBoundary.x, sectionRect.m_lowerBoundary.y, -1.0f);
+	Vector4D pointFarTopLeft   = matrix * Point3D(sectionRect.m_lowerBoundary.x, sectionRect.m_upperBoundary.y, 1.0f);
+	Vector4D pointFarTopRight  = matrix * Point3D(sectionRect.m_upperBoundary.x, sectionRect.m_upperBoundary.y, 1.0f);
+	Vector4D pointFarBotLeft   = matrix * Point3D(sectionRect.m_lowerBoundary.x, sectionRect.m_lowerBoundary.y, 1.0f);
+	Vector4D pointFarBotRight  = matrix * Point3D(sectionRect.m_upperBoundary.x, sectionRect.m_lowerBoundary.y, 1.0f);
 
 
 	Point3D nearTopLeft  = (Point3D) (pointFearTopLeft / pointFearTopLeft.w).xyz;
@@ -275,6 +263,51 @@ Frustum PlayerCameraSystem::GetFrustum(Rendering::CameraComponent* camera) const
 	return frustum;
 }
 
+Ray PlayerCameraSystem::GetCameraRay(TransformComponent* transform, Rendering::CameraComponent* camera) const
+{
+	const Point2DInt pos = InputManager::GetInstance()->GetMousePosition();
+
+	const float ndcX = (2.0f * pos.x) / Application::Get().GetWindow().GetWidth() - 1.0f;
+	const float ndcY = 1.0f - (2.0f * pos.y) / Application::Get().GetWindow().GetHeight();
+
+	const Vector4D clipCoords = Vector4D(ndcX, ndcY, 1.0f, 1.0f);
+
+	Matrix4D inversePerspectiveMatrix = Inverse(camera->m_perspectiveMatrix);
+	Vector4D eyeCoordinates           = inversePerspectiveMatrix * clipCoords;
+	eyeCoordinates /= eyeCoordinates.w;
+
+	Matrix4D inverseViewMatrix = Inverse(camera->m_viewMatrix);
+	Vector4D rayWorld          = inverseViewMatrix * eyeCoordinates;
+
+	Vector3D direction = rayWorld.xyz - transform->m_localPosition;
+	direction          = direction.Normalize();
+
+	return Ray{ transform->m_localPosition, direction };
+}
+
+std::vector<Entity*> PlayerCameraSystem::GetEntitiesFromScreenArea(TransformComponent* cameraTransform, Rendering::CameraComponent* camera,
+																   const Point2DInt startPos, const Point2DInt endPos) const
+{
+	const float w = Application::Get().GetWindow().GetWidth();
+	const float h = Application::Get().GetWindow().GetHeight();
+
+	if (endPos.x - startPos.x > 3 && endPos.y - startPos.y > 3)
+	{
+		const Frustum frustum = GetFrustum(camera, Rect{ { startPos.x / w, 1.0f - endPos.y / h }, { endPos.x / w, 1.0f - startPos.y / h } });
+
+		return Application::Get().GetWorld().GetQuadtree().Intersect(frustum);
+	}
+
+	Quadtree::TraceResult result = Application::Get().GetWorld().GetQuadtree().TraceObject(
+		RayIntersectionTester(GetCameraRay(cameraTransform, camera)));
+	if (result.m_object.IsValid())
+	{
+		return { *result.m_object };
+	}
+
+	return {};
+}
+
 std::vector<Rendering::CameraData>& PlayerCameraSystem::GetCameras()
 {
 	return m_cameras;
@@ -282,12 +315,30 @@ std::vector<Rendering::CameraData>& PlayerCameraSystem::GetCameras()
 
 void PlayerCameraSystem::AddToSelection(Entity* entity)
 {
+	const SelectableComponent* selectable = entity->GetComponentAccessor().GetComponent<SelectableComponent>();
+
+	if (selectable == nullptr || selectable->m_isSelected)
+	{
+		return;
+	}
+
 	if (m_selectedEntities.size() == 0)
 	{
 		m_selectionGroupEntity = entity;
 	}
 
 	m_selectedEntities.emplace(entity);
+}
+
+void PlayerCameraSystem::ClearSelection()
+{
+	for (Entity* entity : m_selectedEntities)
+	{
+		entity->GetComponentAccessor().GetComponent<SelectableComponent>()->m_isSelected = false;
+	}
+
+	m_selectionGroupEntity = nullptr;
+	m_selectedEntities.clear();
 }
 
 void PlayerCameraSystem::SetupTerrainBvh(const std::shared_ptr<Mesh> terrain)
@@ -487,6 +538,7 @@ void PlayerCameraSystem::CreateDragIndicator(CameraDragSelectComponent* cameraDr
 	material->SetOrder(4000); //TODO: create enum for sorting order
 
 	Rendering::MeshComponent* meshComponent = dynamicMeshEntity->GetComponentAccessor().GetComponent<Rendering::MeshComponent>();
+	dynamicMeshEntity->GetComponentAccessor().GetComponent<Rendering::RenderCullComponent>()->m_neverCull = true;
 
 	meshComponent->m_materials = { material };
 
@@ -549,18 +601,19 @@ void PlayerCameraSystem::CreateDragIndicator(CameraDragSelectComponent* cameraDr
 	}
 }
 
-void PlayerCameraSystem::UpdateDragIndicator(CameraDragSelectComponent* cameraDrag) const
+void PlayerCameraSystem::UpdateDragIndicator(TransformComponent* cameraTransform, Rendering::CameraComponent* camera,
+											 CameraDragSelectComponent* cameraDrag) const
 {
 	const Point2DInt currentPos = InputManager::GetInstance()->GetMousePosition();
 
 	const Point2DInt startPos = Point2DInt::Min(currentPos, cameraDrag->m_dragStartPosition);
 	const Point2DInt endPos   = Point2DInt::Max(currentPos, cameraDrag->m_dragStartPosition);
 
-	const float w = 2.0f / Application::Get().GetWindow().GetWidth();
-	const float h = 2.0f / Application::Get().GetWindow().GetHeight();
+	const float halfW = 2.0f / Application::Get().GetWindow().GetWidth();
+	const float halfH = 2.0f / Application::Get().GetWindow().GetHeight();
 
-	const float xValues[4] = { startPos.x * w - 1.0f, (startPos.x + 1) * w - 1.0f, (endPos.x - 1) * w - 1.0f, endPos.x * w - 1.0f };
-	const float yValues[4] = { startPos.y * h - 1.0f, (startPos.y + 1) * h - 1.0f, (endPos.y - 1) * h - 1.0f, endPos.y * h - 1.0f };
+	const float xValues[4] = { startPos.x * halfW - 1.0f, (startPos.x + 1) * halfW - 1.0f, (endPos.x - 1) * halfW - 1.0f, endPos.x * halfW - 1.0f };
+	const float yValues[4] = { startPos.y * halfH - 1.0f, (startPos.y + 1) * halfH - 1.0f, (endPos.y - 1) * halfH - 1.0f, endPos.y * halfH - 1.0f };
 
 	Rendering::DynamicMeshEntity* dynamicMeshEntity = *cameraDrag->m_dragIndicator;
 
@@ -586,4 +639,30 @@ void PlayerCameraSystem::UpdateDragIndicator(CameraDragSelectComponent* cameraDr
 	pointArray[16 + 1] = Point2D(xValues[2], - yValues[1]);
 	pointArray[16 + 2] = Point2D(xValues[1], - yValues[2]);
 	pointArray[16 + 3] = Point2D(xValues[2], - yValues[2]);
+}
+
+void PlayerCameraSystem::OnDragEnd(TransformComponent* cameraTransform, Rendering::CameraComponent* camera, CameraDragSelectComponent* cameraDrag)
+{
+	cameraDrag->m_isDragging                                                                                    = false;
+	cameraDrag->m_dragIndicator->GetComponentAccessor().GetComponent<Rendering::RenderComponent>()->m_isEnabled = false;
+
+	const Point2DInt currentPos = InputManager::GetInstance()->GetMousePosition();
+
+	const Point2DInt startPos = Point2DInt::Min(currentPos, cameraDrag->m_dragStartPosition);
+	const Point2DInt endPos   = Point2DInt::Max(currentPos, cameraDrag->m_dragStartPosition);
+
+	const float w = Application::Get().GetWindow().GetWidth();
+	const float h = Application::Get().GetWindow().GetHeight();
+
+	const std::vector<Entity*> entities = GetEntitiesFromScreenArea(cameraTransform, camera, startPos, endPos);
+
+	ClearSelection();
+
+	for (Entity* entity : entities)
+	{
+		if (SelectableComponent* selectableComponent = entity->GetComponentAccessor().GetComponent<SelectableComponent>())
+		{
+			AddToSelection(entity);
+		}
+	}
 }

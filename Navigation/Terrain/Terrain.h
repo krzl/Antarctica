@@ -33,7 +33,9 @@ namespace Navigation
 
 		std::optional<Point3D> Intersect(const Ray& ray) const;
 
-		static constexpr float GRID_CELL_TO_METER = 1.0f / 1.0f;
+		static float HeightLevelToZ(HeightLevel level);
+
+		static constexpr float GRID_CELL_TO_METER         = 1.0f / 1.0f;
 		static constexpr float GRID_LEVEL_HEIGHT_TO_METER = 5.0f;
 
 	private:
@@ -48,8 +50,6 @@ namespace Navigation
 
 		NavMesh::Edge GenerateNavMeshEdge(uint8_t edgeDirection, std::vector<uint8_t>& lookup, uint32_t x, uint32_t y, int32_t deltaX,
 										  int32_t deltaY) const;
-
-		static float TerrainHeightLevelToZ(HeightLevel level);
 
 		uint32_t m_width  = 0;
 		uint32_t m_height = 0;

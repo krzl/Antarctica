@@ -14,8 +14,8 @@ namespace Navigation
 			uint32_t m_width = 32;
 			uint32_t m_height = 32;
 
-			uint32_t m_minIslandCount = 3;
-			uint32_t m_maxIslandCount = 3;
+			uint32_t m_minIslandCount = 0;
+			uint32_t m_maxIslandCount = 0;
 
 			uint32_t m_minIslandStartingSize = 4;
 			uint32_t m_maxIslandStartingSize = 9;

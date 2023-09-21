@@ -11,6 +11,7 @@ namespace Rendering
 		friend class SkinningSystem;
 
 		bool m_cullSubmeshes = false;
+		bool m_neverCull     = false;
 
 	private:
 

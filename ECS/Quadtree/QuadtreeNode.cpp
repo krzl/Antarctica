@@ -60,7 +60,7 @@ QuadtreeNode* QuadtreeNode::TryPushBack(Entity* entity, const BoundingBox& bound
 
 void QuadtreeNode::CreateChildren()
 {
-	if (m_boundingBox.m_lowerBoundary.x - m_boundingBox.m_upperBoundary.x < Quadtree::MIN_NODE_SIZE + 0.01f)
+	if (m_boundingBox.m_upperBoundary.x - m_boundingBox.m_lowerBoundary.x < Quadtree::MIN_NODE_SIZE + 0.01f)
 	{
 		return;
 	}

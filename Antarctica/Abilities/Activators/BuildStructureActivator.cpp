@@ -5,6 +5,9 @@
 #include "Abilities/BuildAbility.h"
 #include "Assets/DynamicMesh.h"
 #include "Camera/PlayerCameraSystem.h"
+
+#include "Components/RenderCullComponent.h"
+
 #include "Core/Application.h"
 #include "Entities/DynamicMeshEntity.h"
 #include "Entities/World.h"
@@ -30,6 +33,7 @@ BuildStructureActivator::BuildStructureActivator(const uint32_t width, const uin
 		material->GetShaderParams().m_depthTestEnabled = false;
 
 		Rendering::MeshComponent* meshComponent = m_placementIndicator->GetComponentAccessor().GetComponent<Rendering::MeshComponent>();
+		m_placementIndicator->GetComponentAccessor().GetComponent<Rendering::RenderCullComponent>()->m_neverCull = true;
 
 		meshComponent->m_materials = { material };
 
