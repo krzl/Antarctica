@@ -43,6 +43,11 @@ namespace Rendering
 
 	void RenderSystem::Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderComponent* render)
 	{
+		if (!render->m_isEnabled)
+		{
+			return;
+		}
+
 		const ComponentAccessor& componentAccessor = World::Get()->GetEntity(entityId)->GetComponentAccessor();
 		const RenderCullComponent* renderCull      = componentAccessor.GetComponent<RenderCullComponent>();
 		if (renderCull && renderCull->m_isCulled)

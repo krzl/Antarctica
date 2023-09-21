@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CameraData.h"
+#include "CameraDragSelectComponent.h"
 #include "CameraScrollComponent.h"
 
 #include "Abilities/AbilityStackComponent.h"
@@ -18,14 +19,17 @@ struct AbilityBinding;
 class BVH;
 struct TransformComponent;
 
-class PlayerCameraSystem : public System<TransformComponent, Rendering::CameraComponent, CameraScrollComponent>
+class PlayerCameraSystem : public System<TransformComponent, Rendering::CameraComponent, CameraScrollComponent, CameraDragSelectComponent>
 {
 	void Init() override;
 
 	void OnUpdateStart() override;
+	void UpdateDragIndicator(CameraDragSelectComponent* cameraDrag) const;
+	void CreateDragIndicator(CameraDragSelectComponent* cameraDrag) const;
 	void OnUpdateEnd() override;
 
-	void Update(uint64_t entityId, TransformComponent* transform, Rendering::CameraComponent* camera, CameraScrollComponent* cameraScroll) override;
+	void Update(uint64_t entityId, TransformComponent* transform, Rendering::CameraComponent* camera, CameraScrollComponent* cameraScroll,
+				CameraDragSelectComponent* cameraDrag) override;
 
 	Matrix4D GetPerspectiveMatrix(const Rendering::CameraComponent* camera) const;
 	Frustum GetFrustum(Rendering::CameraComponent* camera) const;
@@ -41,6 +45,8 @@ class PlayerCameraSystem : public System<TransformComponent, Rendering::CameraCo
 public:
 
 	[[nodiscard]] const std::optional<Point3D>& GetCursorWorldPosition() const { return m_cursorWorldPosition; }
+
+	//TODO: Remove
 	[[nodiscard]] std::vector<Rendering::CameraData>& GetCameras();
 
 	void AddToSelection(Entity* entity);

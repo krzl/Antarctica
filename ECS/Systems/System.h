@@ -42,7 +42,7 @@ public:
 						[this, archetype, &counter](const uint64_t entityId)
 						{
 							const uint32_t id = counter++;
-							if (entityId != 0)
+							if (archetype.m_archetype->m_entityIds[id] != 0)
 							{
 								Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
 							}
@@ -63,7 +63,7 @@ public:
 						[this, archetype, &counter](const uint64_t entityId)
 						{
 							const uint32_t id = counter++;
-							if (entityId != 0)
+							if (archetype.m_archetype->m_entityIds[id] != 0)
 							{
 								Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
 							}

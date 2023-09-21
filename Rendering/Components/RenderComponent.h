@@ -14,6 +14,8 @@ namespace Rendering
 
 		Transform4D m_worldTransform;
 
+		bool m_isEnabled = true;
+
 		DEFINE_CLASS()
 	};
 

@@ -96,13 +96,15 @@ void BuildingGrid::UpdatePlacementSubmesh(Submesh& submesh, const Point2DInt& st
 
 	uint32_t currentSegmentId = 0;
 
+	Point3D* pointArray = static_cast<Point3D*>(vertexData);
+	Color* colorArray   = reinterpret_cast<Color*>(static_cast<uint8_t*>(vertexData) + sizeof(Point3D) * vertexBuffer.GetElementCount());
+
+
 	for (int32_t x = start.x; x <= end.x; ++x)
 	{
 		for (int32_t y = start.y; y <= end.y; ++y)
 		{
 			const bool isPlaceable = level == m_terrain->GetHeightLevel(x, y) && IsFree(Point2DInt{ x, y });
-
-			Point3D* pointArray = static_cast<Point3D*>(vertexData);
 
 			Point3D& a = pointArray[currentSegmentId * 4 + 0];
 			Point3D& b = pointArray[currentSegmentId * 4 + 1];
@@ -113,8 +115,6 @@ void BuildingGrid::UpdatePlacementSubmesh(Submesh& submesh, const Point2DInt& st
 			b = m_terrain->GetPos(x + 1, y);
 			c = m_terrain->GetPos(x, y + 1);
 			d = m_terrain->GetPos(x + 1, y + 1);
-
-			Color* colorArray = reinterpret_cast<Color*>(static_cast<uint8_t*>(vertexData) + sizeof(Point3D) * vertexBuffer.GetElementCount());
 
 			Color& aColor = colorArray[currentSegmentId * 4 + 0];
 			Color& bColor = colorArray[currentSegmentId * 4 + 1];

@@ -78,8 +78,8 @@ namespace Navigation
 				}
 				else
 				{
-					//movement->m_velocity -= velocityDelta; //TODO: check if can be removed
-					movement->m_velocity = Vector2D::zero;
+					movement->m_velocity -= velocityDelta;
+					//movement->m_velocity = Vector2D::zero;
 				}
 			}
 		}

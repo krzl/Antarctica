@@ -3,6 +3,7 @@
 
 #include <complex>
 
+#include "AssetManager.h"
 #include "CameraData.h"
 
 #include "Abilities/Ability.h"
@@ -12,12 +13,15 @@
 #include "Abilities/Activators/AbilityActivator.h"
 
 #include "Assets/BVH.h"
+#include "Assets/DynamicMesh.h"
 
 #include "Buffers/Types/PerCameraBuffer.h"
 #include "Camera/CameraScrollComponent.h"
 #include "Components/CameraComponent.h"
 #include "Components/TransformComponent.h"
 #include "Core/Application.h"
+
+#include "Entities/DynamicMeshEntity.h"
 
 #include "Input/InputQueue.h"
 
@@ -77,9 +81,9 @@ void PlayerCameraSystem::OnUpdateStart()
 }
 
 void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform, Rendering::CameraComponent* camera,
-								CameraScrollComponent* cameraScroll)
+								CameraScrollComponent* cameraScroll, CameraDragSelectComponent* cameraDrag)
 {
-	if (m_inputQueue.GetMouseButtonPress(InputCommand::MouseButtonId::MIDDLE))
+	if (m_inputQueue.GetMouseButtonPress(InputCommand::MouseButtonId::MIDDLE) && !cameraDrag->m_isDragging)
 	{
 		cameraScroll->m_isDragging = true;
 	}
@@ -140,9 +144,38 @@ void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform
 
 	m_cursorWorldPosition = m_terrainBvh->Intersect(ray);
 
-	//TODO: handle selection of entities
+	if (m_abilityActivator == nullptr && !cameraScroll->m_isDragging)
+	{
+		if (cameraDrag->m_isDragging)
+		{
+			if (m_inputQueue.GetMouseButtonRelease(InputCommand::MouseButtonId::LEFT))
+			{
+				cameraDrag->m_isDragging                                                                                    = false;
+				cameraDrag->m_dragIndicator->GetComponentAccessor().GetComponent<Rendering::RenderComponent>()->m_isEnabled = false;
+			}
+			else
+			{
+				UpdateDragIndicator(cameraDrag);
+			}
+		}
+		else if (m_inputQueue.GetMouseButtonPress(InputCommand::MouseButtonId::LEFT))
+		{
+			if (!cameraDrag->m_dragIndicator.IsValid())
+			{
+				CreateDragIndicator(cameraDrag);
+			}
+			else
+			{
+				cameraDrag->m_dragIndicator->GetComponentAccessor().GetComponent<Rendering::RenderComponent>()->m_isEnabled = true;
+			}
 
-	if (m_selectionGroupEntity != nullptr && m_abilityActivator == nullptr)
+			cameraDrag->m_isDragging        = true;
+			cameraDrag->m_dragStartPosition = InputManager::GetInstance()->GetMousePosition();
+			UpdateDragIndicator(cameraDrag);
+		}
+	}
+
+	if (m_selectionGroupEntity != nullptr && m_abilityActivator == nullptr && !cameraDrag->m_isDragging)
 	{
 		TryTriggerAbilitiesFromSelection();
 	}
@@ -438,4 +471,119 @@ void PlayerCameraSystem::AddAbilityToStack(AbilityStackComponent* abilityStack, 
 	ability->Init(*entity);
 	ability->Tick();
 	abilityStack->m_stack.push(std::move(ability));
+}
+
+void PlayerCameraSystem::CreateDragIndicator(CameraDragSelectComponent* cameraDrag) const
+{
+	std::shared_ptr<DynamicMesh> dynamicMesh = std::make_shared<DynamicMesh>();
+
+	cameraDrag->m_dragIndicator                     = World::Get()->Spawn<Rendering::DynamicMeshEntity>(SpawnParams{}, dynamicMesh);
+	Rendering::DynamicMeshEntity* dynamicMeshEntity = *cameraDrag->m_dragIndicator;
+
+	std::shared_ptr<Shader> shader                 = AssetManager::GetAsset<Shader>("../Resources/Shaders/drag_indicator.hlsl");
+	std::shared_ptr<Material> material             = std::make_shared<Material>(shader);
+	material->GetShaderParams().m_depthTestEnabled = true;
+	material->GetShaderParams().m_blendingEnabled  = true;
+	material->SetOrder(4000); //TODO: create enum for sorting order
+
+	Rendering::MeshComponent* meshComponent = dynamicMeshEntity->GetComponentAccessor().GetComponent<Rendering::MeshComponent>();
+
+	meshComponent->m_materials = { material };
+
+	dynamicMesh->SetSubmeshCount(1);
+
+	Submesh& submesh = dynamicMesh->GetSubmesh(0);
+	submesh.SetDynamic();
+	submesh.SetAttributesUsage({
+		false,
+		false,
+		false,
+		1,
+		0,
+		0,
+		0,
+		0
+	});
+
+	MeshBuffer& vertexBuffer   = submesh.GetVertexBuffer();
+	vertexBuffer.m_elementSize = sizeof(Point3D) + sizeof(Color);
+	vertexBuffer.m_data.resize(vertexBuffer.m_elementSize * 20);
+
+	MeshBuffer& indexBuffer   = submesh.GetIndexBuffer();
+	indexBuffer.m_elementSize = sizeof(uint32_t);
+	indexBuffer.m_data.resize(indexBuffer.m_elementSize * 9 * 6);
+
+	void* vertexData    = vertexBuffer.m_data.data();
+	uint32_t* indexData = reinterpret_cast<uint32_t*>(indexBuffer.m_data.data());
+
+	constexpr uint32_t quads[] = {
+		0, 1, 4, 5,
+		1, 2, 5, 6,
+		2, 3, 6, 7,
+		4, 5, 8, 9,
+		6, 7, 10, 11,
+		8, 9, 12, 13,
+		9, 10, 13, 14,
+		10, 11, 14, 15,
+		16, 17, 18, 19
+	};
+
+	for (uint32_t i = 0; i < 9; ++i)
+	{
+		indexData[i * 6 + 0] = quads[i * 4 + 0];
+		indexData[i * 6 + 1] = quads[i * 4 + 1];
+		indexData[i * 6 + 2] = quads[i * 4 + 3];
+		indexData[i * 6 + 3] = quads[i * 4 + 3];
+		indexData[i * 6 + 4] = quads[i * 4 + 2];
+		indexData[i * 6 + 5] = quads[i * 4 + 0];
+	}
+
+	Color* colorArray = reinterpret_cast<Color*>(static_cast<uint8_t*>(vertexData) + sizeof(Point3D) * vertexBuffer.GetElementCount());
+
+	for (uint32_t i = 0; i < 20; ++i)
+	{
+		const Color borderColor = Color(0.0f, 1.0f, 0.0f, 1.0f);
+		const Color centerColor = Color(0.0f, 1.0f, 0.0f, 0.2f);
+
+		colorArray[i] = i >= 16 ? centerColor : borderColor;
+	}
+}
+
+void PlayerCameraSystem::UpdateDragIndicator(CameraDragSelectComponent* cameraDrag) const
+{
+	const Point2DInt currentPos = InputManager::GetInstance()->GetMousePosition();
+
+	const Point2DInt startPos = Point2DInt::Min(currentPos, cameraDrag->m_dragStartPosition);
+	const Point2DInt endPos   = Point2DInt::Max(currentPos, cameraDrag->m_dragStartPosition);
+
+	const float w = 2.0f / Application::Get().GetWindow().GetWidth();
+	const float h = 2.0f / Application::Get().GetWindow().GetHeight();
+
+	const float xValues[4] = { startPos.x * w - 1.0f, (startPos.x + 1) * w - 1.0f, (endPos.x - 1) * w - 1.0f, endPos.x * w - 1.0f };
+	const float yValues[4] = { startPos.y * h - 1.0f, (startPos.y + 1) * h - 1.0f, (endPos.y - 1) * h - 1.0f, endPos.y * h - 1.0f };
+
+	Rendering::DynamicMeshEntity* dynamicMeshEntity = *cameraDrag->m_dragIndicator;
+
+	const ComponentAccessor& accessor              = dynamicMeshEntity->GetComponentAccessor();
+	const Rendering::MeshComponent* meshComponent  = accessor.GetComponent<Rendering::MeshComponent>();
+	const std::shared_ptr<DynamicMesh> dynamicMesh = std::static_pointer_cast<DynamicMesh>(meshComponent->m_mesh);
+
+	Submesh& submesh         = dynamicMesh->GetSubmesh(0);
+	MeshBuffer& vertexBuffer = submesh.GetVertexBuffer();
+
+	void* vertexData    = vertexBuffer.m_data.data();
+	Point3D* pointArray = static_cast<Point3D*>(vertexData);
+
+	for (uint32_t i = 0; i < 4; ++i)
+	{
+		for (uint32_t j = 0; j < 4; ++j)
+		{
+			pointArray[i * 4 + j] = Point2D(xValues[j], - yValues[i]);
+		}
+	}
+
+	pointArray[16 + 0] = Point2D(xValues[1], - yValues[1]);
+	pointArray[16 + 1] = Point2D(xValues[2], - yValues[1]);
+	pointArray[16 + 2] = Point2D(xValues[1], - yValues[2]);
+	pointArray[16 + 3] = Point2D(xValues[2], - yValues[2]);
 }
