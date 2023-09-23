@@ -639,6 +639,11 @@ void PlayerCameraSystem::UpdateDragIndicator(TransformComponent* cameraTransform
 	pointArray[16 + 1] = Point2D(xValues[2], - yValues[1]);
 	pointArray[16 + 2] = Point2D(xValues[1], - yValues[2]);
 	pointArray[16 + 3] = Point2D(xValues[2], - yValues[2]);
+
+	for (Entity* entity : GetEntitiesFromScreenArea(cameraTransform, camera, startPos, endPos))
+	{
+		if (SelectableComponent* selectableComponent = entity->GetComponentAccessor().GetComponent<SelectableComponent>()) { }
+	}
 }
 
 void PlayerCameraSystem::OnDragEnd(TransformComponent* cameraTransform, Rendering::CameraComponent* camera, CameraDragSelectComponent* cameraDrag)
@@ -651,14 +656,9 @@ void PlayerCameraSystem::OnDragEnd(TransformComponent* cameraTransform, Renderin
 	const Point2DInt startPos = Point2DInt::Min(currentPos, cameraDrag->m_dragStartPosition);
 	const Point2DInt endPos   = Point2DInt::Max(currentPos, cameraDrag->m_dragStartPosition);
 
-	const float w = Application::Get().GetWindow().GetWidth();
-	const float h = Application::Get().GetWindow().GetHeight();
-
-	const std::vector<Entity*> entities = GetEntitiesFromScreenArea(cameraTransform, camera, startPos, endPos);
-
 	ClearSelection();
 
-	for (Entity* entity : entities)
+	for (Entity* entity : GetEntitiesFromScreenArea(cameraTransform, camera, startPos, endPos))
 	{
 		if (SelectableComponent* selectableComponent = entity->GetComponentAccessor().GetComponent<SelectableComponent>())
 		{

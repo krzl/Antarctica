@@ -8,7 +8,6 @@
 #include "Characters/Character.h"
 
 #include "Terrain/Terrain.h"
-#include "Terrain/TerrainGenerator.h"
 
 #include "Camera/PlayerCameraSystem.h"
 
@@ -25,9 +24,7 @@ void main()
 		{
 			GameState& gameState = Application::Get().GetGameState();
 
-			constexpr Navigation::TerrainGenerator::SpawnParameters params;
-
-			gameState.GenerateTerrain(params);
+			gameState.LoadTerrainFromFile("../Resources/Maps/test.bmp");
 
 			const std::shared_ptr<Mesh> mesh = gameState.GetTerrain()->ConstructMesh();
 
@@ -67,15 +64,11 @@ void main()
 
 			time.Stop();
 
-			//DebugDrawManager::GetInstance()->DrawTriangles(navMesh.m_vertices, navMesh.m_traversableIndices, 100.0f, Color::white);
-			//DebugDrawManager::GetInstance()->DrawTrianglesLines(navMesh.m_vertices, navMesh.m_nonTraversableIndices, 1000.0f, Color::magenta);
-
-
 
 #if defined(DEBUG) | defined(_DEBUG)
 			constexpr uint32_t gridSize = 4;
 #else
-			constexpr uint32_t gridSize = 7;
+			constexpr uint32_t gridSize = 50;
 #endif
 
 			for (uint32_t i = 0; i < gridSize; i++)

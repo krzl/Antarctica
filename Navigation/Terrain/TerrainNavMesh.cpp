@@ -68,17 +68,17 @@ namespace Navigation
 
 					if (!isLeftTraversable)
 					{
-						if (m_heightMap[a1] == m_heightMap[a2])
+						if (abs(m_heightMap[a1] - m_heightMap[a2]) < 2)
 						{
 							lookup[a1] |= UP;
 							lookup[a2] |= DOWN;
 						}
-						if (m_heightMap[a2] == m_heightMap[b1])
+						if (abs(m_heightMap[a2] - m_heightMap[b1]) < 2)
 						{
 							lookup[a2] |= DOWN_RIGHT;
 							lookup[b1] |= UP_LEFT;
 						}
-						if (m_heightMap[b1] == m_heightMap[a1])
+						if (abs(m_heightMap[b1] - m_heightMap[a1]) < 2)
 						{
 							lookup[b1] |= LEFT;
 							lookup[a1] |= RIGHT;
@@ -86,17 +86,17 @@ namespace Navigation
 					}
 					if (!isRightTraversable)
 					{
-						if (m_heightMap[b1] == m_heightMap[a2])
+						if (abs(m_heightMap[b1] - m_heightMap[a2]) < 2)
 						{
 							lookup[a2] |= DOWN_RIGHT;
 							lookup[b1] |= UP_LEFT;
 						}
-						if (m_heightMap[a2] == m_heightMap[b2])
+						if (abs(m_heightMap[a2] - m_heightMap[b2]) < 2)
 						{
 							lookup[a2] |= RIGHT;
 							lookup[b2] |= LEFT;
 						}
-						if (m_heightMap[b2] == m_heightMap[b1])
+						if (abs(m_heightMap[b2] - m_heightMap[b1]) < 2)
 						{
 							lookup[b2] |= DOWN;
 							lookup[b1] |= UP;
@@ -114,13 +114,13 @@ namespace Navigation
 			const uint32_t b1 = GetHeightMapArrayIndex(i, m_height - 1);
 			const uint32_t b2 = GetHeightMapArrayIndex(i + 1, m_height - 1);
 
-			if (m_heightMap[a1] == m_heightMap[a2])
+			if (abs(m_heightMap[a1] - m_heightMap[a2]) < 2)
 			{
 				lookup[a1] |= RIGHT;
 				lookup[a2] |= LEFT;
 			}
 
-			if (m_heightMap[b1] == m_heightMap[b2])
+			if (abs(m_heightMap[b1] - m_heightMap[b2]) < 2)
 			{
 				lookup[b1] |= RIGHT;
 				lookup[b2] |= LEFT;
@@ -135,13 +135,13 @@ namespace Navigation
 			const uint32_t b1 = GetHeightMapArrayIndex(m_width - 1, i);
 			const uint32_t b2 = GetHeightMapArrayIndex(m_width - 1, i + 1);
 
-			if (m_heightMap[a1] == m_heightMap[a2])
+			if (abs(m_heightMap[a1] - m_heightMap[a2]) < 2)
 			{
 				lookup[a1] |= UP;
 				lookup[a2] |= DOWN;
 			}
 
-			if (m_heightMap[b1] == m_heightMap[b2])
+			if (abs(m_heightMap[b1] - m_heightMap[b2]) < 2)
 			{
 				lookup[b1] |= UP;
 				lookup[b2] |= DOWN;
@@ -235,6 +235,8 @@ namespace Navigation
 
 		for (const NavMesh::Edge& edge : edges)
 		{
+			//DebugDrawManager::GetInstance()->DrawLine(vertices[verticesIdMap[edge.m_start]], vertices[verticesIdMap[edge.m_end]], 0.05f, 1000.0f);
+
 			finalEdges.emplace_back(NavMesh::Edge{ verticesIdMap[edge.m_start], verticesIdMap[edge.m_end] });
 		}
 

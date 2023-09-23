@@ -12,8 +12,11 @@ public:
 	[[nodiscard]] BuildingGrid* GetBuildingGrid() const { return m_buildingGrid.get(); }
 
 	void GenerateTerrain(const Navigation::TerrainGenerator::SpawnParameters& params);
+	void LoadTerrainFromFile(const std::string& path);
 
 private:
+
+	void SetupTerrain();
 
 	std::unique_ptr<Navigation::Terrain> m_terrain = nullptr;
 	std::unique_ptr<Navigation::NavMesh> m_navMesh = nullptr;

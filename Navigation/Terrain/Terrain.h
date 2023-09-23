@@ -11,6 +11,7 @@ namespace Navigation
 	class Terrain
 	{
 		friend class TerrainGenerator;
+		friend class TerrainLoader;
 
 	public:
 

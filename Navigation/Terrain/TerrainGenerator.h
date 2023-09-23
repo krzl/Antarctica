@@ -11,8 +11,8 @@ namespace Navigation
 		
 		struct SpawnParameters
 		{
-			uint32_t m_width = 32;
-			uint32_t m_height = 32;
+			uint32_t m_width = 512;
+			uint32_t m_height = 512;
 
 			uint32_t m_minIslandCount = 0;
 			uint32_t m_maxIslandCount = 0;

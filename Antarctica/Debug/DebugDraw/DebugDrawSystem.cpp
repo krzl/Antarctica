@@ -72,7 +72,7 @@ void DebugDrawSystem::Update(uint64_t entityId, DebugDrawComponent* debugDraw, R
 		m_despawnTimes.emplace_back(awaitingElement->m_despawnTime);
 
 		std::shared_ptr<Material> material        = std::make_shared<Material>(m_shader);
-		material->GetShaderParams().m_isWireframe = true;
+		material->GetShaderParams().m_isWireframe = awaitingElement->m_drawWireframe;
 		material->SetVariable<Color>("color", awaitingElement->m_color);
 		mesh->m_materials.emplace_back(material);
 

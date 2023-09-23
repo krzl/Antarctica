@@ -58,7 +58,7 @@ namespace Navigation
 								  GetHeightLevel((uint32_t) x, (uint32_t) y) :
 								  GetHeightLevel((uint32_t) x + 1, (uint32_t) y + 1);
 
-		return Max(a, Max(b, c)) - Min(a, Min(b, c)) > 1;
+		return Max(a, Max(b, c)) - Min(a, Min(b, c)) > 2;
 	}
 
 	std::optional<Point3D> Terrain::Intersect(const Ray& ray) const
@@ -80,7 +80,7 @@ namespace Navigation
 
 	float Terrain::HeightLevelToZ(const HeightLevel level)
 	{
-		const float rampRatio = (float) (Clamp(level % 5, 1, 4) - 1) / 4.0f;
+		const float rampRatio = (float) (Clamp(1, 4, level % 5) - 1) / 4.0f;
 		return ((float) (level / 5) + rampRatio) * GRID_LEVEL_HEIGHT_TO_METER;
 	}
 
@@ -139,14 +139,14 @@ namespace Navigation
 				const uint32_t a1 = GetSubmeshIndex(x, y);
 
 				const bool isFlat =
-					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x), Clamp(0u, m_height - 1, y + 1)) &&
-					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y)) &&
-					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y + 1)) &&
-					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y)) &&
-					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y + 1)) &&
-					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x), Clamp(0u, m_height - 1, y - 1)) &&
-					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y - 1)) &&
-					GetHeightLevel(x, y) == GetHeightLevel(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y - 1));
+					abs(GetHeightLevel(x, y) - GetHeightLevel(Clamp(0u, m_width - 1, x), Clamp(0u, m_height - 1, y + 1))) < 2 &&
+					abs(GetHeightLevel(x, y) - GetHeightLevel(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y))) < 2 &&
+					abs(GetHeightLevel(x, y) - GetHeightLevel(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y + 1))) < 2 &&
+					abs(GetHeightLevel(x, y) - GetHeightLevel(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y))) < 2 &&
+					abs(GetHeightLevel(x, y) - GetHeightLevel(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y + 1))) < 2 &&
+					abs(GetHeightLevel(x, y) - GetHeightLevel(Clamp(0u, m_width - 1, x), Clamp(0u, m_height - 1, y - 1))) < 2 &&
+					abs(GetHeightLevel(x, y) - GetHeightLevel(Clamp(0u, m_width - 1, x + 1), Clamp(0u, m_height - 1, y - 1))) < 2 &&
+					abs(GetHeightLevel(x, y) - GetHeightLevel(Clamp(0u, m_width - 1, x - 1), Clamp(0u, m_height - 1, y - 1))) < 2;
 
 				texcoordWeights[a1 * 4 + 0] = isFlat ? 1.0f : 0.0f;
 				texcoordWeights[a1 * 4 + 1] = isFlat ? 0.0f : 1.0f;

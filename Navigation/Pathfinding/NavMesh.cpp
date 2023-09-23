@@ -62,9 +62,13 @@ namespace Navigation
 
 				if (!terrain.IsOnSlope(center))
 				{
-					vertexList.emplace_back(m_vertices[triangle.m_vertices[0]] + Vector3D(0.0f, 0.0f, 0.05f));
-					vertexList.emplace_back(m_vertices[triangle.m_vertices[1]] + Vector3D(0.0f, 0.0f, 0.05f));
-					vertexList.emplace_back(m_vertices[triangle.m_vertices[2]] + Vector3D(0.0f, 0.0f, 0.05f));
+					const Vector3D a = m_vertices[triangle.m_vertices[0]];
+					const Vector3D b = m_vertices[triangle.m_vertices[1]];
+					const Vector3D c = m_vertices[triangle.m_vertices[2]];
+
+					vertexList.emplace_back(a + Vector3D(0.0f, 0.0f, 0.05f));
+					vertexList.emplace_back(b + Vector3D(0.0f, 0.0f, 0.05f));
+					vertexList.emplace_back(c + Vector3D(0.0f, 0.0f, 0.05f));
 				}
 			}
 
