@@ -1041,7 +1041,46 @@ namespace Navigation
 
 		if (previousVertex == 0xFFFFFFFF)
 		{
-			__debugbreak();
+			//Fallback for handling points on triangle edge, find closest edge from point
+
+			const Point3D& a = m_vertices[currentTriangle->m_vertices[0]];
+			const Point3D& b = m_vertices[currentTriangle->m_vertices[1]];
+			const Point3D& c = m_vertices[currentTriangle->m_vertices[2]];
+
+			const Vector3D edgeA = Normalize(b - a);
+			const Vector3D edgeB = Normalize(c - b);
+			const Vector3D edgeC = Normalize(a - c);
+
+			const float distA = GetDistanceSquaredFromLineToPoint(edgeA, startPoint);
+			const float distB = GetDistanceSquaredFromLineToPoint(edgeB, startPoint);
+			const float distC = GetDistanceSquaredFromLineToPoint(edgeC, startPoint);
+
+			if (distA < distB)
+			{
+				if (distA < distC)
+				{
+					previousVertex = currentTriangle->m_vertices[0];
+					nextTriangleId = currentTriangle->m_adjacentTriangles[0];
+				}
+				else
+				{
+					previousVertex = currentTriangle->m_vertices[2];
+					nextTriangleId = currentTriangle->m_adjacentTriangles[2];
+				}
+			}
+			else
+			{
+				if (distB < distC)
+				{
+					previousVertex = currentTriangle->m_vertices[1];
+					nextTriangleId = currentTriangle->m_adjacentTriangles[1];
+				}
+				else
+				{
+					previousVertex = currentTriangle->m_vertices[2];
+					nextTriangleId = currentTriangle->m_adjacentTriangles[2];
+				}
+			}
 		}
 
 		while (true)

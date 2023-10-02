@@ -29,10 +29,10 @@ namespace Navigation
 
 		[[nodiscard]] float GetTargetRadius() const { return m_targetRadius; }
 		void SetTargetRadius(const float targetRadius) { m_targetRadius = targetRadius; }
-		
+
 		[[nodiscard]] float GetSlowdownRadius() const { return m_slowdownRadius; }
 		void SetSlowdownRadius(const float slowdownRadius) { m_slowdownRadius = slowdownRadius; }
-		
+
 		[[nodiscard]] float GetTimeToTarget() const { return m_timeToTarget; }
 		void SetTimeToTarget(const float timeToTarget) { m_timeToTarget = timeToTarget; }
 
@@ -40,7 +40,11 @@ namespace Navigation
 
 		std::optional<Point3D> m_target;
 
-		bool m_hasArrived;
+		bool m_hasArrived    = false;
+		bool m_calculatePath = false;
+
+		std::optional<std::list<uint32_t>> m_path;
+
 		float m_targetRadius   = 1.5;
 		float m_slowdownRadius = 0.0f;
 		float m_timeToTarget   = 0.1f;
