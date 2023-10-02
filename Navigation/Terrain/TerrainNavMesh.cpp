@@ -1,8 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Terrain.h"
 
-#include "Debug/DebugDrawManager.h"
-
 namespace Navigation
 {
 	enum NavMeshEdgeDirection
@@ -218,16 +216,64 @@ namespace Navigation
 			}
 		}
 
-		std::vector<Point3D> vertices;
-		std::map<uint32_t, uint32_t> verticesIdMap;
+		struct NavMeshVertexHelper
+		{
+			uint32_t m_vertexId;
+			int32_t m_binId;
+			uint32_t m_rand;
+
+			static bool Compare(const NavMeshVertexHelper& a, const NavMeshVertexHelper& b)
+			{
+				if (a.m_binId != b.m_binId)
+				{
+					return a.m_binId < b.m_binId;
+				}
+
+				return a.m_rand < b.m_rand;
+			}
+		};
+
+		std::vector<NavMeshVertexHelper> vertexList;
 
 		for (auto [id, usageCount] : vertexUsageCount)
 		{
 			if (usageCount != 0)
 			{
-				vertices.emplace_back(GetPos(id));
-				verticesIdMap[id] = (uint32_t) vertices.size() - 1;
+				vertexList.emplace_back(NavMeshVertexHelper{
+					id,
+					-1,
+					Random::GetRandomUInt32()
+				});
 			}
+		}
+
+		const uint32_t binsPerColumn = sqrt(sqrt(vertexList.size()));
+
+		const Point2D lowerLeft = (Point2D) GetPos(0).xy;
+		const Vector2D scaler   = Vector2D(0.5f / - lowerLeft.x, 0.5f / - lowerLeft.y) * binsPerColumn;
+
+		for (uint32_t i = 0; i < vertexList.size(); ++i)
+		{
+			NavMeshVertexHelper& vertex = vertexList[i];
+
+			const Vector2D pos    = (GetPos(vertex.m_vertexId).xy - lowerLeft) * scaler;
+			const uint32_t x      = pos.x;
+			const uint32_t y      = pos.y;
+			vertexList[i].m_binId = (y % 2 == 0 ? x : binsPerColumn - x) + y * binsPerColumn;
+		}
+
+		std::sort(vertexList.begin(), vertexList.end(), NavMeshVertexHelper::Compare);
+		
+		std::vector<Point3D> vertices;
+		vertices.reserve(vertexList.size());
+		std::map<uint32_t, uint32_t> verticesIdMap;
+
+		for (uint32_t i = 0; i < vertexList.size(); ++i)
+		{
+			NavMeshVertexHelper& vertex = vertexList[i];
+
+			vertices.emplace_back(GetPos(vertex.m_vertexId));
+			verticesIdMap[vertex.m_vertexId] = (uint32_t) vertices.size() - 1;
 		}
 
 		std::vector<NavMesh::Edge> finalEdges;
@@ -235,8 +281,6 @@ namespace Navigation
 
 		for (const NavMesh::Edge& edge : edges)
 		{
-			//DebugDrawManager::GetInstance()->DrawLine(vertices[verticesIdMap[edge.m_start]], vertices[verticesIdMap[edge.m_end]], 0.05f, 1000.0f);
-
 			finalEdges.emplace_back(NavMesh::Edge{ verticesIdMap[edge.m_start], verticesIdMap[edge.m_end] });
 		}
 

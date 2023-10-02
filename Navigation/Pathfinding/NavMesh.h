@@ -8,6 +8,8 @@ namespace Navigation
 
 	class NavMesh
 	{
+		friend class PathFinding;
+
 		struct Node;
 
 		struct Triangle
@@ -16,6 +18,7 @@ namespace Navigation
 
 			std::array<uint32_t, 3> m_vertices          = { NULL_ID, NULL_ID, NULL_ID };
 			std::array<uint32_t, 3> m_adjacentTriangles = { NULL_ID, NULL_ID, NULL_ID };
+			bool m_isNavigable                          = false;
 		};
 
 	public:
@@ -33,8 +36,11 @@ namespace Navigation
 
 		void AddObstacle(const std::vector<Point3D>& vertices);
 
-		std::vector<uint32_t> m_traversableIndices;
-		std::vector<uint32_t> m_nonTraversableIndices;
+		Point3D GetVertexPosition(const uint32_t vertexId) const;
+
+		bool DoesDirectPathExists(uint32_t startVertexId, uint32_t endVertexId) const;
+		bool DoesDirectPathExists(uint32_t startVertexId, const Point3D& endPoint) const;
+		bool DoesDirectPathExists(const Point3D& startPoint, const Point3D& endPoint) const;
 
 	private:
 
@@ -46,7 +52,7 @@ namespace Navigation
 		bool TriangleFlipTest(uint32_t vertexId, const Triangle& triangle, uint32_t oppositeVertexId) const;
 		bool IsConvex(const Edge& edge) const;
 
-		bool DoesEdgeAlreadyExist(const Edge& edge);
+		bool DoesEdgeAlreadyExist(const Edge& edge, bool mustBeTraversable = false) const;
 		std::queue<Edge> GetIntersectingEdges(const Edge& edge) const;
 
 		void GetEdgeTriangles(const Edge& edge, uint32_t& aTriangleId, uint32_t& bTriangleId) const;
@@ -61,7 +67,8 @@ namespace Navigation
 		static void GetNextVerticesClockwise(const Triangle& triangle, uint32_t startingVertexId, uint32_t& p1, uint32_t& p2);
 
 		uint32_t FindInitialConstraintTriangle(const Edge& edge) const;
-
+		uint32_t FindInitialConstraintTriangle(const uint32_t startVertex, const Point3D& endPoint, const uint32_t endPointTriangle) const;
+		uint32_t FindInitialConstraintTriangle(const Point3D& startPoint, const Point3D& endPoint, const uint32_t endPointTriangle) const;
 
 		std::vector<Point3D> m_vertices;
 		std::vector<std::unordered_set<uint32_t>> m_vertexToTriangleMap;

@@ -469,6 +469,8 @@ Entity* PlayerCameraSystem::FindSuitableEntityForAbility(const std::string& abil
 
 void PlayerCameraSystem::ActivateAbility(Entity* entity, const std::string& abilityId)
 {
+	Timer timer;
+	timer.Start();
 	if (m_abilityActivator->ShouldActivateForAllSelected())
 	{
 		for (Entity* selectedEntity : m_selectedEntities)
@@ -504,6 +506,8 @@ void PlayerCameraSystem::ActivateAbility(Entity* entity, const std::string& abil
 	m_abilityActivator->OnFinished();
 
 	m_abilityActivator.reset();
+	timer.Stop();
+	LOG(DEBUG, "TEST", "{}", timer.GetTime());
 }
 
 void PlayerCameraSystem::AddAbilityToStack(AbilityStackComponent* abilityStack, std::shared_ptr<Ability> ability, Entity* entity) const

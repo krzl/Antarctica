@@ -1,6 +1,8 @@
 ﻿#include "stdafx.h"
 #include "GameState.h"
 
+#include "Pathfinding/PathFinding.h"
+
 #include "Terrain/TerrainLoader.h"
 
 void GameState::GenerateTerrain(const Navigation::TerrainGenerator::SpawnParameters& params)
@@ -19,4 +21,6 @@ void GameState::SetupTerrain()
 {
 	m_navMesh      = std::unique_ptr<Navigation::NavMesh>(m_terrain->CreateNavMesh());
 	m_buildingGrid = std::make_unique<BuildingGrid>(m_terrain.get());
+
+	Navigation::PathFinding::m_navMesh = m_navMesh.get();
 }

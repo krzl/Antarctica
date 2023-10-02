@@ -151,6 +151,23 @@ bool operator==(const Point3D& lhs, const Point3D& rhs)
 		lhs.z == rhs.z;
 }
 
+static float Sign(const Point3D& p1, const Point3D& p2, const Point3D& p3)
+{
+	return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+}
+
+bool IsInsideTriangle(const Point3D& p, const Point3D& t1, const Point3D& t2, const Point3D& t3)
+{
+	const float d1 = Sign(p, t1, t2);
+	const float d2 = Sign(p, t2, t3);
+	const float d3 = Sign(p, t3, t1);
+
+	const bool hasNeg = d1 < 0.0f || d2 < 0.0f || d3 < 0.0f;
+	const bool hasPos = d1 > 0.0f || d2 > 0.0f || d3 > 0.0f;
+
+	return !(hasNeg && hasPos);
+}
+
 float GetDistanceFromLineToPoint(const Vector3D& direction, const Point3D& point)
 {
 	return std::sqrt(GetDistanceSquaredFromLineToPoint(direction, point));

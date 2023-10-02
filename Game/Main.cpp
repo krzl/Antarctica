@@ -30,7 +30,7 @@ void main()
 
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>(
 				{
-					Point3D(0, 0, 30),
+					Point3D(0, 0, 70),
 					EulerToQuaternion(20.0f, 0.0f, 0.0f)
 				}
 			);
@@ -66,9 +66,9 @@ void main()
 
 
 #if defined(DEBUG) | defined(_DEBUG)
-			constexpr uint32_t gridSize = 4;
+			constexpr uint32_t gridSize = 1;
 #else
-			constexpr uint32_t gridSize = 50;
+			constexpr uint32_t gridSize = 10;
 #endif
 
 			for (uint32_t i = 0; i < gridSize; i++)

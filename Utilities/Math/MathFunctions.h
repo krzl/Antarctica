@@ -32,6 +32,8 @@ T Clamp(const T& a, const T& b, const T& value)
 	return value < a ? a : (value > b ? b : value);
 }
 
+bool IsInsideTriangle(const Point3D& p, const Point3D& t1, const Point3D& t2, const Point3D& t3);
+
 float GetDistanceFromLineToPoint(const Vector3D& direction, const Point3D& point);
 
 float GetDistanceSquaredFromLineToPoint(const Vector3D& direction, const Point3D& point);

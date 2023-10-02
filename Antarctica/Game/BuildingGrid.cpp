@@ -54,7 +54,7 @@ bool BuildingGrid::IsFree(const Point2DInt& start, const Point2DInt& end) const
 				return false;
 			}
 
-			if (IsFree(Point2DInt{ x, y }))
+			if (!IsFree(Point2DInt{ x, y }))
 			{
 				return false;
 			}
