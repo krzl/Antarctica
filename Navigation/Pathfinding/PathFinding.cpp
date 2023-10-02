@@ -223,18 +223,6 @@ namespace Navigation
 		}
 	}
 
-	bool PathFinding::IsGoalNode(const uint32_t endTriangleId, const uint32_t currentId)
-	{
-		for (const unsigned vertexId : m_navMesh->m_triangles[endTriangleId].m_vertices)
-		{
-			if (vertexId == currentId)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	float PathFinding::EstimateTotalCost(const Point3D& start, const Point3D& end)
 	{
 		return Magnitude(end.xy - start.xy);

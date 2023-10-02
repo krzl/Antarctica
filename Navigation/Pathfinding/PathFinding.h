@@ -44,7 +44,6 @@ namespace Navigation
 		static uint32_t GetClosestDirectPointOnPath(const Point3D& pathStart, const NodeRecord* currentPathEndNode,
 													const std::vector<NodeRecord>& nodeRecords, const Point3D& pathEnd);
 
-		static bool IsGoalNode(uint32_t endTriangleId, uint32_t currentId);
 		static float EstimateTotalCost(const Point3D& start, const Point3D& end);
 
 		static NavMesh* m_navMesh;

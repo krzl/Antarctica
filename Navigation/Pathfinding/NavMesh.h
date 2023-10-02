@@ -68,7 +68,6 @@ namespace Navigation
 
 		uint32_t FindInitialConstraintTriangle(const Edge& edge) const;
 		uint32_t FindInitialConstraintTriangle(const uint32_t startVertex, const Point3D& endPoint, const uint32_t endPointTriangle) const;
-		uint32_t FindInitialConstraintTriangle(const Point3D& startPoint, const Point3D& endPoint, const uint32_t endPointTriangle) const;
 
 		std::vector<Point3D> m_vertices;
 		std::vector<std::unordered_set<uint32_t>> m_vertexToTriangleMap;
