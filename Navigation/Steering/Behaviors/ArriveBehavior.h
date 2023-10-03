@@ -22,7 +22,7 @@ namespace Navigation
 								MovementComponent* nearbyMovement) override;
 		Vector2D GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement) override;
 
-		void SetTarget(const Point3D& point);
+		void SetTarget(const Point3D& point, uint32_t delay = 0);
 		Point3D GetTarget() const { return m_target.value(); }
 		bool HasTarget() const { return m_target.has_value(); }
 		void ClearTarget() { m_target.reset(); }
@@ -43,7 +43,7 @@ namespace Navigation
 		std::optional<Point3D> m_target;
 
 		bool m_hasArrived    = false;
-		bool m_calculatePath = false;
+		uint32_t m_framesUntilCalculatePath = -1;
 
 		std::optional<std::list<uint32_t>> m_path;
 

@@ -28,7 +28,11 @@ bool InstantMoveActivator::ShouldBeCancelled()
 
 std::shared_ptr<Ability> InstantMoveActivator::Activate(Entity* entity)
 {
-	return std::make_shared<MoveAbility>(m_cursorPosition.value());
+	uint32_t pathFindingDelay = m_entityActivationCount++ / NAVIGATION_MAX_UNITS_PER_FRAME;
+	return std::make_shared<MoveAbility>(m_cursorPosition.value(), pathFindingDelay);
 }
 
-void InstantMoveActivator::OnFinished() {}
+void InstantMoveActivator::OnFinished()
+{
+	m_entityActivationCount = 0;
+}

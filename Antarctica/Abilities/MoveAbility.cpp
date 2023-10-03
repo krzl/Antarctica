@@ -6,8 +6,9 @@
 #include "Entities/Camera.h"
 #include "Steering/Behaviors/ArriveBehavior.h"
 
-MoveAbility::MoveAbility(const Point3D& target) :
-	m_target(target) {}
+MoveAbility::MoveAbility(const Point3D& target, const uint32_t delay) :
+	m_target(target),
+	m_delay(delay) {}
 
 bool MoveAbility::Init(Entity& entity)
 {
@@ -22,7 +23,7 @@ void MoveAbility::Start()
 	Navigation::MovementComponent* movementComponent   = componentAccessor.GetComponent<Navigation::MovementComponent>();
 	Anim::AnimatedMeshComponent* animatedMeshComponent = componentAccessor.GetComponent<Anim::AnimatedMeshComponent>();
 
-	movementComponent->m_arriveBehavior.SetTarget(m_target);
+	movementComponent->m_arriveBehavior.SetTarget(m_target, m_delay);
 	animatedMeshComponent->m_animationSolver.SetTrigger(Anim::AnimTrigger::WALK, true);
 }
 

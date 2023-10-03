@@ -54,16 +54,8 @@ void main()
 			material->SetOrder(3);
 			terrainActor->SetMaterial(material);
 
-
-			Timer time;
-			time.Start();
-
 			PlayerCameraSystem* playerCameraSystem = Application::Get().GetSystem<PlayerCameraSystem>();
-
 			playerCameraSystem->SetupTerrainBvh(mesh);
-
-			time.Stop();
-
 
 #if defined(DEBUG) | defined(_DEBUG)
 			constexpr uint32_t gridSize = 25;

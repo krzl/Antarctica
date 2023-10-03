@@ -59,7 +59,7 @@ void Application::Run()
 {
 	m_isRunning = true;
 	TimeManager::GetInstance()->RestartTimer();
-
+	
 	while (m_isRunning)
 	{
 		if (!m_isPaused)
@@ -83,6 +83,7 @@ void Application::Run()
 			{
 				--m_frameCounter.m_stepLockFramesPending;
 				++m_frameCounter.m_stepLockFrameCount;
+
 				m_ecs.RunStepLock();
 			}
 		}
