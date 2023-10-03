@@ -28,7 +28,7 @@ namespace Navigation
 
 		std::vector<NodeRecord> nodeRecords(m_navMesh->m_vertices.size());
 
-		const NodeRecord* node = ProcessPath(start, end, startTriangleId, endTriangleId, nodeRecords);
+		const NodeRecord* node = ProcessPath(start, end, startTriangleId, nodeRecords);
 
 		if (node == nullptr)
 		{
@@ -62,8 +62,7 @@ namespace Navigation
 		return path;
 	}
 
-	PathFinding::NodeRecord* PathFinding::ProcessPath(const Point3D& start, const Point3D& end, const uint32_t startTriangleId,
-													  const uint32_t endTriangleId, std::vector<NodeRecord>& nodeRecords)
+	PathFinding::NodeRecord* PathFinding::ProcessPath(const Point3D& start, const Point3D& end, const uint32_t startTriangleId, std::vector<NodeRecord>& nodeRecords)
 	{
 		std::priority_queue<NodeRecord*, std::vector<NodeRecord*>, NodeRecordComp> priorityQueue;
 
@@ -167,7 +166,7 @@ namespace Navigation
 			current->m_state = NodeState::CLOSED;
 		}
 
-		
+
 		return nullptr;
 	}
 

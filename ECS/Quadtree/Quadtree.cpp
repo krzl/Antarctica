@@ -87,14 +87,23 @@ std::vector<Entity*> Quadtree::Intersect(const Frustum& frustum) const
 	return objects;
 }
 
+void Quadtree::FindNearby(const Sphere& sphere, std::vector<Entity*>& outEntities) const
+{
+	m_root->FindNearby(sphere, [&outEntities](Entity* entity)
+	{
+		outEntities.emplace_back(entity);
+	});
+}
+
 
 std::vector<Entity*> Quadtree::FindNearby(const Sphere& sphere) const
 {
-	std::vector<Entity*> objects;
-	objects.reserve(100);
+	std::vector<Entity*> entities;
+	FindNearby(sphere, entities);
+	return entities;
+}
 
-	m_root->FindNearby(sphere, objects);
-	objects.shrink_to_fit();
-
-	return objects;
+void Quadtree::FindNearby(const Sphere& sphere, const std::function<void(Entity*)> function) const
+{
+	m_root->FindNearby(sphere, function);
 }

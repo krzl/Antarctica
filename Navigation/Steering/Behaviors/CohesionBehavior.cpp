@@ -4,45 +4,40 @@
 #include "ArriveBehavior.h"
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
-#include "Steering/SteeringSystem.h"
 
 namespace Navigation
 {
-	Vector2D CohesionBehavior::GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
-													 const std::vector<NearbyTarget>& nearbyTargets)
+	void CohesionBehavior::InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement)
 	{
-		if (!movement->m_arriveBehavior.HasTarget())
+		m_heading    = Vector2D::zero;
+		m_actorCount = 0;
+	}
+
+	void CohesionBehavior::UpdateNearbyEntity(const TransformComponent* transform, MovementComponent* movement,
+											  const TransformComponent* nearbyTransform, MovementComponent* nearbyMovement)
+	{
+		const float distanceSqr   = SquaredMag(nearbyTransform->m_localPosition.xy - transform->m_localPosition.xy);
+		const float cohesionRange = (movement->m_radius + nearbyMovement->m_radius) * m_cohesionScale;
+
+		if (distanceSqr < cohesionRange * cohesionRange &&
+			movement->m_velocity != Vector2D::zero
+			&& nearbyMovement->m_arriveBehavior.HasTarget() &&
+			SquaredMag(movement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget()) < cohesionRange * cohesionRange)
+		{
+			++m_actorCount;
+			m_heading += nearbyTransform->m_localPosition.xy;
+		}
+	}
+
+	Vector2D CohesionBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
+	{
+		if (!movement->m_arriveBehavior.HasTarget() || m_actorCount == 0 || m_heading == Vector2D::zero)
 		{
 			return Vector2D::zero;
 		}
-		Vector2D heading = Vector2D::zero;
 
-		uint32_t actorCount = 0;
-
-		for (const NearbyTarget& target : nearbyTargets)
-		{
-			const float distanceSqr   = SquaredMag(target.m_transform->m_localPosition.xy - transform->m_localPosition.xy);
-			const float cohesionRange = (movement->m_radius + target.m_movement->m_radius) * m_cohesionScale;
-
-			if (distanceSqr < cohesionRange * cohesionRange &&
-				movement->m_velocity != Vector2D::zero
-				&& target.m_movement->m_arriveBehavior.HasTarget() &&
-				SquaredMag(movement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget()) < cohesionRange * cohesionRange)
-			{
-				++actorCount;
-				heading += target.m_transform->m_localPosition.xy;
-			}
-		}
-
-		if (actorCount == 0 || heading == Vector2D::zero)
-		{
-			return Vector2D::zero;
-		}
-
-		const Vector2D target = heading / actorCount;
-
-		const Vector2D direction = target - transform->m_localPosition.xy;
-
+		const Vector2D target         = m_heading / m_actorCount;
+		const Vector2D direction      = target - transform->m_localPosition.xy;
 		const Vector2D targetVelocity = Normalize(direction) * movement->m_maxSpeed;
 		return (targetVelocity - movement->m_velocity) * (movement->m_maxAcceleration / movement->m_maxSpeed);
 	}

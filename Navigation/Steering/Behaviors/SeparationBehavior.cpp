@@ -4,57 +4,58 @@
 #include "ArriveBehavior.h"
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
-#include "Steering/SteeringSystem.h"
 
 namespace Navigation
 {
-	Vector2D SeparationBehavior::GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
-													   const std::vector<NearbyTarget>& nearbyTargets)
+	void SeparationBehavior::InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement)
 	{
-		Vector2D totalAcceleration = Vector2D::zero;
+		m_actorCount        = 0;
+		m_totalAcceleration = Vector2D::zero;
+	}
 
+	void SeparationBehavior::UpdateNearbyEntity(const TransformComponent* transform, MovementComponent* movement,
+												const TransformComponent* nearbyTransform, MovementComponent* nearbyMovement)
+	{
 		const float characterRadius = movement->m_radius;
 
-		uint32_t actorCount = 0;
+		const Vector2D direction = transform->m_localPosition.xy - nearbyTransform->m_localPosition.xy;
+		const float distance     = Magnitude(direction);
 
-		for (const NearbyTarget& target : nearbyTargets)
+		const float otherRadius = nearbyMovement->m_radius;
+
+		const float radiusSum = characterRadius + otherRadius;
+
+		if (movement->m_arriveBehavior.HasTarget() && !nearbyMovement->m_arriveBehavior.HasTarget())
 		{
-			const Vector2D direction = transform->m_localPosition.xy - target.m_transform->m_localPosition.xy;
-			const float distance     = Magnitude(direction);
-
-			const float otherRadius = target.m_movement->m_radius;
-
-			const float radiusSum = characterRadius + otherRadius;
-
-			if (movement->m_arriveBehavior.HasTarget() && !target.m_movement->m_arriveBehavior.HasTarget())
-			{
-				continue;
-			}
-
-			if (distance < radiusSum && distance > 0.0f)
-			{
-				const float relativeDistance = distance / radiusSum;
-				const float strength         = m_decayCoefficient / (relativeDistance * relativeDistance);
-
-				totalAcceleration += direction * strength;
-
-				++actorCount;
-			}
+			return;
 		}
 
-		if (actorCount == 0 || totalAcceleration == Vector2D::zero)
+		if (distance < radiusSum && distance > 0.0f)
+		{
+			const float relativeDistance = distance / radiusSum;
+			const float strength         = m_decayCoefficient / (relativeDistance * relativeDistance);
+
+			m_totalAcceleration += direction * strength;
+
+			++m_actorCount;
+		}
+	}
+
+	Vector2D SeparationBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
+	{
+		if (m_actorCount == 0 || m_totalAcceleration == Vector2D::zero)
 		{
 			return Vector2D::zero;
 		}
 
-		totalAcceleration *= movement->m_maxAcceleration / actorCount;
+		m_totalAcceleration *= movement->m_maxAcceleration / m_actorCount;
 
-		const float acceleration = Magnitude(totalAcceleration);
+		const float acceleration = Magnitude(m_totalAcceleration);
 		if (acceleration > movement->m_maxAcceleration)
 		{
-			totalAcceleration *= movement->m_maxAcceleration / acceleration;
+			m_totalAcceleration *= movement->m_maxAcceleration / acceleration;
 		}
 
-		return totalAcceleration / actorCount * movement->m_maxAcceleration;
+		return m_totalAcceleration / m_actorCount * movement->m_maxAcceleration;
 	}
 }

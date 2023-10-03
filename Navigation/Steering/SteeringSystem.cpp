@@ -40,25 +40,22 @@ namespace Navigation
 		const float maxRadiusToCheck = Max(movement->m_radius * movement->m_cohesionBehavior.GetCohesionScale(),
 			movement->m_radius * movement->m_alignmentBehavior.GetCohesionScale());
 
-		std::vector<NearbyTarget> targets;
-		targets.reserve(25);
+		movement->m_steeringPipeline.InitializeTotalAccelerationCalculation(transform, movement);
 
-		const std::vector<Entity*> nearbyEntities = World::Get()->GetQuadtree().FindNearby(Sphere{ transform->m_localPosition, maxRadiusToCheck });
-
-		for (Entity* entity : nearbyEntities)
+		World::Get()->GetQuadtree().FindNearby(Sphere{ transform->m_localPosition, maxRadiusToCheck }, [entityId, &movement, &transform](Entity* entity)
 		{
 			const ComponentAccessor& componentAccessor = entity->GetComponentAccessor();
 
 			const TransformComponent* nearbyTransform = componentAccessor.GetComponent<TransformComponent>();
-			const MovementComponent* nearbyMovement   = componentAccessor.GetComponent<MovementComponent>();
+			MovementComponent* nearbyMovement         = componentAccessor.GetComponent<MovementComponent>();
 
-			if (nearbyTransform && nearbyMovement && transform != nearbyTransform)
+			if (nearbyTransform && nearbyMovement && entity->GetInstanceId() != entityId)
 			{
-				targets.push_back({ nearbyTransform, nearbyMovement });
+				movement->m_steeringPipeline.UpdateNearbyEntity(transform, movement, nearbyTransform, nearbyMovement);
 			}
-		}
+		});
 
-		Vector2D acceleration = movement->m_steeringPipeline.GetLinearAcceleration(transform, movement, targets);
+		Vector2D acceleration = movement->m_steeringPipeline.GetFinalLinearAcceleration(transform, movement);
 
 		if (!movement->m_arriveBehavior.HasTarget())
 		{

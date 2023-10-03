@@ -7,6 +7,8 @@ class TimeManager : public Manager
 {
 	REGISTER_MANAGER(TimeManager);
 
+	friend class Application;
+	
 public:
 
 	[[nodiscard]] static constexpr float GetTimeStep() { return 1.0f / 60.0f; }
@@ -17,6 +19,8 @@ protected:
 
 	void Init() override;
 	void Update() override;
+
+	void RestartTimer();
 
 private:
 

@@ -4,46 +4,45 @@
 #include "ArriveBehavior.h"
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
-#include "Steering/SteeringSystem.h"
 
 namespace Navigation
 {
-	Vector2D AlignmentBehavior::GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
-													  const std::vector<NearbyTarget>& nearbyTargets)
+	void AlignmentBehavior::InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement)
+	{
+		m_heading    = Vector2D::zero;
+		m_actorCount = 0;
+	}
+
+	void AlignmentBehavior::UpdateNearbyEntity(const TransformComponent* transform, MovementComponent* movement,
+											   const TransformComponent* nearbyTransform, MovementComponent* nearbyMovement)
 	{
 		if (!movement->m_arriveBehavior.HasTarget())
 		{
-			return Vector2D::zero;
+			return;
 		}
+		
+		const float distance      = SquaredMag(nearbyTransform->m_localPosition.xy - transform->m_localPosition.xy);
+		const float cohesionRange = (movement->m_radius + nearbyMovement->m_radius) * m_cohesionScale;
 
-		Vector2D heading    = Vector2D::zero;
-		uint32_t actorCount = 0;
-
-		for (const NearbyTarget& target : nearbyTargets)
+		if (distance < cohesionRange && movement->m_velocity != Vector2D::zero &&
+			nearbyMovement->m_arriveBehavior.HasTarget() &&
+			Magnitude(nearbyMovement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget()) < cohesionRange)
 		{
-			const float distance = SquaredMag(target.m_transform->m_localPosition.xy - transform->m_localPosition.xy);
-
-			const float cohesionRange = (movement->m_radius + target.m_movement->m_radius) * m_cohesionScale;
-
-			if (distance < cohesionRange && movement->m_velocity != Vector2D::zero &&
-				target.m_movement->m_arriveBehavior.HasTarget() &&
-				Magnitude(target.m_movement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget()) < cohesionRange)
-			{
-				++actorCount;
-				heading += Normalize(target.m_movement->m_velocity);
-			}
+			++m_actorCount;
+			m_heading += Normalize(nearbyMovement->m_velocity);
 		}
+	}
 
-		if (actorCount == 0)
+	Vector2D AlignmentBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
+	{
+		if (!movement->m_arriveBehavior.HasTarget() || m_actorCount == 0)
 		{
 			return Vector2D::zero;
 		}
 
-		const Vector2D averageHeading = heading / actorCount;
-
+		const Vector2D averageHeading  = m_heading / m_actorCount;
 		const Vector2D desiredVelocity = averageHeading * movement->m_maxSpeed;
-
-		const Vector2D velocityChange = desiredVelocity - movement->m_velocity;
+		const Vector2D velocityChange  = desiredVelocity - movement->m_velocity;
 		return velocityChange * (movement->m_maxAcceleration / movement->m_maxSpeed);
 	}
 }

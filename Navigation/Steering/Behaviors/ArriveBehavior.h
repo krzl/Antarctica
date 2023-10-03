@@ -17,8 +17,10 @@ namespace Navigation
 
 		void OnArrive(const Point3D target, const TransformComponent* transform, const MovementComponent* movement);
 
-		Vector2D GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
-									   const std::vector<NearbyTarget>& nearbyTargets) override;
+		void InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement) override;
+		void UpdateNearbyEntity(const TransformComponent* transform, MovementComponent* movement, const TransformComponent* nearbyTransform,
+								MovementComponent* nearbyMovement) override;
+		Vector2D GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement) override;
 
 		void SetTarget(const Point3D& point);
 		Point3D GetTarget() const { return m_target.value(); }

@@ -35,7 +35,7 @@ namespace Navigation
 
 	private:
 
-		static NodeRecord* ProcessPath(const Point3D& start, const Point3D& end, uint32_t startTriangleId, uint32_t endTriangleId,
+		static NodeRecord* ProcessPath(const Point3D& start, const Point3D& end, const uint32_t startTriangleId,
 									   std::vector<NodeRecord>& nodeRecords);
 
 		static uint32_t GetClosestDirectPointOnPath(const Point3D& pathStart, const NodeRecord* currentPathEndNode,

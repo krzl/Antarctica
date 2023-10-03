@@ -207,13 +207,13 @@ void QuadtreeNode::TestIntersect(const Frustum& frustum, std::vector<Entity*>& o
 	}
 }
 
-void QuadtreeNode::FindNearby(const Sphere& sphere, std::vector<Entity*>& objects) const
+void QuadtreeNode::FindNearby(const Sphere& sphere, const std::function<void(Entity*)> function) const
 {
 	for (Entity* object : m_entities)
 	{
 		if (IsOverlapping2D(sphere, object->GetBoundingBox()))
 		{
-			objects.emplace_back(object);
+			function(object);
 		}
 	}
 
@@ -226,28 +226,44 @@ void QuadtreeNode::FindNearby(const Sphere& sphere, std::vector<Entity*>& object
 				case IntersectTestResult::OUTSIDE:
 					continue;
 				case IntersectTestResult::INTERSECT:
-					childNode->FindNearby(sphere, objects);
+					childNode->FindNearby(sphere, function);
 					break;
 				case IntersectTestResult::INSIDE:
-					childNode->CollectChildObjects(objects);
+					childNode->CollectChildObjects(function);
 					break;
 			}
 		}
 	}
 }
 
-void QuadtreeNode::CollectChildObjects(std::vector<Entity*>& objects) const
+void QuadtreeNode::CollectChildObjects(std::vector<Entity*>& entities) const
 {
-	for (Entity* object : m_entities)
+	for (Entity* entity : m_entities)
 	{
-		objects.emplace_back(object);
+		entities.emplace_back(entity);
 	}
 
 	for (const QuadtreeNode* childNode : m_childNodes)
 	{
 		if (childNode != nullptr && childNode->m_totalObjectCount > 0)
 		{
-			childNode->CollectChildObjects(objects);
+			childNode->CollectChildObjects(entities);
+		}
+	}
+}
+
+void QuadtreeNode::CollectChildObjects(const std::function<void(Entity*)> function) const
+{
+	for (Entity* entity : m_entities)
+	{
+		function(entity);
+	}
+
+	for (const QuadtreeNode* childNode : m_childNodes)
+	{
+		if (childNode != nullptr && childNode->m_totalObjectCount > 0)
+		{
+			childNode->CollectChildObjects(function);
 		}
 	}
 }

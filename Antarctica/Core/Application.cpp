@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "Application.h"
 
-#include <Renderer.h>
-
 #include "Camera/PlayerCameraSystem.h"
 #include "Entities/World.h"
 #include "Managers/Manager.h"
@@ -60,6 +58,7 @@ void Application::Start()
 void Application::Run()
 {
 	m_isRunning = true;
+	TimeManager::GetInstance()->RestartTimer();
 
 	while (m_isRunning)
 	{

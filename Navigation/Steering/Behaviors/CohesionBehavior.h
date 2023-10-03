@@ -13,8 +13,10 @@ namespace Navigation
 			SetWeight(0.0f);
 		}
 
-		Vector2D GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
-									   const std::vector<NearbyTarget>& nearbyTargets) override;
+		void InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement) override;
+		void UpdateNearbyEntity(const TransformComponent* transform, MovementComponent* movement, const TransformComponent* nearbyTransform,
+								MovementComponent* nearbyMovement) override;
+		Vector2D GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement) override;
 
 		[[nodiscard]] float GetCohesionScale() const { return m_cohesionScale; }
 		void SetCohesionScale(const float cohesionScale) { m_cohesionScale = cohesionScale; }
@@ -22,5 +24,10 @@ namespace Navigation
 	protected:
 
 		float m_cohesionScale = 10.0f;
+
+	private:
+
+		Vector2D m_heading    = Vector2D::zero;
+		uint32_t m_actorCount = 0;
 	};
 }

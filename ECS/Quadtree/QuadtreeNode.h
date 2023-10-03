@@ -33,9 +33,10 @@ class QuadtreeNode
 
 	Entity* TraceObject(const RayIntersectionTester& ray, float& minDistance) const;
 	void TestIntersect(const Frustum& frustum, std::vector<Entity*>& objects) const;
-	void FindNearby(const Sphere& sphere, std::vector<Entity*>& objects) const;
+	void FindNearby(const Sphere& sphere, std::function<void(Entity*)> function) const;
 
-	void CollectChildObjects(std::vector<Entity*>& objects) const;
+	void CollectChildObjects(std::vector<Entity*>& entities) const;
+	void CollectChildObjects(std::function<void(Entity*)> function) const;
 
 	[[nodiscard]] Quadtree& GetTree() const { return *m_tree; }
 

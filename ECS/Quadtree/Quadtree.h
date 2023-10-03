@@ -29,7 +29,9 @@ public:
 
 	TraceResult TraceObject(const RayIntersectionTester& ray) const;
 	std::vector<Entity*> Intersect(const Frustum& frustum) const;
+	void FindNearby(const Sphere& sphere, std::vector<Entity*>& outEntities) const;
 	std::vector<Entity*> FindNearby(const Sphere& sphere) const;
+	void FindNearby(const Sphere& sphere, std::function<void(Entity*)> function) const;
 
 	static constexpr float QUADTREE_SIZE = 512.0f;
 	static constexpr float MIN_NODE_SIZE = 4.0f;

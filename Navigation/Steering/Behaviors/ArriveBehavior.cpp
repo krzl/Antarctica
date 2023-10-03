@@ -3,10 +3,7 @@
 
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
-
 #include "Pathfinding/PathFinding.h"
-
-#include "Steering/SteeringSystem.h"
 
 
 namespace Navigation
@@ -16,9 +13,13 @@ namespace Navigation
 		m_target.reset();
 	}
 
+	void ArriveBehavior::InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement) { }
 
-	Vector2D ArriveBehavior::GetLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement,
-												   const std::vector<NearbyTarget>& nearbyTargets)
+	void ArriveBehavior::UpdateNearbyEntity(const TransformComponent* transform, MovementComponent* movement,
+											const TransformComponent* nearbyTransform, MovementComponent* nearbyMovement) { }
+
+
+	Vector2D ArriveBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
 	{
 		if (!m_target.has_value())
 		{
@@ -27,7 +28,7 @@ namespace Navigation
 
 		if (m_calculatePath)
 		{
-			m_path = PathFinding::FindPath(transform->m_localPosition, m_target.value());
+			m_path          = PathFinding::FindPath(transform->m_localPosition, m_target.value());
 			m_calculatePath = false;
 		}
 
