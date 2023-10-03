@@ -35,6 +35,7 @@ namespace Navigation
 
 			if (!m_path.has_value())
 			{
+				m_hasArrived = true;
 				m_target.reset();
 			}
 		}

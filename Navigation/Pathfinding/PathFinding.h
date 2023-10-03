@@ -7,6 +7,7 @@ namespace Navigation
 	class PathFinding
 	{
 		friend class GameState;
+		friend class ArriveBehaviour;
 
 		enum class NodeState
 		{

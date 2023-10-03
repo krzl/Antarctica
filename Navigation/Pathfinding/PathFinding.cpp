@@ -26,6 +26,16 @@ namespace Navigation
 		const uint32_t startTriangleId = m_navMesh->FindTriangleId(start);
 		const uint32_t endTriangleId   = m_navMesh->FindTriangleId(end);
 
+		const NavMesh::Triangle& startTriangle = m_navMesh->m_triangles[startTriangleId];
+		const NavMesh::Triangle& endTriangle   = m_navMesh->m_triangles[endTriangleId];
+
+		if (!startTriangle.m_isNavigable ||
+			!endTriangle.m_isNavigable ||
+			startTriangle.m_islandId != endTriangle.m_islandId)
+		{
+			return std::optional<std::list<uint32_t>>();
+		}
+
 		std::vector<NodeRecord> nodeRecords(m_navMesh->m_vertices.size());
 
 		const NodeRecord* node = ProcessPath(start, end, startTriangleId, nodeRecords);
@@ -62,7 +72,8 @@ namespace Navigation
 		return path;
 	}
 
-	PathFinding::NodeRecord* PathFinding::ProcessPath(const Point3D& start, const Point3D& end, const uint32_t startTriangleId, std::vector<NodeRecord>& nodeRecords)
+	PathFinding::NodeRecord* PathFinding::ProcessPath(const Point3D& start, const Point3D& end, const uint32_t startTriangleId,
+													  std::vector<NodeRecord>& nodeRecords)
 	{
 		std::priority_queue<NodeRecord*, std::vector<NodeRecord*>, NodeRecordComp> priorityQueue;
 

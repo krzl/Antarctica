@@ -19,6 +19,7 @@ namespace Navigation
 			std::array<uint32_t, 3> m_vertices          = { NULL_ID, NULL_ID, NULL_ID };
 			std::array<uint32_t, 3> m_adjacentTriangles = { NULL_ID, NULL_ID, NULL_ID };
 			bool m_isNavigable                          = false;
+			uint32_t m_islandId                         = 0;
 		};
 
 	public:
@@ -68,6 +69,9 @@ namespace Navigation
 
 		uint32_t FindInitialConstraintTriangle(const Edge& edge) const;
 		uint32_t FindInitialConstraintTriangle(const uint32_t startVertex, const Point3D& endPoint, const uint32_t endPointTriangle) const;
+
+		void AssignIslandIds();
+		void AssignIslandId(uint32_t triangleId, uint32_t islandId, std::set<uint32_t>& remainingTriangles);
 
 		std::vector<Point3D> m_vertices;
 		std::vector<std::unordered_set<uint32_t>> m_vertexToTriangleMap;

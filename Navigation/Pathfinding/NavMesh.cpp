@@ -60,39 +60,7 @@ namespace Navigation
 			triangle.m_isNavigable = !terrain.IsOnSlope(center);
 		}
 
-		/*
-		{
-			Color color[] = {
-				Color::black,
-				Color::blue,
-				Color::cyan,
-				Color::green,
-				Color::magenta,
-				Color::red,
-				Color::yellow,
-				Color::white
-			};
-		
-			for (uint32_t i = 0; i < m_triangles.size(); ++i)
-			{
-				std::vector<Point3D> vertexList;
-				vertexList.reserve(3);
-		
-				const Triangle& triangle = m_triangles[i];
-				if (triangle.m_isNavigable)
-				{
-					const Vector3D a = m_vertices[triangle.m_vertices[0]];
-					const Vector3D b = m_vertices[triangle.m_vertices[1]];
-					const Vector3D c = m_vertices[triangle.m_vertices[2]];
-		
-					vertexList.emplace_back(a + Vector3D(0.0f, 0.0f, 0.05f));
-					vertexList.emplace_back(b + Vector3D(0.0f, 0.0f, 0.05f));
-					vertexList.emplace_back(c + Vector3D(0.0f, 0.0f, 0.05f));
-		
-					DebugDrawManager::GetInstance()->DrawTriangles(vertexList, 1000.0f, color[i % 8]);
-				}
-			}
-		}*/
+		AssignIslandIds();
 	}
 
 	void NavMesh::AddVertex(const Point3D& vertex)
@@ -1120,6 +1088,43 @@ namespace Navigation
 
 
 				previousVertex = oppositeVertexId;
+			}
+		}
+	}
+
+	void NavMesh::AssignIslandIds()
+	{
+		std::set<uint32_t> remainingTriangles;
+
+		for (uint32_t i = 0; i < m_triangles.size(); ++i)
+		{
+			if (m_triangles[i].m_isNavigable)
+			{
+				remainingTriangles.emplace(i);
+			}
+		}
+
+		uint32_t islandId = 0;
+		while (!remainingTriangles.empty())
+		{
+			auto it                   = remainingTriangles.begin();
+			const uint32_t triangleId = *it;
+			remainingTriangles.erase(it);
+
+			AssignIslandId(triangleId, islandId++, remainingTriangles);
+		}
+	}
+
+	void NavMesh::AssignIslandId(const uint32_t triangleId, const uint32_t islandId, std::set<uint32_t>& remainingTriangles)
+	{
+		Triangle& triangle  = m_triangles[triangleId];
+		triangle.m_islandId = islandId;
+
+		for (uint32_t i = 0; i < 3; ++i)
+		{
+			if (const bool isRemaining = remainingTriangles.erase(triangle.m_adjacentTriangles[i]))
+			{
+				AssignIslandId(triangle.m_adjacentTriangles[i], islandId, remainingTriangles);
 			}
 		}
 	}
