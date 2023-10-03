@@ -3,6 +3,8 @@
 
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
+
+#include "Pathfinding/NavMesh.h"
 #include "Pathfinding/PathFinding.h"
 
 
@@ -38,6 +40,10 @@ namespace Navigation
 				m_hasArrived = true;
 				m_target.reset();
 			}
+			else
+			{
+				m_currentPathSegment = m_path.value().begin();
+			}
 		}
 		else if (m_framesUntilCalculatePath > 0)
 		{
@@ -49,14 +55,44 @@ namespace Navigation
 			return Vector2D::zero;
 		}
 
-		const Vector2D direction = m_target.value().xy - transform->m_localPosition.xy;
-		const float distance     = SquaredMag(direction);
-
-		if (distance < m_targetRadius * m_targetRadius)
+		if (m_currentPathSegment != m_path.value().end())
 		{
-			m_hasArrived = true;
-			return Vector2D::zero;
+			auto nextSegment = m_currentPathSegment;
+			++nextSegment;
+
+			if (nextSegment == m_path.value().end())
+			{
+				if (PathFinding::m_navMesh->DoesDirectPathExists(transform->m_localPosition, m_target.value()))
+				{
+					++m_currentPathSegment;
+				}
+			}
+			else
+			{
+				if (PathFinding::m_navMesh->DoesDirectPathExists(*nextSegment, transform->m_localPosition))
+				{
+					++m_currentPathSegment;
+				}
+			}
 		}
+		else
+		{
+			const Vector2D directionToEnd = m_target.value().xy - transform->m_localPosition.xy;
+			const float distanceToEnd     = SquaredMag(directionToEnd);
+
+			if (distanceToEnd < m_targetRadius * m_targetRadius)
+			{
+				m_hasArrived = true;
+				return Vector2D::zero;
+			}
+		}
+
+		const Point3D nextTarget = m_currentPathSegment == m_path.value().end() ?
+									   m_target.value() :
+									   PathFinding::m_navMesh->GetVertexPosition(*m_currentPathSegment);
+
+		const Vector2D direction = nextTarget.xy - transform->m_localPosition.xy;
+		const float distance     = SquaredMag(direction);
 
 		float targetSpeed = movement->m_maxSpeed;
 		if (distance <= m_slowdownRadius * m_slowdownRadius)

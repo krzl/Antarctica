@@ -23,4 +23,5 @@ void GameState::SetupTerrain()
 	m_buildingGrid = std::make_unique<BuildingGrid>(m_terrain.get());
 
 	Navigation::PathFinding::m_navMesh = m_navMesh.get();
+	Navigation::PathFinding::m_terrain = m_terrain.get();
 }

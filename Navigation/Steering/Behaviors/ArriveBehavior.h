@@ -42,10 +42,12 @@ namespace Navigation
 
 		std::optional<Point3D> m_target;
 
-		bool m_hasArrived    = false;
-		uint32_t m_framesUntilCalculatePath = -1;
+		bool m_hasArrived = false;
 
 		std::optional<std::list<uint32_t>> m_path;
+		std::list<unsigned>::iterator m_currentPathSegment;
+		
+		uint32_t m_framesUntilCalculatePath = -1;
 
 		float m_targetRadius   = 1.5;
 		float m_slowdownRadius = 0.0f;

@@ -6,6 +6,7 @@
 namespace Navigation
 {
 	NavMesh* PathFinding::m_navMesh;
+	Terrain* PathFinding::m_terrain;
 
 	bool PathFinding::NodeRecordComp::operator()(const NodeRecord* a, const NodeRecord* b) const
 	{

@@ -2,12 +2,14 @@
 
 namespace Navigation
 {
+	class Terrain;
 	class NavMesh;
 
 	class PathFinding
 	{
 		friend class GameState;
-		friend class ArriveBehaviour;
+		friend class ArriveBehavior;
+		friend class MovementSystem;
 
 		enum class NodeState
 		{
@@ -48,5 +50,6 @@ namespace Navigation
 		static float EstimateTotalCost(const Point3D& start, const Point3D& end);
 
 		static NavMesh* m_navMesh;
+		static Terrain* m_terrain;
 	};
 }

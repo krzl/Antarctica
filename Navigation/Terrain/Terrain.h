@@ -25,6 +25,8 @@ namespace Navigation
 		Point3D GetPos(uint32_t x, uint32_t y) const;
 		Point3D GetPos(uint32_t id) const;
 
+		float GetHeightAtLocation(const Point2D& point) const;
+
 		void ConstructSubmesh(std::shared_ptr<Mesh> mesh, uint32_t xStart, uint32_t xEnd, uint32_t yStart, uint32_t yEnd) const;
 		std::shared_ptr<Mesh> ConstructMesh();
 

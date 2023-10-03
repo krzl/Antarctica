@@ -39,6 +39,55 @@ namespace Navigation
 			HeightLevelToZ(m_heightMap[id]));
 	}
 
+	float Terrain::GetHeightAtLocation(const Point2D& point) const
+	{
+		const float xCenterOffset = m_width * GRID_CELL_TO_METER / 2.0f;
+		const float yCenterOffset = m_height * GRID_CELL_TO_METER / 2.0f;
+
+		const float x = (point.x + xCenterOffset) / GRID_CELL_TO_METER;
+		const float y = (point.y + yCenterOffset) / GRID_CELL_TO_METER;
+
+		if (x < 0 || y < 0 || x > m_width || y > m_height)
+		{
+			return 0.0f;
+		}
+
+		const bool isLowerLeft = (1 - Terathon::Frac(x)) > Terathon::Frac(y);
+
+		const HeightLevel a = isLowerLeft ?
+								  GetHeightLevel((uint32_t) x, (uint32_t) y) :
+								  GetHeightLevel((uint32_t) x + 1, (uint32_t) y + 1);
+		const HeightLevel b = GetHeightLevel((uint32_t) x + 1, (uint32_t) y);
+		const HeightLevel c = GetHeightLevel((uint32_t) x, (uint32_t) y + 1);
+
+		if (a == b == c)
+		{
+			return HeightLevelToZ(a);
+		}
+
+		Vector2D v0, v1, v2;
+
+		if (isLowerLeft)
+		{
+			v0 = Vector2D(1.0f, 0.0f);
+			v1 = Vector2D(0.0f, 1.0f);
+			v2 = Vector2D(Terathon::Frac(x), Terathon::Frac(y));
+		}
+		else
+		{
+			v0 = Vector2D(0.0f, -1.0f);
+			v1 = Vector2D(-1.0f, 0.0f);
+			v2 = Vector2D(Terathon::Frac(x) - 1.0f, Terathon::Frac(y) - 1.0f);
+		}
+
+		const float den = v0.x * v1.y - v1.x * v0.y;
+		const float v   = (v2.x * v1.y - v1.x * v2.y) / den;
+		const float w   = (v0.x * v2.y - v2.x * v0.y) / den;
+		const float u   = 1.0f - v - w;
+
+		return HeightLevelToZ(a) * u + HeightLevelToZ(b) * v + HeightLevelToZ(c) * w;
+	}
+
 	bool Terrain::IsOnSlope(const Point3D& point) const
 	{
 		const float xCenterOffset = m_width * GRID_CELL_TO_METER / 2.0f;
@@ -52,11 +101,11 @@ namespace Navigation
 			return true;
 		}
 
-		const HeightLevel a = GetHeightLevel((uint32_t) x + 1, (uint32_t) y);
-		const HeightLevel b = GetHeightLevel((uint32_t) x, (uint32_t) y + 1);
-		const HeightLevel c = (1 - Terathon::Frac(x)) > Terathon::Frac(y) ?
+		const HeightLevel a = (1 - Terathon::Frac(x)) > Terathon::Frac(y) ?
 								  GetHeightLevel((uint32_t) x, (uint32_t) y) :
 								  GetHeightLevel((uint32_t) x + 1, (uint32_t) y + 1);
+		const HeightLevel b = GetHeightLevel((uint32_t) x + 1, (uint32_t) y);
+		const HeightLevel c = GetHeightLevel((uint32_t) x, (uint32_t) y + 1);
 
 		return Max(a, Max(b, c)) - Min(a, Min(b, c)) > 2;
 	}

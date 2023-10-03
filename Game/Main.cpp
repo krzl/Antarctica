@@ -60,7 +60,7 @@ void main()
 #if defined(DEBUG) | defined(_DEBUG)
 			constexpr uint32_t gridSize = 25;
 #else
-			constexpr uint32_t gridSize = 50;
+			constexpr uint32_t gridSize = 5;
 #endif
 
 			for (uint32_t i = 0; i < gridSize; i++)

@@ -5,6 +5,8 @@
 
 #include "Components/MovementComponent.h"
 
+#include "Core/Application.h"
+
 #include "Entities/World.h"
 
 #include "Managers/FrameCounter.h"
@@ -26,7 +28,9 @@ void TransformUpdateSystem::Update(const uint64_t entityId, TransformComponent* 
 	{
 		const float deltaTime = TimeManager::GetTimeStep() * m_stepLockProgress;
 
-		const Point3D newLocalPosition = transform->m_localPosition + Vector3D(movement->m_velocity, 0.0f) * deltaTime;
+		Point3D newLocalPosition = transform->m_localPosition + Vector3D(movement->m_velocity, 0.0f) * deltaTime;
+
+		newLocalPosition.z = Application::Get().GetGameState().GetTerrain()->GetHeightAtLocation((Point2D) newLocalPosition.xy);
 
 		const Vector3D oldDirection = transform->m_localRotation.GetDirectionY();
 		const float oldOrientation  = std::atan2(-oldDirection.x, oldDirection.y);

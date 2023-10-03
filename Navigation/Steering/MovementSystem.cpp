@@ -4,6 +4,8 @@
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
 #include "Managers/TimeManager.h"
+#include "Pathfinding/PathFinding.h"
+#include "Terrain/Terrain.h"
 
 namespace Navigation
 {
@@ -14,6 +16,9 @@ namespace Navigation
 			constexpr float deltaTime = TimeManager::GetTimeStep();
 
 			transform->m_localPosition += Vector3D(movement->m_velocity, 0.0f) * deltaTime;
+
+			transform->m_localPosition.z = PathFinding::m_terrain->GetHeightAtLocation(
+				(Point2D) transform->m_localPosition.xy);
 
 			const Vector3D oldDirection = transform->m_localRotation.GetDirectionY();
 			const float oldOrientation  = std::atan2(-oldDirection.x, oldDirection.y);
