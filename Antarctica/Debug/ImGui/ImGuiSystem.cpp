@@ -84,7 +84,7 @@ struct Vertex
 	Vector2D m_texcoord;
 };
 
-void ImGuiSystem::Update(uint64_t entityId, ImGuiComponent* imgui, Rendering::MeshComponent* mesh)
+void ImGuiSystem::Update(Entity* entity, ImGuiComponent* imgui, Rendering::MeshComponent* mesh)
 {
 	const ImDrawData* imDrawData = ImGui::GetDrawData();
 

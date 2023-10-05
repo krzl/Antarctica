@@ -41,14 +41,14 @@ namespace Rendering
 		std::sort(m_renderQueue.begin(), m_renderQueue.end(), RenderQueueComp());
 	}
 
-	void RenderSystem::Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderComponent* render)
+	void RenderSystem::Update(Entity* entity, TransformComponent* transform, MeshComponent* mesh, RenderComponent* render)
 	{
 		if (!render->m_isEnabled)
 		{
 			return;
 		}
 
-		const ComponentAccessor& componentAccessor = World::Get()->GetEntity(entityId)->GetComponentAccessor();
+		const ComponentAccessor& componentAccessor = entity->GetComponentAccessor();
 		const RenderCullComponent* renderCull      = componentAccessor.GetComponent<RenderCullComponent>();
 		if (renderCull && renderCull->m_isCulled)
 		{

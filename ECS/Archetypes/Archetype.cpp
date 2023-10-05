@@ -25,27 +25,27 @@ Archetype::Archetype(const std::vector<const Class*>& classes) :
 	m_allArchetypes.emplace_back(this);
 }
 
-uint32_t Archetype::GetNewEntityOffset(const Entity* entity)
+uint32_t Archetype::GetNewEntityOffset(Entity* entity)
 {
 	if (m_emptySlots.size() == 0)
 	{
-		m_entityIds.emplace_back(entity->GetInstanceId());
+		m_entities.emplace_back(entity);
 
 		for (uint32_t i = 0; i < m_componentTypeInfos.size(); ++i)
 		{
 			m_componentData[i].resize(m_componentData[i].size() + m_componentTypeInfos[i].m_dataSize);
 		}
 
-		return (uint32_t) m_entityIds.size() - 1;
+		return (uint32_t) m_entities.size() - 1;
 	}
 
 	const uint32_t offset = m_emptySlots.top();
 	m_emptySlots.pop();
-	m_entityIds[offset] = entity->GetInstanceId();
+	m_entities[offset] = entity;
 	return offset;
 }
 
-void Archetype::AddEntity(const Entity* entity)
+void Archetype::AddEntity(Entity* entity)
 {
 	const uint32_t insertPosition = GetNewEntityOffset(entity);
 
@@ -62,7 +62,7 @@ void Archetype::RemoveEntity(Entity* entity)
 {
 	const uint32_t position = entity->GetComponentAccessor().m_entityOffset;
 	m_emptySlots.emplace(position);
-	m_entityIds[position] = 0;
+	m_entities[position] = nullptr;
 
 	for (uint32_t i = 0; i < m_componentTypeInfos.size(); ++i)
 	{

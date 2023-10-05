@@ -25,7 +25,7 @@ void Entity::CreateArchetype()
 
 const ComponentAccessor& Entity::GetComponentAccessor()
 {
-	if (!m_componentAccessor.IsValid(m_instanceId))
+	if (!m_componentAccessor.IsValid())
 	{
 		m_componentAccessor.Setup(this);
 	}

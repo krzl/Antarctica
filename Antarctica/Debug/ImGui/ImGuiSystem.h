@@ -17,7 +17,7 @@ class ImGuiSystem : public System<ImGuiComponent, Rendering::MeshComponent>
 	void Init() override;
 	void OnFrameStart() override;
 	void OnUpdateStart() override;
-	void Update(uint64_t entityId, ImGuiComponent* imgui, Rendering::MeshComponent* mesh) override;
+	void Update(Entity* entity, ImGuiComponent* imgui, Rendering::MeshComponent* mesh) override;
 
 	std::shared_ptr<Shader> m_shader;
 	std::shared_ptr<Material> m_material;

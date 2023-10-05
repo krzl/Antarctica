@@ -20,12 +20,12 @@ struct Archetype
 	const std::vector<const Class*> m_classes;
 
 	std::vector<std::vector<uint8_t>> m_componentData;
-	std::vector<uint64_t> m_entityIds;
+	std::vector<Entity*> m_entities;
 
-	void AddEntity(const Entity* entity);
+	void AddEntity(Entity* entity);
 	void RemoveEntity(Entity* entity);
 
-	uint32_t GetNewEntityOffset(const Entity* entity);
+	uint32_t GetNewEntityOffset(Entity* entity);
 
 	static const std::vector<std::unique_ptr<Archetype>>& GetAllArchetypes() { return m_allArchetypes; }
 

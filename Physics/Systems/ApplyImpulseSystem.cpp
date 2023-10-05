@@ -15,7 +15,7 @@ namespace Physics
 		m_isMultiThreaded = false; //TODO: CHECK THAT
 	}
 
-	void ApplyImpulseSystem::Update(uint64_t entityId, TransformComponent* transform, Navigation::MovementComponent* movement,
+	void ApplyImpulseSystem::Update(Entity* entity, TransformComponent* transform, Navigation::MovementComponent* movement,
 									PhysicsBodyComponent* physicsBody)
 	{
 		for (const CollisionData& collision : physicsBody->m_collisions)

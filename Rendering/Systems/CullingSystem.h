@@ -19,7 +19,7 @@ namespace Rendering
 		friend class Application;
 
 		void OnUpdateStart() override;
-		void Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderCullComponent* renderCull,
+		void Update(Entity* entity, TransformComponent* transform, MeshComponent* mesh, RenderCullComponent* renderCull,
 					ColliderComponent* collider, RenderComponent* render) override;
 
 		Frustum m_cameraFrustum = {};

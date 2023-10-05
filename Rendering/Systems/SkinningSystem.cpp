@@ -10,9 +10,9 @@
 
 namespace Rendering
 {
-	void SkinningSystem::Update(const uint64_t entityId, Anim::AnimatedMeshComponent* animatedMesh, MeshComponent* mesh, RenderComponent* render)
+	void SkinningSystem::Update(Entity* entity, Anim::AnimatedMeshComponent* animatedMesh, MeshComponent* mesh, RenderComponent* render)
 	{
-		const RenderCullComponent* renderCull = World::Get()->GetEntity(entityId)->GetComponentAccessor().GetComponent<RenderCullComponent>();
+		const RenderCullComponent* renderCull = entity->GetComponentAccessor().GetComponent<RenderCullComponent>();
 		if (renderCull && renderCull->m_isCulled)
 		{
 			return;

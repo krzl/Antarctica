@@ -21,7 +21,7 @@ namespace Physics
 
 	private:
 
-		void Update(uint64_t entityId, TransformComponent* transform, Navigation::MovementComponent* movement,
+		void Update(Entity* entity, TransformComponent* transform, Navigation::MovementComponent* movement,
 					PhysicsBodyComponent* physicsBody) override;
 	};
 }

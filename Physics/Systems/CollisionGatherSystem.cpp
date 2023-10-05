@@ -10,20 +10,18 @@
 
 namespace Physics
 {
-	void CollisionGatherSystem::Update(const uint64_t entityId, TransformComponent* transform, Navigation::MovementComponent* movement,
+	void CollisionGatherSystem::Update(Entity* entity, TransformComponent* transform, Navigation::MovementComponent* movement,
 									   PhysicsBodyComponent* physicsBody)
 	{
 		movement->m_velocity += movement->m_force * physicsBody->GetInverseMass() * TimeManager::GetInstance()->GetTimeStep() / 2.0f;
 
-		Entity* self = *World::Get()->GetEntity(entityId);
-
 		physicsBody->m_collisions.resize(0);
 		World::Get()->GetQuadtree().FindNearby(Sphere{ transform->m_localPosition, movement->m_radius },
-			[=](Entity* entity)
+			[=](Entity* other)
 			{
-				if (entity->GetInstanceId() < entityId) // avoid duplicate collisions and collision with self
+				if (other->GetInstanceId() < entity->GetInstanceId()) // avoid duplicate collisions and collision with self
 				{
-					const ComponentAccessor& componentAccessor = entity->GetComponentAccessor();
+					const ComponentAccessor& componentAccessor = other->GetComponentAccessor();
 
 					const TransformComponent* otherTransform;
 					const Navigation::MovementComponent* otherMovement;
@@ -48,8 +46,8 @@ namespace Physics
 						if (distance == 0.0f)
 						{
 							physicsBody->m_collisions.emplace_back(CollisionData{
-								self,
 								entity,
+								other,
 								Min(physicsBody->m_restitution, otherPhysicsBody->m_restitution),
 								Terathon::Sqrt(physicsBody->m_staticFriction * otherPhysicsBody->m_staticFriction),
 								Terathon::Sqrt(physicsBody->m_dynamicFriction * otherPhysicsBody->m_dynamicFriction),
@@ -63,8 +61,8 @@ namespace Physics
 							normal = normal / distance; // normalization
 
 							physicsBody->m_collisions.emplace_back(CollisionData{
-								self,
 								entity,
+								other,
 								Min(physicsBody->m_restitution, otherPhysicsBody->m_restitution),
 								Terathon::Sqrt(physicsBody->m_staticFriction * otherPhysicsBody->m_staticFriction),
 								Terathon::Sqrt(physicsBody->m_dynamicFriction * otherPhysicsBody->m_dynamicFriction),

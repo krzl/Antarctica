@@ -8,10 +8,8 @@ void ComponentAccessor::Setup(Entity* entity)
 	m_entity    = entity;
 	m_archetype = entity->GetArchetype();
 
-	const uint64_t instanceId = entity->GetInstanceId();
-
-	const auto entityPlacement = std::find(m_archetype->m_entityIds.begin(), m_archetype->m_entityIds.end(), instanceId);
-	m_entityOffset             = std::distance(entity->GetArchetype()->m_entityIds.begin(), entityPlacement);
+	const auto entityPlacement = std::find(m_archetype->m_entities.begin(), m_archetype->m_entities.end(), entity);
+	m_entityOffset             = std::distance(entity->GetArchetype()->m_entities.begin(), entityPlacement);
 }
 
 void* ComponentAccessor::GetComponentFromClass(const Class& clazz) const
@@ -28,7 +26,7 @@ void* ComponentAccessor::GetComponentFromClass(const Class& clazz) const
 	return nullptr;
 }
 
-bool ComponentAccessor::IsValid(const uint64_t instanceId) const
+bool ComponentAccessor::IsValid() const
 {
-	return m_entity != nullptr && m_archetype->m_entityIds[m_entityOffset] == instanceId;
+	return m_entity != nullptr && m_archetype->m_entities[m_entityOffset] == m_entity;
 }

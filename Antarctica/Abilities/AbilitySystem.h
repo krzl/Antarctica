@@ -12,5 +12,5 @@ public:
 
 private:
 	
-	void Update(uint64_t entityId, AbilityStackComponent* abilityStack) override;
+	void Update(Entity* entity, AbilityStackComponent* abilityStack) override;
 };

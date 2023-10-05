@@ -35,7 +35,7 @@ void DebugDrawSystem::Init()
 	World::Get()->Spawn<DebugDrawer>({});
 }
 
-void DebugDrawSystem::Update(uint64_t entityId, DebugDrawComponent* debugDraw, Rendering::MeshComponent* mesh)
+void DebugDrawSystem::Update(Entity* entity, DebugDrawComponent* debugDraw, Rendering::MeshComponent* mesh)
 {
 	std::shared_ptr<DynamicMesh> dynamicMesh;
 	if (mesh->m_mesh == nullptr)

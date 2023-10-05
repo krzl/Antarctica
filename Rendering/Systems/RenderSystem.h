@@ -24,7 +24,7 @@ namespace Rendering
 
 		void OnUpdateStart() override;
 		void OnUpdateEnd() override;
-		void Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderComponent*) override;
+		void Update(Entity* entity, TransformComponent* transform, MeshComponent* mesh, RenderComponent*) override;
 
 		Transform4D GetAttachedNodeTransform(const ComponentAccessor& componentAccessor, const Mesh& mesh, int32_t nodeId, bool ignoreAttachmentRotation);
 		Transform4D GetAttachmentTransform(const ComponentAccessor& componentAccessor, const MeshComponent* mesh, uint32_t submeshId);

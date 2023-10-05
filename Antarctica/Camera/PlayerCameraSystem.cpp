@@ -80,7 +80,7 @@ void PlayerCameraSystem::OnUpdateStart()
 	m_inputQueue.TryAddMouseMoveCommand();
 }
 
-void PlayerCameraSystem::Update(uint64_t entityId, TransformComponent* transform, Rendering::CameraComponent* camera,
+void PlayerCameraSystem::Update(Entity* entity, TransformComponent* transform, Rendering::CameraComponent* camera,
 								CameraScrollComponent* cameraScroll, CameraDragSelectComponent* cameraDrag)
 {
 	if (m_inputQueue.GetMouseButtonPress(InputCommand::MouseButtonId::MIDDLE) && !cameraDrag->m_isDragging)

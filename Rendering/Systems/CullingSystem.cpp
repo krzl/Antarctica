@@ -21,7 +21,7 @@ namespace Rendering
 		World::Get()->GetQuadtree().CalculateCulling(m_cameraFrustum, m_frameCounter->m_renderFrameCount);
 	}
 
-	void CullingSystem::Update(uint64_t entityId, TransformComponent* transform, MeshComponent* mesh, RenderCullComponent* renderCull,
+	void CullingSystem::Update(Entity* entity, TransformComponent* transform, MeshComponent* mesh, RenderCullComponent* renderCull,
 							   ColliderComponent* collider, RenderComponent* render)
 	{
 		if (renderCull->m_neverCull)
@@ -29,7 +29,7 @@ namespace Rendering
 			renderCull->m_isCulled = false;
 			return;
 		}
-		
+
 		if (m_frameCounter->m_renderFrameCount != transform->m_quadtreePlacement.GetNode()->GetLastSeenFrameId())
 		{
 			renderCull->m_isCulled = true;

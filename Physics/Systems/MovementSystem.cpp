@@ -12,7 +12,7 @@
 
 namespace Physics
 {
-	void MovementSystem::Update(const uint64_t entityId, TransformComponent* transform, Navigation::MovementComponent* movement)
+	void MovementSystem::Update(Entity* entity, TransformComponent* transform, Navigation::MovementComponent* movement)
 	{
 		if (movement->m_force != Vector2D::zero || movement->m_velocity != Vector2D::zero)
 		{
@@ -22,7 +22,7 @@ namespace Physics
 			transform->m_localPosition.z = Navigation::PathFinding::m_terrain->GetHeightAtLocation(
 				(Point2D) transform->m_localPosition.xy);
 
-			const ComponentAccessor& componentAccessor = World::Get()->GetEntity(entityId)->GetComponentAccessor();
+			const ComponentAccessor& componentAccessor = entity->GetComponentAccessor();
 			if (const PhysicsBodyComponent* physicsBody = componentAccessor.GetComponent<PhysicsBodyComponent>())
 			{
 				movement->m_velocity += movement->m_force * physicsBody->GetInverseMass() * deltaTime / 2.0f;

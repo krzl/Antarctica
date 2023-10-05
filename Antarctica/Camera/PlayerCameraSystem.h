@@ -26,7 +26,7 @@ class PlayerCameraSystem : public System<TransformComponent, Rendering::CameraCo
 	void OnUpdateStart() override;
 	void OnUpdateEnd() override;
 
-	void Update(uint64_t entityId, TransformComponent* transform, Rendering::CameraComponent* camera, CameraScrollComponent* cameraScroll,
+	void Update(Entity* entity, TransformComponent* transform, Rendering::CameraComponent* camera, CameraScrollComponent* cameraScroll,
 				CameraDragSelectComponent* cameraDrag) override;
 
 	Matrix4D GetPerspectiveMatrix(const Rendering::CameraComponent* camera) const;

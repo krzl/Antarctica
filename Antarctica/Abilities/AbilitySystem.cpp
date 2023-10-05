@@ -9,7 +9,7 @@ AbilitySystem::AbilitySystem()
 	m_isMultiThreaded = false;
 }
 
-void AbilitySystem::Update(const uint64_t entityId, AbilityStackComponent* abilityStack)
+void AbilitySystem::Update(Entity* entity, AbilityStackComponent* abilityStack)
 {
 	if (abilityStack->m_stack.size() == 0)
 	{

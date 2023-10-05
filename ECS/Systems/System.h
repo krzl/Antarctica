@@ -40,14 +40,14 @@ public:
 					{
 						std::atomic_uint32_t counter = 0;
 						std::for_each(std::execution::par_unseq,
-							archetype.m_archetype->m_entityIds.begin(),
-							archetype.m_archetype->m_entityIds.end(),
-							[this, archetype, &counter](const uint64_t entityId)
+							archetype.m_archetype->m_entities.begin(),
+							archetype.m_archetype->m_entities.end(),
+							[this, archetype, &counter](const Entity* entity)
 							{
 								const uint32_t id = counter++;
-								if (archetype.m_archetype->m_entityIds[id] != 0)
+								if (archetype.m_archetype->m_entities[id] != nullptr)
 								{
-									Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
+									Run<0>(archetype, id, archetype.m_archetype->m_entities[id]);
 								}
 							});
 					});
@@ -61,14 +61,14 @@ public:
 					{
 						uint32_t counter = 0;
 						std::for_each(std::execution::seq,
-							archetype.m_archetype->m_entityIds.begin(),
-							archetype.m_archetype->m_entityIds.end(),
-							[this, archetype, &counter](const uint64_t entityId)
+							archetype.m_archetype->m_entities.begin(),
+							archetype.m_archetype->m_entities.end(),
+							[this, archetype, &counter](const Entity* entity)
 							{
 								const uint32_t id = counter++;
-								if (archetype.m_archetype->m_entityIds[id] != 0)
+								if (archetype.m_archetype->m_entities[id] != nullptr)
 								{
-									Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
+									Run<0>(archetype, id, archetype.m_archetype->m_entities[id]);
 								}
 							});
 					});
@@ -81,7 +81,7 @@ public:
 
 protected:
 
-	virtual void Update(uint64_t entityId, Types*... ts) = 0;
+	virtual void Update(Entity* entity, Types*... ts) = 0;
 
 private:
 
@@ -116,20 +116,20 @@ private:
 
 
 	template<std::size_t Index, typename... Ts>
-	std::enable_if_t<Index != sizeof...(Types)> Run(const MatchedArchetype& archetype, const uint32_t id, const uint64_t entityId, Ts... ts)
+	std::enable_if_t<Index != sizeof...(Types)> Run(const MatchedArchetype& archetype, const uint32_t id, Entity* entity, Ts... ts)
 	{
 		typedef std::tuple_element_t<Index, std::tuple<Types...>> ComponentType;
 
 		const uint32_t componentId    = archetype.m_componentIds[Index];
 		ComponentType* componentStart = (ComponentType*) archetype.m_archetype->m_componentData[componentId].data();
 
-		Run<Index + 1>(archetype, id, entityId, ts..., componentStart + id);
+		Run<Index + 1>(archetype, id, entity, ts..., componentStart + id);
 	}
 
 	template<std::size_t Index, typename... Ts>
-	std::enable_if_t<Index == sizeof...(Types)> Run(const MatchedArchetype& archetype, const uint32_t id, const uint64_t entityId, Ts... ts)
+	std::enable_if_t<Index == sizeof...(Types)> Run(const MatchedArchetype& archetype, const uint32_t id, Entity* entity, Ts... ts)
 	{
-		Update(entityId, ts...);
+		Update(entity, ts...);
 	}
 
 	std::vector<MatchedArchetype> m_archetypesMatched;

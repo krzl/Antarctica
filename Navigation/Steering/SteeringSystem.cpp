@@ -30,7 +30,7 @@ namespace Navigation
 		m_movementTester.m_hasValuesChanged = false;
 	}
 
-	void SteeringSystem::Update(uint64_t entityId, TransformComponent* transform, MovementComponent* movement)
+	void SteeringSystem::Update(Entity* entity, TransformComponent* transform, MovementComponent* movement)
 	{
 		if (movement->m_enableMovementTester && m_frameCounter->m_stepLockFramesPending == 0)
 		{
@@ -43,14 +43,19 @@ namespace Navigation
 		movement->m_steeringPipeline.InitializeTotalAccelerationCalculation(transform, movement);
 
 		World::Get()->GetQuadtree().FindNearby(Sphere{ transform->m_localPosition, maxRadiusToCheck },
-			[entityId, &movement, &transform](Entity* entity)
+			[entity, &movement, &transform](Entity* other)
 			{
-				const ComponentAccessor& componentAccessor = entity->GetComponentAccessor();
+				if (other == entity)
+				{
+					return;
+				}
+
+				const ComponentAccessor& componentAccessor = other->GetComponentAccessor();
 
 				const TransformComponent* nearbyTransform = componentAccessor.GetComponent<TransformComponent>();
 				MovementComponent* nearbyMovement         = componentAccessor.GetComponent<MovementComponent>();
 
-				if (nearbyTransform && nearbyMovement && entity->GetInstanceId() != entityId)
+				if (nearbyTransform && nearbyMovement)
 				{
 					movement->m_steeringPipeline.UpdateNearbyEntity(transform, movement, nearbyTransform, nearbyMovement);
 				}
@@ -59,7 +64,7 @@ namespace Navigation
 		const float deltaTime = TimeManager::GetInstance()->GetTimeStep();
 
 		movement->m_force = movement->m_steeringPipeline.GetFinalLinearAcceleration(transform, movement);
-		
+
 		if (movement->m_force == Vector2D::zero && movement->m_velocity != Vector2D::zero)
 		{
 			const Vector2D velocityDelta = Normalize(movement->m_velocity) * movement->m_maxAcceleration * deltaTime;

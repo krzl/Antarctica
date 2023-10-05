@@ -18,7 +18,7 @@ namespace Navigation
 		void DrawMovementTester();
 		void OnStepLockStart() override;
 		void OnStepLockEnd() override;
-		void Update(uint64_t entityId, TransformComponent* transform, MovementComponent* movement) override;
+		void Update(Entity* entity, TransformComponent* transform, MovementComponent* movement) override;
 
 		MovementTester m_movementTester;
 	};

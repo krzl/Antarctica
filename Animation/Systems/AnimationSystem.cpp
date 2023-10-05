@@ -5,7 +5,7 @@
 
 namespace Anim
 {
-	void AnimationSystem::Update(uint64_t entityId, AnimatedMeshComponent* animatedMesh)
+	void AnimationSystem::Update(Entity* entity, AnimatedMeshComponent* animatedMesh)
 	{
 		animatedMesh->m_animationSolver.UpdateState();
 	}

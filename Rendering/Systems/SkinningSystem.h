@@ -10,6 +10,6 @@ namespace Rendering
 
 	class SkinningSystem : public System<Anim::AnimatedMeshComponent, MeshComponent, RenderComponent>
 	{
-		void Update(uint64_t entityId, Anim::AnimatedMeshComponent* animatedMesh, MeshComponent* mesh, RenderComponent* render) override;
+		void Update(Entity* entity, Anim::AnimatedMeshComponent* animatedMesh, MeshComponent* mesh, RenderComponent* render) override;
 	};
 }

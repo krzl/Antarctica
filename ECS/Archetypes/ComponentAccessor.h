@@ -28,7 +28,7 @@ public:
 
 	void* GetComponentFromClass(const Class& clazz) const;
 
-	bool IsValid(uint64_t instanceId) const;
+	bool IsValid() const;
 
 private:
 

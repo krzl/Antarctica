@@ -18,10 +18,10 @@ void TransformUpdateSystem::OnUpdateStart()
 	m_stepLockProgress = Min(1.0f, m_frameCounter->GetNextStepLockProgress());
 }
 
-void TransformUpdateSystem::Update(const uint64_t entityId, TransformComponent* transform, MoveableComponent* moveable,
+void TransformUpdateSystem::Update(Entity* entity, TransformComponent* transform, MoveableComponent* moveable,
 								   Rendering::RenderComponent* render)
 {
-	const ComponentAccessor& componentAccessor    = World::Get()->GetEntity(entityId)->GetComponentAccessor();
+	const ComponentAccessor& componentAccessor    = entity->GetComponentAccessor();
 	const Navigation::MovementComponent* movement = componentAccessor.GetComponent<Navigation::MovementComponent>();
 
 	if (movement != nullptr && movement->m_velocity != Vector2D::zero)
