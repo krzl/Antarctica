@@ -21,7 +21,6 @@ namespace Navigation
 		}
 
 		if (nearbyMovement->m_arriveBehavior.m_hasArrived &&
-			nearbyMovement->m_arriveBehavior.HasArrivedCheck(nearbyTransform) &&
 			SquaredMag(nearbyMovement->m_arriveBehavior.GetTarget().xy - GetTarget().xy) < m_targetRadius * m_targetRadius &&
 			SquaredMag(transform->m_localPosition.xy - GetTarget().xy) < m_outerTargetRadius * m_outerTargetRadius)
 		{

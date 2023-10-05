@@ -22,7 +22,7 @@ namespace Navigation
 
 		void SetTarget(const Point3D& point, uint32_t delay = 0);
 		Point3D GetTarget() const { return m_target.value_or(Point3D(0.0f, 0.0f, 0.0f)); }
-		bool HasTarget() const { return m_target.has_value() && m_hasArrived; }
+		bool HasTarget() const { return m_target.has_value() && !m_hasArrived; }
 
 		bool HasArrived() const { return m_hasArrived; }
 
@@ -45,7 +45,7 @@ namespace Navigation
 
 		uint32_t m_framesUntilCalculatePath = -1;
 
-		float m_targetRadius      = 5.0f;
+		float m_targetRadius      = 4.0f;
 		float m_outerTargetRadius = 12.0f;
 	};
 }

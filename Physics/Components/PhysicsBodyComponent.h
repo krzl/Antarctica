@@ -13,7 +13,7 @@ namespace Physics
 
 		std::vector<CollisionData> m_collisions;
 
-		float m_restitution     = 0.05f;
+		float m_restitution     = 1.05f;
 		float m_staticFriction  = 0.1f;
 		float m_dynamicFriction = 0.2f;
 

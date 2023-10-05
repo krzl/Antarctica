@@ -291,7 +291,7 @@ namespace Rendering::Dx12
 		m_frameCommandAllocators[m_currentBackbufferId]->Reset();
 		m_commandList->Reset(m_frameCommandAllocators[m_currentBackbufferId].Get(), nullptr);
 
-		m_scratchBuffer.Reset();
+		GetScratchBuffer().Reset();
 		DescriptorHeap::OnFrameStart();
 	}
 

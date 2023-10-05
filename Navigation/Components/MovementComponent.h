@@ -18,7 +18,6 @@ namespace Navigation
 
 		float m_maxAcceleration    = 1500.0f;
 		float m_maxSpeed           = 4.0f;
-		float m_decelerationFactor = 2.0f;
 
 		float m_maxRotation = 7.0f;
 

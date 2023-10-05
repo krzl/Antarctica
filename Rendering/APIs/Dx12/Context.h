@@ -71,7 +71,7 @@ namespace Rendering::Dx12
 
 		[[nodiscard]] uint32_t GetCurrentFenceId() const { return m_currentFenceId; }
 
-		[[nodiscard]] ScratchBuffer& GetScratchBuffer() { return m_scratchBuffer; }
+		[[nodiscard]] ScratchBuffer& GetScratchBuffer() { return m_scratchBuffers[m_currentFenceId % 4]; }
 
 	private:
 
@@ -100,10 +100,9 @@ namespace Rendering::Dx12
 		ComPtr<ID3D12DescriptorHeap> m_rtvDescriptorHeap;
 		ComPtr<ID3D12DescriptorHeap> m_dsvDescriptorHeap;
 
-
 		std::vector<RenderObject> m_renderQueue;
 
-		ScratchBuffer m_scratchBuffer;
+		std::array<ScratchBuffer, 4> m_scratchBuffers;
 
 		ScratchBufferHandle m_currentCameraBufferHandle;
 

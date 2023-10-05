@@ -164,6 +164,6 @@ namespace Rendering::Dx12
 			isCurrentBatched = isNextBatched;
 		}
 
-		m_scratchBuffer.SubmitBuffers();
+		GetScratchBuffer().SubmitBuffers();
 	}
 }
