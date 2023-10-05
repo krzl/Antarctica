@@ -39,9 +39,6 @@ void MoveAbility::End()
 {
 	const ComponentAccessor& componentAccessor = m_entity->GetComponentAccessor();
 
-	Navigation::MovementComponent* movementComponent = componentAccessor.GetComponent<Navigation::MovementComponent>();
-	movementComponent->m_arriveBehavior.ClearTarget();
-
 	Anim::AnimatedMeshComponent* animatedMeshComponent = componentAccessor.GetComponent<Anim::AnimatedMeshComponent>();
 	animatedMeshComponent->m_animationSolver.SetTrigger(Anim::AnimTrigger::WALK, false);
 }

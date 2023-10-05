@@ -10,21 +10,37 @@
 
 namespace Navigation
 {
-	void ArriveBehavior::OnArrive(const Point3D target, const TransformComponent* transform, const MovementComponent* movement)
-	{
-		m_target.reset();
-		m_path.reset();
-	}
-
 	void ArriveBehavior::InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement) { }
 
 	void ArriveBehavior::UpdateNearbyEntity(const TransformComponent* transform, MovementComponent* movement,
-											const TransformComponent* nearbyTransform, MovementComponent* nearbyMovement) { }
+											const TransformComponent* nearbyTransform, MovementComponent* nearbyMovement)
+	{
+		if (!m_target.has_value() || m_hasArrived)
+		{
+			return;
+		}
 
+		if (nearbyMovement->m_arriveBehavior.m_hasArrived &&
+			nearbyMovement->m_arriveBehavior.HasArrivedCheck(nearbyTransform) &&
+			SquaredMag(nearbyMovement->m_arriveBehavior.GetTarget().xy - GetTarget().xy) < m_targetRadius * m_targetRadius &&
+			SquaredMag(transform->m_localPosition.xy - GetTarget().xy) < m_outerTargetRadius * m_outerTargetRadius)
+		{
+			m_hasArrived = true;
+		}
+	}
+
+
+	bool ArriveBehavior::HasArrivedCheck(const TransformComponent* transform)
+	{
+		const Vector2D directionToEnd = m_target.value().xy - transform->m_localPosition.xy;
+		const float distanceToEnd     = SquaredMag(directionToEnd);
+
+		return distanceToEnd < m_targetRadius * m_targetRadius;
+	}
 
 	Vector2D ArriveBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
 	{
-		if (!m_target.has_value())
+		if (!m_target.has_value() || m_hasArrived)
 		{
 			return Vector2D::zero;
 		}
@@ -38,14 +54,11 @@ namespace Navigation
 			if (!m_path.has_value())
 			{
 				m_hasArrived = true;
-				m_target.reset();
 
 				return Vector2D::zero;
 			}
-			else
-			{
-				m_currentPathSegment = m_path.value().begin();
-			}
+
+			m_currentPathSegment = m_path.value().begin();
 		}
 		else if (m_framesUntilCalculatePath != -1)
 		{
@@ -74,10 +87,7 @@ namespace Navigation
 		}
 		else
 		{
-			const Vector2D directionToEnd = m_target.value().xy - transform->m_localPosition.xy;
-			const float distanceToEnd     = SquaredMag(directionToEnd);
-
-			if (distanceToEnd < m_targetRadius * m_targetRadius)
+			if (HasArrivedCheck(transform))
 			{
 				m_hasArrived = true;
 				return Vector2D::zero;

@@ -28,8 +28,8 @@ namespace Navigation
 		ImGui::NewLine();
 		m_hasValuesChanged |= ImGui::SliderFloat("Steering::MaxRotation", &m_maxRotation, 0.1f, 20.0f);
 		ImGui::NewLine();
-		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::TargetRadius", &m_arriveTargetRadius, 0.0f, 5.0f);
-		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::OuterTargetRadius", &m_outerTargetRadius, 0.0f, 10.0f);
+		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::TargetRadius", &m_arriveTargetRadius, 0.0f, 10.0f);
+		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::OuterTargetRadius", &m_outerTargetRadius, 0.0f, 20.0f);
 		ImGui::NewLine();
 		m_hasValuesChanged |= ImGui::SliderFloat("Cohesion::CohesionRange", &m_cohesionScale, 1.0f, 20.0f);
 		m_hasValuesChanged |= ImGui::SliderFloat("Alignment::CohesionRange", &m_cohesionScale, 1.0f, 20.0f);

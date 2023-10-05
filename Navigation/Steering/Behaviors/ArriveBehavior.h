@@ -15,17 +15,14 @@ namespace Navigation
 
 		Dispatcher<> m_onArrive;
 
-		void OnArrive(const Point3D target, const TransformComponent* transform, const MovementComponent* movement);
-
 		void InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement) override;
 		void UpdateNearbyEntity(const TransformComponent* transform, MovementComponent* movement, const TransformComponent* nearbyTransform,
 								MovementComponent* nearbyMovement) override;
 		Vector2D GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement) override;
 
 		void SetTarget(const Point3D& point, uint32_t delay = 0);
-		Point3D GetTarget() const { return m_target.value(); }
-		bool HasTarget() const { return m_target.has_value(); }
-		void ClearTarget() { m_target.reset(); }
+		Point3D GetTarget() const { return m_target.value_or(Point3D(0.0f, 0.0f, 0.0f)); }
+		bool HasTarget() const { return m_target.has_value() && m_hasArrived; }
 
 		bool HasArrived() const { return m_hasArrived; }
 
@@ -37,6 +34,8 @@ namespace Navigation
 
 	protected:
 
+		bool HasArrivedCheck(const TransformComponent* transform);
+
 		std::optional<Point3D> m_target;
 
 		bool m_hasArrived = false;
@@ -46,7 +45,7 @@ namespace Navigation
 
 		uint32_t m_framesUntilCalculatePath = -1;
 
-		float m_targetRadius      = 1.5;
-		float m_outerTargetRadius = 4.0f;
+		float m_targetRadius      = 5.0f;
+		float m_outerTargetRadius = 12.0f;
 	};
 }
