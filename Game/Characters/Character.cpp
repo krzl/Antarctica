@@ -8,7 +8,6 @@
 #include "Abilities/SelectableComponent.h"
 #include "Abilities/Activators/BuildStructureActivator.h"
 #include "Abilities/Activators/InstantMoveActivator.h"
-
 #include "Animator/AnimatorBuilder.h"
 #include "Animator/StateMachine/AnimationState.h"
 #include "Animator/StateMachine/StateMachineBuilder.h"
@@ -21,6 +20,7 @@
 #include "Components/MeshComponent.h"
 #include "Components/MoveableComponent.h"
 #include "Components/MovementComponent.h"
+#include "Components/PhysicsBodyComponent.h"
 #include "Components/RenderComponent.h"
 #include "Components/RenderCullComponent.h"
 #include "Components/TransformComponent.h"
@@ -40,6 +40,7 @@ void Character::DefineArchetype(ArchetypeBuilder& builder)
 	builder.AddComponent<Rendering::RenderCullComponent>();
 	builder.AddComponent<TransformComponent>();
 	builder.AddComponent<SelectableComponent>();
+	builder.AddComponent<Physics::PhysicsBodyComponent>();
 }
 
 void Character::SetupComponents(const ComponentAccessor& accessor)
@@ -47,11 +48,12 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 	Entity::SetupComponents(accessor);
 
 
-	AbilityTriggerComponent* abilityTrigger   = accessor.GetComponent<AbilityTriggerComponent>();
-	Anim::AnimatedMeshComponent* animatedMesh = accessor.GetComponent<Anim::AnimatedMeshComponent>();
-	ColliderComponent* collider               = accessor.GetComponent<ColliderComponent>();
-	Rendering::MeshComponent* meshComponent   = accessor.GetComponent<Rendering::MeshComponent>();
-	Navigation::MovementComponent* movement   = accessor.GetComponent<Navigation::MovementComponent>();
+	AbilityTriggerComponent* abilityTrigger    = accessor.GetComponent<AbilityTriggerComponent>();
+	Anim::AnimatedMeshComponent* animatedMesh  = accessor.GetComponent<Anim::AnimatedMeshComponent>();
+	ColliderComponent* collider                = accessor.GetComponent<ColliderComponent>();
+	Rendering::MeshComponent* meshComponent    = accessor.GetComponent<Rendering::MeshComponent>();
+	Physics::PhysicsBodyComponent* physicsBody = accessor.GetComponent<Physics::PhysicsBodyComponent>();
+	Navigation::MovementComponent* movement    = accessor.GetComponent<Navigation::MovementComponent>();
 
 	meshComponent->m_transform = EulerToQuaternion(90.0, 180.0f, 0.0f).GetRotationMatrix() * Transform4D::MakeScale(0.01f);
 
@@ -138,4 +140,6 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 			return std::make_shared<BuildStructureActivator>(3, 3);
 		}
 	});
+
+	physicsBody->SetMass(100.0f);
 }

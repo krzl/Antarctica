@@ -30,7 +30,7 @@ void main()
 
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>(
 				{
-					Point3D(0, 0, 70),
+					Point3D(0, 0, 30),
 					EulerToQuaternion(20.0f, 0.0f, 0.0f)
 				}
 			);
@@ -58,9 +58,9 @@ void main()
 			playerCameraSystem->SetupTerrainBvh(mesh);
 
 #if defined(DEBUG) | defined(_DEBUG)
-			constexpr uint32_t gridSize = 25;
+			constexpr uint32_t gridSize = 20;
 #else
-			constexpr uint32_t gridSize = 5;
+			constexpr uint32_t gridSize = 50;
 #endif
 
 			for (uint32_t i = 0; i < gridSize; i++)

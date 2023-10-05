@@ -10,7 +10,7 @@ namespace Navigation
 
 		explicit SeparationBehavior()
 		{
-			SetWeight(1.0f);
+			SetWeight(2.0f);
 		}
 
 		void InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement) override;

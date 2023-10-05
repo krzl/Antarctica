@@ -23,14 +23,13 @@ namespace Navigation
 		m_hasValuesChanged |= ImGui::SliderFloat("Alignment::Weight", &m_alignmentWeight, 0.0f, 2.0f);
 		ImGui::NewLine();
 		m_hasValuesChanged |= ImGui::SliderFloat("Steering::AgentRadius", &m_agentRadius, 0.3f, 5.0f);
-		m_hasValuesChanged |= ImGui::SliderFloat("Steering::MaxAcceleration", &m_maxAcceleration, 0.0f, 500.0f);
+		m_hasValuesChanged |= ImGui::SliderFloat("Steering::Acceleration", &m_acceleration, 200.0f, 2000.0f);
 		m_hasValuesChanged |= ImGui::SliderFloat("Steering::MaxSpeed", &m_maxSpeed, 0.0f, 10.0f);
 		ImGui::NewLine();
 		m_hasValuesChanged |= ImGui::SliderFloat("Steering::MaxRotation", &m_maxRotation, 0.1f, 20.0f);
 		ImGui::NewLine();
 		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::TargetRadius", &m_arriveTargetRadius, 0.0f, 5.0f);
-		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::SlowdownRadius", &m_arriveSlowdownRadius, 0.0f, 5.0f);
-		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::TimeToTarget", &m_arriveTimeToTarget, 0.0f, 5.0f);
+		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::OuterTargetRadius", &m_outerTargetRadius, 0.0f, 10.0f);
 		ImGui::NewLine();
 		m_hasValuesChanged |= ImGui::SliderFloat("Cohesion::CohesionRange", &m_cohesionScale, 1.0f, 20.0f);
 		m_hasValuesChanged |= ImGui::SliderFloat("Alignment::CohesionRange", &m_cohesionScale, 1.0f, 20.0f);
@@ -52,15 +51,14 @@ namespace Navigation
 			m_cohesionWeight   = movement->m_cohesionBehavior.GetWeight();
 			m_alignmentWeight  = movement->m_alignmentBehavior.GetWeight();
 
-			m_agentRadius     = movement->m_radius;
-			m_maxAcceleration = movement->m_maxAcceleration;
-			m_maxSpeed        = movement->m_maxSpeed;
+			m_agentRadius  = movement->m_radius;
+			m_acceleration = movement->m_maxAcceleration;
+			m_maxSpeed     = movement->m_maxSpeed;
 
 			m_maxRotation = movement->m_maxRotation;
 
-			m_arriveTargetRadius   = movement->m_arriveBehavior.GetTargetRadius();
-			m_arriveSlowdownRadius = movement->m_arriveBehavior.GetSlowdownRadius();
-			m_arriveTimeToTarget   = movement->m_arriveBehavior.GetTimeToTarget();
+			m_arriveTargetRadius = movement->m_arriveBehavior.GetTargetRadius();
+			m_outerTargetRadius  = movement->m_arriveBehavior.GetOuterTargetRadius();
 
 			m_cohesionScale              = movement->m_cohesionBehavior.GetCohesionScale();
 			m_separationDecayCoefficient = movement->m_separationBehavior.GetDecayCoefficient();
@@ -75,14 +73,13 @@ namespace Navigation
 			movement->m_alignmentBehavior.SetWeight(m_alignmentWeight);
 
 			movement->m_radius          = m_agentRadius;
-			movement->m_maxAcceleration = m_maxAcceleration;
+			movement->m_maxAcceleration = m_acceleration;
 			movement->m_maxSpeed        = m_maxSpeed;
 
 			movement->m_maxRotation = m_maxRotation;
 
 			movement->m_arriveBehavior.SetTargetRadius(m_arriveTargetRadius);
-			movement->m_arriveBehavior.SetSlowdownRadius(m_arriveSlowdownRadius);
-			movement->m_arriveBehavior.SetTimeToTarget(m_arriveTimeToTarget);
+			movement->m_arriveBehavior.SetOuterTargetRadius(m_outerTargetRadius);
 
 			movement->m_cohesionBehavior.SetCohesionScale(m_cohesionScale);
 			movement->m_separationBehavior.SetDecayCoefficient(m_separationDecayCoefficient);

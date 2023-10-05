@@ -5,10 +5,12 @@
 #include "Camera/PlayerCameraSystem.h"
 #include "Debug/DebugDraw/DebugDrawSystem.h"
 #include "Debug/ImGui/ImGuiSystem.h"
-#include "Steering/MovementSystem.h"
 #include "Steering/SteeringSystem.h"
 #include "Systems/AnimationSystem.h"
+#include "Systems/ApplyImpulseSystem.h"
+#include "Systems/CollisionGatherSystem.h"
 #include "Systems/CullingSystem.h"
+#include "Systems/MovementSystem.h"
 #include "Systems/QuadtreeUpdateSystem.h"
 #include "Systems/RenderSystem.h"
 #include "Systems/SkinningSystem.h"
@@ -20,7 +22,9 @@ void Application::CreateSystems()
 
 	m_ecs.AddSystem<AbilitySystem>(ECS::STEP_LOCK);
 	m_ecs.AddSystem<Anim::AnimationSystem>(ECS::STEP_LOCK);
-	m_ecs.AddSystem<Navigation::MovementSystem>(ECS::STEP_LOCK);
+	m_ecs.AddSystem<Physics::CollisionGatherSystem>(ECS::STEP_LOCK);
+	m_ecs.AddSystem<Physics::ApplyImpulseSystem>(ECS::STEP_LOCK);
+	m_ecs.AddSystem<Physics::MovementSystem>(ECS::STEP_LOCK);
 	m_ecs.AddSystem<QuadtreeUpdateSystem>(ECS::STEP_LOCK);
 	m_ecs.AddSystem<Navigation::SteeringSystem>(ECS::STEP_LOCK);
 

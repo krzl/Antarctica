@@ -20,8 +20,9 @@ namespace Navigation
 		const float cohesionRange = (movement->m_radius + nearbyMovement->m_radius) * m_cohesionScale;
 
 		if (distanceSqr < cohesionRange * cohesionRange &&
-			movement->m_velocity != Vector2D::zero
-			&& nearbyMovement->m_arriveBehavior.HasTarget() &&
+			movement->m_velocity != Vector2D::zero &&
+			nearbyMovement->m_arriveBehavior.HasTarget() &&
+			movement->m_arriveBehavior.HasTarget() &&
 			SquaredMag(movement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget()) < cohesionRange * cohesionRange)
 		{
 			++m_actorCount;

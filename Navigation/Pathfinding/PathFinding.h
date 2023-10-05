@@ -1,5 +1,10 @@
 #pragma once
 
+namespace Physics
+{
+	class MovementSystem;
+}
+
 namespace Navigation
 {
 	class Terrain;
@@ -9,7 +14,7 @@ namespace Navigation
 	{
 		friend class GameState;
 		friend class ArriveBehavior;
-		friend class MovementSystem;
+		friend class Physics::MovementSystem;
 
 		enum class NodeState
 		{

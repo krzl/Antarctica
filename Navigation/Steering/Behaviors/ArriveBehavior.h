@@ -32,11 +32,8 @@ namespace Navigation
 		[[nodiscard]] float GetTargetRadius() const { return m_targetRadius; }
 		void SetTargetRadius(const float targetRadius) { m_targetRadius = targetRadius; }
 
-		[[nodiscard]] float GetSlowdownRadius() const { return m_slowdownRadius; }
-		void SetSlowdownRadius(const float slowdownRadius) { m_slowdownRadius = slowdownRadius; }
-
-		[[nodiscard]] float GetTimeToTarget() const { return m_timeToTarget; }
-		void SetTimeToTarget(const float timeToTarget) { m_timeToTarget = timeToTarget; }
+		[[nodiscard]] float GetOuterTargetRadius() const { return m_outerTargetRadius; }
+		void SetOuterTargetRadius(const float outerTargetRadius) { m_outerTargetRadius = outerTargetRadius; }
 
 	protected:
 
@@ -46,11 +43,10 @@ namespace Navigation
 
 		std::optional<std::list<uint32_t>> m_path;
 		std::list<unsigned>::iterator m_currentPathSegment;
-		
+
 		uint32_t m_framesUntilCalculatePath = -1;
 
-		float m_targetRadius   = 1.5;
-		float m_slowdownRadius = 0.0f;
-		float m_timeToTarget   = 0.1f;
+		float m_targetRadius      = 1.5;
+		float m_outerTargetRadius = 4.0f;
 	};
 }

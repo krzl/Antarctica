@@ -16,27 +16,19 @@ namespace Navigation
 	void SeparationBehavior::UpdateNearbyEntity(const TransformComponent* transform, MovementComponent* movement,
 												const TransformComponent* nearbyTransform, MovementComponent* nearbyMovement)
 	{
-		const float characterRadius = movement->m_radius;
-
-		const Vector2D direction = transform->m_localPosition.xy - nearbyTransform->m_localPosition.xy;
-		const float distance     = Magnitude(direction);
-
-		const float otherRadius = nearbyMovement->m_radius;
-
-		const float radiusSum = characterRadius + otherRadius;
-
 		if (movement->m_arriveBehavior.HasTarget() && !nearbyMovement->m_arriveBehavior.HasTarget())
 		{
 			return;
 		}
 
-		if (distance < radiusSum && distance > 0.0f)
+		const Vector2D direction = transform->m_localPosition.xy - nearbyTransform->m_localPosition.xy;
+		const float distanceSqr  = SquaredMag(direction);
+
+		if (distanceSqr < movement->m_radius * 4 * movement->m_radius && distanceSqr > 0.0f)
 		{
-			const float relativeDistance = distance / radiusSum;
-			const float strength         = m_decayCoefficient / (relativeDistance * relativeDistance);
-
-			m_totalAcceleration += direction * strength;
-
+			const float radiusSum = movement->m_radius + nearbyMovement->m_radius;
+			const float distance  = Terathon::Sqrt(distanceSqr);
+			m_totalAcceleration += direction * (1.0f - ((distance - radiusSum) / (movement->m_radius * 4 - radiusSum)));
 			++m_actorCount;
 		}
 	}
@@ -46,14 +38,6 @@ namespace Navigation
 		if (m_actorCount == 0 || m_totalAcceleration == Vector2D::zero)
 		{
 			return Vector2D::zero;
-		}
-
-		m_totalAcceleration *= movement->m_maxAcceleration / m_actorCount;
-
-		const float acceleration = Magnitude(m_totalAcceleration);
-		if (acceleration > movement->m_maxAcceleration)
-		{
-			m_totalAcceleration *= movement->m_maxAcceleration / acceleration;
 		}
 
 		return m_totalAcceleration / m_actorCount * movement->m_maxAcceleration;

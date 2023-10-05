@@ -23,7 +23,7 @@ namespace Navigation
 
 	protected:
 
-		float m_cohesionScale = 10.0f;
+		float m_cohesionScale = 2.0f;
 
 	private:
 

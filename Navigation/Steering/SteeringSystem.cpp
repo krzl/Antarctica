@@ -42,54 +42,35 @@ namespace Navigation
 
 		movement->m_steeringPipeline.InitializeTotalAccelerationCalculation(transform, movement);
 
-		World::Get()->GetQuadtree().FindNearby(Sphere{ transform->m_localPosition, maxRadiusToCheck }, [entityId, &movement, &transform](Entity* entity)
-		{
-			const ComponentAccessor& componentAccessor = entity->GetComponentAccessor();
-
-			const TransformComponent* nearbyTransform = componentAccessor.GetComponent<TransformComponent>();
-			MovementComponent* nearbyMovement         = componentAccessor.GetComponent<MovementComponent>();
-
-			if (nearbyTransform && nearbyMovement && entity->GetInstanceId() != entityId)
+		World::Get()->GetQuadtree().FindNearby(Sphere{ transform->m_localPosition, maxRadiusToCheck },
+			[entityId, &movement, &transform](Entity* entity)
 			{
-				movement->m_steeringPipeline.UpdateNearbyEntity(transform, movement, nearbyTransform, nearbyMovement);
-			}
-		});
+				const ComponentAccessor& componentAccessor = entity->GetComponentAccessor();
 
-		Vector2D acceleration = movement->m_steeringPipeline.GetFinalLinearAcceleration(transform, movement);
+				const TransformComponent* nearbyTransform = componentAccessor.GetComponent<TransformComponent>();
+				MovementComponent* nearbyMovement         = componentAccessor.GetComponent<MovementComponent>();
 
-		if (!movement->m_arriveBehavior.HasTarget())
-		{
-			acceleration *= movement->m_decelerationFactor;
-		}
+				if (nearbyTransform && nearbyMovement && entity->GetInstanceId() != entityId)
+				{
+					movement->m_steeringPipeline.UpdateNearbyEntity(transform, movement, nearbyTransform, nearbyMovement);
+				}
+			});
 
 		const float deltaTime = TimeManager::GetInstance()->GetTimeStep();
 
-		if (acceleration == Vector2D::zero)
+		movement->m_force = movement->m_steeringPipeline.GetFinalLinearAcceleration(transform, movement);
+		
+		if (movement->m_force == Vector2D::zero && movement->m_velocity != Vector2D::zero)
 		{
-			if (SquaredMag(movement->m_velocity) != 0.0f)
+			const Vector2D velocityDelta = Normalize(movement->m_velocity) * movement->m_maxAcceleration * deltaTime;
+			if (SquaredMag(velocityDelta) > SquaredMag(movement->m_velocity))
 			{
-				const Vector2D velocityDelta = Normalize(movement->m_velocity) * movement->m_maxAcceleration * deltaTime;
-				if (SquaredMag(velocityDelta) > SquaredMag(movement->m_velocity))
-				{
-					movement->m_velocity = Vector2D::zero;
-				}
-				else
-				{
-					movement->m_velocity -= velocityDelta;
-					//movement->m_velocity = Vector2D::zero;
-				}
+				movement->m_velocity = Vector2D::zero;
 			}
-		}
-		else
-		{
-			movement->m_velocity += acceleration * deltaTime;
-		}
-
-		if (movement->m_velocity != Vector2D::zero)
-		{
-			if (SquaredMag(movement->m_velocity) > movement->m_maxSpeed * movement->m_maxSpeed)
+			else
 			{
-				movement->m_velocity = Normalize(movement->m_velocity) * movement->m_maxSpeed;
+				movement->m_velocity -= velocityDelta;
+				//movement->m_velocity = Vector2D::zero;
 			}
 		}
 	}

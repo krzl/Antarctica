@@ -10,7 +10,7 @@ namespace Navigation
 
 		explicit AlignmentBehavior()
 		{
-			SetWeight(0.4f);
+			SetWeight(0.2f);
 		}
 
 		void InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement) override;
@@ -23,7 +23,7 @@ namespace Navigation
 
 	protected:
 
-		float m_cohesionScale = 1.0f;
+		float m_cohesionScale = 2.0f;
 
 	private:
 		

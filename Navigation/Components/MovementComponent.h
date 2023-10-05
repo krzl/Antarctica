@@ -11,11 +11,12 @@ namespace Navigation
 {
 	struct MovementComponent : Component
 	{
+		Vector2D m_force    = Vector2D::zero;
 		Vector2D m_velocity = Vector2D::zero;
 
 		float m_radius = 0.0f;
 
-		float m_maxAcceleration    = 50.0f;
+		float m_maxAcceleration    = 1500.0f;
 		float m_maxSpeed           = 4.0f;
 		float m_decelerationFactor = 2.0f;
 

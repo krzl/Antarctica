@@ -17,15 +17,14 @@ namespace Navigation
 		float m_cohesionWeight   = 0.0f;
 		float m_alignmentWeight  = 0.0f;
 
-		float m_agentRadius     = 0.0f;
-		float m_maxAcceleration = 0.0f;
-		float m_maxSpeed        = 0.0f;
+		float m_agentRadius  = 0.0f;
+		float m_acceleration = 0.0f;
+		float m_maxSpeed     = 0.0f;
 
 		float m_maxRotation = 0.0f;
 
-		float m_arriveTargetRadius   = 0.0f;
-		float m_arriveSlowdownRadius = 0.0f;
-		float m_arriveTimeToTarget   = 0.0f;
+		float m_arriveTargetRadius = 0.0f;
+		float m_outerTargetRadius  = 0.0f;
 
 		float m_cohesionScale              = 0.0f;
 		float m_alignmentCohesionScale     = 0.0f;

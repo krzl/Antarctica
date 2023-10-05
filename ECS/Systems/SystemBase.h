@@ -27,4 +27,5 @@ protected:
 	ECS* m_ecs;
 
 	bool m_isMultiThreaded = true;
+	uint32_t m_iterationCount = 1;
 };

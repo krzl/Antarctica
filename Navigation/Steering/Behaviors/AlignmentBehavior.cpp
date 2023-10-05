@@ -20,13 +20,13 @@ namespace Navigation
 		{
 			return;
 		}
-		
+
 		const float distance      = SquaredMag(nearbyTransform->m_localPosition.xy - transform->m_localPosition.xy);
 		const float cohesionRange = (movement->m_radius + nearbyMovement->m_radius) * m_cohesionScale;
 
 		if (distance < cohesionRange && movement->m_velocity != Vector2D::zero &&
 			nearbyMovement->m_arriveBehavior.HasTarget() &&
-			Magnitude(nearbyMovement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget()) < cohesionRange)
+			SquaredMag(nearbyMovement->m_arriveBehavior.GetTarget() - movement->m_arriveBehavior.GetTarget()) < cohesionRange * cohesionRange)
 		{
 			++m_actorCount;
 			m_heading += Normalize(nearbyMovement->m_velocity);
@@ -42,7 +42,7 @@ namespace Navigation
 
 		const Vector2D averageHeading  = m_heading / m_actorCount;
 		const Vector2D desiredVelocity = averageHeading * movement->m_maxSpeed;
-		const Vector2D velocityChange  = desiredVelocity - movement->m_velocity;
-		return velocityChange * (movement->m_maxAcceleration / movement->m_maxSpeed);
+		const Vector2D force  = desiredVelocity - movement->m_velocity;
+		return force * movement->m_maxAcceleration / movement->m_maxSpeed;
 	}
 }

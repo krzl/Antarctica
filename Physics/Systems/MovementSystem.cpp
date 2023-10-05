@@ -1,24 +1,43 @@
 ﻿#include "stdafx.h"
 #include "MovementSystem.h"
 
+#include "Archetypes/ComponentAccessor.h"
 #include "Components/MovementComponent.h"
+#include "Components/PhysicsBodyComponent.h"
 #include "Components/TransformComponent.h"
+#include "Entities/World.h"
 #include "Managers/TimeManager.h"
 #include "Pathfinding/PathFinding.h"
 #include "Terrain/Terrain.h"
 
-namespace Navigation
+namespace Physics
 {
-	void MovementSystem::Update(uint64_t entityId, TransformComponent* transform, MovementComponent* movement)
+	void MovementSystem::Update(const uint64_t entityId, TransformComponent* transform, Navigation::MovementComponent* movement)
 	{
-		if (movement->m_velocity != Vector2D::zero)
+		if (movement->m_force != Vector2D::zero || movement->m_velocity != Vector2D::zero)
 		{
 			constexpr float deltaTime = TimeManager::GetTimeStep();
 
 			transform->m_localPosition += Vector3D(movement->m_velocity, 0.0f) * deltaTime;
-
-			transform->m_localPosition.z = PathFinding::m_terrain->GetHeightAtLocation(
+			transform->m_localPosition.z = Navigation::PathFinding::m_terrain->GetHeightAtLocation(
 				(Point2D) transform->m_localPosition.xy);
+
+			const ComponentAccessor& componentAccessor = World::Get()->GetEntity(entityId)->GetComponentAccessor();
+			if (const PhysicsBodyComponent* physicsBody = componentAccessor.GetComponent<PhysicsBodyComponent>())
+			{
+				movement->m_velocity += movement->m_force * physicsBody->GetInverseMass() * deltaTime / 2.0f;
+
+				if (movement->m_velocity != Vector2D::zero)
+				{
+					if (SquaredMag(movement->m_velocity) > movement->m_maxSpeed * movement->m_maxSpeed)
+					{
+						movement->m_velocity = Normalize(movement->m_velocity) * movement->m_maxSpeed;
+					}
+				}
+			}
+			movement->m_force = Vector2D::zero;
+
+
 
 			const Vector3D oldDirection = transform->m_localRotation.GetDirectionY();
 			const float oldOrientation  = std::atan2(-oldDirection.x, oldDirection.y);

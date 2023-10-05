@@ -28,47 +28,52 @@ public:
 			static uint32_t componentIds[sizeof...(Types)];
 			TryAddNewArchetype<0>(allArchetypes[m_archetypesParsed++].get(), componentIds);
 		}
-		if (m_isMultiThreaded)
+		uint32_t currentIteration = 0;
+		while (currentIteration < m_iterationCount)
 		{
-			std::for_each(std::execution::par_unseq,
-				m_archetypesMatched.begin(),
-				m_archetypesMatched.end(),
-				[this](const MatchedArchetype& archetype)
-				{
-					std::atomic_uint32_t counter = 0;
-					std::for_each(std::execution::par_unseq,
-						archetype.m_archetype->m_entityIds.begin(),
-						archetype.m_archetype->m_entityIds.end(),
-						[this, archetype, &counter](const uint64_t entityId)
-						{
-							const uint32_t id = counter++;
-							if (archetype.m_archetype->m_entityIds[id] != 0)
+			if (m_isMultiThreaded)
+			{
+				std::for_each(std::execution::par_unseq,
+					m_archetypesMatched.begin(),
+					m_archetypesMatched.end(),
+					[this](const MatchedArchetype& archetype)
+					{
+						std::atomic_uint32_t counter = 0;
+						std::for_each(std::execution::par_unseq,
+							archetype.m_archetype->m_entityIds.begin(),
+							archetype.m_archetype->m_entityIds.end(),
+							[this, archetype, &counter](const uint64_t entityId)
 							{
-								Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
-							}
-						});
-				});
-		}
-		else
-		{
-			std::for_each(std::execution::seq,
-				m_archetypesMatched.begin(),
-				m_archetypesMatched.end(),
-				[this](const MatchedArchetype& archetype)
-				{
-					uint32_t counter = 0;
-					std::for_each(std::execution::seq,
-						archetype.m_archetype->m_entityIds.begin(),
-						archetype.m_archetype->m_entityIds.end(),
-						[this, archetype, &counter](const uint64_t entityId)
-						{
-							const uint32_t id = counter++;
-							if (archetype.m_archetype->m_entityIds[id] != 0)
+								const uint32_t id = counter++;
+								if (archetype.m_archetype->m_entityIds[id] != 0)
+								{
+									Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
+								}
+							});
+					});
+			}
+			else
+			{
+				std::for_each(std::execution::seq,
+					m_archetypesMatched.begin(),
+					m_archetypesMatched.end(),
+					[this](const MatchedArchetype& archetype)
+					{
+						uint32_t counter = 0;
+						std::for_each(std::execution::seq,
+							archetype.m_archetype->m_entityIds.begin(),
+							archetype.m_archetype->m_entityIds.end(),
+							[this, archetype, &counter](const uint64_t entityId)
 							{
-								Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
-							}
-						});
-				});
+								const uint32_t id = counter++;
+								if (archetype.m_archetype->m_entityIds[id] != 0)
+								{
+									Run<0>(archetype, id, archetype.m_archetype->m_entityIds[id]);
+								}
+							});
+					});
+			}
+			++currentIteration;
 		}
 
 		OnUpdateEnd();
