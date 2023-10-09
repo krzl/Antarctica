@@ -3,8 +3,6 @@
 
 #include "Sphere.h"
 
-#include "assimp/code/AssetLib/3MF/3MFXmlTags.h"
-
 IntersectTestResult Intersect2D(const Sphere& sphere, const BoundingBox& boundingBox)
 {
 	const Point2D topLeft  = Point2D(boundingBox.m_lowerBoundary.x, boundingBox.m_upperBoundary.y);

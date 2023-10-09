@@ -35,8 +35,9 @@ T Clamp(const T& a, const T& b, const T& value)
 bool IsInsideTriangle(const Point3D& p, const Point3D& t1, const Point3D& t2, const Point3D& t3);
 
 float GetDistanceFromLineToPoint(const Vector3D& direction, const Point3D& point);
-
 float GetDistanceSquaredFromLineToPoint(const Vector3D& direction, const Point3D& point);
+
+Point3D GetClosestPointFromLineSegmentToPoint(const Point3D& start, const Point3D& end, const Point3D& point);
 
 bool IsNaN(const Vector2D& vector);
 bool IsNaN(const Vector3D& vector);

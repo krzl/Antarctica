@@ -2,6 +2,7 @@
 
 namespace Physics
 {
+	class CollisionGatherSystem;
 	class MovementSystem;
 }
 
@@ -15,6 +16,7 @@ namespace Navigation
 		friend class GameState;
 		friend class ArriveBehavior;
 		friend class Physics::MovementSystem;
+		friend class Physics::CollisionGatherSystem;
 
 		enum class NodeState
 		{

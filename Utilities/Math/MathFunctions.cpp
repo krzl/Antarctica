@@ -83,6 +83,28 @@ float GetDistanceSquaredFromLineToPoint(const Vector3D& direction, const Point3D
 	return distanceSquared;
 }
 
+Point3D GetClosestPointFromLineSegmentToPoint(const Point3D& start, const Point3D& end, const Point3D& point)
+{
+	const Vector3D a = point - start;
+	const Vector3D dir = end - start;
+
+	const float dot = Dot(a, dir);
+	const float segmentLengthSqr = SquaredMag(dir);
+
+	const float t = segmentLengthSqr != 0.0f ? dot / segmentLengthSqr : -1.0f;
+
+	if (t < 0.0f)
+	{
+		return start;
+	}
+	if (t > 1.0f)
+	{
+		return end;
+	}
+	
+	return Point3D(start + t * dir);
+}
+
 bool IsNaN(const Vector2D& vector)
 {
 	return isnan<float>(vector.x) || isnan<float>(vector.y);

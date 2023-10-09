@@ -74,6 +74,8 @@ namespace Rendering::Dx12
 		[[nodiscard]] ScratchBuffer& GetScratchBuffer() { return m_scratchBuffers[m_currentFenceId % 4]; }
 
 	private:
+		
+		IDXGIAdapter* FindBestAdapter() const;
 
 		ComPtr<IDXGIFactory4> m_dxgiFactory;
 		ComPtr<ID3D12Device> m_device;
@@ -102,7 +104,7 @@ namespace Rendering::Dx12
 
 		std::vector<RenderObject> m_renderQueue;
 
-		std::array<ScratchBuffer, 4> m_scratchBuffers;
+		std::array<ScratchBuffer, 16> m_scratchBuffers;
 
 		ScratchBufferHandle m_currentCameraBufferHandle;
 

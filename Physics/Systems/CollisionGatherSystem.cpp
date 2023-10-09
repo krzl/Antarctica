@@ -6,6 +6,10 @@
 #include "Components/TransformComponent.h"
 #include "Entities/World.h"
 #include "Managers/TimeManager.h"
+
+#include "Pathfinding/NavMesh.h"
+#include "Pathfinding/PathFinding.h"
+
 #include "PhysicsBody/CollisionData.h"
 
 namespace Physics
@@ -37,7 +41,6 @@ namespace Physics
 
 						if (distanceSqr >= radius * radius)
 						{
-							//TODO: Check if it ever hits
 							return;
 						}
 
@@ -74,5 +77,25 @@ namespace Physics
 					}
 				}
 			});
+
+		Navigation::NavMesh* navMesh = Navigation::PathFinding::m_navMesh;
+
+		Vector2D collisionNormal;
+		Point2D collisionPoint;
+		float penetration;
+
+		if (navMesh->FindCollisionPoint(transform->m_localPosition, movement->m_radius, collisionPoint, collisionNormal, penetration))
+		{
+			physicsBody->m_collisions.emplace_back(CollisionData{
+				entity,
+				nullptr,
+				physicsBody->m_restitution,
+				physicsBody->m_staticFriction,
+				physicsBody->m_dynamicFriction,
+				penetration,
+				collisionNormal,
+				collisionPoint
+			});
+		}
 	}
 }

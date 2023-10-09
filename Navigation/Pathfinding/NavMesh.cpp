@@ -1128,4 +1128,155 @@ namespace Navigation
 			}
 		}
 	}
+
+	bool NavMesh::FindCollisionPoint(const Point3D& location, const float radius, Point2D& outCollisionPoint, Vector2D& outCollisionNormal,
+									 float& outPenetration)
+	{
+		const uint32_t startTriangleId = FindTriangleId(location);
+
+		std::set<uint32_t> visitedTriangles;
+		visitedTriangles.emplace(startTriangleId);
+
+		float distanceToPointSqr = 100000.0f;
+
+		if (!m_triangles[startTriangleId].m_isNavigable)
+		{
+			FindNearestPointOnNavMesh(startTriangleId, (Point2D) location.xy, outCollisionPoint, &outCollisionNormal, distanceToPointSqr,
+				visitedTriangles);
+			outPenetration = Terathon::Sqrt(distanceToPointSqr);
+			return true;
+		}
+
+		FindCollisionPoint(startTriangleId, location, radius * radius, outCollisionPoint, outCollisionNormal, distanceToPointSqr, visitedTriangles);
+
+		if (distanceToPointSqr > radius)
+		{
+			return false;
+		}
+
+		outPenetration = radius - Terathon::Sqrt(distanceToPointSqr);
+		return true;
+	}
+
+	void NavMesh::FindCollisionPoint(const uint32_t triangleId, const Point3D& location, const float radiusSqr, Point2D& collisionPoint,
+									 Vector2D& collisionNormal, float& distanceToPointSqr, std::set<uint32_t>& visitedTriangles)
+	{
+		const Triangle& triangle = m_triangles[triangleId];
+
+		const Point3D points[] = {
+			m_vertices[triangle.m_vertices[0]],
+			m_vertices[triangle.m_vertices[1]],
+			m_vertices[triangle.m_vertices[2]]
+		};
+
+		if (!triangle.m_isNavigable)
+		{
+			__debugbreak();
+		}
+
+		for (uint32_t i = 0; i < 3; ++i)
+		{
+			const uint32_t neighborTriangleId = triangle.m_adjacentTriangles[i];
+			const Triangle& neighborTriangle  = m_triangles[neighborTriangleId];
+
+			if (visitedTriangles.find(neighborTriangleId) != visitedTriangles.end())
+			{
+				continue;
+			}
+
+			visitedTriangles.emplace(neighborTriangleId);
+
+			const Point3D closestPoint = GetClosestPointFromLineSegmentToPoint((Point3D) points[i].xy, (Point3D) points[(i + 1) % 3].xy,
+				(Point3D) location.xy);
+			const float distanceToSegmentSqr = SquaredMag(closestPoint.xy - location.xy);
+
+			if (distanceToSegmentSqr < distanceToPointSqr)
+			{
+				if (!neighborTriangle.m_isNavigable)
+				{
+					const Vector2D lineDir = Normalize(points[(i + 1) % 3].xy - points[i].xy);
+					collisionPoint         = closestPoint.xy;
+					collisionNormal        = Vector2D(lineDir.y, -lineDir.x);
+					distanceToPointSqr     = distanceToSegmentSqr;
+
+					if (Dot(collisionNormal, location.xy - closestPoint.xy) > 0.0f)
+					{
+						collisionNormal = -collisionNormal;
+					}
+				}
+				else
+				{
+					FindCollisionPoint(neighborTriangleId, location, radiusSqr, collisionPoint, collisionNormal, distanceToPointSqr,
+						visitedTriangles);
+				}
+			}
+		}
+	}
+
+	Point2D NavMesh::FindNearestPointOnNavMesh(const Point2D& location, Vector2D* normal)
+	{
+		const uint32_t startTriangleId = FindTriangleId(location);
+
+		std::set<uint32_t> visitedTriangles;
+		visitedTriangles.emplace(startTriangleId);
+
+
+		Point2D pointOnNavMesh;
+		float closestDistanceSqr = 100000.0f;
+		FindNearestPointOnNavMesh(startTriangleId, (Point2D) location.xy, pointOnNavMesh, normal, closestDistanceSqr, visitedTriangles);
+		return pointOnNavMesh;
+	}
+
+	void NavMesh::FindNearestPointOnNavMesh(const uint32_t triangleId, const Point2D& location, Point2D& pointOnNavMesh, Vector2D* normal,
+											float& closestDistanceSqr, std::set<uint32_t>& visitedTriangles)
+	{
+		const Triangle& triangle = m_triangles[triangleId];
+
+		const Point3D points[] = {
+			m_vertices[triangle.m_vertices[0]],
+			m_vertices[triangle.m_vertices[1]],
+			m_vertices[triangle.m_vertices[2]]
+		};
+
+		for (uint32_t i = 0; i < 3; ++i)
+		{
+			const uint32_t neighborTriangleId = triangle.m_adjacentTriangles[i];
+			const Triangle& neighborTriangle  = m_triangles[neighborTriangleId];
+
+			if (visitedTriangles.find(neighborTriangleId) != visitedTriangles.end())
+			{
+				continue;
+			}
+
+			visitedTriangles.emplace(neighborTriangleId);
+
+			const Point3D closestPoint = GetClosestPointFromLineSegmentToPoint((Point3D) points[i].xy, (Point3D) points[(i + 1) % 3].xy,
+				(Point3D) location.xy);
+			const float distanceToSegmentSqr = SquaredMag(closestPoint.xy - location.xy);
+
+			if (distanceToSegmentSqr < closestDistanceSqr)
+			{
+				if (neighborTriangle.m_isNavigable)
+				{
+					pointOnNavMesh = closestPoint.xy;
+					if (normal)
+					{
+						const Vector2D lineDir = Normalize(points[(i + 1) % 3].xy - points[i].xy);
+
+						*normal = Vector2D(lineDir.y, -lineDir.x);
+
+						if (Dot(*normal, location.xy - closestPoint.xy) > 0.0f)
+						{
+							*normal = -*normal;
+						}
+					}
+					closestDistanceSqr = distanceToSegmentSqr;
+				}
+				else
+				{
+					FindNearestPointOnNavMesh(neighborTriangleId, location, pointOnNavMesh, normal, closestDistanceSqr, visitedTriangles);
+				}
+			}
+		}
+	}
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "Components/MovementComponent.h"
 
 struct Submesh;
 
@@ -43,6 +44,10 @@ namespace Navigation
 		bool DoesDirectPathExists(uint32_t startVertexId, const Point3D& endPoint) const;
 		bool DoesDirectPathExists(const Point3D& startPoint, const Point3D& endPoint) const;
 
+		bool FindCollisionPoint(const Point3D& location, float radius, Point2D& outCollisionPoint, Vector2D& outCollisionNormal,
+								float& outPenetration);
+		Point2D FindNearestPointOnNavMesh(const Point2D& location, Vector2D* normal = nullptr);
+
 	private:
 
 		void SetTriangle(uint32_t triangleId, const Triangle& triangle);
@@ -72,6 +77,12 @@ namespace Navigation
 
 		void AssignIslandIds();
 		void AssignIslandId(uint32_t triangleId, uint32_t islandId, std::set<uint32_t>& remainingTriangles);
+
+		void FindCollisionPoint(const uint32_t triangleId, const Point3D& location, float radiusSqr, Point2D& collisionPoint,
+								Vector2D& collisionNormal, float& distanceToPointSqr, std::set<uint32_t>& visitedTriangles);
+
+		void FindNearestPointOnNavMesh(const uint32_t triangleId, const Point2D& location, Point2D& pointOnNavMesh, Vector2D* normal,
+									   float& closestDistanceSqr, std::set<uint32_t>& visitedTriangles);
 
 		std::vector<Point3D> m_vertices;
 		std::vector<std::unordered_set<uint32_t>> m_vertexToTriangleMap;

@@ -20,21 +20,27 @@ namespace Physics
 	{
 		for (const CollisionData& collision : physicsBody->m_collisions)
 		{
-			const ComponentAccessor& componentAccessor   = collision.m_entityB->GetComponentAccessor();
-			const TransformComponent* otherTransform     = componentAccessor.GetComponent<TransformComponent>();
-			Navigation::MovementComponent* otherMovement = componentAccessor.GetComponent<Navigation::MovementComponent>();
-			const PhysicsBodyComponent* otherPhysicsBody = componentAccessor.GetComponent<PhysicsBodyComponent>();
+			Navigation::MovementComponent* otherMovement = nullptr;
+			const PhysicsBodyComponent* otherPhysicsBody = nullptr;
 
-			const Vector2D ra = collision.m_contactPoint - transform->m_localPosition.xy;
-			const Vector2D rb = collision.m_contactPoint - otherTransform->m_localPosition.xy;
+			if (collision.m_entityB)
+			{
+				const ComponentAccessor& componentAccessor = collision.m_entityB->GetComponentAccessor();
+				otherMovement                              = componentAccessor.GetComponent<Navigation::MovementComponent>();
+				otherPhysicsBody                           = componentAccessor.GetComponent<PhysicsBodyComponent>();
+			}
 
-			Vector2D relativeVelocity = otherMovement->m_velocity - movement->m_velocity;
+			Vector2D relativeVelocity = -movement->m_velocity;
+			if (otherMovement)
+			{
+				relativeVelocity += otherMovement->m_velocity;
+			}
 
 			if (relativeVelocity == Vector2D::zero)
 			{
 				continue;
 			}
-			
+
 			const float contactVelocity = Dot(relativeVelocity, collision.m_normal);
 
 
@@ -43,17 +49,21 @@ namespace Physics
 				// entities are separating, ignore resolve
 				continue;
 			}
-			const float raCrossN       = ra.x * collision.m_normal.y - ra.y * collision.m_normal.x;
-			const float rBCrossN       = rb.x * collision.m_normal.y - rb.y * collision.m_normal.x;
-			const float inverseMassSum = physicsBody->GetInverseMass() + otherPhysicsBody->GetInverseMass();
+
+			const float inverseMassSum = physicsBody->GetInverseMass() + (otherPhysicsBody ? otherPhysicsBody->GetInverseMass() : 0.0f);
 
 			const float j = -(1.0f + collision.m_restitution) * contactVelocity / inverseMassSum;
 
 			const Vector2D impulse = collision.m_normal * j;
 			movement->m_velocity -= physicsBody->GetInverseMass() * impulse;
-			otherMovement->m_velocity += otherPhysicsBody->GetInverseMass() * impulse;
 
-			relativeVelocity = otherMovement->m_velocity - movement->m_velocity;
+			relativeVelocity = - movement->m_velocity;
+			if (otherMovement)
+			{
+				otherMovement->m_velocity += otherPhysicsBody->GetInverseMass() * impulse;
+				relativeVelocity += otherMovement->m_velocity;
+			}
+
 			const Vector2D t = Normalize(relativeVelocity - (collision.m_normal * Dot(relativeVelocity, collision.m_normal)));
 
 			if (relativeVelocity == Vector2D::zero || IsNaN(t))
@@ -78,7 +88,11 @@ namespace Physics
 			}
 
 			movement->m_velocity -= physicsBody->GetInverseMass() * tangentImpulse;
-			otherMovement->m_velocity += otherPhysicsBody->GetInverseMass() * tangentImpulse;
+
+			if (otherMovement)
+			{
+				otherMovement->m_velocity += otherPhysicsBody->GetInverseMass() * tangentImpulse;
+			}
 		}
 	}
 }

@@ -188,7 +188,7 @@ namespace Rendering::Dx12
 		{
 			const ComPtr<ID3D12Resource>& buffer = m_buffers[i];
 
-			if (IsUavBuffer(i))
+			if (!IsUavBuffer(i))
 			{
 				buffer->Unmap(0, nullptr);
 			}
@@ -200,7 +200,7 @@ namespace Rendering::Dx12
 		for (uint32_t i = 0; i < m_bufferAllocationSizes.size(); ++i)
 		{
 			m_bufferAllocationSizes[i] = 0;
-			if (IsUavBuffer(i))
+			if (!IsUavBuffer(i))
 			{
 				m_buffers[i]->Map(0, nullptr, (void**) &m_mappedBuffers[i]);
 			}

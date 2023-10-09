@@ -25,6 +25,28 @@ namespace Rendering::Dx12
 		context = this;
 	}
 
+	IDXGIAdapter* Dx12Context::FindBestAdapter() const
+	{
+		IDXGIAdapter* bestAdapter   = nullptr;
+		uint64_t currentHighestVRam = 0;
+
+		uint32_t i = 0;
+		IDXGIAdapter* adapter;
+		while (m_dxgiFactory->EnumAdapters(i++, &adapter) != DXGI_ERROR_NOT_FOUND)
+		{
+			DXGI_ADAPTER_DESC desc;
+			adapter->GetDesc(&desc);
+
+			if (desc.DedicatedVideoMemory > currentHighestVRam)
+			{
+				currentHighestVRam = desc.DedicatedVideoMemory;
+				bestAdapter        = adapter;
+			}
+		}
+
+		return bestAdapter;
+	}
+
 	void Dx12Context::Init(const Platform::Window& window, const Settings& settings)
 	{
 #if defined(DEBUG) | defined(_DEBUG)
@@ -48,27 +70,7 @@ namespace Rendering::Dx12
 		CreateDXGIFactory1(IID_PPV_ARGS(&m_dxgiFactory));
 #endif
 
-		uint32_t i = 0;
-		IDXGIAdapter* pAdapter;
-		while (m_dxgiFactory->EnumAdapters(i++, &pAdapter) != DXGI_ERROR_NOT_FOUND)
-		{
-			DXGI_ADAPTER_DESC desc;
-			pAdapter->GetDesc(&desc);
-			
-			std::wstring ws(desc.Description);
-			std::string str(ws.begin(), ws.end());
-			
-			LOG(DEBUG, "DX12", "DESC {}", str);
-			LOG(DEBUG, "DX12", "VENDOR {}", desc.VendorId);
-			LOG(DEBUG, "DX12", "DEVICE {}", desc.DeviceId);
-			LOG(DEBUG, "DX12", "SUBSYSID {}", desc.SubSysId);
-			LOG(DEBUG, "DX12", "REVISION {}", desc.Revision);
-			LOG(DEBUG, "DX12", "VMEM {}", desc.DedicatedVideoMemory);
-			LOG(DEBUG, "DX12", "SMEM {}", desc.DedicatedSystemMemory);
-			LOG(DEBUG, "DX12", "SHARED SMEM {}", desc.SharedSystemMemory);
-		}
-
-		D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&m_device));
+		D3D12CreateDevice(FindBestAdapter(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&m_device));
 		m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_commandFence));
 
 		D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msQualityLevels = {
