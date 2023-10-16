@@ -39,7 +39,6 @@ namespace Rendering::Dx12
 			D3D12_BUFFER_SRV_FLAG_NONE
 		};
 
-		//LOG(DEBUG, "TEST", "BIND {} : {}, {}", this, heapHandle->GetCPUHandle().ptr, heapHandle->GetGPUHandle().ptr);
 		Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_buffers[handle.m_bufferId].Get(), &desc, heapHandle->GetCPUHandle());
 
 		return heapHandle;
@@ -198,10 +197,6 @@ namespace Rendering::Dx12
 
 	void ScratchBuffer::Reset()
 	{
-		if (m_buffers.size() > 0)
-		{
-			//LOG(DEBUG, "TEST", "RESET {} : {}", this, m_buffers[0].GetAddressOf());
-		}
 		for (uint32_t i = 0; i < m_bufferAllocationSizes.size(); ++i)
 		{
 			m_bufferAllocationSizes[i] = 0;
