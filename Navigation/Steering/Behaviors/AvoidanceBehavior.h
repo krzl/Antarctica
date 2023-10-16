@@ -21,7 +21,6 @@ namespace Navigation
 	private:
 
 		const TransformComponent* m_closestTransform = nullptr;
-		const MovementComponent* m_closestMovement = nullptr;
 		float m_closestDistanceSqr = 0.0f;
 	};
 }
