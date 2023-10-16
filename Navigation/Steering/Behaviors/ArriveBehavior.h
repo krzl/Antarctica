@@ -45,7 +45,7 @@ namespace Navigation
 
 		uint32_t m_framesUntilCalculatePath = -1;
 
-		float m_targetRadius      = 4.0f;
-		float m_outerTargetRadius = 12.0f;
+		float m_targetRadius      = 0.2f;
+		float m_outerTargetRadius = 5.0f;
 	};
 }

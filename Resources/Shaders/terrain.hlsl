@@ -38,10 +38,10 @@ SamplerState samp : register(s0);
 			"DescriptorTable(SRV(t0, numDescriptors = 1))," \
 			"CBV(b1)," \
 			"CBV(b2)," \
-			"DescriptorTable( SRV(t3, numDescriptors = 1))," \
-			"DescriptorTable( SRV(t4, numDescriptors = 1))," \
-			"DescriptorTable( SRV(t5, numDescriptors = 1))," \
-			"DescriptorTable( SRV(t6, numDescriptors = 1))," \
+			"DescriptorTable( SRV(t3, numDescriptors = 1), visibility=SHADER_VISIBILITY_PIXEL)," \
+			"DescriptorTable( SRV(t4, numDescriptors = 1), visibility=SHADER_VISIBILITY_PIXEL)," \
+			"DescriptorTable( SRV(t5, numDescriptors = 1), visibility=SHADER_VISIBILITY_PIXEL)," \
+			"DescriptorTable( SRV(t6, numDescriptors = 1), visibility=SHADER_VISIBILITY_PIXEL)," \
 			"StaticSampler(s0)"
 			
 [RootSignature(RS)]

@@ -46,6 +46,10 @@ namespace Navigation
 
 		bool FindCollisionPoint(const Point3D& location, float radius, Point2D& outCollisionPoint, Vector2D& outCollisionNormal,
 								float& outPenetration);
+
+		bool FindCollisionPoint(const Point3D& location, const Vector2D& direction, float radius, Point2D& outCollisionPoint,
+								Vector2D& outCollisionNormal, float& outPenetration);
+
 		Point2D FindNearestPointOnNavMesh(const Point2D& location, Vector2D* normal = nullptr);
 
 	private:
@@ -80,6 +84,9 @@ namespace Navigation
 
 		void FindCollisionPoint(const uint32_t triangleId, const Point3D& location, float radiusSqr, Point2D& collisionPoint,
 								Vector2D& collisionNormal, float& distanceToPointSqr, std::set<uint32_t>& visitedTriangles);
+
+		void FindCollisionPoint(const uint32_t triangleId, const Point3D& location, const Vector2D& direction, float radiusSqr,
+								Point2D& collisionPoint, Vector2D& collisionNormal, float& distanceToPointSqr, std::set<uint32_t>& visitedTriangles);
 
 		void FindNearestPointOnNavMesh(const uint32_t triangleId, const Point2D& location, Point2D& pointOnNavMesh, Vector2D* normal,
 									   float& closestDistanceSqr, std::set<uint32_t>& visitedTriangles);

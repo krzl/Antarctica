@@ -282,7 +282,7 @@ namespace Rendering::Dx12
 
 	void Dx12Context::WaitForFrameCompletion()
 	{
-		if (m_commandFence->GetCompletedValue() <= m_currentFenceId - Renderer::BUFFER_COUNT)
+		if (m_commandFence->GetCompletedValue() <= m_currentFenceId - 1)
 		{
 			const HANDLE event = CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS);
 			m_commandFence->SetEventOnCompletion(m_currentFenceId, event);
@@ -397,9 +397,7 @@ namespace Rendering::Dx12
 			m_commandList->SetGraphicsRootDescriptorTable(0, renderObject.m_perObjectBuffer->GetGPUHandle());
 
 			m_commandList->SetGraphicsRootConstantBufferView(1, GetScratchBuffer().GetGpuPointer(m_currentCameraBufferHandle));
-			m_commandList->SetGraphicsRootConstantBufferView(
-				2,
-				GetScratchBuffer().GetGpuPointer(renderObject.m_perCallBuffer));
+			m_commandList->SetGraphicsRootConstantBufferView(2, GetScratchBuffer().GetGpuPointer(renderObject.m_perCallBuffer));
 
 			if (renderObject.m_skinningBufferHandle)
 			{
@@ -443,7 +441,13 @@ namespace Rendering::Dx12
 	{
 		return m_currentBackbufferId;
 	}
-
+#define DBOUT( s )            \
+{                             \
+   std::ostringstream os_;    \
+   os_ << s;                   \
+   OutputDebugString( os_.str().c_str() );  \
+}
+	
 	void Dx12Context::ExecuteAndPresent()
 	{
 		m_commandList->Close();
@@ -455,6 +459,7 @@ namespace Rendering::Dx12
 
 		m_swapchain->Present(1, 0);
 		m_currentBackbufferId = (m_currentBackbufferId + 1) % Renderer::BUFFER_COUNT;
+		DBOUT("PONG\n");
 	}
 
 	std::shared_ptr<DescriptorHeapHandle> Dx12Context::CreateHeapHandle(const uint32_t size, const D3D12_DESCRIPTOR_HEAP_FLAGS flags)

@@ -4,6 +4,7 @@
 #include "Steering/SteeringPipeline.h"
 #include "Steering/Behaviors/AlignmentBehavior.h"
 #include "Steering/Behaviors/ArriveBehavior.h"
+#include "Steering/Behaviors/AvoidanceBehavior.h"
 #include "Steering/Behaviors/CohesionBehavior.h"
 #include "Steering/Behaviors/SeparationBehavior.h"
 
@@ -23,6 +24,7 @@ namespace Navigation
 
 		AlignmentBehavior m_alignmentBehavior;
 		ArriveBehavior m_arriveBehavior;
+		AvoidanceBehavior m_avoidanceBehavior;
 		CohesionBehavior m_cohesionBehavior;
 		SeparationBehavior m_separationBehavior;
 

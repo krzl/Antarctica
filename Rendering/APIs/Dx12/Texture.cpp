@@ -44,8 +44,7 @@ namespace Rendering::Dx12
 
 		m_heapHandle = Dx12Context::Get().CreateHeapHandle();
 
-		Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_texture.Get(), &srvDesc,
-			m_heapHandle->GetCPUHandle());
+		Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_heapHandle->GetCPUHandle());
 
 		SetDebugName(m_texture, texture->GetPath().data());
 	}

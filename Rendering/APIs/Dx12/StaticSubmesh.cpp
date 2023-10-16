@@ -155,10 +155,8 @@ namespace Rendering::Dx12
 				D3D12_BUFFER_SRV_FLAG_NONE
 			};
 
-			Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_vertexBuffer.Get(),
-				&desc,
-				m_skinningHeapHandle->GetCPUHandle(
-					m_skinnedAttributesCount));
+			Dx12Context::Get().GetDevice()->CreateShaderResourceView(m_vertexBuffer.Get(), &desc,
+				m_skinningHeapHandle->GetCPUHandle(m_skinnedAttributesCount));
 
 			m_skinnedAttributesCount++;
 		}

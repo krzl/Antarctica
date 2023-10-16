@@ -10,6 +10,7 @@ namespace Navigation
 	{
 		InitializeTotalAccelerationCalculation(movement->m_arriveBehavior, transform, movement);
 		InitializeTotalAccelerationCalculation(movement->m_alignmentBehavior, transform, movement);
+		InitializeTotalAccelerationCalculation(movement->m_avoidanceBehavior, transform, movement);
 		InitializeTotalAccelerationCalculation(movement->m_cohesionBehavior, transform, movement);
 		InitializeTotalAccelerationCalculation(movement->m_separationBehavior, transform, movement);
 	}
@@ -19,6 +20,7 @@ namespace Navigation
 	{
 		UpdateNearbyEntity(movement->m_arriveBehavior, transform, movement, nearbyTransform, nearbyMovement);
 		UpdateNearbyEntity(movement->m_alignmentBehavior, transform, movement, nearbyTransform, nearbyMovement);
+		UpdateNearbyEntity(movement->m_avoidanceBehavior, transform, movement, nearbyTransform, nearbyMovement);
 		UpdateNearbyEntity(movement->m_cohesionBehavior, transform, movement, nearbyTransform, nearbyMovement);
 		UpdateNearbyEntity(movement->m_separationBehavior, transform, movement, nearbyTransform, nearbyMovement);
 	}
@@ -29,6 +31,7 @@ namespace Navigation
 
 		totalAcceleration += GetLinearAcceleration(movement->m_arriveBehavior, transform, movement);
 		totalAcceleration += GetLinearAcceleration(movement->m_alignmentBehavior, transform, movement);
+		totalAcceleration += GetLinearAcceleration(movement->m_avoidanceBehavior, transform, movement);
 		totalAcceleration += GetLinearAcceleration(movement->m_cohesionBehavior, transform, movement);
 		totalAcceleration += GetLinearAcceleration(movement->m_separationBehavior, transform, movement);
 

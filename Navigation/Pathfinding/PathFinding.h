@@ -13,8 +13,10 @@ namespace Navigation
 
 	class PathFinding
 	{
+		//TODO: Change method of accessing nav mesh field for classes inside navigation subsystem
 		friend class GameState;
 		friend class ArriveBehavior;
+		friend class AvoidanceBehavior;
 		friend class Physics::MovementSystem;
 		friend class Physics::CollisionGatherSystem;
 

@@ -37,8 +37,8 @@ namespace Navigation
 			m_movementTester.UpdateComponent(movement, transform);
 		}
 
-		const float maxRadiusToCheck = Max(movement->m_radius * movement->m_cohesionBehavior.GetCohesionScale(),
-			movement->m_radius * movement->m_alignmentBehavior.GetCohesionScale());
+		const float maxRadiusToCheck = Max(Max(movement->m_radius * movement->m_cohesionBehavior.GetCohesionScale(),
+			movement->m_radius * movement->m_alignmentBehavior.GetCohesionScale()), Magnitude(movement->m_velocity));
 
 		movement->m_steeringPipeline.InitializeTotalAccelerationCalculation(transform, movement);
 
