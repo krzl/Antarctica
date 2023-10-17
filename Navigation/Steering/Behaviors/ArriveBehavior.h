@@ -35,6 +35,8 @@ namespace Navigation
 	protected:
 
 		bool HasArrivedCheck(const TransformComponent* transform);
+		bool RecalculatePath(const TransformComponent* transform);
+		void AdjustNextPathSegment(const TransformComponent* transform);
 
 		std::optional<Point3D> m_target;
 
@@ -44,6 +46,7 @@ namespace Navigation
 		std::list<unsigned>::iterator m_currentPathSegment;
 
 		uint32_t m_framesUntilCalculatePath = -1;
+		bool m_retryCalculatePath = false;
 
 		float m_targetRadius      = 0.2f;
 		float m_outerTargetRadius = 5.0f;

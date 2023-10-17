@@ -28,8 +28,8 @@ public:
 			static uint32_t componentIds[sizeof...(Types)];
 			TryAddNewArchetype<0>(allArchetypes[m_archetypesParsed++].get(), componentIds);
 		}
-		uint32_t currentIteration = 0;
-		while (currentIteration < m_iterationCount)
+		m_currentIteration = 0;
+		while (m_currentIteration < m_iterationCount)
 		{
 			if (m_isMultiThreaded)
 			{
@@ -73,7 +73,7 @@ public:
 							});
 					});
 			}
-			++currentIteration;
+			++m_currentIteration;
 		}
 
 		OnUpdateEnd();

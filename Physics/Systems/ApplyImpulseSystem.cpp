@@ -12,7 +12,7 @@ namespace Physics
 	ApplyImpulseSystem::ApplyImpulseSystem()
 	{
 		m_iterationCount  = 10;
-		m_isMultiThreaded = false; //TODO: CHECK THAT
+		m_isMultiThreaded = false;
 	}
 
 	void ApplyImpulseSystem::Update(Entity* entity, TransformComponent* transform, Navigation::MovementComponent* movement,
@@ -28,6 +28,23 @@ namespace Physics
 				const ComponentAccessor& componentAccessor = collision.m_entityB->GetComponentAccessor();
 				otherMovement                              = componentAccessor.GetComponent<Navigation::MovementComponent>();
 				otherPhysicsBody                           = componentAccessor.GetComponent<PhysicsBodyComponent>();
+			}
+
+			const float inverseMassSum = physicsBody->GetInverseMass() + (otherPhysicsBody ? otherPhysicsBody->GetInverseMass() : 0.0f);
+
+			if (m_currentIteration == 0)
+			{
+				constexpr float k_slop          = 0.5f; // Penetration allowance
+				constexpr float penetrationCorr = 0.4f; // Penetration correction percentage
+
+				const Vector2D correction = Max(collision.m_penetration - k_slop, 0.0f) * penetrationCorr / inverseMassSum * collision.m_normal;
+
+				movement->m_positionCorrection -= correction * physicsBody->GetInverseMass();
+
+				if (otherMovement)
+				{
+					otherMovement->m_positionCorrection += correction * otherPhysicsBody->GetInverseMass();
+				}
 			}
 
 			Vector2D relativeVelocity = -movement->m_velocity;
@@ -49,8 +66,6 @@ namespace Physics
 				// entities are separating, ignore resolve
 				continue;
 			}
-
-			const float inverseMassSum = physicsBody->GetInverseMass() + (otherPhysicsBody ? otherPhysicsBody->GetInverseMass() : 0.0f);
 
 			const float j = -(1.0f + collision.m_restitution) * contactVelocity / inverseMassSum;
 

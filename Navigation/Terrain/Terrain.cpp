@@ -226,7 +226,7 @@ namespace Navigation
 		}
 
 		//blur out transition
-		for (uint32_t x = xStart; x < xEnd - 1; ++x)
+		/*for (uint32_t x = xStart; x < xEnd - 1; ++x)
 		{
 			for (uint32_t y = yStart; y < yEnd - 1; ++y)
 			{
@@ -260,7 +260,7 @@ namespace Navigation
 					texcoordWeights[a1 * 4 + 1] = Max(texcoordWeights[a1 * 4 + 1], 0.5f);
 				}
 			}
-		}
+		}*/
 
 		SubmeshBuilder submeshBuilder("Terrain", std::move(vertices), indices);
 		submeshBuilder.SetTexcoords(std::move(texcoordSplatUV), 0);

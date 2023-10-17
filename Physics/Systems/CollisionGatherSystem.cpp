@@ -86,6 +86,10 @@ namespace Physics
 
 		if (navMesh->FindCollisionPoint(transform->m_localPosition, movement->m_radius, collisionPoint, collisionNormal, penetration))
 		{
+			const Vector2D normal = transform->m_localPosition.xy == collisionPoint ?
+										collisionNormal :
+										-Normalize(transform->m_localPosition.xy - collisionPoint);
+
 			physicsBody->m_collisions.emplace_back(CollisionData{
 				entity,
 				nullptr,
@@ -93,7 +97,7 @@ namespace Physics
 				physicsBody->m_staticFriction,
 				physicsBody->m_dynamicFriction,
 				penetration,
-				collisionNormal,
+				normal,
 				collisionPoint
 			});
 		}

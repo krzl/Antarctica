@@ -58,9 +58,9 @@ void main()
 			playerCameraSystem->SetupTerrainBvh(mesh);
 
 #if defined(DEBUG) | defined(_DEBUG)
-			constexpr uint32_t gridSize = 10;
+			constexpr uint32_t gridSize = 8;
 #else
-			constexpr uint32_t gridSize = 50;
+			constexpr uint32_t gridSize = 20;
 #endif
 
 			for (uint32_t i = 0; i < gridSize; i++)

@@ -37,34 +37,44 @@ namespace Navigation
 		return distanceToEnd < m_targetRadius * m_targetRadius;
 	}
 
-	Vector2D ArriveBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
+	bool ArriveBehavior::RecalculatePath(const TransformComponent* transform)
 	{
-		if (!m_target.has_value() || m_hasArrived)
+		m_path = PathFinding::FindPath(transform->m_localPosition, m_target.value());
+
+		if (m_path.has_value())
 		{
-			return Vector2D::zero;
-		}
-
-		if (m_framesUntilCalculatePath == 0)
-		{
-			m_path = PathFinding::FindPath(transform->m_localPosition, m_target.value());
-
-			m_framesUntilCalculatePath = -1;
-
-			if (!m_path.has_value())
-			{
-				m_hasArrived = true;
-
-				return Vector2D::zero;
-			}
-
 			m_currentPathSegment = m_path.value().begin();
 		}
-		else if (m_framesUntilCalculatePath != -1)
+
+		return m_path.has_value();
+	}
+
+	void ArriveBehavior::AdjustNextPathSegment(const TransformComponent* transform)
+	{
+		if (m_currentPathSegment == m_path.value().end())
 		{
-			--m_framesUntilCalculatePath;
+			if (!PathFinding::m_navMesh->DoesDirectPathExists(transform->m_localPosition, m_target.value()))
+			{
+				if (!RecalculatePath(transform))
+				{
+					m_framesUntilCalculatePath = 5;
+				}
+				return;
+			}
+		}
+		else
+		{
+			if (!PathFinding::m_navMesh->DoesDirectPathExists(*m_currentPathSegment, transform->m_localPosition))
+			{
+				if (!RecalculatePath(transform))
+				{
+					m_framesUntilCalculatePath = 5;
+				}
+				return;
+			}
 		}
 
-		if (m_path.has_value() && m_currentPathSegment != m_path.value().end())
+		if (m_currentPathSegment != m_path.value().end())
 		{
 			auto nextSegment = m_currentPathSegment;
 			++nextSegment;
@@ -84,13 +94,55 @@ namespace Navigation
 				}
 			}
 		}
-		else
+	}
+
+	Vector2D ArriveBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
+	{
+		if (!m_target.has_value() || m_hasArrived)
 		{
-			if (HasArrivedCheck(transform))
+			return Vector2D::zero;
+		}
+
+		if (m_framesUntilCalculatePath == 0)
+		{
+			m_framesUntilCalculatePath = -1;
+
+			if (!RecalculatePath(transform))
 			{
-				m_hasArrived = true;
+				if (m_retryCalculatePath)
+				{
+					m_framesUntilCalculatePath = 5;
+				}
+				else
+				{
+					m_hasArrived = true;
+				}
+
 				return Vector2D::zero;
 			}
+
+			m_currentPathSegment = m_path.value().begin();
+			m_retryCalculatePath = true;
+		}
+		else if (m_framesUntilCalculatePath != -1)
+		{
+			--m_framesUntilCalculatePath;
+		}
+
+		if (m_path.has_value())
+		{
+			AdjustNextPathSegment(transform);
+
+			if (m_framesUntilCalculatePath != -1)
+			{
+				return Vector2D::zero;
+			}
+		}
+
+		if (HasArrivedCheck(transform))
+		{
+			m_hasArrived = true;
+			return Vector2D::zero;
 		}
 
 		const Point3D nextTarget = !m_path.has_value() || m_currentPathSegment == m_path.value().end() ?
@@ -109,6 +161,7 @@ namespace Navigation
 		m_target                   = point;
 		m_hasArrived               = false;
 		m_framesUntilCalculatePath = delay;
+		m_retryCalculatePath       = false;
 		m_path.reset();
 	}
 }

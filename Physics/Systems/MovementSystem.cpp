@@ -14,13 +14,11 @@ namespace Physics
 {
 	void MovementSystem::Update(Entity* entity, TransformComponent* transform, Navigation::MovementComponent* movement)
 	{
-		if (movement->m_force != Vector2D::zero || movement->m_velocity != Vector2D::zero)
+		if (movement->m_force != Vector2D::zero || movement->m_velocity != Vector2D::zero || movement->m_positionCorrection != Vector2D::zero)
 		{
 			constexpr float deltaTime = TimeManager::GetTimeStep();
 
 			transform->m_localPosition += Vector3D(movement->m_velocity, 0.0f) * deltaTime;
-			transform->m_localPosition.z = Navigation::PathFinding::m_terrain->GetHeightAtLocation(
-				(Point2D) transform->m_localPosition.xy);
 
 			const ComponentAccessor& componentAccessor = entity->GetComponentAccessor();
 			if (const PhysicsBodyComponent* physicsBody = componentAccessor.GetComponent<PhysicsBodyComponent>())
@@ -35,8 +33,12 @@ namespace Physics
 					}
 				}
 			}
-			movement->m_force = Vector2D::zero;
 
+			transform->m_localPosition += movement->m_positionCorrection;
+			transform->m_localPosition.z = Navigation::PathFinding::m_terrain->GetHeightAtLocation((Point2D) transform->m_localPosition.xy);
+
+			movement->m_force              = Vector2D::zero;
+			movement->m_positionCorrection = Vector2D::zero;
 
 
 			const Vector3D oldDirection = transform->m_localRotation.GetDirectionY();
