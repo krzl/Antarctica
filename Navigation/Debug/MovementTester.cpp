@@ -23,7 +23,7 @@ namespace Navigation
 		m_hasValuesChanged |= ImGui::SliderFloat("Alignment::Weight", &m_alignmentWeight, 0.0f, 2.0f);
 		ImGui::NewLine();
 		m_hasValuesChanged |= ImGui::SliderFloat("Steering::AgentRadius", &m_agentRadius, 0.3f, 5.0f);
-		m_hasValuesChanged |= ImGui::SliderFloat("Steering::Acceleration", &m_acceleration, 200.0f, 2000.0f);
+		m_hasValuesChanged |= ImGui::SliderFloat("Steering::Acceleration", &m_acceleration, 200.0f, 10000.0f);
 		m_hasValuesChanged |= ImGui::SliderFloat("Steering::MaxSpeed", &m_maxSpeed, 0.0f, 10.0f);
 		ImGui::NewLine();
 		m_hasValuesChanged |= ImGui::SliderFloat("Steering::MaxRotation", &m_maxRotation, 0.1f, 20.0f);

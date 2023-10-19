@@ -44,9 +44,7 @@ namespace Physics
 							return;
 						}
 
-						const float distance = Terathon::Sqrt(distanceSqr);
-
-						if (distance == 0.0f)
+						if (distanceSqr == 0.0f)
 						{
 							physicsBody->m_collisions.emplace_back(CollisionData{
 								entity,
@@ -61,6 +59,8 @@ namespace Physics
 						}
 						else
 						{
+							const float distance = Terathon::Sqrt(distanceSqr);
+
 							normal = normal / distance; // normalization
 
 							physicsBody->m_collisions.emplace_back(CollisionData{
