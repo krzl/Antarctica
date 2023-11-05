@@ -24,6 +24,7 @@ namespace Navigation
 	{
 		if (!movement->m_arriveBehavior.HasTarget() ||
 			!nearbyMovement->m_arriveBehavior.HasTarget() ||
+			SquaredMag(movement->m_arriveBehavior.GetTarget().xy - nearbyMovement->m_arriveBehavior.GetTarget().xy) < 5.0f * 5.0f ||
 			Dot(movement->m_velocity, nearbyMovement->m_velocity) > 0.0f)
 		{
 			return;
@@ -49,8 +50,8 @@ namespace Navigation
 		Point2D collisionNormal;
 		float penetration;
 
-		if (PathFinding::m_navMesh->FindCollisionPoint(transform->m_localPosition, movement->m_velocity, Terathon::Sqrt(m_closestDistanceSqr),
-			collisionPoint, collisionNormal, penetration))
+		if (PathFinding::m_navMesh->FindCollisionPoint(Sphere{ transform->m_localPosition, Terathon::Sqrt(m_closestDistanceSqr) },
+			movement->m_velocity, collisionPoint, collisionNormal, penetration))
 		{
 			const Vector2D awayVector = collisionPoint - transform->m_localPosition.xy;
 

@@ -101,13 +101,13 @@ namespace Navigation
 			return true;
 		}
 
-		const HeightLevel a = (1 - Terathon::Frac(x)) > Terathon::Frac(y) ?
+		const HeightLevel a = (1 - Terathon::Frac(x)) >= Terathon::Frac(y) ?
 								  GetHeightLevel((uint32_t) x, (uint32_t) y) :
 								  GetHeightLevel((uint32_t) x + 1, (uint32_t) y + 1);
 		const HeightLevel b = GetHeightLevel((uint32_t) x + 1, (uint32_t) y);
 		const HeightLevel c = GetHeightLevel((uint32_t) x, (uint32_t) y + 1);
 
-		return Max(a, Max(b, c)) - Min(a, Min(b, c)) > 2;
+		return Max(a, Max(b, c)) - Min(a, Min(b, c)) > 1;
 	}
 
 	std::optional<Point3D> Terrain::Intersect(const Ray& ray) const

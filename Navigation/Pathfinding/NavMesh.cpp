@@ -297,34 +297,6 @@ namespace Navigation
 
 	bool NavMesh::TriangleFlipTest(const uint32_t vertexId, const Triangle& triangle, const uint32_t oppositeVertexId) const
 	{
-		/*
-		const Vector3D a = m_vertices[triangle.m_vertices[0]];
-		const Vector3D b = m_vertices[triangle.m_vertices[1]];
-		const Vector3D c = m_vertices[triangle.m_vertices[2]];
-
-		float xx = sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
-		float yy = sqrt((c.x - a.x) * (c.x - a.x) + (c.y - a.y) * (c.y - a.y));
-		float cc = sqrt((c.x - b.x) * (c.x - b.x) + (c.y - b.y) * (c.y - b.y));
-
-		float radius = (xx * yy * cc) / (sqrt((xx + yy + cc) * (yy + cc - xx) * (cc + xx - yy) * (xx + yy - cc)));
-		float d      = 2.0f * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y));
-		float xp     = ((a.x * a.x + a.y * a.y) * (b.y - c.y) + (b.x * b.x + b.y * b.y) * (c.y - a.y) + (c.x * c.x + c.y * c.y) * (a.y - b.y)) /
-			d;
-		float yp = ((a.x * a.x + a.y * a.y) * (c.x - b.x) + (b.x * b.x + b.y * b.y) * (a.x - c.x) + (c.x * c.x + c.y * c.y) * (b.x - a.x)) /
-			d;
-
-		const Point2D circumcircle(xp, yp);
-
-		const float diffA = Magnitude(a.xy - circumcircle);
-		const float diffB = Magnitude(b.xy - circumcircle);
-		const float diffC = Magnitude(c.xy - circumcircle);
-
-		const float mag = Magnitude(circumcircle - m_vertices[vertexId].xy);
-
-		return mag < diffA;
-		*/
-
-
 		uint32_t p1Id;
 		uint32_t p2Id;
 
@@ -1065,7 +1037,6 @@ namespace Navigation
 
 			const uint32_t oppositeVertexId = FindOppositeSideVertexId(m_triangles[nextTriangleId], *currentTriangle);
 
-
 			currentTriangleId = nextTriangleId;
 			currentTriangle   = &m_triangles[currentTriangleId];
 
@@ -1129,10 +1100,9 @@ namespace Navigation
 		}
 	}
 
-	bool NavMesh::FindCollisionPoint(const Point3D& location, const float radius, Point2D& outCollisionPoint, Vector2D& outCollisionNormal,
-									 float& outPenetration)
+	bool NavMesh::FindCollisionPoint(const Sphere& sphere, Point2D& outCollisionPoint, Vector2D& outCollisionNormal, float& outPenetration)
 	{
-		const uint32_t startTriangleId = FindTriangleId(location);
+		const uint32_t startTriangleId = FindTriangleId(sphere.m_center);
 
 		std::set<uint32_t> visitedTriangles;
 		visitedTriangles.emplace(startTriangleId);
@@ -1141,24 +1111,25 @@ namespace Navigation
 
 		if (!m_triangles[startTriangleId].m_isNavigable)
 		{
-			FindNearestPointOnNavMesh(startTriangleId, (Point2D) location.xy, outCollisionPoint, &outCollisionNormal, distanceToPointSqr,
+			FindNearestPointOnNavMesh(startTriangleId, (Point2D) sphere.m_center.xy, outCollisionPoint, &outCollisionNormal, distanceToPointSqr,
 				visitedTriangles);
 			outPenetration = Terathon::Sqrt(distanceToPointSqr);
 			return true;
 		}
 
-		FindCollisionPoint(startTriangleId, location, radius * radius, outCollisionPoint, outCollisionNormal, distanceToPointSqr, visitedTriangles);
+		FindCollisionPoint(startTriangleId, sphere, sphere.m_radius * sphere.m_radius, outCollisionPoint, outCollisionNormal, distanceToPointSqr,
+			visitedTriangles);
 
-		if (distanceToPointSqr > radius)
+		if (distanceToPointSqr > sphere.m_radius * sphere.m_radius)
 		{
 			return false;
 		}
 
-		outPenetration = radius - Terathon::Sqrt(distanceToPointSqr);
+		outPenetration = sphere.m_radius - Terathon::Sqrt(distanceToPointSqr);
 		return true;
 	}
 
-	void NavMesh::FindCollisionPoint(const uint32_t triangleId, const Point3D& location, const float radiusSqr, Point2D& collisionPoint,
+	void NavMesh::FindCollisionPoint(const uint32_t triangleId, const Sphere& sphere, const float radiusSqr, Point2D& collisionPoint,
 									 Vector2D& collisionNormal, float& distanceToPointSqr, std::set<uint32_t>& visitedTriangles)
 	{
 		const Triangle& triangle = m_triangles[triangleId];
@@ -1169,15 +1140,15 @@ namespace Navigation
 			m_vertices[triangle.m_vertices[2]]
 		};
 
-		if (!triangle.m_isNavigable)
-		{
-			__debugbreak();
-		}
-
 		for (uint32_t i = 0; i < 3; ++i)
 		{
 			const uint32_t neighborTriangleId = triangle.m_adjacentTriangles[i];
-			const Triangle& neighborTriangle  = m_triangles[neighborTriangleId];
+			if (neighborTriangleId == 0xFFFFFFFF)
+			{
+				continue;
+			}
+
+			const Triangle& neighborTriangle = m_triangles[neighborTriangleId];
 
 			if (visitedTriangles.find(neighborTriangleId) != visitedTriangles.end())
 			{
@@ -1187,8 +1158,8 @@ namespace Navigation
 			visitedTriangles.emplace(neighborTriangleId);
 
 			const Point3D closestPoint = GetClosestPointFromLineSegmentToPoint((Point3D) points[i].xy, (Point3D) points[(i + 1) % 3].xy,
-				(Point3D) location.xy);
-			const float distanceToSegmentSqr = SquaredMag(closestPoint.xy - location.xy);
+				(Point3D) sphere.m_center.xy);
+			const float distanceToSegmentSqr = SquaredMag(closestPoint.xy - sphere.m_center.xy);
 
 			if (distanceToSegmentSqr < distanceToPointSqr)
 			{
@@ -1199,15 +1170,14 @@ namespace Navigation
 					collisionNormal        = Vector2D(lineDir.y, -lineDir.x);
 					distanceToPointSqr     = distanceToSegmentSqr;
 
-					if (Dot(collisionNormal, location.xy - closestPoint.xy) > 0.0f)
+					if (Dot(collisionNormal, sphere.m_center.xy - closestPoint.xy) > 0.0f)
 					{
 						collisionNormal = -collisionNormal;
 					}
 				}
 				else
 				{
-					FindCollisionPoint(neighborTriangleId, location, radiusSqr, collisionPoint, collisionNormal, distanceToPointSqr,
-						visitedTriangles);
+					FindCollisionPoint(neighborTriangleId, sphere, radiusSqr, collisionPoint, collisionNormal, distanceToPointSqr, visitedTriangles);
 				}
 			}
 		}
@@ -1241,7 +1211,12 @@ namespace Navigation
 		for (uint32_t i = 0; i < 3; ++i)
 		{
 			const uint32_t neighborTriangleId = triangle.m_adjacentTriangles[i];
-			const Triangle& neighborTriangle  = m_triangles[neighborTriangleId];
+			if (neighborTriangleId == 0xFFFFFFFF)
+			{
+				continue;
+			}
+
+			const Triangle& neighborTriangle = m_triangles[neighborTriangleId];
 
 			if (visitedTriangles.find(neighborTriangleId) != visitedTriangles.end())
 			{
@@ -1280,10 +1255,10 @@ namespace Navigation
 		}
 	}
 
-	bool NavMesh::FindCollisionPoint(const Point3D& location, const Vector2D& direction, float radius, Point2D& outCollisionPoint,
+	bool NavMesh::FindCollisionPoint(const Sphere& sphere, const Vector2D& direction, Point2D& outCollisionPoint,
 									 Vector2D& outCollisionNormal, float& outPenetration)
 	{
-		const uint32_t startTriangleId = FindTriangleId(location);
+		const uint32_t startTriangleId = FindTriangleId(sphere.m_center);
 
 		std::set<uint32_t> visitedTriangles;
 		visitedTriangles.emplace(startTriangleId);
@@ -1292,25 +1267,24 @@ namespace Navigation
 
 		if (!m_triangles[startTriangleId].m_isNavigable)
 		{
-			FindNearestPointOnNavMesh(startTriangleId, (Point2D) location.xy, outCollisionPoint, &outCollisionNormal, distanceToPointSqr,
+			FindNearestPointOnNavMesh(startTriangleId, (Point2D) sphere.m_center.xy, outCollisionPoint, &outCollisionNormal, distanceToPointSqr,
 				visitedTriangles);
 			outPenetration = Terathon::Sqrt(distanceToPointSqr);
 			return true;
 		}
 
-		FindCollisionPoint(startTriangleId, location, direction, radius * radius, outCollisionPoint, outCollisionNormal, distanceToPointSqr,
-			visitedTriangles);
-
-		if (distanceToPointSqr > radius)
+		FindCollisionPoint(startTriangleId, sphere, sphere.m_radius * sphere.m_radius, direction, outCollisionPoint, outCollisionNormal,
+			distanceToPointSqr, visitedTriangles);
+		if (distanceToPointSqr > sphere.m_radius * sphere.m_radius)
 		{
 			return false;
 		}
 
-		outPenetration = radius - Terathon::Sqrt(distanceToPointSqr);
+		outPenetration = sphere.m_radius - Terathon::Sqrt(distanceToPointSqr);
 		return true;
 	}
 
-	void NavMesh::FindCollisionPoint(const uint32_t triangleId, const Point3D& location, const Vector2D& direction, float radiusSqr,
+	void NavMesh::FindCollisionPoint(const uint32_t triangleId, const Sphere& sphere, const float radiusSqr, const Vector2D& direction,
 									 Point2D& collisionPoint, Vector2D& collisionNormal, float& distanceToPointSqr,
 									 std::set<uint32_t>& visitedTriangles)
 	{
@@ -1330,7 +1304,12 @@ namespace Navigation
 		for (uint32_t i = 0; i < 3; ++i)
 		{
 			const uint32_t neighborTriangleId = triangle.m_adjacentTriangles[i];
-			const Triangle& neighborTriangle  = m_triangles[neighborTriangleId];
+			if (neighborTriangleId == 0xFFFFFFFF)
+			{
+				continue;
+			}
+
+			const Triangle& neighborTriangle = m_triangles[neighborTriangleId];
 
 			if (visitedTriangles.find(neighborTriangleId) != visitedTriangles.end())
 			{
@@ -1340,21 +1319,21 @@ namespace Navigation
 			visitedTriangles.emplace(neighborTriangleId);
 
 			const Point3D closestPoint = GetClosestPointFromLineSegmentToPoint((Point3D) points[i].xy, (Point3D) points[(i + 1) % 3].xy,
-				(Point3D) location.xy);
-			const float distanceToSegmentSqr = SquaredMag(closestPoint.xy - location.xy);
+				(Point3D) sphere.m_center.xy);
+			const float distanceToSegmentSqr = SquaredMag(closestPoint.xy - sphere.m_center.xy);
 
 			if (distanceToSegmentSqr < distanceToPointSqr)
 			{
 				if (!neighborTriangle.m_isNavigable)
 				{
-					if (Dot(closestPoint.xy - location.xy, direction) > 0.0f)
+					if (Dot(closestPoint.xy - sphere.m_center.xy, direction) > 0.0f)
 					{
 						const Vector2D lineDir = Normalize(points[(i + 1) % 3].xy - points[i].xy);
-						collisionPoint = closestPoint.xy;
-						collisionNormal = Vector2D(lineDir.y, -lineDir.x);
-						distanceToPointSqr = distanceToSegmentSqr;
+						collisionPoint         = closestPoint.xy;
+						collisionNormal        = Vector2D(lineDir.y, -lineDir.x);
+						distanceToPointSqr     = distanceToSegmentSqr;
 
-						if (Dot(collisionNormal, location.xy - closestPoint.xy) > 0.0f)
+						if (Dot(collisionNormal, sphere.m_center.xy - closestPoint.xy) > 0.0f)
 						{
 							collisionNormal = -collisionNormal;
 						}
@@ -1362,10 +1341,195 @@ namespace Navigation
 				}
 				else
 				{
-					FindCollisionPoint(neighborTriangleId, location, radiusSqr, collisionPoint, collisionNormal, distanceToPointSqr,
+					FindCollisionPoint(neighborTriangleId, sphere, radiusSqr, direction, collisionPoint, collisionNormal, distanceToPointSqr,
 						visitedTriangles);
 				}
 			}
 		}
+	}
+
+	static std::optional<Point2D> LineLineIntersection(const Point2D& a, const Point2D& b, const Point2D& c, const Point2D& d)
+	{
+		const double a1 = b.y - a.y;
+		const double b1 = a.x - b.x;
+		const double c1 = a1 * (a.x) + b1 * (a.y);
+
+		const double a2 = d.y - c.y;
+		const double b2 = c.x - d.x;
+		const double c2 = a2 * (c.x) + b2 * (c.y);
+
+		const double determinant = a1 * b2 - a2 * b1;
+
+		if (determinant == 0)
+		{
+			return std::optional<Point2D>();
+		}
+
+		const double x = (b2 * c1 - b1 * c2) / determinant;
+		const double y = (a1 * c2 - a2 * c1) / determinant;
+		return Point2D(x, y);
+	}
+
+	bool NavMesh::FindCollisionPoint(const Point2D& start, const Vector2D& direction, float maxDistance, Point2D& outCollisionPoint,
+									 Vector2D& outCollisionNormal)
+	{
+		const Point2D end = start + direction * maxDistance;
+
+		const uint32_t targetTriangleId = FindTriangleId(end);
+		uint32_t currentTriangleId      = FindTriangleId(start);
+
+		const Triangle* currentTriangle = &m_triangles[currentTriangleId];
+
+		if (!currentTriangle->m_isNavigable)
+		{
+			outCollisionPoint = start;
+			outCollisionNormal = Vector2D(0.0f, 1.0f);
+
+			return true;
+		}
+
+		if (targetTriangleId == currentTriangleId)
+		{
+			return false;
+		}
+
+		uint32_t nextTriangleId = currentTriangleId;
+		uint32_t previousVertex = 0xFFFFFFFF;
+		uint32_t adjacentIndex;
+
+		for (uint32_t i = 0; i < 3; ++i)
+		{
+			const Point3D& a = m_vertices[currentTriangle->m_vertices[i]];
+			const Point3D& b = m_vertices[currentTriangle->m_vertices[(i + 1) % 3]];
+			if (Intersect2D(start, end, a, b))
+			{
+				previousVertex = currentTriangle->m_vertices[i];
+				nextTriangleId = currentTriangle->m_adjacentTriangles[i];
+				adjacentIndex  = i;
+
+				//if points are collinear, look for another intersecting edge
+				if (GetSegmentOrientation(a, b, start) != 0)
+				{
+					break;
+				}
+			}
+		}
+
+		if (previousVertex == 0xFFFFFFFF)
+		{
+			//Fallback for handling points on triangle edge, find closest edge from point
+
+			const Point3D& a = m_vertices[currentTriangle->m_vertices[0]];
+			const Point3D& b = m_vertices[currentTriangle->m_vertices[1]];
+			const Point3D& c = m_vertices[currentTriangle->m_vertices[2]];
+
+			const Vector3D edgeA = Normalize(b - a);
+			const Vector3D edgeB = Normalize(c - b);
+			const Vector3D edgeC = Normalize(a - c);
+
+			const float distA = GetDistanceSquaredFromLineToPoint(edgeA, start);
+			const float distB = GetDistanceSquaredFromLineToPoint(edgeB, start);
+			const float distC = GetDistanceSquaredFromLineToPoint(edgeC, start);
+
+			if (distA < distB)
+			{
+				if (distA < distC)
+				{
+					adjacentIndex = 0;
+				}
+				else
+				{
+					adjacentIndex = 2;
+				}
+			}
+			else
+			{
+				if (distB < distC)
+				{
+					adjacentIndex = 1;
+				}
+				else
+				{
+					adjacentIndex = 2;
+				}
+			}
+
+			previousVertex = currentTriangle->m_vertices[adjacentIndex];
+			nextTriangleId = currentTriangle->m_adjacentTriangles[adjacentIndex];
+		}
+
+		while (true)
+		{
+			if (!currentTriangle->m_isNavigable)
+			{
+				bool hasCollided     = false;
+				float maxDistanceSqr = maxDistance * maxDistance;
+
+				for (uint32_t i = 0; i < 3; ++i)
+				{
+					const Point2D a = (Point2D) m_vertices[m_triangles[currentTriangleId].m_vertices[(i + 0) % 3]].xy;
+					const Point2D b = (Point2D) m_vertices[m_triangles[currentTriangleId].m_vertices[(i + 1) % 3]].xy;
+
+					const std::optional<Point2D> collisionPoint = LineLineIntersection(a, b, start, end);
+
+					if (!collisionPoint.has_value())
+					{
+						continue;
+					}
+
+					const float distanceSqr = SquaredMag(collisionPoint.value() - start);
+					if (distanceSqr <= maxDistanceSqr)
+					{
+						maxDistanceSqr    = distanceSqr;
+						outCollisionPoint = collisionPoint.value();
+
+						const Vector2D lineDir = Normalize(b - a);
+						outCollisionNormal     = Vector2D(lineDir.y, -lineDir.x);
+
+						if (Dot(outCollisionNormal, direction) > 0.0f)
+						{
+							outCollisionNormal = -outCollisionNormal;
+						}
+
+						hasCollided = true;
+					}
+				}
+
+				return hasCollided;
+			}
+
+			if (currentTriangleId == targetTriangleId)
+			{
+				return false;
+			}
+
+			const uint32_t oppositeVertexId = FindOppositeSideVertexId(m_triangles[nextTriangleId], *currentTriangle);
+
+			currentTriangleId = nextTriangleId;
+			currentTriangle   = &m_triangles[currentTriangleId];
+
+			if (Intersect2D(start, end, m_vertices[previousVertex], m_vertices[oppositeVertexId]))
+			{
+				adjacentIndex = previousVertex == currentTriangle->m_vertices[0] ? 0 : previousVertex == currentTriangle->m_vertices[1] ? 1 : 2;
+			}
+			else
+			{
+				adjacentIndex  = oppositeVertexId == currentTriangle->m_vertices[0] ? 0 : oppositeVertexId == currentTriangle->m_vertices[1] ? 1 : 2;
+				previousVertex = oppositeVertexId;
+			}
+
+			nextTriangleId = currentTriangle->m_adjacentTriangles[adjacentIndex];
+		}
+	}
+
+
+
+	bool NavMesh::FindCollisionPoint(const Point2D& start, const Point2D& end, Point2D& outCollisionPoint, Vector2D& outCollisionNormal)
+	{
+		Vector2D direction    = end - start;
+		const float magnitude = Magnitude(direction);
+		direction /= magnitude;
+
+		return FindCollisionPoint(start, direction, magnitude, outCollisionPoint, outCollisionNormal);
 	}
 }

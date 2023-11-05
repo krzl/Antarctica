@@ -19,7 +19,7 @@ namespace Rendering
 	{
 	public:
 
-		static constexpr uint32_t BUFFER_COUNT = 3;
+		static constexpr uint32_t BUFFER_COUNT = 2;
 
 		static Renderer& Get();
 

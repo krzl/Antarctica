@@ -84,7 +84,7 @@ namespace Physics
 		Point2D collisionPoint;
 		float penetration;
 
-		if (navMesh->FindCollisionPoint(transform->m_localPosition, movement->m_radius, collisionPoint, collisionNormal, penetration))
+		if (navMesh->FindCollisionPoint(Sphere{ transform->m_localPosition, movement->m_radius }, collisionPoint, collisionNormal, penetration))
 		{
 			const Vector2D normal = transform->m_localPosition.xy == collisionPoint ?
 										collisionNormal :

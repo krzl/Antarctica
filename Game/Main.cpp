@@ -11,6 +11,8 @@
 
 #include "Camera/PlayerCameraSystem.h"
 
+#include "Debug/DebugDraw/DebugDrawSystem.h"
+
 void main()
 {
 #if defined(DEBUG) | defined(_DEBUG)
@@ -30,7 +32,7 @@ void main()
 
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>(
 				{
-					Point3D(0, 0, 30),
+					Point3D(0, 0, 70),
 					EulerToQuaternion(20.0f, 0.0f, 0.0f)
 				}
 			);
@@ -42,7 +44,6 @@ void main()
 					Vector3D(1.0f, 1.0f, 1.0f)
 				},
 				mesh);
-
 
 			const std::shared_ptr<Texture> ground = AssetManager::GetAsset<Texture>("../Resources/Textures/ground.png");
 			const std::shared_ptr<Texture> rock   = AssetManager::GetAsset<Texture>("../Resources/Textures/rock.png");
@@ -58,9 +59,9 @@ void main()
 			playerCameraSystem->SetupTerrainBvh(mesh);
 
 #if defined(DEBUG) | defined(_DEBUG)
-			constexpr uint32_t gridSize = 8;
+			constexpr uint32_t gridSize = 1;
 #else
-			constexpr uint32_t gridSize = 20;
+			constexpr uint32_t gridSize = 40;
 #endif
 
 			for (uint32_t i = 0; i < gridSize; i++)

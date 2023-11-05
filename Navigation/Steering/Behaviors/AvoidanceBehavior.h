@@ -10,7 +10,7 @@ namespace Navigation
 
 		explicit AvoidanceBehavior()
 		{
-			SetWeight(0.0f);
+			SetWeight(1.0f);
 		}
 
 		void InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement) override;

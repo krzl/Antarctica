@@ -2,7 +2,6 @@
 #include "BuildAbility.h"
 
 #include "Entities/Camera.h"
-
 #include "Game/BuildingGrid.h"
 
 BuildAbility::BuildAbility(BuildingGrid* buildingGrid, const Point2DInt startPosition, const Point2DInt endPosition):
@@ -19,8 +18,10 @@ void BuildAbility::Start() {}
 
 bool BuildAbility::Update()
 {
-	m_buildingGrid->SetUsed(m_startPosition, m_endPosition);
 	return true;
 }
 
-void BuildAbility::End() {}
+void BuildAbility::End()
+{
+	m_buildingGrid->SetUsed(m_startPosition, m_endPosition);
+}

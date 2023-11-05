@@ -43,7 +43,7 @@ namespace Navigation
 
 	public:
 
-		static std::optional<std::list<uint32_t>> FindPath(const Point3D& start, const Point3D& end);
+		static std::optional<std::list<Point2D>> FindPath(const Point3D& start, const Point3D& end, const float extrusion);
 
 	private:
 
@@ -52,9 +52,6 @@ namespace Navigation
 
 		static uint32_t GetClosestDirectPointOnPath(const Point3D& pathStart, const NodeRecord* currentPathEndNode,
 													const std::vector<NodeRecord>& nodeRecords, uint32_t vertexId);
-
-		static uint32_t GetClosestDirectPointOnPath(const Point3D& pathStart, const NodeRecord* currentPathEndNode,
-													const std::vector<NodeRecord>& nodeRecords, const Point3D& pathEnd);
 
 		static float EstimateTotalCost(const Point3D& start, const Point3D& end);
 

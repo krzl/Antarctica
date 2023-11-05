@@ -230,7 +230,7 @@ void DebugDrawManager::DrawTriangles(std::vector<Point3D> pointsList, const floa
 	builder->m_boundingBox = GetBoundingBox(builder->m_vertices);
 	builder->m_color       = color;
 
-	builder->m_drawWireframe = true;
+	builder->m_drawWireframe = false;
 
 	m_onDrawItemQueued.Dispatch(builder);
 }

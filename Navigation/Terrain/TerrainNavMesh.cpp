@@ -1,6 +1,8 @@
 ﻿#include "stdafx.h"
 #include "Terrain.h"
 
+#include "Debug/DebugDrawManager.h"
+
 namespace Navigation
 {
 	enum NavMeshEdgeDirection

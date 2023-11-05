@@ -11,7 +11,7 @@ namespace Physics
 {
 	ApplyImpulseSystem::ApplyImpulseSystem()
 	{
-		m_iterationCount  = 1;
+		m_iterationCount  = 10;
 		m_isMultiThreaded = false;
 	}
 
@@ -34,8 +34,8 @@ namespace Physics
 
 			if (m_currentIteration == 0)
 			{
-				constexpr float k_slop          = 0.f; // Penetration allowance
-				constexpr float penetrationCorr = 1.0f; // Penetration correction percentage
+				constexpr float k_slop          = 0.05f; // Penetration allowance
+				constexpr float penetrationCorr = 0.4f;  // Penetration correction percentage
 
 				const Vector2D correction = Max(collision.m_penetration - k_slop, 0.0f) * penetrationCorr / inverseMassSum * collision.m_normal;
 
@@ -45,10 +45,8 @@ namespace Physics
 				{
 					otherMovement->m_positionCorrection += correction * otherPhysicsBody->GetInverseMass();
 				}
-
-				continue;
 			}
-			
+
 			Vector2D relativeVelocity = -movement->m_velocity;
 			if (otherMovement)
 			{

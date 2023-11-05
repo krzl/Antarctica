@@ -1,5 +1,4 @@
 #pragma once
-#include "Components/MovementComponent.h"
 
 struct Submesh;
 
@@ -44,20 +43,22 @@ namespace Navigation
 		bool DoesDirectPathExists(uint32_t startVertexId, const Point3D& endPoint) const;
 		bool DoesDirectPathExists(const Point3D& startPoint, const Point3D& endPoint) const;
 
-		bool FindCollisionPoint(const Point3D& location, float radius, Point2D& outCollisionPoint, Vector2D& outCollisionNormal,
+		bool FindCollisionPoint(const Sphere& sphere, Point2D& outCollisionPoint, Vector2D& outCollisionNormal, float& outPenetration);
+		bool FindCollisionPoint(const Sphere& sphere, const Vector2D& direction, Point2D& outCollisionPoint, Vector2D& outCollisionNormal,
 								float& outPenetration);
-
-		bool FindCollisionPoint(const Point3D& location, const Vector2D& direction, float radius, Point2D& outCollisionPoint,
-								Vector2D& outCollisionNormal, float& outPenetration);
+		bool FindCollisionPoint(const Point2D& start, const Vector2D& direction, float maxDistance, Point2D& outCollisionPoint,
+								Vector2D& outCollisionNormal);
+		bool FindCollisionPoint(const Point2D& start, const Point2D& end, Point2D& outCollisionPoint, Vector2D& outCollisionNormal);
 
 		Point2D FindNearestPointOnNavMesh(const Point2D& location, Vector2D* normal = nullptr);
+
+
+		uint32_t FindTriangleId(const Point3D& vertex) const;
 
 	private:
 
 		void SetTriangle(uint32_t triangleId, const Triangle& triangle);
 		void RemoveTriangle(uint32_t triangleId);
-
-		uint32_t FindTriangleId(const Point3D& vertex) const;
 
 		bool TriangleFlipTest(uint32_t vertexId, const Triangle& triangle, uint32_t oppositeVertexId) const;
 		bool IsConvex(const Edge& edge) const;
@@ -82,14 +83,16 @@ namespace Navigation
 		void AssignIslandIds();
 		void AssignIslandId(uint32_t triangleId, uint32_t islandId, std::set<uint32_t>& remainingTriangles);
 
-		void FindCollisionPoint(const uint32_t triangleId, const Point3D& location, float radiusSqr, Point2D& collisionPoint,
+		void FindCollisionPoint(const uint32_t triangleId, const Sphere& sphere, float radiusSqr, Point2D& collisionPoint,
 								Vector2D& collisionNormal, float& distanceToPointSqr, std::set<uint32_t>& visitedTriangles);
 
-		void FindCollisionPoint(const uint32_t triangleId, const Point3D& location, const Vector2D& direction, float radiusSqr,
+		void FindCollisionPoint(const uint32_t triangleId, const Sphere& sphere, float radiusSqr, const Vector2D& direction,
 								Point2D& collisionPoint, Vector2D& collisionNormal, float& distanceToPointSqr, std::set<uint32_t>& visitedTriangles);
 
 		void FindNearestPointOnNavMesh(const uint32_t triangleId, const Point2D& location, Point2D& pointOnNavMesh, Vector2D* normal,
 									   float& closestDistanceSqr, std::set<uint32_t>& visitedTriangles);
+
+	public:
 
 		std::vector<Point3D> m_vertices;
 		std::vector<std::unordered_set<uint32_t>> m_vertexToTriangleMap;

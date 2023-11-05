@@ -17,11 +17,11 @@ namespace Navigation
 		return a->m_estimatedTotalCost > b->m_estimatedTotalCost;
 	}
 
-	std::optional<std::list<uint32_t>> PathFinding::FindPath(const Point3D& start, const Point3D& end)
+	std::optional<std::list<Point2D>> PathFinding::FindPath(const Point3D& start, const Point3D& end, const float extrusion)
 	{
 		if (m_navMesh->DoesDirectPathExists(start, end))
 		{
-			return std::list<uint32_t>();
+			return std::list<Point2D>();
 		}
 
 		const uint32_t startTriangleId = m_navMesh->FindTriangleId(start);
@@ -34,7 +34,7 @@ namespace Navigation
 			!endTriangle.m_isNavigable ||
 			startTriangle.m_islandId != endTriangle.m_islandId)
 		{
-			return std::optional<std::list<uint32_t>>();
+			return std::optional<std::list<Point2D>>();
 		}
 
 		std::vector<NodeRecord> nodeRecords(m_navMesh->m_vertices.size());
@@ -43,13 +43,19 @@ namespace Navigation
 
 		if (node == nullptr)
 		{
-			return std::optional<std::list<uint32_t>>();
+			return std::optional<std::list<Point2D>>();
 		}
 
-		std::list<uint32_t> path;
+		const NodeRecord* lastNode = nullptr;
+
+		std::list<Point2D> path;
 		while (node != nullptr)
 		{
-			path.emplace_front(node - nodeRecords.data());
+			const Point2D previousPosition = (Point2D) (lastNode == nullptr ? end.xy : m_navMesh->m_vertices[lastNode - nodeRecords.data()].xy);
+			const Point2D currentPosition  = (Point2D) m_navMesh->m_vertices[node - nodeRecords.data()].xy;
+
+			lastNode = node;
+
 			if (node->m_previousVertexId != -1)
 			{
 				node = &nodeRecords[node->m_previousVertexId];
@@ -58,15 +64,47 @@ namespace Navigation
 			{
 				node = nullptr;
 			}
-		}
 
-		std::list<uint32_t>::iterator it = path.begin();
-		for (uint32_t i = 0; i < path.size() - 1; ++i)
-		{
-			const uint32_t pathPoint = *it++;
-			if (m_navMesh->DoesDirectPathExists(pathPoint, end))
+			const Point2D nextPosition = (Point2D) (node == nullptr ? start.xy : m_navMesh->m_vertices[node - nodeRecords.data()].xy);
+
+			const Point2D extrusionPoint = (Point2D) GetClosestPointFromLineSegmentToPoint(previousPosition, nextPosition, currentPosition).xy;
+			Vector2D extrusionDirection  = Normalize(currentPosition - extrusionPoint);
+
+			if (IsNaN(extrusionDirection))
 			{
-				path.erase(it, path.end());
+				const Vector2D extrusionPerpendicular = Normalize(previousPosition - nextPosition);
+
+				extrusionDirection = Vector2D(extrusionPerpendicular.y, -extrusionPerpendicular.x);
+
+			}
+
+			const Vector2D extrusionVector = extrusionDirection * extrusion;
+
+			Point2D collisionPoint;
+			Point2D collisionDirection;
+
+			if (m_navMesh->FindCollisionPoint(currentPosition + extrusionDirection * 0.001f, currentPosition + extrusionVector, collisionPoint,
+				collisionDirection))
+			{
+				const Point2D previousCollisionPoint = collisionPoint;
+				if (m_navMesh->FindCollisionPoint(currentPosition - extrusionDirection * 0.001f, currentPosition - extrusionVector, collisionPoint,
+					collisionDirection))
+				{
+					if (SquaredMag(previousCollisionPoint - currentPosition) > SquaredMag(collisionPoint - currentPosition))
+					{
+						collisionPoint = previousCollisionPoint;
+					}
+
+					path.emplace_front(collisionPoint);
+				}
+				else
+				{
+					path.emplace_front(currentPosition - extrusionVector);
+				}
+			}
+			else
+			{
+				path.emplace_front(currentPosition + extrusionVector);
 			}
 		}
 
@@ -104,9 +142,8 @@ namespace Navigation
 
 			if (m_navMesh->DoesDirectPathExists(currentVertexId, end))
 			{
-				const uint32_t startSegmentVertexId = GetClosestDirectPointOnPath(start, current, nodeRecords, end);
-				NodeRecord* startSegmentNode        = &nodeRecords[startSegmentVertexId];
-				startSegmentNode->m_state           = NodeState::END_NODE;
+				NodeRecord* startSegmentNode = &nodeRecords[currentVertexId];
+				startSegmentNode->m_state    = NodeState::END_NODE;
 
 				priorityQueue.emplace(startSegmentNode);
 
@@ -180,32 +217,6 @@ namespace Navigation
 
 
 		return nullptr;
-	}
-
-	uint32_t PathFinding::GetClosestDirectPointOnPath(const Point3D& pathStart, const NodeRecord* currentPathEndNode,
-													  const std::vector<NodeRecord>& nodeRecords, const Point3D& pathEnd)
-	{
-		const NodeRecord* bestNode = currentPathEndNode;
-
-		while (true)
-		{
-			if (currentPathEndNode->m_previousVertexId == -1)
-			{
-				if (m_navMesh->DoesDirectPathExists(pathStart, pathEnd))
-				{
-					return -1;
-				}
-				return bestNode - nodeRecords.data();
-			}
-			else
-			{
-				if (m_navMesh->DoesDirectPathExists(currentPathEndNode->m_previousVertexId, pathEnd))
-				{
-					bestNode = &nodeRecords[currentPathEndNode->m_previousVertexId];
-				}
-				currentPathEndNode = &nodeRecords[currentPathEndNode->m_previousVertexId];
-			}
-		}
 	}
 
 	uint32_t PathFinding::GetClosestDirectPointOnPath(const Point3D& pathStart, const NodeRecord* currentPathEndNode,

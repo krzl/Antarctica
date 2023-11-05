@@ -4,8 +4,12 @@
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
 
+#include "Debug/DebugDrawManager.h"
+
 #include "Pathfinding/NavMesh.h"
 #include "Pathfinding/PathFinding.h"
+
+#include "Terrain/Terrain.h"
 
 
 namespace Navigation
@@ -28,7 +32,6 @@ namespace Navigation
 		}
 	}
 
-
 	bool ArriveBehavior::HasArrivedCheck(const TransformComponent* transform)
 	{
 		const Vector2D directionToEnd = m_target.value().xy - transform->m_localPosition.xy;
@@ -37,9 +40,9 @@ namespace Navigation
 		return distanceToEnd < m_targetRadius * m_targetRadius;
 	}
 
-	bool ArriveBehavior::RecalculatePath(const TransformComponent* transform)
+	bool ArriveBehavior::RecalculatePath(const TransformComponent* transform, const MovementComponent* movement)
 	{
-		m_path = PathFinding::FindPath(transform->m_localPosition, m_target.value());
+		m_path = PathFinding::FindPath(transform->m_localPosition, m_target.value(), movement->m_radius * 5.0f);
 
 		if (m_path.has_value())
 		{
@@ -49,13 +52,13 @@ namespace Navigation
 		return m_path.has_value();
 	}
 
-	void ArriveBehavior::AdjustNextPathSegment(const TransformComponent* transform)
+	void ArriveBehavior::AdjustNextPathSegment(const TransformComponent* transform, const MovementComponent* movement)
 	{
 		if (m_currentPathSegment == m_path.value().end())
 		{
 			if (!PathFinding::m_navMesh->DoesDirectPathExists(transform->m_localPosition, m_target.value()))
 			{
-				if (!RecalculatePath(transform))
+				if (!RecalculatePath(transform, movement))
 				{
 					m_framesUntilCalculatePath = 5;
 				}
@@ -66,7 +69,7 @@ namespace Navigation
 		{
 			if (!PathFinding::m_navMesh->DoesDirectPathExists(*m_currentPathSegment, transform->m_localPosition))
 			{
-				if (!RecalculatePath(transform))
+				if (!RecalculatePath(transform, movement))
 				{
 					m_framesUntilCalculatePath = 5;
 				}
@@ -107,7 +110,7 @@ namespace Navigation
 		{
 			m_framesUntilCalculatePath = -1;
 
-			if (!RecalculatePath(transform))
+			if (!RecalculatePath(transform, movement))
 			{
 				if (m_retryCalculatePath)
 				{
@@ -131,7 +134,7 @@ namespace Navigation
 
 		if (m_path.has_value())
 		{
-			AdjustNextPathSegment(transform);
+			AdjustNextPathSegment(transform, movement);
 
 			if (m_framesUntilCalculatePath != -1)
 			{
@@ -145,12 +148,8 @@ namespace Navigation
 			return Vector2D::zero;
 		}
 
-		const Point3D nextTarget = !m_path.has_value() || m_currentPathSegment == m_path.value().end() ?
-									   m_target.value() :
-									   PathFinding::m_navMesh->GetVertexPosition(*m_currentPathSegment);
-
-
-		const Vector2D direction      = nextTarget.xy - transform->m_localPosition.xy;
+		const Point2D nextTarget = !m_path.has_value() || m_currentPathSegment == m_path.value().end() ? (Point2D) m_target.value().xy : *m_currentPathSegment;
+		const Vector2D direction = nextTarget.xy - transform->m_localPosition.xy;
 		const Vector2D targetVelocity = Normalize(direction) * movement->m_maxSpeed;
 
 		return (targetVelocity - movement->m_velocity) * movement->m_maxAcceleration / movement->m_maxSpeed;

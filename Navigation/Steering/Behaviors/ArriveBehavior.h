@@ -35,20 +35,22 @@ namespace Navigation
 	protected:
 
 		bool HasArrivedCheck(const TransformComponent* transform);
-		bool RecalculatePath(const TransformComponent* transform);
-		void AdjustNextPathSegment(const TransformComponent* transform);
+		bool RecalculatePath(const TransformComponent* transform, const MovementComponent* movement);
+		void AdjustNextPathSegment(const TransformComponent* transform, const MovementComponent* movement);
 
 		std::optional<Point3D> m_target;
 
 		bool m_hasArrived = false;
 
-		std::optional<std::list<uint32_t>> m_path;
-		std::list<unsigned>::iterator m_currentPathSegment;
+		std::optional<std::list<Point2D>> m_path;
+		std::list<Point2D>::iterator m_currentPathSegment;
 
 		uint32_t m_framesUntilCalculatePath = -1;
 		bool m_retryCalculatePath = false;
 
 		float m_targetRadius      = 0.2f;
 		float m_outerTargetRadius = 5.0f;
+
+		bool first = true;
 	};
 }

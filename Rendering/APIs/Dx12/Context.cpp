@@ -459,7 +459,6 @@ namespace Rendering::Dx12
 
 		m_swapchain->Present(1, 0);
 		m_currentBackbufferId = (m_currentBackbufferId + 1) % Renderer::BUFFER_COUNT;
-		DBOUT("PONG\n");
 	}
 
 	std::shared_ptr<DescriptorHeapHandle> Dx12Context::CreateHeapHandle(const uint32_t size, const D3D12_DESCRIPTOR_HEAP_FLAGS flags)
