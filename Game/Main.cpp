@@ -32,7 +32,7 @@ void main()
 
 			Ref<RTSCamera> camera = Application::Get().GetWorld().Spawn<RTSCamera>(
 				{
-					Point3D(0, 0, 70),
+					Point3D(0, 0, 40),
 					EulerToQuaternion(20.0f, 0.0f, 0.0f)
 				}
 			);

@@ -12,7 +12,7 @@
 #include "Managers/TimeManager.h"
 #include "Pathfinding/PathFinding.h"
 #include "Terrain/Terrain.h"
-#pragma optimize( "", off )
+
 namespace Physics
 {
 	void MovementSystem::Update(Entity* entity, TransformComponent* transform, Navigation::MovementComponent* movement)
@@ -35,7 +35,21 @@ namespace Physics
 				if (targetPosition != transform->m_localPosition.xy &&
 					navMesh->FindCollisionPoint((Point2D) transform->m_localPosition.xy, targetPosition, collisionPoint, collisionNormal))
 				{
-					targetPosition = collisionPoint + Normalize(collisionNormal) * 0.00001f;
+					const Point2D deltaPosition   = targetPosition - transform->m_localPosition.xy;
+					const Vector2D slideDirection = deltaPosition - Dot(-collisionNormal, deltaPosition) * (-collisionNormal);
+					const Point2D slideStart      = (Point2D) transform->m_localPosition.xy;
+					const Point2D slideEnd        = slideStart + movement->m_positionCorrection + slideDirection * deltaTime;
+					
+					movement->m_velocity = movement->m_velocity - Dot(-collisionNormal, movement->m_velocity) * (-collisionNormal);
+
+					if (navMesh->FindCollisionPoint(slideStart, slideEnd, collisionPoint, collisionNormal))
+					{
+						targetPosition = collisionPoint + Normalize(collisionNormal) * 0.00001f;
+					}
+					else
+					{
+						targetPosition = slideEnd;
+					}
 				}
 
 				if (!navMesh->m_triangles[navMesh->FindTriangleId(targetPosition)].m_isNavigable)
@@ -91,5 +105,3 @@ namespace Physics
 		}
 	}
 }
-
-#pragma optimize( "", on )

@@ -79,7 +79,7 @@ void Application::Run()
 
 			m_frameCounter.CalculateStepLockFramesToExecute();
 
-			while (m_frameCounter.m_stepLockFramesPending > 0)
+			if (m_frameCounter.m_stepLockFramesPending > 0)
 			{
 				--m_frameCounter.m_stepLockFramesPending;
 				++m_frameCounter.m_stepLockFrameCount;

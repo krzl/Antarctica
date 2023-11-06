@@ -11,7 +11,7 @@ namespace Physics
 {
 	ApplyImpulseSystem::ApplyImpulseSystem()
 	{
-		m_iterationCount  = 10;
+		m_iterationCount  = 1;
 		m_isMultiThreaded = false;
 	}
 

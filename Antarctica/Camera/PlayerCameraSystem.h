@@ -76,7 +76,7 @@ private:
 	std::shared_ptr<AbilityActivator> m_abilityActivator = nullptr;
 
 	float m_aspectRatio = 1.0f;
-
+	
 	std::optional<Point3D> m_cursorWorldPosition;
 
 	std::vector<Rendering::CameraData> m_cameras;

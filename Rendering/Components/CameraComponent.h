@@ -6,10 +6,10 @@ namespace Rendering
 {
 	struct CameraComponent : Component
 	{
-		float m_fov   = 60;
-		float m_farZ  = 100;
+		float m_fov   = 60.0f;
+		float m_farZ  = 500.0f;
 		float m_nearZ = 0.1f;
-		float m_order = 0;
+		float m_order = 0.0f;
 
 		Matrix4D m_viewMatrix;
 		Matrix4D m_perspectiveMatrix;

@@ -167,6 +167,7 @@ LRESULT Platform::Window::MsgProc(const HWND hwnd, const UINT msg, const WPARAM 
 		case WM_MOUSEMOVE:
 		case WM_KEYUP:
 		case WM_KEYDOWN:
+		case WM_MOUSEWHEEL:
 			m_inputHandler.ProcessMessage(msg, wParam, lParam);
 			return 0;
 		default:

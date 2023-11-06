@@ -19,6 +19,7 @@ public:
 	[[nodiscard]] bool IsRightMousePressed() const { return m_isRightMousePressed; }
 	[[nodiscard]] const Point2DInt& GetMousePosition() const { return m_mousePosition; }
 	[[nodiscard]] const Point2DInt& GetMouseDelta() const { return m_mouseDelta; }
+	[[nodiscard]] float GetScrollWheelDelta() const { return m_previousMouseWheelDelta; }
 
 	Dispatcher<> OnLeftMouseButtonPressed;
 	Dispatcher<> OnMiddleMouseButtonPressed;
@@ -51,4 +52,7 @@ private:
 	Point2DInt m_oldMousePosition;
 
 	Point2DInt m_mouseDelta = { 0, 0 };
+	
+	float m_mouseWheelDelta = 0.0f;
+	float m_previousMouseWheelDelta = 0.0f;
 };

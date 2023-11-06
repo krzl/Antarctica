@@ -26,6 +26,7 @@ void InputHandler::ProcessMessage(const UINT msg, const WPARAM wParam, const LPA
 		case WM_MBUTTONUP:
 		case WM_RBUTTONUP:
 		case WM_MOUSEMOVE:
+		case WM_MOUSEWHEEL:
 			ProcessMouseInput(msg, wParam, lParam);
 			return;
 		case WM_KEYDOWN:
@@ -47,8 +48,8 @@ void InputHandler::ProcessMouseInput(const UINT msg, const WPARAM wParam, const 
 	const int32_t x = GET_X_LPARAM(lParam);
 	const int32_t y = GET_Y_LPARAM(lParam);
 
-	m_inputManager->m_mousePosition = Point2DInt{ x, y };
-
+	m_inputManager->m_mousePosition   = Point2DInt{ x, y };
+	
 	switch (msg)
 	{
 		case WM_LBUTTONDOWN:
@@ -71,6 +72,9 @@ void InputHandler::ProcessMouseInput(const UINT msg, const WPARAM wParam, const 
 			return;
 		case WM_MOUSEMOVE:
 			m_inputManager->OnMouseMove.Dispatch(x, y);
+			return;
+		case WM_MOUSEWHEEL:
+			m_inputManager->m_mouseWheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 			return;
 	}
 }

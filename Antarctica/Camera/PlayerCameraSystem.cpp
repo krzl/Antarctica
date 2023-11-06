@@ -99,10 +99,40 @@ void PlayerCameraSystem::Update(Entity* entity, TransformComponent* transform, R
 	{
 		if (const InputCommand::MouseMoveInput* mouseMove = m_inputQueue.GetMouseMove())
 		{
-			const Vector3D positionDelta = Vector3D(-mouseMove->m_deltaX * cameraScroll->m_cameraSpeed,
-				mouseMove->m_deltaY * cameraScroll->m_cameraSpeed, 0.0f);
+			const Vector3D positionDelta = Vector3D(-mouseMove->m_deltaX * cameraScroll->m_dragSpeed,
+				mouseMove->m_deltaY * cameraScroll->m_dragSpeed, 0.0f);
 			transform->m_localPosition += positionDelta;
 		}
+	}
+
+	InputManager* inputManager = InputManager::GetInstance();
+
+	Vector2D cameraKeyboardScrollDirection = Vector2D::zero;
+	if (inputManager->IsKeyPressed(Key::LEFT_ARROW))
+	{
+		cameraKeyboardScrollDirection += Vector2D(-1.0f, 0.0f);
+	}
+	if (inputManager->IsKeyPressed(Key::RIGHT_ARROW))
+	{
+		cameraKeyboardScrollDirection += Vector2D(1.0f, 0.0f);
+	}
+	if (inputManager->IsKeyPressed(Key::UP_ARROW))
+	{
+		cameraKeyboardScrollDirection += Vector2D(0.0f, 1.0f);
+	}
+	if (inputManager->IsKeyPressed(Key::DOWN_ARROW))
+	{
+		cameraKeyboardScrollDirection += Vector2D(0.0f, -1.0f);
+	}
+
+	if (cameraKeyboardScrollDirection != Vector2D::zero)
+	{
+		transform->m_localPosition += cameraKeyboardScrollDirection * cameraScroll->m_keyboardSpeed * TimeManager::GetInstance()->GetDeltaTime();
+	}
+
+	if (inputManager->GetScrollWheelDelta() != 0.0f)
+	{
+		transform->m_localPosition.z = Clamp(cameraScroll->m_minHeight, cameraScroll->m_maxHeight, transform->m_localPosition.z - cameraScroll->m_heightDeltaSpeed * inputManager->GetScrollWheelDelta());
 	}
 
 	camera->m_viewMatrix        = Inverse(Transform4D::MakeTranslation(transform->m_localPosition) * transform->m_localRotation.GetRotationMatrix());

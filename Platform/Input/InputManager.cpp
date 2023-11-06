@@ -55,5 +55,7 @@ void InputManager::Update()
 		m_mousePosition.x - m_oldMousePosition.x,
 		m_mousePosition.y - m_oldMousePosition.y
 	};
-	m_oldMousePosition = m_mousePosition;
+	m_oldMousePosition        = m_mousePosition;
+	m_previousMouseWheelDelta = m_mouseWheelDelta;
+	m_mouseWheelDelta         = 0.0f;
 }

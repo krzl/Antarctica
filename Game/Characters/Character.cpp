@@ -141,5 +141,5 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 		}
 	});
 
-	physicsBody->SetMass(1000.0f);
+	physicsBody->SetMass(2000.0f);
 }
