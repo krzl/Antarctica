@@ -275,6 +275,7 @@ float Intersect(const Ray& ray, const Triangle& triangle)
 
 bool IsOverlapping2D(const Sphere& sphere, const BoundingBox& boundingBox)
 {
+	PERF_COUNTER(Overlap2DTest)
 	float dMin = 0;
 
 

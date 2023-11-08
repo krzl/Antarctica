@@ -32,6 +32,7 @@ namespace Navigation
 
 	Vector2D CohesionBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
 	{
+		PERF_COUNTER(GetFinalLinearAcceleration__CohesionBehavior);
 		if (!movement->m_arriveBehavior.HasTarget() || m_actorCount == 0 || m_heading == Vector2D::zero)
 		{
 			return Vector2D::zero;

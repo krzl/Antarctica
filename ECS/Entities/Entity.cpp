@@ -35,6 +35,7 @@ const ComponentAccessor& Entity::GetComponentAccessor()
 
 BoundingBox Entity::GetBoundingBox()
 {
+	PERF_COUNTER(EntityBoundingBoxGather)
 	const ComponentAccessor& accessor = GetComponentAccessor();
 	if (ColliderComponent* collider = accessor.GetComponent<ColliderComponent>())
 	{

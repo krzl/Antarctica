@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "ECS.h"
 
+#include "Performance/PerformanceMonitor.h"
+
 #include "Systems/SystemBase.h"
 
 void ECS::ExecuteForAllSystems(const std::function<void(SystemBase*)> function) const
@@ -31,6 +33,7 @@ SystemBase* ECS::GetSystem(const uint64_t hash)
 
 void ECS::RunBeginFrame()
 {
+	PERF_COUNTER(BeginFrame);
 	ExecuteForAllSystems([](SystemBase* system)
 	{
 		system->OnFrameStart();
@@ -38,12 +41,14 @@ void ECS::RunBeginFrame()
 
 	for (SystemBase* system : m_preStepLockSystems)
 	{
+		PerformanceCounter counter(typeid(*system).name());
 		system->Run();
 	}
 }
 
 void ECS::RunStepLock()
 {
+	PERF_COUNTER(LockStep);
 	ExecuteForAllSystems([](SystemBase* system)
 	{
 		system->OnStepLockStart();
@@ -51,6 +56,7 @@ void ECS::RunStepLock()
 
 	for (SystemBase* system : m_stepLockSystems)
 	{
+		PerformanceCounter counter(typeid(*system).name());
 		system->Run();
 	}
 
@@ -62,8 +68,10 @@ void ECS::RunStepLock()
 
 void ECS::RunEndFrame()
 {
+	PERF_COUNTER(EndFrame);
 	for (SystemBase* system : m_postStepLockSystems)
 	{
+		PerformanceCounter counter(typeid(*system).name());
 		system->Run();
 	}
 
@@ -72,7 +80,6 @@ void ECS::RunEndFrame()
 		system->OnFrameEnd();
 	});
 }
-
 
 ECS::~ECS()
 {

@@ -11,8 +11,6 @@
 
 #include "Camera/PlayerCameraSystem.h"
 
-#include "Debug/DebugDraw/DebugDrawSystem.h"
-
 void main()
 {
 #if defined(DEBUG) | defined(_DEBUG)
@@ -59,7 +57,7 @@ void main()
 			playerCameraSystem->SetupTerrainBvh(mesh);
 
 #if defined(DEBUG) | defined(_DEBUG)
-			constexpr uint32_t gridSize = 1;
+			constexpr uint32_t gridSize = 12;
 #else
 			constexpr uint32_t gridSize = 40;
 #endif

@@ -209,11 +209,15 @@ void QuadtreeNode::TestIntersect(const Frustum& frustum, std::vector<Entity*>& o
 
 void QuadtreeNode::FindNearby(const Sphere& sphere, const std::function<void(Entity*)> function) const
 {
-	for (Entity* object : m_entities)
 	{
-		if (IsOverlapping2D(sphere, object->GetBoundingBox()))
+		PERF_COUNTER(Iteration)
+		for (Entity* object : m_entities)
 		{
-			function(object);
+			PERF_COUNTER(PerEntityCode)
+			if (IsOverlapping2D(sphere, object->GetBoundingBox()))
+			{
+				function(object);
+			}
 		}
 	}
 

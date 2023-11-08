@@ -35,6 +35,7 @@ namespace Navigation
 
 	Vector2D SeparationBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
 	{
+		PERF_COUNTER(GetFinalLinearAcceleration__SeparationBehavior);
 		if (m_actorCount == 0 || m_totalAcceleration == Vector2D::zero)
 		{
 			return Vector2D::zero;

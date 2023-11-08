@@ -35,6 +35,7 @@ namespace Navigation
 
 	Vector2D AlignmentBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
 	{
+		PERF_COUNTER(GetFinalLinearAcceleration__AlignmentBehavior);
 		if (!movement->m_arriveBehavior.HasTarget() || m_actorCount == 0)
 		{
 			return Vector2D::zero;

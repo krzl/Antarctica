@@ -96,6 +96,7 @@ namespace Navigation
 
 	Vector2D ArriveBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
 	{
+		PERF_COUNTER(GetFinalLinearAcceleration__ArriveBehavior);
 		if (!m_target.has_value() || m_hasArrived)
 		{
 			return Vector2D::zero;

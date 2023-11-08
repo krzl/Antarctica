@@ -5,6 +5,8 @@
 #include "SystemBase.h"
 #include "Archetypes/Archetype.h"
 
+#include "Performance/PerformanceMonitor.h"
+
 class Entity;
 struct Archetype;
 

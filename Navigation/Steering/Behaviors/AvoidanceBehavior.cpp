@@ -16,7 +16,7 @@ namespace Navigation
 		}
 
 		m_closestTransform   = nullptr;
-		m_closestDistanceSqr = SquaredMag(movement->m_velocity);;
+		m_closestDistanceSqr = Min(SquaredMag(movement->m_velocity), 1.0f);
 	}
 
 	void AvoidanceBehavior::UpdateNearbyEntity(const TransformComponent* transform, MovementComponent* movement,
@@ -41,6 +41,7 @@ namespace Navigation
 
 	Vector2D AvoidanceBehavior::GetFinalLinearAcceleration(const TransformComponent* transform, const MovementComponent* movement)
 	{
+		PERF_COUNTER(GetFinalLinearAcceleration__AvoidanceBehavior);
 		if (!movement->m_arriveBehavior.HasTarget())
 		{
 			return Vector2D::zero;
@@ -50,18 +51,28 @@ namespace Navigation
 		Point2D collisionNormal;
 		float penetration;
 
-		if (PathFinding::m_navMesh->FindCollisionPoint(Sphere{ transform->m_localPosition, Terathon::Sqrt(m_closestDistanceSqr) },
-			movement->m_velocity, collisionPoint, collisionNormal, penetration))
 		{
-			const Vector2D awayVector = collisionPoint - transform->m_localPosition.xy;
+			bool hasCollided;
 
-			const float dot        = movement->m_velocity.x * -awayVector.y + movement->m_velocity.y * awayVector.x;
-			const bool avoidToLeft = dot > 0.0f;
+			{
+				PERF_COUNTER(AvoidanceBehavior__NavCollision);
+				hasCollided = PathFinding::m_navMesh->FindCollisionPoint(Sphere{ transform->m_localPosition, Terathon::Sqrt(m_closestDistanceSqr) },
+					movement->m_velocity, collisionPoint, collisionNormal, penetration);
+			}
 
-			const Vector2D desiredDirection = Normalize(avoidToLeft ? Vector2D(-awayVector.y, awayVector.x) : Vector2D(awayVector.y, -awayVector.x));
-			const Vector2D desiredVelocity  = desiredDirection * movement->m_radius * movement->m_maxSpeed;
-			const Vector2D force            = desiredVelocity - movement->m_velocity;
-			return force * movement->m_maxAcceleration / movement->m_maxSpeed;
+			if (hasCollided)
+			{
+				PERF_COUNTER(AvoidanceBehavior__PostNavCollision);
+				const Vector2D awayVector = collisionPoint - transform->m_localPosition.xy;
+
+				const float dot        = movement->m_velocity.x * -awayVector.y + movement->m_velocity.y * awayVector.x;
+				const bool avoidToLeft = dot > 0.0f;
+
+				const Vector2D desiredDirection = Normalize(avoidToLeft ? Vector2D(-awayVector.y, awayVector.x) : Vector2D(awayVector.y, -awayVector.x));
+				const Vector2D desiredVelocity  = desiredDirection * movement->m_radius * movement->m_maxSpeed;
+				const Vector2D force            = desiredVelocity - movement->m_velocity;
+				return force * movement->m_maxAcceleration / movement->m_maxSpeed;
+			}
 		}
 
 		if (m_closestTransform == nullptr)

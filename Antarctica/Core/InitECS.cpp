@@ -11,6 +11,7 @@
 #include "Systems/CollisionGatherSystem.h"
 #include "Systems/CullingSystem.h"
 #include "Systems/MovementSystem.h"
+#include "Systems/PerformanceMonitorSystem.h"
 #include "Systems/QuadtreeUpdateSystem.h"
 #include "Systems/RenderSystem.h"
 #include "Systems/SkinningSystem.h"
@@ -18,6 +19,7 @@
 
 void Application::CreateSystems()
 {
+	m_ecs.AddSystem<PerformanceMonitorSystem>(ECS::PRE_STEP_LOCK);
 	m_ecs.AddSystem<PlayerCameraSystem>(ECS::PRE_STEP_LOCK);
 
 	m_ecs.AddSystem<AbilitySystem>(ECS::STEP_LOCK);

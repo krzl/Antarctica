@@ -62,6 +62,7 @@ void Application::Run()
 	
 	while (m_isRunning)
 	{
+		PERF_COUNTER(Frame);
 		if (!m_isPaused)
 		{
 			m_window.Update();

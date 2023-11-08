@@ -42,24 +42,28 @@ namespace Navigation
 
 		movement->m_steeringPipeline.InitializeTotalAccelerationCalculation(transform, movement);
 
-		World::Get()->GetQuadtree().FindNearby(Sphere{ transform->m_localPosition, maxRadiusToCheck },
-			[entity, &movement, &transform](Entity* other)
-			{
-				if (other == entity)
+		{
+			PERF_COUNTER(SteeringNearby)
+			World::Get()->GetQuadtree().FindNearby(Sphere{ transform->m_localPosition, maxRadiusToCheck },
+				[entity, &movement, &transform](Entity* other)
 				{
-					return;
-				}
+					PERF_COUNTER(UpdateNearbyEntity)
+					if (other == entity)
+					{
+						return;
+					}
 
-				const ComponentAccessor& componentAccessor = other->GetComponentAccessor();
+					const ComponentAccessor& componentAccessor = other->GetComponentAccessor();
 
-				const TransformComponent* nearbyTransform = componentAccessor.GetComponent<TransformComponent>();
-				MovementComponent* nearbyMovement         = componentAccessor.GetComponent<MovementComponent>();
+					const TransformComponent* nearbyTransform = componentAccessor.GetComponent<TransformComponent>();
+					MovementComponent* nearbyMovement         = componentAccessor.GetComponent<MovementComponent>();
 
-				if (nearbyTransform && nearbyMovement)
-				{
-					movement->m_steeringPipeline.UpdateNearbyEntity(transform, movement, nearbyTransform, nearbyMovement);
-				}
-			});
+					if (nearbyTransform && nearbyMovement)
+					{
+						movement->m_steeringPipeline.UpdateNearbyEntity(transform, movement, nearbyTransform, nearbyMovement);
+					}
+				});
+		}
 
 		const float deltaTime = TimeManager::GetInstance()->GetTimeStep();
 

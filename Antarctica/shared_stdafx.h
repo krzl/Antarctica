@@ -48,6 +48,8 @@ using Terathon::Quaternion;
 #include "../Utilities/Common/MathHelpers.h"
 #include "../Utilities/Common/Random.h"
 
+#include "../Utilities/Performance/PerformanceCounter.h"
+
 #include "../Utilities/Math/BoundingBox.h"
 #include "../Utilities/Math/Capsule.h"
 #include "../Utilities/Math/Frustum.h"

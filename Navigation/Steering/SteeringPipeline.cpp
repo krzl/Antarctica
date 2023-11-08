@@ -8,6 +8,8 @@ namespace Navigation
 {
 	void SteeringPipeline::InitializeTotalAccelerationCalculation(const TransformComponent* transform, MovementComponent* movement) const
 	{
+		PERF_COUNTER(InitializeTotalAccelerationCalculation)
+
 		InitializeTotalAccelerationCalculation(movement->m_arriveBehavior, transform, movement);
 		InitializeTotalAccelerationCalculation(movement->m_alignmentBehavior, transform, movement);
 		InitializeTotalAccelerationCalculation(movement->m_avoidanceBehavior, transform, movement);
@@ -27,6 +29,8 @@ namespace Navigation
 
 	Vector2D SteeringPipeline::GetFinalLinearAcceleration(const TransformComponent* transform, MovementComponent* movement) const
 	{
+		PERF_COUNTER(GetFinalLinearAcceleration)
+
 		Vector2D totalAcceleration = Vector2D::zero;
 
 		totalAcceleration += GetLinearAcceleration(movement->m_arriveBehavior, transform, movement);
