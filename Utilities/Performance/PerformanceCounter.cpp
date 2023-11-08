@@ -5,9 +5,9 @@
 
 PerformanceCounter::PerformanceCounter(const uint64_t id, const std::string& name)
 {
+	timer.Start();
 	m_monitor = &PerformanceMonitor::GetMonitor();
 	m_monitor->OpenNode(id, name);
-	timer.Start();
 }
 
 PerformanceCounter::PerformanceCounter(const std::string& name) :
@@ -15,6 +15,6 @@ PerformanceCounter::PerformanceCounter(const std::string& name) :
 
 PerformanceCounter::~PerformanceCounter()
 {
-	timer.Stop();
 	m_monitor->CloseNode(timer.GetTime());
+	timer.Stop();
 }

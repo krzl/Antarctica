@@ -23,6 +23,8 @@
 #include <exception>
 #include <iostream>
 
+#include <execution>
+
 #include <chrono>
 
 #include "../ThirdParty/terathon-math/TSMath.h"

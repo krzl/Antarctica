@@ -36,13 +36,15 @@ QuadtreePlacementRef QuadtreeNode::AddEntity(Entity* entity, const BoundingBox& 
 void QuadtreeNode::PlaceEntity(Entity* entity)
 {
 	std::lock_guard lock(m_mutex);
-	m_entities.emplace(entity);
+	m_entities.emplace_back(entity);
+	//m_entities.emplace(entity);
 }
 
 void QuadtreeNode::RemoveEntity(Entity* entity)
 {
 	std::lock_guard lock(m_mutex);
-	m_entities.erase(entity);
+	m_entities.erase(std::remove(m_entities.begin(), m_entities.end(), entity), m_entities.end());
+	//m_entities.erase(entity);
 }
 
 QuadtreeNode* QuadtreeNode::TryPushBack(Entity* entity, const BoundingBox& boundingBox)
@@ -213,7 +215,7 @@ void QuadtreeNode::FindNearby(const Sphere& sphere, const std::function<void(Ent
 		PERF_COUNTER(Iteration)
 		for (Entity* object : m_entities)
 		{
-			PERF_COUNTER(PerEntityCode)
+			//PERF_COUNTER(PerEntityCode)
 			if (IsOverlapping2D(sphere, object->GetBoundingBox()))
 			{
 				function(object);
@@ -258,10 +260,10 @@ void QuadtreeNode::CollectChildObjects(std::vector<Entity*>& entities) const
 
 void QuadtreeNode::CollectChildObjects(const std::function<void(Entity*)> function) const
 {
-	for (Entity* entity : m_entities)
+	std::for_each(std::execution::par_unseq, m_entities.begin(), m_entities.end(), [function](Entity* entity)
 	{
 		function(entity);
-	}
+	});
 
 	for (const QuadtreeNode* childNode : m_childNodes)
 	{

@@ -38,10 +38,9 @@ namespace Navigation
 		}
 
 		const float maxRadiusToCheck = Max(Max(movement->m_radius * movement->m_cohesionBehavior.GetCohesionScale(),
-			movement->m_radius * movement->m_alignmentBehavior.GetCohesionScale()), Magnitude(movement->m_velocity));
+			movement->m_radius * movement->m_alignmentBehavior.GetCohesionScale()), Min(Magnitude(movement->m_velocity), 0.0f));
 
 		movement->m_steeringPipeline.InitializeTotalAccelerationCalculation(transform, movement);
-
 		{
 			PERF_COUNTER(SteeringNearby)
 			World::Get()->GetQuadtree().FindNearby(Sphere{ transform->m_localPosition, maxRadiusToCheck },

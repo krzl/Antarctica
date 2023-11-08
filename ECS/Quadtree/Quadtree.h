@@ -34,7 +34,7 @@ public:
 	void FindNearby(const Sphere& sphere, std::function<void(Entity*)> function) const;
 
 	static constexpr float QUADTREE_SIZE = 512.0f;
-	static constexpr float MIN_NODE_SIZE = 4.0f;
+	static constexpr float MIN_NODE_SIZE = 2.0f;
 
 private:
 

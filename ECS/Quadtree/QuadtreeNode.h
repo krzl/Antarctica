@@ -43,7 +43,7 @@ class QuadtreeNode
 	QuadtreeNode* m_childNodes[(uint32_t) ChildDirection::COUNT] = { nullptr, nullptr, nullptr, nullptr };
 	QuadtreeNode* m_parent                                       = nullptr;
 
-	std::unordered_set<Entity*> m_entities;
+	std::vector<Entity*> m_entities;
 
 	uint32_t m_totalObjectCount = 0;
 
