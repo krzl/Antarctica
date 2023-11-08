@@ -39,7 +39,7 @@ namespace Physics
 					const Vector2D slideDirection = deltaPosition - Dot(-collisionNormal, deltaPosition) * (-collisionNormal);
 					const Point2D slideStart      = (Point2D) transform->m_localPosition.xy;
 					const Point2D slideEnd        = slideStart + movement->m_positionCorrection + slideDirection * deltaTime;
-					
+
 					movement->m_velocity = movement->m_velocity - Dot(-collisionNormal, movement->m_velocity) * (-collisionNormal);
 
 					if (navMesh->FindCollisionPoint(slideStart, slideEnd, collisionPoint, collisionNormal))
@@ -54,9 +54,8 @@ namespace Physics
 
 				if (!navMesh->m_triangles[navMesh->FindTriangleId(targetPosition)].m_isNavigable)
 				{
-					LOG(DEBUG, "TEST", "{} = {}, {} -> {}, {} --- {}, {}, ({}, {})", entity->GetInstanceId(), transform->m_localPosition.x,
-						transform->m_localPosition.y, oldTargetPosition.x, oldTargetPosition.y, targetPosition.x, targetPosition.y,
-						collisionNormal.x, collisionNormal.y);
+					//FALLBACK
+					targetPosition = transform->m_localPosition.xy;
 				}
 
 				movement->m_velocity += movement->m_force * physicsBody->GetInverseMass() * deltaTime / 2.0f;
@@ -70,9 +69,10 @@ namespace Physics
 				}
 			}
 
+			movement->m_lastPosition = (Point2D) transform->m_localPosition.xy;
+
 			transform->m_localPosition.xy = targetPosition;
 			transform->m_localPosition.z  = Navigation::PathFinding::m_terrain->GetHeightAtLocation((Point2D) transform->m_localPosition.xy);
-
 
 			movement->m_force              = Vector2D::zero;
 			movement->m_positionCorrection = Vector2D::zero;

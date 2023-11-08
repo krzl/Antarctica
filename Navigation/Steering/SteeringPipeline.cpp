@@ -36,7 +36,6 @@ namespace Navigation
 		totalAcceleration += GetLinearAcceleration(movement->m_separationBehavior, transform, movement);
 
 		const float accelerationMagnitudeSqr = SquaredMag(totalAcceleration);
-		//if (accelerationMagnitudeSqr > movement->m_maxAcceleration * movement->m_maxAcceleration)
 		if (accelerationMagnitudeSqr != 0.0f)
 		{
 			totalAcceleration = totalAcceleration * (movement->m_maxAcceleration / Terathon::Sqrt(accelerationMagnitudeSqr));

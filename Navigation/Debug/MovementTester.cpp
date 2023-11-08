@@ -51,7 +51,7 @@ namespace Navigation
 			m_cohesionWeight   = movement->m_cohesionBehavior.GetWeight();
 			m_alignmentWeight  = movement->m_alignmentBehavior.GetWeight();
 
-			m_agentRadius  = movement->m_radius;
+			m_agentRadius  = movement->m_colliderRadius;
 			m_acceleration = movement->m_maxAcceleration;
 			m_maxSpeed     = movement->m_maxSpeed;
 
@@ -72,7 +72,7 @@ namespace Navigation
 			movement->m_cohesionBehavior.SetWeight(m_cohesionWeight);
 			movement->m_alignmentBehavior.SetWeight(m_alignmentWeight);
 
-			movement->m_radius          = m_agentRadius;
+			movement->m_colliderRadius          = m_agentRadius;
 			movement->m_maxAcceleration = m_acceleration;
 			movement->m_maxSpeed        = m_maxSpeed;
 
@@ -94,7 +94,7 @@ namespace Navigation
 			const float speedRatio = Magnitude(movement->m_velocity) / movement->m_maxSpeed;
 			const Color color      = LerpClamped(Color::red, Color::white, speedRatio);
 
-			DebugDrawManager::GetInstance()->DrawSphere(transform->m_localPosition, movement->m_radius, 0.0f, color, 8);
+			DebugDrawManager::GetInstance()->DrawSphere(transform->m_localPosition, movement->m_colliderRadius, 0.0f, color, 8);
 			DebugDrawManager::GetInstance()->DrawLine(transform->m_localPosition, transform->m_localPosition + Vector3D(movement->m_velocity, 0.0f),
 				0.05f, 0.0f, Color::yellow, 6);
 		}

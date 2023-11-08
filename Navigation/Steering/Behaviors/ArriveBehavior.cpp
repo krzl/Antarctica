@@ -3,14 +3,8 @@
 
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
-
-#include "Debug/DebugDrawManager.h"
-
 #include "Pathfinding/NavMesh.h"
 #include "Pathfinding/PathFinding.h"
-
-#include "Terrain/Terrain.h"
-
 
 namespace Navigation
 {
@@ -26,7 +20,8 @@ namespace Navigation
 
 		if (nearbyMovement->m_arriveBehavior.m_hasArrived &&
 			SquaredMag(nearbyMovement->m_arriveBehavior.GetTarget().xy - GetTarget().xy) < m_targetRadius * m_targetRadius &&
-			SquaredMag(transform->m_localPosition.xy - GetTarget().xy) < m_outerTargetRadius * m_outerTargetRadius)
+			SquaredMag(transform->m_localPosition.xy - GetTarget().xy) < m_outerTargetRadius * m_outerTargetRadius &&
+			PathFinding::m_navMesh->DoesDirectPathExists(m_target.value(), transform->m_localPosition))
 		{
 			m_hasArrived = true;
 		}
@@ -36,7 +31,7 @@ namespace Navigation
 	{
 		const Vector2D directionToEnd = m_target.value().xy - transform->m_localPosition.xy;
 		const float distanceToEnd     = SquaredMag(directionToEnd);
-
+		
 		return distanceToEnd < m_targetRadius * m_targetRadius;
 	}
 
@@ -148,8 +143,10 @@ namespace Navigation
 			return Vector2D::zero;
 		}
 
-		const Point2D nextTarget = !m_path.has_value() || m_currentPathSegment == m_path.value().end() ? (Point2D) m_target.value().xy : *m_currentPathSegment;
-		const Vector2D direction = nextTarget.xy - transform->m_localPosition.xy;
+		const Point2D nextTarget = !m_path.has_value() || m_currentPathSegment == m_path.value().end() ?
+									   (Point2D) m_target.value().xy :
+									   *m_currentPathSegment;
+		const Vector2D direction      = nextTarget.xy - transform->m_localPosition.xy;
 		const Vector2D targetVelocity = Normalize(direction) * movement->m_maxSpeed;
 
 		return (targetVelocity - movement->m_velocity) * movement->m_maxAcceleration / movement->m_maxSpeed;

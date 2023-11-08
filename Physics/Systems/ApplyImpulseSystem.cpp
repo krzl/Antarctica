@@ -21,6 +21,7 @@ namespace Physics
 		for (const CollisionData& collision : physicsBody->m_collisions)
 		{
 			Navigation::MovementComponent* otherMovement = nullptr;
+			const TransformComponent* otherTransform     = nullptr;
 			const PhysicsBodyComponent* otherPhysicsBody = nullptr;
 
 			if (collision.m_entityB)
@@ -28,6 +29,7 @@ namespace Physics
 				const ComponentAccessor& componentAccessor = collision.m_entityB->GetComponentAccessor();
 				otherMovement                              = componentAccessor.GetComponent<Navigation::MovementComponent>();
 				otherPhysicsBody                           = componentAccessor.GetComponent<PhysicsBodyComponent>();
+				otherTransform                             = componentAccessor.GetComponent<TransformComponent>();
 			}
 
 			const float inverseMassSum = physicsBody->GetInverseMass() + (otherPhysicsBody ? otherPhysicsBody->GetInverseMass() : 0.0f);
@@ -59,7 +61,7 @@ namespace Physics
 			}
 
 			const float contactVelocity = Dot(relativeVelocity, collision.m_normal);
-			if (contactVelocity > 0.0f)
+			if (contactVelocity >= 0.0f)
 			{
 				// entities are separating, ignore resolve
 				continue;
@@ -67,13 +69,30 @@ namespace Physics
 
 			const float j = -(1.0f + collision.m_restitution) * contactVelocity / inverseMassSum;
 
+			float velocityRatio = 0.5f;
+			if (otherMovement)
+			{
+				if (movement->m_arriveBehavior.HasTarget() && otherMovement->m_arriveBehavior.HasTarget())
+				{
+					const float deltaTransform = Magnitude(movement->m_lastPosition - transform->m_localPosition.xy);
+					const float otherDeltaTransform = Magnitude(otherMovement->m_lastPosition - otherTransform->m_localPosition.xy);
+					velocityRatio = deltaTransform / (deltaTransform + otherDeltaTransform);
+				}
+				else
+				{
+					const float deltaVelocity = Magnitude(movement->m_velocity);
+					const float otherDeltaVelocity = Magnitude(otherMovement->m_velocity);
+					velocityRatio = otherDeltaVelocity / (deltaVelocity + otherDeltaVelocity);
+				}
+			}
+
 			const Vector2D impulse = collision.m_normal * j;
-			movement->m_velocity -= physicsBody->GetInverseMass() * impulse;
+			movement->m_velocity -= physicsBody->GetInverseMass() * impulse * Max(0.0f, Min(velocityRatio * 2.0f, 1.0f));
 
 			relativeVelocity = -movement->m_velocity;
 			if (otherMovement)
 			{
-				otherMovement->m_velocity += otherPhysicsBody->GetInverseMass() * impulse;
+				otherMovement->m_velocity += otherPhysicsBody->GetInverseMass() * impulse * Max(0.0f, Min((1.0f - velocityRatio) * 2.0f, 1.0f));
 				relativeVelocity += otherMovement->m_velocity;
 			}
 
@@ -100,11 +119,12 @@ namespace Physics
 				tangentImpulse = t * -j * collision.m_dynamicFriction;
 			}
 
-			movement->m_velocity -= physicsBody->GetInverseMass() * tangentImpulse;
+			movement->m_velocity -= physicsBody->GetInverseMass() * tangentImpulse * Max(0.0f, Min(velocityRatio * 2.0f, 1.0f));
 
 			if (otherMovement)
 			{
-				otherMovement->m_velocity += otherPhysicsBody->GetInverseMass() * tangentImpulse;
+				otherMovement->m_velocity += otherPhysicsBody->GetInverseMass() * tangentImpulse *
+					Max(0.0f, Min((1.0f - velocityRatio) * 2.0f, 1.0f));
 			}
 		}
 	}

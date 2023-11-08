@@ -24,9 +24,12 @@ namespace Navigation
 		Vector2D m_force    = Vector2D::zero;
 		Vector2D m_velocity = Vector2D::zero;
 
+		Vector2D m_lastPosition = Vector2D::zero;
+		
 		float m_radius = 0.0f;
+		float m_colliderRadius = 0.0f;
 
-		float m_maxAcceleration = 5000.0f;
+		float m_maxAcceleration = 15000.0f;
 		float m_maxSpeed        = 4.0f;
 
 		float m_maxRotation = 7.0f;

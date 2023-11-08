@@ -3,6 +3,9 @@
 
 #include "Abilities/MoveAbility.h"
 #include "Camera/PlayerCameraSystem.h"
+
+#include "Components/MovementComponent.h"
+
 #include "Core/Application.h"
 
 InstantMoveActivator::InstantMoveActivator()
@@ -28,8 +31,12 @@ bool InstantMoveActivator::ShouldBeCancelled()
 
 std::shared_ptr<Ability> InstantMoveActivator::Activate(Entity* entity)
 {
+	const Navigation::MovementComponent* movement = entity->GetComponentAccessor().GetComponent<Navigation::MovementComponent>();
+	const uint32_t selectedCount                  = Application::Get().GetSystem<PlayerCameraSystem>()->GetSelectedCount();
+
 	uint32_t pathFindingDelay = m_entityActivationCount++ / NAVIGATION_MAX_UNITS_PER_FRAME;
-	return std::make_shared<MoveAbility>(m_cursorPosition.value(), pathFindingDelay);
+	return std::make_shared<MoveAbility>(m_cursorPosition.value(), pathFindingDelay,
+		Terathon::Sqrt(selectedCount * Max(movement->m_radius, movement->m_colliderRadius) / Terathon::Math::pi) * 1.1f);
 }
 
 void InstantMoveActivator::OnFinished()

@@ -117,7 +117,8 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 	materialSkin->SetTexture("tex", texture);
 	meshComponent->m_materials = { material, material, material, materialSkin };
 
-	movement->m_radius = 0.3f;
+	movement->m_radius = 0.23f;
+	movement->m_colliderRadius = 0.18f;
 
 	collider->m_boundingBox = mesh->GetBoundingBox().Transform(meshComponent->m_transform);
 

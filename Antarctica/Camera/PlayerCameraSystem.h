@@ -56,13 +56,11 @@ public:
 	//TODO: Remove entities from selection when destroyed
 	void AddToSelection(Entity* entity);
 	void ClearSelection();
+	uint32_t GetSelectedCount() const;
 
-	//TODO: Handle selection in another file
 	void CreateDragIndicator(CameraDragSelectComponent* cameraDrag) const;
 	void UpdateDragIndicator(TransformComponent* cameraTransform, Rendering::CameraComponent* camera, CameraDragSelectComponent* cameraDrag) const;
 	void OnDragEnd(TransformComponent* cameraTransform, Rendering::CameraComponent* camera, CameraDragSelectComponent* cameraDrag);
-
-
 
 	void SetupTerrainBvh(const std::shared_ptr<Mesh> terrain);
 
@@ -76,7 +74,7 @@ private:
 	std::shared_ptr<AbilityActivator> m_abilityActivator = nullptr;
 
 	float m_aspectRatio = 1.0f;
-	
+
 	std::optional<Point3D> m_cursorWorldPosition;
 
 	std::vector<Rendering::CameraData> m_cameras;

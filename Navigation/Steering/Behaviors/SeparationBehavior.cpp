@@ -24,11 +24,11 @@ namespace Navigation
 		const Vector2D direction = transform->m_localPosition.xy - nearbyTransform->m_localPosition.xy;
 		const float distanceSqr  = SquaredMag(direction);
 
-		if (distanceSqr < movement->m_radius * 4 * movement->m_radius && distanceSqr > 0.0f)
+		if (distanceSqr < movement->m_colliderRadius * 4 * movement->m_colliderRadius && distanceSqr > 0.0f)
 		{
-			const float radiusSum = movement->m_radius + nearbyMovement->m_radius;
+			const float radiusSum = movement->m_colliderRadius + nearbyMovement->m_colliderRadius;
 			const float distance  = Terathon::Sqrt(distanceSqr);
-			m_totalAcceleration += direction * (1.0f - ((distance - radiusSum) / (movement->m_radius * 4 - radiusSum)));
+			m_totalAcceleration += direction * (1.0f - ((distance - radiusSum) / (movement->m_colliderRadius * 4 - radiusSum)));
 			++m_actorCount;
 		}
 	}
@@ -40,6 +40,6 @@ namespace Navigation
 			return Vector2D::zero;
 		}
 
-		return m_totalAcceleration / m_actorCount * movement->m_maxAcceleration;
+		return Normalize(m_totalAcceleration) * movement->m_maxAcceleration;
 	}
 }

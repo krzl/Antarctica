@@ -17,7 +17,7 @@ namespace Navigation
 											  const TransformComponent* nearbyTransform, MovementComponent* nearbyMovement)
 	{
 		const float distanceSqr   = SquaredMag(nearbyTransform->m_localPosition.xy - transform->m_localPosition.xy);
-		const float cohesionRange = (movement->m_radius + nearbyMovement->m_radius) * m_cohesionScale;
+		const float cohesionRange = (movement->m_colliderRadius + nearbyMovement->m_colliderRadius) * m_cohesionScale;
 
 		if (distanceSqr < cohesionRange * cohesionRange &&
 			movement->m_velocity != Vector2D::zero &&

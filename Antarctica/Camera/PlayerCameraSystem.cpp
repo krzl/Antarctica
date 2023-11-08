@@ -132,7 +132,8 @@ void PlayerCameraSystem::Update(Entity* entity, TransformComponent* transform, R
 
 	if (inputManager->GetScrollWheelDelta() != 0.0f)
 	{
-		transform->m_localPosition.z = Clamp(cameraScroll->m_minHeight, cameraScroll->m_maxHeight, transform->m_localPosition.z - cameraScroll->m_heightDeltaSpeed * inputManager->GetScrollWheelDelta());
+		transform->m_localPosition.z = Clamp(cameraScroll->m_minHeight, cameraScroll->m_maxHeight,
+			transform->m_localPosition.z - cameraScroll->m_heightDeltaSpeed * inputManager->GetScrollWheelDelta());
 	}
 
 	camera->m_viewMatrix        = Inverse(Transform4D::MakeTranslation(transform->m_localPosition) * transform->m_localRotation.GetRotationMatrix());
@@ -367,6 +368,11 @@ void PlayerCameraSystem::ClearSelection()
 
 	m_selectionGroupEntity = nullptr;
 	m_selectedEntities.clear();
+}
+
+uint32_t PlayerCameraSystem::GetSelectedCount() const
+{
+	return (uint32_t) m_selectedEntities.size();
 }
 
 void PlayerCameraSystem::SetupTerrainBvh(const std::shared_ptr<Mesh> terrain)
