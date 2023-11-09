@@ -38,7 +38,7 @@ namespace Navigation
 		}
 
 		const float maxRadiusToCheck = Max(Max(movement->m_radius * movement->m_cohesionBehavior.GetCohesionScale(),
-			movement->m_radius * movement->m_alignmentBehavior.GetCohesionScale()), Min(Magnitude(movement->m_velocity), 0.0f));
+			movement->m_radius * movement->m_alignmentBehavior.GetCohesionScale()), Min(Magnitude(movement->m_velocity), 0.4f));
 
 		movement->m_steeringPipeline.InitializeTotalAccelerationCalculation(transform, movement);
 		{
@@ -70,16 +70,7 @@ namespace Navigation
 
 		if (movement->m_force == Vector2D::zero && movement->m_velocity != Vector2D::zero)
 		{
-			const Vector2D velocityDelta = Normalize(movement->m_velocity) * movement->m_maxAcceleration * deltaTime;
-			if (SquaredMag(velocityDelta) > SquaredMag(movement->m_velocity))
-			{
-				movement->m_velocity = Vector2D::zero;
-			}
-			else
-			{
-				//movement->m_velocity -= velocityDelta;
-				movement->m_velocity = Vector2D::zero;
-			}
+			movement->m_velocity = Vector2D::zero;
 		}
 	}
 }

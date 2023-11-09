@@ -950,7 +950,7 @@ namespace Navigation
 	bool NavMesh::DoesDirectPathExists(const Point3D& startPoint, const Point3D& endPoint) const
 	{
 		const uint32_t targetTriangleId = FindTriangleId(endPoint);
-		uint32_t currentTriangleId      = FindTriangleId(startPoint); // FindInitialConstraintTriangle(startPoint, endPoint, targetTriangleId);
+		uint32_t currentTriangleId      = FindTriangleId(startPoint);
 
 		const Triangle* currentTriangle = &m_triangles[currentTriangleId];
 

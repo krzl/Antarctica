@@ -12,12 +12,6 @@ namespace Rendering::Dx12
 	StaticSubmesh::~StaticSubmesh()
 	{
 		//TODO: release resources
-		/*
-		 *RELEASE_DX(m_indexBuffer);
-		RELEASE_DX(m_indexUploadBuffer);
-		RELEASE_DX(m_vertexBuffer);
-		RELEASE_DX(m_vertexUploadBuffer);
-		*/
 	}
 
 	void StaticSubmesh::Init(const ::Submesh* submesh)

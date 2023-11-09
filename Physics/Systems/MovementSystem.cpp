@@ -54,7 +54,7 @@ namespace Physics
 
 				if (!navMesh->m_triangles[navMesh->FindTriangleId(targetPosition)].m_isNavigable)
 				{
-					//FALLBACK
+					//fallback
 					targetPosition = transform->m_localPosition.xy;
 				}
 

@@ -61,7 +61,7 @@ namespace Physics
 						{
 							const float distance = Terathon::Sqrt(distanceSqr);
 
-							normal = normal / distance; // normalization
+							normal = normal / distance;
 
 							physicsBody->m_collisions.emplace_back(CollisionData{
 								entity,
@@ -84,7 +84,8 @@ namespace Physics
 		Point2D collisionPoint;
 		float penetration;
 
-		if (navMesh->FindCollisionPoint(Sphere{ transform->m_localPosition, movement->m_colliderRadius }, collisionPoint, collisionNormal, penetration))
+		if (navMesh->FindCollisionPoint(Sphere{ transform->m_localPosition, movement->m_colliderRadius }, collisionPoint, collisionNormal,
+			penetration))
 		{
 			const Vector2D normal = transform->m_localPosition.xy == collisionPoint ?
 										collisionNormal :

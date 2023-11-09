@@ -225,43 +225,6 @@ namespace Navigation
 			}
 		}
 
-		//blur out transition
-		/*for (uint32_t x = xStart; x < xEnd - 1; ++x)
-		{
-			for (uint32_t y = yStart; y < yEnd - 1; ++y)
-			{
-				const uint32_t a1 = GetSubmeshIndex(x, y);
-
-				bool isNearEdge =
-					texcoordWeights[(GetSubmeshIndex(x, y + 1)) * 4 + 1] > 0.7 ||
-					texcoordWeights[(GetSubmeshIndex(x + 1, y)) * 4 + 1] > 0.7 ||
-					texcoordWeights[(GetSubmeshIndex(x + 1, y + 1)) * 4 + 1] > 0.7;
-
-				if (!isNearEdge && x != xStart)
-				{
-					isNearEdge =
-						texcoordWeights[(GetSubmeshIndex(x - 1, y)) * 4 + 1] > 0.7 ||
-						texcoordWeights[(GetSubmeshIndex(x - 1, y + 1)) * 4 + 1] > 0.7;
-				}
-				if (!isNearEdge && y != yStart)
-				{
-					isNearEdge =
-						texcoordWeights[(GetSubmeshIndex(x, y - 1)) * 4 + 1] > 0.7 ||
-						texcoordWeights[(GetSubmeshIndex(x + 1, y - 1)) * 4 + 1] > 0.7;
-				}
-				if (!isNearEdge && x != xStart && y != yStart)
-				{
-					isNearEdge =
-						texcoordWeights[(GetSubmeshIndex(x - 1, y - 1)) * 4 + 1] > 0.7;
-				}
-
-				if (isNearEdge)
-				{
-					texcoordWeights[a1 * 4 + 1] = Max(texcoordWeights[a1 * 4 + 1], 0.5f);
-				}
-			}
-		}*/
-
 		SubmeshBuilder submeshBuilder("Terrain", std::move(vertices), indices);
 		submeshBuilder.SetTexcoords(std::move(texcoordSplatUV), 0);
 		submeshBuilder.SetTexcoords(std::move(texcoordWeights), 1);
