@@ -16,7 +16,7 @@ void main()
 #if defined(DEBUG) | defined(_DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-
+	
 	Application app;
 
 	app.OnApplicationInitialized.AddListener([]()
@@ -50,14 +50,14 @@ void main()
 			const auto material = std::make_shared<Material>(terrainShader);
 			material->SetTexture("tex1", ground);
 			material->SetTexture("tex2", rock);
-			material->SetOrder(3);
+			material->SetOrder(TERRAIN);
 			terrainActor->SetMaterial(material);
 
 			PlayerCameraSystem* playerCameraSystem = Application::Get().GetSystem<PlayerCameraSystem>();
 			playerCameraSystem->SetupTerrainBvh(mesh);
 
 #if defined(DEBUG) | defined(_DEBUG)
-			constexpr uint32_t gridSize = 12;
+			constexpr uint32_t gridSize = 1;
 #else
 			constexpr uint32_t gridSize = 30;
 #endif
@@ -70,7 +70,7 @@ void main()
 					const int32_t y = j - gridSize / 2;
 
 					Ref character = Application::Get().GetWorld().Spawn<Character>(
-						{ Point3D(x * 0.65f, y * 0.65, 0.0f) });
+						{ Point3D(x * 0.50f, y * 0.50f, 0.0f) });
 					character->SetName("Character " + std::to_string((gridSize * i) + j));
 
 					playerCameraSystem->AddToSelection(*character);

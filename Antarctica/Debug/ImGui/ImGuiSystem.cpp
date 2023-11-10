@@ -43,7 +43,7 @@ void ImGuiSystem::Init()
 	m_material->GetShaderParams().m_isDoubleSided    = true;
 
 	m_material->SetTexture("tex", m_texture);
-	m_material->SetOrder(5000.0f);
+	m_material->SetOrder(UI + 500);
 
 	World::Get()->Spawn<ImGuiManager>({});
 
@@ -103,19 +103,19 @@ void ImGuiSystem::Update(Entity* entity, ImGuiComponent* imgui, Rendering::MeshC
 		}
 	}
 
-	std::shared_ptr<DynamicMesh> dynamicMesh;
-	if (mesh->m_mesh == nullptr)
+	if (mesh->m_renderItems.size() == 0)
 	{
-		mesh->m_mesh      = dynamicMesh = std::make_shared<DynamicMesh>();
-		mesh->m_materials = { m_material };
-	}
-	else
-	{
-		dynamicMesh = std::static_pointer_cast<DynamicMesh>(mesh->m_mesh);
+		Rendering::RenderItem& renderItem = mesh->m_renderItems.emplace_back();
+
+		renderItem.m_mesh      = std::make_shared<DynamicMesh>();
+		renderItem.m_materials = { m_material };
 	}
 
+	Rendering::RenderItem& renderItem              = mesh->m_renderItems[0];
+	const std::shared_ptr<DynamicMesh> dynamicMesh = std::static_pointer_cast<DynamicMesh>(renderItem.m_mesh);
+
 	dynamicMesh->SetSubmeshCount(submeshCount);
-	mesh->m_rectMasks.resize(submeshCount);
+	renderItem.m_rectMasks.resize(submeshCount);
 
 	uint32_t cmdIndex = 0;
 
@@ -167,7 +167,7 @@ void ImGuiSystem::Update(Entity* entity, ImGuiComponent* imgui, Rendering::MeshC
 
 			submesh.SetDynamic();
 
-			mesh->m_rectMasks[cmdIndex] = Rect{
+			renderItem.m_rectMasks[cmdIndex] = Rect{
 				{
 					cmd.ClipRect.x,
 					cmd.ClipRect.y,

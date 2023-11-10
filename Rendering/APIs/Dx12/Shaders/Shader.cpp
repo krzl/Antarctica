@@ -33,7 +33,7 @@ namespace Rendering::Dx12
 		{
 			return false;
 		}
-		
+
 		struct stat fileStat;
 		stat(m_path.c_str(), &fileStat);
 
@@ -121,9 +121,10 @@ namespace Rendering::Dx12
 				D3D12_COLOR_WRITE_ENABLE_ALL,
 			};
 
-
-			for (uint32_t i               = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
+			for (uint32_t i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
+			{
 				blendDesc.RenderTarget[i] = renderTargetBlendDesc;
+			}
 
 			return blendDesc;
 		}
@@ -143,6 +144,20 @@ namespace Rendering::Dx12
 		else if (shaderParams.m_blendingEnabled)
 		{
 			depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		}
+
+		if (shaderParams.m_stencilReadMask.has_value() || shaderParams.m_stencilWriteMask.has_value())
+		{
+			depthStencilDesc.StencilEnable    = true;
+			depthStencilDesc.StencilReadMask  = shaderParams.m_stencilReadMask.value_or(0xFF);
+			depthStencilDesc.StencilWriteMask = shaderParams.m_stencilWriteMask.value_or(0x00);
+
+			depthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+			depthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+			depthStencilDesc.FrontFace.StencilPassOp = shaderParams.m_stencilWriteMask.has_value() ? D3D12_STENCIL_OP_REPLACE : D3D12_STENCIL_OP_KEEP;
+			depthStencilDesc.FrontFace.StencilFunc = shaderParams.m_stencilReadMask.has_value() ?
+														 D3D12_COMPARISON_FUNC_EQUAL :
+														 D3D12_COMPARISON_FUNC_ALWAYS;
 		}
 
 		return depthStencilDesc;

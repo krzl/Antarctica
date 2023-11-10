@@ -28,14 +28,14 @@ BuildStructureActivator::BuildStructureActivator(const uint32_t width, const uin
 		std::shared_ptr<Shader> shader                 = AssetManager::GetAsset<Shader>("../Resources/Shaders/build_placement.hlsl");
 		std::shared_ptr<Material> material             = std::make_shared<Material>(shader);
 		material->GetShaderParams().m_depthTestEnabled = true;
-		material->SetOrder(3000); //TODO: create enum for sorting order
+		material->SetOrder(TRANSPARENCY + 500); //TODO: create enum for sorting order
 
 		material->GetShaderParams().m_depthTestEnabled = false;
 
 		Rendering::MeshComponent* meshComponent = m_placementIndicator->GetComponentAccessor().GetComponent<Rendering::MeshComponent>();
 		m_placementIndicator->GetComponentAccessor().GetComponent<Rendering::RenderCullComponent>()->m_neverCull = true;
 
-		meshComponent->m_materials = { material };
+		meshComponent->m_renderItems[0].m_materials = { material };
 
 		dynamicMesh->SetSubmeshCount(1);
 
@@ -86,7 +86,8 @@ void BuildStructureActivator::Update()
 	const ComponentAccessor& accessor             = m_placementIndicator->GetComponentAccessor();
 	const Rendering::MeshComponent* meshComponent = accessor.GetComponent<Rendering::MeshComponent>();
 
-	const std::shared_ptr<DynamicMesh> dynamicMesh = std::static_pointer_cast<DynamicMesh>(meshComponent->m_mesh);
+	const Rendering::RenderItem& renderItem = meshComponent->m_renderItems[0];
+	const std::shared_ptr<DynamicMesh> dynamicMesh = std::static_pointer_cast<DynamicMesh>(renderItem.m_mesh);
 
 	Submesh& submesh = dynamicMesh->GetSubmesh(0);
 

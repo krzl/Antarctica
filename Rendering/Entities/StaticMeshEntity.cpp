@@ -27,7 +27,8 @@ namespace Rendering
 	void StaticMeshEntity::SetupComponents(const ComponentAccessor& accessor)
 	{
 		MeshComponent* meshComponent = accessor.GetComponent<MeshComponent>();
-		meshComponent->m_mesh        = m_mesh;
+
+		meshComponent->m_renderItems.emplace_back().m_mesh = m_mesh;
 
 		ColliderComponent* collider = accessor.GetComponent<ColliderComponent>();
 		collider->m_boundingBox     = m_mesh->GetBoundingBox();
@@ -44,17 +45,18 @@ namespace Rendering
 	void StaticMeshEntity::SetMaterial(const std::shared_ptr<Material>& material, const uint32_t index)
 	{
 		MeshComponent* meshComponent = GetComponentAccessor().GetComponent<MeshComponent>();
+		RenderItem& renderItem       = meshComponent->m_renderItems[0];
 		assert(index < 8);
-		if (meshComponent->m_materials.size() <= index)
+		if (renderItem.m_materials.size() <= index)
 		{
-			while (meshComponent->m_materials.size() <= index)
+			while (renderItem.m_materials.size() <= index)
 			{
-				meshComponent->m_materials.push_back(meshComponent->m_materials.size() == index ? material : nullptr);
+				renderItem.m_materials.push_back(renderItem.m_materials.size() == index ? material : nullptr);
 			}
 		}
 		else
 		{
-			meshComponent->m_materials[index] = material;
+			renderItem.m_materials[index] = material;
 		}
 	}
 }

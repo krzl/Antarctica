@@ -146,6 +146,7 @@ void PlayerCameraSystem::Update(Entity* entity, TransformComponent* transform, R
 	Rendering::PerCameraBuffer buffer = Rendering::PerCameraBuffer::DEFAULT_BUFFER;
 	buffer.m_viewProjMatrix           = viewProj.transpose;
 	buffer.m_projMatrix               = camera->m_perspectiveMatrix.transpose;
+	buffer.m_viewProjInvMatrix        = Inverse(viewProj).transpose;
 
 	//TODO: add lock so m_cameras is not changed on multiple threads
 	m_cameras.emplace_back(Rendering::CameraData{
@@ -346,6 +347,12 @@ void PlayerCameraSystem::AddToSelection(Entity* entity)
 {
 	const SelectableComponent* selectable = entity->GetComponentAccessor().GetComponent<SelectableComponent>();
 
+	if (Rendering::MeshComponent* meshComponent = entity->GetComponentAccessor().GetComponent<Rendering::MeshComponent>())
+	{
+		//TODO: don't assume index 1 is correct
+		meshComponent->m_renderItems[1].m_isHidden = false;
+	}
+	
 	if (selectable == nullptr || selectable->m_isSelected)
 	{
 		return;
@@ -364,6 +371,12 @@ void PlayerCameraSystem::ClearSelection()
 	for (Entity* entity : m_selectedEntities)
 	{
 		entity->GetComponentAccessor().GetComponent<SelectableComponent>()->m_isSelected = false;
+
+		if (Rendering::MeshComponent* meshComponent = entity->GetComponentAccessor().GetComponent<Rendering::MeshComponent>())
+		{
+			//TODO: don't assume index 1 is correct
+			meshComponent->m_renderItems[1].m_isHidden = true;
+		}
 	}
 
 	m_selectionGroupEntity = nullptr;
@@ -569,12 +582,12 @@ void PlayerCameraSystem::CreateDragIndicator(CameraDragSelectComponent* cameraDr
 	std::shared_ptr<Material> material             = std::make_shared<Material>(shader);
 	material->GetShaderParams().m_depthTestEnabled = true;
 	material->GetShaderParams().m_blendingEnabled  = true;
-	material->SetOrder(4000); //TODO: create enum for sorting order
+	material->SetOrder(UI); //TODO: create enum for sorting order
 
 	Rendering::MeshComponent* meshComponent = dynamicMeshEntity->GetComponentAccessor().GetComponent<Rendering::MeshComponent>();
 	dynamicMeshEntity->GetComponentAccessor().GetComponent<Rendering::RenderCullComponent>()->m_neverCull = true;
 
-	meshComponent->m_materials = { material };
+	meshComponent->m_renderItems[0].m_materials = { material };
 
 	dynamicMesh->SetSubmeshCount(1);
 
@@ -653,7 +666,9 @@ void PlayerCameraSystem::UpdateDragIndicator(TransformComponent* cameraTransform
 
 	const ComponentAccessor& accessor              = dynamicMeshEntity->GetComponentAccessor();
 	const Rendering::MeshComponent* meshComponent  = accessor.GetComponent<Rendering::MeshComponent>();
-	const std::shared_ptr<DynamicMesh> dynamicMesh = std::static_pointer_cast<DynamicMesh>(meshComponent->m_mesh);
+
+	const Rendering::RenderItem& renderItem = meshComponent->m_renderItems[0];
+	const std::shared_ptr<DynamicMesh> dynamicMesh = std::static_pointer_cast<DynamicMesh>(renderItem.m_mesh);
 
 	Submesh& submesh         = dynamicMesh->GetSubmesh(0);
 	MeshBuffer& vertexBuffer = submesh.GetVertexBuffer();

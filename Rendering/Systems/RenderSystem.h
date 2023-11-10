@@ -26,8 +26,8 @@ namespace Rendering
 		void OnUpdateEnd() override;
 		void Update(Entity* entity, TransformComponent* transform, MeshComponent* mesh, RenderComponent*) override;
 
-		Transform4D GetAttachedNodeTransform(const ComponentAccessor& componentAccessor, const Mesh& mesh, int32_t nodeId, bool ignoreAttachmentRotation);
-		Transform4D GetAttachmentTransform(const ComponentAccessor& componentAccessor, const MeshComponent* mesh, uint32_t submeshId);
+		Transform4D GetAttachedNodeTransform(const ComponentAccessor& componentAccessor, const RenderItem& renderItem, int32_t nodeId, bool ignoreAttachmentRotation);
+		Transform4D GetAttachmentTransform(const ComponentAccessor& componentAccessor, const RenderItem& renderItem, uint32_t submeshId);
 
 		std::atomic_uint32_t m_counter;
 		RenderQueue m_renderQueue;

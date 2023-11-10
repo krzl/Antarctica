@@ -10,12 +10,17 @@ struct ShaderParams
 	uint8_t m_depthTestEnabled : 1;
 	uint8_t m_isWireframe : 1;
 
+	std::optional<uint8_t> m_stencilReadMask;
+	std::optional<uint8_t> m_stencilWriteMask;
+
 	ShaderParams()
 	{
 		m_isDoubleSided    = false;
 		m_blendingEnabled  = false;
 		m_depthTestEnabled = true;
 		m_isWireframe      = false;
+		m_stencilReadMask  = {};
+		m_stencilWriteMask = {};
 	}
 
 

@@ -47,18 +47,12 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 {
 	Entity::SetupComponents(accessor);
 
-
 	AbilityTriggerComponent* abilityTrigger    = accessor.GetComponent<AbilityTriggerComponent>();
 	Anim::AnimatedMeshComponent* animatedMesh  = accessor.GetComponent<Anim::AnimatedMeshComponent>();
 	ColliderComponent* collider                = accessor.GetComponent<ColliderComponent>();
 	Rendering::MeshComponent* meshComponent    = accessor.GetComponent<Rendering::MeshComponent>();
 	Physics::PhysicsBodyComponent* physicsBody = accessor.GetComponent<Physics::PhysicsBodyComponent>();
 	Navigation::MovementComponent* movement    = accessor.GetComponent<Navigation::MovementComponent>();
-
-	meshComponent->m_transform = EulerToQuaternion(90.0, 180.0f, 0.0f).GetRotationMatrix() * Transform4D::MakeScale(0.01f);
-
-	const std::shared_ptr<Mesh> mesh = AssetManager::GetAsset<Mesh>(
-		"../Resources/Meshes/TT_RTS_Demo_Character.FBX");
 
 	std::shared_ptr<Anim::Animator> animator;
 	{
@@ -73,7 +67,6 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 		const std::shared_ptr<Animation> walkAnim = AssetManager::GetAsset<Animation>(
 			"../Resources/Animations/infantry_03_run.fbx");
 		const std::shared_ptr<AnimationState> walkState = stateMachineBuilder.AddState<AnimationState>(walkAnim);
-
 
 		const std::shared_ptr<Animation> workAnim = AssetManager::GetAsset<Animation>(
 			"../Resources/Animations/infantry_04_attack_A.fbx");
@@ -101,7 +94,27 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 		animator = animatorBuilder.Build();
 	}
 
-	meshComponent->m_mesh = mesh;
+	const std::shared_ptr<Mesh> mesh = AssetManager::GetAsset<Mesh>(
+		"../Resources/Meshes/TT_RTS_Demo_Character.FBX");
+
+	const std::shared_ptr<Mesh> box = AssetManager::GetAsset<Mesh>(
+		"../Resources/Meshes/Box.FBX");
+
+	movement->m_radius = 0.23f;
+	movement->m_colliderRadius = 0.18f;
+
+	meshComponent->m_renderItems.resize(2);
+	
+	Rendering::RenderItem& characterRenderItem = meshComponent->m_renderItems[0];
+	Rendering::RenderItem& selectionRenderItem = meshComponent->m_renderItems[1];
+
+	characterRenderItem.m_transform = EulerToQuaternion(90.0, 180.0f, 0.0f).GetRotationMatrix() * Transform4D::MakeScale(0.01f);
+	characterRenderItem.m_mesh = mesh;
+	characterRenderItem.m_isAnimated = true;
+
+	selectionRenderItem.m_transform = Transform4D::MakeScale(movement->m_radius * 0.02f);
+	selectionRenderItem.m_mesh = box;
+	selectionRenderItem.m_isHidden = true;
 
 	animatedMesh->m_animator = animator;
 	animatedMesh->m_animationSolver.ResetSolver(animator);
@@ -111,16 +124,24 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 	std::shared_ptr<Shader> shader = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic.hlsl");
 	const auto material            = std::make_shared<Material>(shader);
 	material->SetTexture("tex", texture);
+	material->GetShaderParams().m_stencilWriteMask = 4;
+	material->SetOrder(CHARACTER);
 
 	std::shared_ptr<Shader> shaderSkin = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic_skinned.hlsl");
 	const auto materialSkin            = std::make_shared<Material>(shaderSkin);
 	materialSkin->SetTexture("tex", texture);
-	meshComponent->m_materials = { material, material, material, materialSkin };
+	materialSkin->GetShaderParams().m_stencilWriteMask = 4;
+	materialSkin->SetOrder(CHARACTER);
 
-	movement->m_radius = 0.23f;
-	movement->m_colliderRadius = 0.18f;
+	std::shared_ptr<Shader> selectionShader = AssetManager::GetAsset<Shader>("../Resources/Shaders/decal.hlsl");
+	const auto selectionMaterial = std::make_shared<Material>(selectionShader);
+	selectionMaterial->SetOrder(TRANSPARENCY);
+	selectionMaterial->GetShaderParams().m_blendingEnabled = true;
 
-	collider->m_boundingBox = mesh->GetBoundingBox().Transform(meshComponent->m_transform);
+	characterRenderItem.m_materials = { material, material, material, materialSkin };
+	selectionRenderItem.m_materials = { selectionMaterial };
+
+	collider->m_boundingBox = mesh->GetBoundingBox().Transform(characterRenderItem.m_transform);
 
 	abilityTrigger->m_abilityBindings.emplace_back(AbilityBinding{
 		"MoveAbility",

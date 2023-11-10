@@ -37,15 +37,15 @@ void DebugDrawSystem::Init()
 
 void DebugDrawSystem::Update(Entity* entity, DebugDrawComponent* debugDraw, Rendering::MeshComponent* mesh)
 {
-	std::shared_ptr<DynamicMesh> dynamicMesh;
-	if (mesh->m_mesh == nullptr)
+	if (mesh->m_renderItems.size() == 0)
 	{
-		mesh->m_mesh = dynamicMesh = std::make_shared<DynamicMesh>();
+		Rendering::RenderItem& renderItem = mesh->m_renderItems.emplace_back();
+		renderItem.m_mesh                 = std::make_shared<DynamicMesh>();
 	}
-	else
-	{
-		dynamicMesh = std::static_pointer_cast<DynamicMesh>(mesh->m_mesh);
-	}
+
+	Rendering::RenderItem& renderItem = mesh->m_renderItems[0];
+
+	const std::shared_ptr<DynamicMesh> dynamicMesh = std::static_pointer_cast<DynamicMesh>(renderItem.m_mesh);
 
 	std::vector<Submesh>& submeshes = dynamicMesh->GetSubmeshes();
 
@@ -58,7 +58,7 @@ void DebugDrawSystem::Update(Entity* entity, DebugDrawComponent* debugDraw, Rend
 		{
 			const uint32_t index = (uint32_t) std::distance(m_despawnTimes.begin(), it);
 			submeshes.erase(submeshes.begin() + index);
-			mesh->m_materials.erase(mesh->m_materials.begin() + index);
+			renderItem.m_materials.erase(renderItem.m_materials.begin() + index);
 			it = m_despawnTimes.erase(it);
 		}
 		else
@@ -74,7 +74,7 @@ void DebugDrawSystem::Update(Entity* entity, DebugDrawComponent* debugDraw, Rend
 		std::shared_ptr<Material> material        = std::make_shared<Material>(m_shader);
 		material->GetShaderParams().m_isWireframe = awaitingElement->m_drawWireframe;
 		material->SetVariable<Color>("color", awaitingElement->m_color);
-		mesh->m_materials.emplace_back(material);
+		renderItem.m_materials.emplace_back(material);
 
 		Submesh& submesh = submeshes.emplace_back();
 

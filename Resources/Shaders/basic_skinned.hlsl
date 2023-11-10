@@ -18,6 +18,7 @@ struct VertexOut
 struct PerObject
 {
 	float4x4	world;
+	float4x4	worldInv;
 };
 
 StructuredBuffer<PerObject> perObjectBuffers : register(t0);
@@ -26,6 +27,7 @@ cbuffer _cbCamera : register(b1)
 {
 	float4x4	viewProj;
 	float4x4	proj;
+	float4x4 	viewProjInv;
 };
 
 cbuffer _cbCall : register(b2)

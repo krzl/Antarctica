@@ -22,6 +22,7 @@ namespace Rendering::Dx12
 		uint32_t m_instanceCount;
 		ShaderParams m_shaderParams;
 		std::optional<Rect> m_clipRect;
+		bool m_doDepthTransitionBeforeRendering = false;
 
 		std::shared_ptr<DescriptorHeapHandle> m_skinningBufferHandle;
 		std::shared_ptr<DescriptorHeapHandle> m_boneTransforms;
@@ -94,7 +95,9 @@ namespace Rendering::Dx12
 		D3D12_RECT m_scissorRect  = {};
 
 		ComPtr<ID3D12Resource> m_depthStencilBuffer;
-
+		std::shared_ptr<DescriptorHeapHandle> m_depthSRV;
+		bool m_isDepthStencilReadable = false;
+		
 		uint32_t m_rtvDescriptorSize = 0;
 		uint32_t m_dsvDescriptorSize = 0;
 

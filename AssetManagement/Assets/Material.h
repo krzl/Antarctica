@@ -6,6 +6,14 @@
 
 class Shader;
 
+enum RenderOrder
+{
+	TERRAIN      = 0,
+	CHARACTER    = 100,
+	TRANSPARENCY = 3000,
+	UI = 5000
+};
+
 class Material : public Asset
 {
 public:

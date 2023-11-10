@@ -4,6 +4,12 @@
 
 namespace Rendering
 {
+	struct CullData
+	{
+		bool m_isCulled;
+		std::bitset<256> m_culledSubmeshes;
+	};
+	
 	struct RenderCullComponent : Component
 	{
 		friend class CullingSystem;
@@ -15,9 +21,7 @@ namespace Rendering
 
 	private:
 
-		bool m_isCulled;
-		std::bitset<1024> m_culledSubmeshes;
-
+		std::array<CullData, 16> m_cullData;
 
 		DEFINE_CLASS()
 	};

@@ -8,10 +8,12 @@ namespace Rendering
 {
 	const PerCameraBuffer PerCameraBuffer::DEFAULT_BUFFER = {
 		Transform4D::identity,
+		Transform4D::identity,
 		Transform4D::identity
 	};
 
 	const PerObjectBuffer PerObjectBuffer::DEFAULT_BUFFER = {
+		Transform4D::identity,
 		Transform4D::identity
 	};
 
@@ -20,5 +22,7 @@ namespace Rendering
 		0,
 		0,
 		0,
+		0,
+		0
 	};
 }

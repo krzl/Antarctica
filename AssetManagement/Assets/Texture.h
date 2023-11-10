@@ -23,7 +23,6 @@ public:
 		return m_nativeObject.get();
 	}
 
-
 	[[nodiscard]] const Rendering::NativeTexture* GetNativeObject() const
 	{
 		return m_nativeObject.get();

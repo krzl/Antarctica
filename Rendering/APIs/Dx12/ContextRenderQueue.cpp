@@ -41,6 +41,8 @@ namespace Rendering::Dx12
 			{
 				RenderObject& renderObject = m_renderQueue.emplace_back();
 
+				renderObject.m_doDepthTransitionBeforeRendering = i != 0 && queuedObject->m_order >= TRANSPARENCY && objectsToRender[i - 1]->m_order < TRANSPARENCY;
+
 				std::shared_ptr<::Shader> shader = queuedObject->m_material->GetShader();
 				if (shader->GetNativeObject() == nullptr)
 				{
@@ -105,7 +107,6 @@ namespace Rendering::Dx12
 					queuedObject->m_boneTransforms.data(), queuedObject->m_boneTransforms.size() * sizeof(Matrix4D));
 			}
 
-
 			const bool isNextBatched =
 				(objectsToRender.size() != i + 1) &&
 				objectsToRender[i + 1]->m_submesh == queuedObject->m_submesh &&
@@ -128,7 +129,9 @@ namespace Rendering::Dx12
 					instanceCount,
 					lastRenderObject->m_submesh->GetVertexCount(),
 					lastRenderObject->m_submesh->GetIndexCount(),
-					0
+					0,
+					static_cast<uint32_t>(m_viewport.Width),
+					static_cast<uint32_t>(m_viewport.Height)
 				};
 
 

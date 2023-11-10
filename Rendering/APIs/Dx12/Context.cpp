@@ -159,6 +159,7 @@ namespace Rendering::Dx12
 		m_commandQueue->ExecuteCommandLists(1, &commandLists);
 
 		FlushCommandQueue();
+		m_depthSRV = CreateHeapHandle();
 	}
 
 	void Dx12Context::FlushCommandQueue()
@@ -258,6 +259,17 @@ namespace Rendering::Dx12
 			D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_commandList->ResourceBarrier(1, &depthTransition);
 
+		m_isDepthStencilReadable = false;
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC depthSrvDesc = {};
+		depthSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		depthSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		depthSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		depthSrvDesc.Texture2D.MostDetailedMip = 0;
+		depthSrvDesc.Texture2D.MipLevels = -1;
+		
+		m_device->CreateShaderResourceView(m_depthStencilBuffer.Get(), &depthSrvDesc, m_depthSRV->GetCPUHandle());
+
 		m_viewport = {
 			0.0f,
 			0.0f,
@@ -312,6 +324,15 @@ namespace Rendering::Dx12
 					texture->SetNativeObject(Texture::Create(texture));
 				}
 				renderObject.m_textures[id] = texture->GetNativeObject();
+			}
+			else
+			{
+				static const uint64_t DEPTH_TEXTURE_HASH = std::hash<std::string>()("DepthTexture");
+				if (nameHash == DEPTH_TEXTURE_HASH)
+				{
+					//TODO: support more than one special texture
+					renderObject.m_textures[id] = nullptr;
+				}
 			}
 		}
 
@@ -376,17 +397,64 @@ namespace Rendering::Dx12
 			nullptr);
 
 		m_commandList->OMSetRenderTargets(1, &backbufferView, true, &depthStencilView);
+		m_commandList->OMSetStencilRef(255);
 	}
 
 	void Dx12Context::DrawObjects(const CameraData& camera)
 	{
+		if (m_isDepthStencilReadable)
+		{
+			const CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_depthStencilBuffer.Get(),
+				D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			m_commandList->ResourceBarrier(1, &barrier);
+			
+			const auto backbufferView = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+				m_rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+				m_currentBackbufferId,
+				m_rtvDescriptorSize);
+
+			const auto depthStencilView =
+				CD3DX12_CPU_DESCRIPTOR_HANDLE(m_dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+			m_commandList->OMSetRenderTargets(1, &backbufferView, true, &depthStencilView);
+			
+			m_isDepthStencilReadable = false;
+		}
+
 		for (RenderObject& renderObject : m_renderQueue)
 		{
+			if (renderObject.m_doDepthTransitionBeforeRendering && !m_isDepthStencilReadable)
+			{
+				const auto backbufferView = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+					m_rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+					m_currentBackbufferId,
+					m_rtvDescriptorSize);
+
+				m_commandList->OMSetRenderTargets(1, &backbufferView, true, nullptr);
+
+				const CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_depthStencilBuffer.Get(),
+					D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_DEPTH_READ);
+				m_commandList->ResourceBarrier(1, &barrier);
+
+				m_isDepthStencilReadable = true;
+			}
+
 			renderObject.m_shader->Bind(renderObject.m_shaderParams);
 
 			for (const auto& texture : renderObject.m_textures)
 			{
-				texture.second->Bind(texture.first);
+				if (texture.second == nullptr)
+				{
+					if (m_isDepthStencilReadable)
+					{
+						//DEPTH TEXTURE
+						m_commandList->SetGraphicsRootDescriptorTable(texture.first, m_depthSRV->GetGPUHandle());
+					}
+				}
+				else
+				{
+					texture.second->Bind(texture.first);
+				}
 			}
 
 			for (const auto buffer : renderObject.m_constantBuffers)
@@ -441,13 +509,14 @@ namespace Rendering::Dx12
 	{
 		return m_currentBackbufferId;
 	}
+
 #define DBOUT( s )            \
 {                             \
    std::ostringstream os_;    \
    os_ << s;                   \
    OutputDebugString( os_.str().c_str() );  \
 }
-	
+
 	void Dx12Context::ExecuteAndPresent()
 	{
 		m_commandList->Close();
