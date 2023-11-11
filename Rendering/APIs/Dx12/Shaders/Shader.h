@@ -54,7 +54,7 @@ namespace Rendering::Dx12
 		std::string m_path;
 
 		ComPtr<ID3D12RootSignature> m_rootSignature         = nullptr;
-		mutable std::map<uint8_t, ComPtr<ID3D12PipelineState>> m_pipelineStates;
+		mutable std::map<uint32_t, ComPtr<ID3D12PipelineState>> m_pipelineStates;
 
 		std::map<uint32_t, MeshAttribute> m_inputSlotBindings;
 

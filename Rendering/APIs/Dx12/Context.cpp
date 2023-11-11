@@ -188,6 +188,7 @@ namespace Rendering::Dx12
 			buffer.Reset();
 		}
 		m_depthStencilBuffer.Reset();
+		m_depthReadBuffer.Reset();
 
 		m_currentBackbufferId = 0;
 
@@ -240,6 +241,15 @@ namespace Rendering::Dx12
 			IID_PPV_ARGS(&m_depthStencilBuffer)
 		);
 
+		m_device->CreateCommittedResource(
+			&heapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&depthStencilInfo,
+			D3D12_RESOURCE_STATE_DEPTH_READ,
+			nullptr,
+			IID_PPV_ARGS(&m_depthReadBuffer)
+		);
+
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvInfo = {
 			DXGI_FORMAT_D24_UNORM_S8_UINT,
 			D3D12_DSV_DIMENSION_TEXTURE2D,
@@ -262,13 +272,13 @@ namespace Rendering::Dx12
 		m_isDepthStencilReadable = false;
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC depthSrvDesc = {};
-		depthSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		depthSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-		depthSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		depthSrvDesc.Texture2D.MostDetailedMip = 0;
-		depthSrvDesc.Texture2D.MipLevels = -1;
-		
-		m_device->CreateShaderResourceView(m_depthStencilBuffer.Get(), &depthSrvDesc, m_depthSRV->GetCPUHandle());
+		depthSrvDesc.Shader4ComponentMapping         = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		depthSrvDesc.Format                          = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		depthSrvDesc.ViewDimension                   = D3D12_SRV_DIMENSION_TEXTURE2D;
+		depthSrvDesc.Texture2D.MostDetailedMip       = 0;
+		depthSrvDesc.Texture2D.MipLevels             = -1;
+
+		m_device->CreateShaderResourceView(m_depthReadBuffer.Get(), &depthSrvDesc, m_depthSRV->GetCPUHandle());
 
 		m_viewport = {
 			0.0f,
@@ -327,10 +337,10 @@ namespace Rendering::Dx12
 			}
 			else
 			{
+				//TODO: do it in a less hacky way
 				static const uint64_t DEPTH_TEXTURE_HASH = std::hash<std::string>()("DepthTexture");
 				if (nameHash == DEPTH_TEXTURE_HASH)
 				{
-					//TODO: support more than one special texture
 					renderObject.m_textures[id] = nullptr;
 				}
 			}
@@ -397,29 +407,11 @@ namespace Rendering::Dx12
 			nullptr);
 
 		m_commandList->OMSetRenderTargets(1, &backbufferView, true, &depthStencilView);
-		m_commandList->OMSetStencilRef(255);
 	}
 
 	void Dx12Context::DrawObjects(const CameraData& camera)
 	{
-		if (m_isDepthStencilReadable)
-		{
-			const CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_depthStencilBuffer.Get(),
-				D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-			m_commandList->ResourceBarrier(1, &barrier);
-			
-			const auto backbufferView = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-				m_rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-				m_currentBackbufferId,
-				m_rtvDescriptorSize);
-
-			const auto depthStencilView =
-				CD3DX12_CPU_DESCRIPTOR_HANDLE(m_dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
-			m_commandList->OMSetRenderTargets(1, &backbufferView, true, &depthStencilView);
-			
-			m_isDepthStencilReadable = false;
-		}
+		m_isDepthStencilReadable = false;
 
 		for (RenderObject& renderObject : m_renderQueue)
 		{
@@ -427,14 +419,28 @@ namespace Rendering::Dx12
 			{
 				const auto backbufferView = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 					m_rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-					m_currentBackbufferId,
-					m_rtvDescriptorSize);
+					m_currentBackbufferId, m_rtvDescriptorSize);
+
+				const auto depthStencilView = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+				const D3D12_RESOURCE_BARRIER barriers[] = {
+					CD3DX12_RESOURCE_BARRIER::Transition(m_depthStencilBuffer.Get(),
+						D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_COPY_SOURCE),
+					CD3DX12_RESOURCE_BARRIER::Transition(m_depthReadBuffer.Get(),
+						D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_STATE_COPY_DEST),
+				};
 
 				m_commandList->OMSetRenderTargets(1, &backbufferView, true, nullptr);
 
-				const CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_depthStencilBuffer.Get(),
-					D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_DEPTH_READ);
+				m_commandList->ResourceBarrier(2, barriers);
+				m_commandList->CopyResource(m_depthReadBuffer.Get(), m_depthStencilBuffer.Get());
+
+				const D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_depthStencilBuffer.Get(),
+					D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
 				m_commandList->ResourceBarrier(1, &barrier);
+
+				m_commandList->OMSetRenderTargets(1, &backbufferView, true, &depthStencilView);
 
 				m_isDepthStencilReadable = true;
 			}
@@ -445,9 +451,9 @@ namespace Rendering::Dx12
 			{
 				if (texture.second == nullptr)
 				{
+					//DEPTH TEXTURE
 					if (m_isDepthStencilReadable)
 					{
-						//DEPTH TEXTURE
 						m_commandList->SetGraphicsRootDescriptorTable(texture.first, m_depthSRV->GetGPUHandle());
 					}
 				}

@@ -95,6 +95,7 @@ namespace Rendering::Dx12
 		D3D12_RECT m_scissorRect  = {};
 
 		ComPtr<ID3D12Resource> m_depthStencilBuffer;
+		ComPtr<ID3D12Resource> m_depthReadBuffer;
 		std::shared_ptr<DescriptorHeapHandle> m_depthSRV;
 		bool m_isDepthStencilReadable = false;
 		

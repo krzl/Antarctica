@@ -20,6 +20,10 @@ namespace Rendering::Dx12
 
 		commandList->SetPipelineState(m_pipelineStates[shaderParams].Get());
 		commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+		if (shaderParams.m_stencilMode != ShaderParams::IGNORE)
+		{
+			commandList->OMSetStencilRef(shaderParams.m_stencilRef);
+		}
 	}
 
 	ID3D12PipelineState* Shader::GetPipelineState(const ShaderParams shaderParams) const
@@ -146,18 +150,25 @@ namespace Rendering::Dx12
 			depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 		}
 
-		if (shaderParams.m_stencilReadMask.has_value() || shaderParams.m_stencilWriteMask.has_value())
+		if (shaderParams.m_stencilMode != ShaderParams::IGNORE)
 		{
 			depthStencilDesc.StencilEnable    = true;
-			depthStencilDesc.StencilReadMask  = shaderParams.m_stencilReadMask.value_or(0xFF);
-			depthStencilDesc.StencilWriteMask = shaderParams.m_stencilWriteMask.value_or(0x00);
+			depthStencilDesc.StencilReadMask  = shaderParams.m_stencilMask;
+			depthStencilDesc.StencilWriteMask = shaderParams.m_stencilMask;
 
-			depthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+			depthStencilDesc.FrontFace.StencilFailOp      = D3D12_STENCIL_OP_KEEP;
 			depthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
-			depthStencilDesc.FrontFace.StencilPassOp = shaderParams.m_stencilWriteMask.has_value() ? D3D12_STENCIL_OP_REPLACE : D3D12_STENCIL_OP_KEEP;
-			depthStencilDesc.FrontFace.StencilFunc = shaderParams.m_stencilReadMask.has_value() ?
+			depthStencilDesc.FrontFace.StencilPassOp      = shaderParams.m_stencilMode == ShaderParams::WRITE_REPLACE ?
+																D3D12_STENCIL_OP_REPLACE :
+																D3D12_STENCIL_OP_KEEP;
+			depthStencilDesc.FrontFace.StencilFunc = shaderParams.m_stencilMode == ShaderParams::TEST ?
 														 D3D12_COMPARISON_FUNC_EQUAL :
 														 D3D12_COMPARISON_FUNC_ALWAYS;
+		}
+
+		if (shaderParams.m_depthWriteDisabled)
+		{
+			depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 		}
 
 		return depthStencilDesc;

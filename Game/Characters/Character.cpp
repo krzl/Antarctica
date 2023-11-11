@@ -124,19 +124,27 @@ void Character::SetupComponents(const ComponentAccessor& accessor)
 	std::shared_ptr<Shader> shader = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic.hlsl");
 	const auto material            = std::make_shared<Material>(shader);
 	material->SetTexture("tex", texture);
-	material->GetShaderParams().m_stencilWriteMask = 4;
+	material->GetShaderParams().m_stencilMode = ShaderParams::WRITE_REPLACE;
+	material->GetShaderParams().m_stencilMask = 1;
+	material->GetShaderParams().m_stencilRef = 1;
 	material->SetOrder(CHARACTER);
 
 	std::shared_ptr<Shader> shaderSkin = AssetManager::GetAsset<Shader>("../Resources/Shaders/basic_skinned.hlsl");
 	const auto materialSkin            = std::make_shared<Material>(shaderSkin);
 	materialSkin->SetTexture("tex", texture);
-	materialSkin->GetShaderParams().m_stencilWriteMask = 4;
+	materialSkin->GetShaderParams().m_stencilMode = ShaderParams::WRITE_REPLACE;
+	materialSkin->GetShaderParams().m_stencilMask = 1;
+	materialSkin->GetShaderParams().m_stencilRef = 1;
 	materialSkin->SetOrder(CHARACTER);
 
 	std::shared_ptr<Shader> selectionShader = AssetManager::GetAsset<Shader>("../Resources/Shaders/decal.hlsl");
 	const auto selectionMaterial = std::make_shared<Material>(selectionShader);
 	selectionMaterial->SetOrder(TRANSPARENCY);
 	selectionMaterial->GetShaderParams().m_blendingEnabled = true;
+	selectionMaterial->GetShaderParams().m_stencilMode = ShaderParams::TEST;
+	selectionMaterial->GetShaderParams().m_stencilMask = 1;
+	selectionMaterial->GetShaderParams().m_stencilRef = 0;
+	selectionMaterial->GetShaderParams().m_depthWriteDisabled = true;
 
 	characterRenderItem.m_materials = { material, material, material, materialSkin };
 	selectionRenderItem.m_materials = { selectionMaterial };

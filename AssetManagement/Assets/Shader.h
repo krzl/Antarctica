@@ -3,15 +3,25 @@
 #include "Asset.h"
 #include "Types.h"
 
+#undef IGNORE
+
 struct ShaderParams
 {
+	enum StencilMode
+	{
+		IGNORE,
+		TEST,
+		WRITE_REPLACE
+	};
+
 	uint8_t m_isDoubleSided : 1;
 	uint8_t m_blendingEnabled : 1;
 	uint8_t m_depthTestEnabled : 1;
+	uint8_t m_depthWriteDisabled : 1;
 	uint8_t m_isWireframe : 1;
-
-	std::optional<uint8_t> m_stencilReadMask;
-	std::optional<uint8_t> m_stencilWriteMask;
+	StencilMode m_stencilMode;
+	uint8_t m_stencilMask;
+	uint8_t m_stencilRef;
 
 	ShaderParams()
 	{
@@ -19,15 +29,16 @@ struct ShaderParams
 		m_blendingEnabled  = false;
 		m_depthTestEnabled = true;
 		m_isWireframe      = false;
-		m_stencilReadMask  = {};
-		m_stencilWriteMask = {};
+		m_stencilMode      = IGNORE;
+		m_stencilMask      = {};
+		m_stencilRef       = {};
 	}
 
 
 	// ReSharper disable once CppNonExplicitConversionOperator
-	operator uint8_t() const
+	operator uint32_t() const
 	{
-		return *reinterpret_cast<const uint8_t*>(this);
+		return *reinterpret_cast<const uint32_t*>(this);
 	}
 };
 
