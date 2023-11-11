@@ -11,8 +11,11 @@ void PerformanceMonitorSystem::Run()
 
 	static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_BordersOuter |
 		ImGuiTableFlags_BordersV;
-
-	if (ImGui::Begin("PerformanceWindow"))
+	
+	ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(500.0f, 50.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(300.0f, 0.0f), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("Performance Window", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		ImGui::BeginTable("PerformanceTable", 2, flags);
 

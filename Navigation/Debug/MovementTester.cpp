@@ -3,7 +3,6 @@
 
 #include "Components/MovementComponent.h"
 #include "Components/TransformComponent.h"
-#include "Debug/DebugDrawManager.h"
 #include "imgui/imgui.h"
 
 namespace Navigation
@@ -15,7 +14,9 @@ namespace Navigation
 			return;
 		}
 
-		ImGui::Begin("Agent steering");
+		ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(50.0f, 50.0f), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Agent steering", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
 		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::Weight", &m_arriveWeight, 0.0f, 2.0f);
 		m_hasValuesChanged |= ImGui::SliderFloat("Separation::Weight", &m_separationWeight, 0.0f, 2.0f);
@@ -34,8 +35,6 @@ namespace Navigation
 		m_hasValuesChanged |= ImGui::SliderFloat("Cohesion::CohesionRange", &m_cohesionScale, 1.0f, 20.0f);
 		m_hasValuesChanged |= ImGui::SliderFloat("Alignment::CohesionRange", &m_cohesionScale, 1.0f, 20.0f);
 		m_hasValuesChanged |= ImGui::SliderFloat("Separation::DecayCoefficient", &m_separationDecayCoefficient, 0.001f, 1.0f);
-		ImGui::NewLine();
-		ImGui::Checkbox("ShowDebug", &m_showDebug);
 		ImGui::End();
 	}
 
@@ -72,7 +71,7 @@ namespace Navigation
 			movement->m_cohesionBehavior.SetWeight(m_cohesionWeight);
 			movement->m_alignmentBehavior.SetWeight(m_alignmentWeight);
 
-			movement->m_colliderRadius          = m_agentRadius;
+			movement->m_colliderRadius  = m_agentRadius;
 			movement->m_maxAcceleration = m_acceleration;
 			movement->m_maxSpeed        = m_maxSpeed;
 
@@ -84,19 +83,6 @@ namespace Navigation
 			movement->m_cohesionBehavior.SetCohesionScale(m_cohesionScale);
 			movement->m_separationBehavior.SetDecayCoefficient(m_separationDecayCoefficient);
 			movement->m_alignmentBehavior.SetCohesionScale(m_alignmentCohesionScale);
-		}
-
-		if (m_showDebug)
-		{
-			static std::mutex debugDrawMutex;
-			std::lock_guard lock(debugDrawMutex);
-
-			const float speedRatio = Magnitude(movement->m_velocity) / movement->m_maxSpeed;
-			const Color color      = LerpClamped(Color::red, Color::white, speedRatio);
-
-			DebugDrawManager::GetInstance()->DrawSphere(transform->m_localPosition, movement->m_colliderRadius, 0.0f, color, 8);
-			DebugDrawManager::GetInstance()->DrawLine(transform->m_localPosition, transform->m_localPosition + Vector3D(movement->m_velocity, 0.0f),
-				0.05f, 0.0f, Color::yellow, 6);
 		}
 	}
 }

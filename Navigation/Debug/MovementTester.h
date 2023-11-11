@@ -30,7 +30,6 @@ namespace Navigation
 		float m_alignmentCohesionScale     = 0.0f;
 		float m_separationDecayCoefficient = 0.0f;
 
-		bool m_showDebug        = false;
 		bool m_hasValuesChanged = false;
 
 		std::atomic_bool m_hasComponentsToTest = false;

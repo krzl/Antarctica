@@ -25,13 +25,14 @@ struct ShaderParams
 
 	ShaderParams()
 	{
-		m_isDoubleSided    = false;
-		m_blendingEnabled  = false;
-		m_depthTestEnabled = true;
-		m_isWireframe      = false;
-		m_stencilMode      = IGNORE;
-		m_stencilMask      = {};
-		m_stencilRef       = {};
+		m_isDoubleSided      = false;
+		m_blendingEnabled    = false;
+		m_depthTestEnabled   = true;
+		m_depthWriteDisabled = false;
+		m_isWireframe        = false;
+		m_stencilMode        = IGNORE;
+		m_stencilMask        = {};
+		m_stencilRef         = {};
 	}
 
 
