@@ -27,6 +27,8 @@ add_subdirectory(Rendering)
 add_subdirectory(Utilities)
 add_subdirectory(ThirdParty)
 
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Game)
+
 target_link_libraries(Antarctica assimp)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
