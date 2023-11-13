@@ -19,6 +19,7 @@ namespace Navigation
 		friend class AvoidanceBehavior;
 		friend class Physics::MovementSystem;
 		friend class Physics::CollisionGatherSystem;
+		friend class TransformUpdateSystem;
 
 		enum class NodeState
 		{

@@ -15,7 +15,7 @@ namespace Navigation
 		}
 
 		ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowPos(ImVec2(50.0f, 50.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(150.0f, 50.0f), ImGuiCond_FirstUseEver);
 		ImGui::Begin("Agent steering", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
 		m_hasValuesChanged |= ImGui::SliderFloat("Arrive::Weight", &m_arriveWeight, 0.0f, 2.0f);

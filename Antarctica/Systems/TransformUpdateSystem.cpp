@@ -12,6 +12,8 @@
 #include "Managers/FrameCounter.h"
 #include "Managers/TimeManager.h"
 
+#include "Pathfinding/PathFinding.h"
+
 void TransformUpdateSystem::OnUpdateStart()
 {
 	System::OnUpdateStart();
@@ -30,6 +32,14 @@ void TransformUpdateSystem::Update(Entity* entity, TransformComponent* transform
 
 		Point3D newLocalPosition = transform->m_localPosition + Vector3D(movement->m_velocity, 0.0f) * deltaTime;
 
+		Point2D collisionPoint;
+		Vector2D collisionNormal;
+		
+		if (Navigation::PathFinding::m_navMesh->FindCollisionPoint((Point2D) transform->m_localPosition.xy, (Point2D) newLocalPosition.xy, collisionPoint, collisionNormal))
+		{
+			newLocalPosition = collisionPoint;
+		}
+		
 		newLocalPosition.z = Application::Get().GetGameState().GetTerrain()->GetHeightAtLocation((Point2D) newLocalPosition.xy);
 
 		const Vector3D oldDirection = transform->m_localRotation.GetDirectionY();

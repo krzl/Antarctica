@@ -22,7 +22,6 @@ namespace Physics
 			constexpr float deltaTime = TimeManager::GetTimeStep();
 
 			Point2D targetPosition    = (Point2D) transform->m_localPosition.xy + movement->m_velocity * deltaTime + movement->m_positionCorrection;
-			Point2D oldTargetPosition = targetPosition;
 
 			const ComponentAccessor& componentAccessor = entity->GetComponentAccessor();
 			if (const PhysicsBodyComponent* physicsBody = componentAccessor.GetComponent<PhysicsBodyComponent>())
@@ -81,25 +80,28 @@ namespace Physics
 			const Vector3D oldDirection = transform->m_localRotation.GetDirectionY();
 			const float oldOrientation  = std::atan2(-oldDirection.x, oldDirection.y);
 
-			const Vector2D velocityDir    = Normalize(movement->m_velocity);
-			const float targetOrientation = std::atan2(-velocityDir.x, velocityDir.y);
-
-			const float rotation     = RemapAngleRad(targetOrientation - oldOrientation);
-			const float rotationSize = abs(rotation);
-
-			if (rotationSize != 0.0f)
+			if (movement->m_velocity != Vector2D::zero)
 			{
-				const float diff = abs(Min(movement->m_maxRotation * deltaTime, rotationSize)) * rotation / rotationSize;
+				const Vector2D velocityDir = Normalize(movement->m_velocity);
+				const float targetOrientation = std::atan2(-velocityDir.x, velocityDir.y);
 
-				const float newOrientation = oldOrientation + diff;
+				const float rotation = RemapAngleRad(targetOrientation - oldOrientation);
+				const float rotationSize = abs(rotation);
 
-				if (abs(AngleDifference(oldOrientation, targetOrientation)) < abs(AngleDifference(oldOrientation, newOrientation)))
+				if (rotationSize != 0.0f)
 				{
-					transform->m_localRotation = Quaternion::MakeRotationZ(targetOrientation);
-				}
-				else
-				{
-					transform->m_localRotation = Quaternion::MakeRotationZ(newOrientation);
+					const float diff = abs(Min(movement->m_maxRotation * deltaTime, rotationSize)) * rotation / rotationSize;
+
+					const float newOrientation = oldOrientation + diff;
+
+					if (abs(AngleDifference(oldOrientation, targetOrientation)) < abs(AngleDifference(oldOrientation, newOrientation)))
+					{
+						transform->m_localRotation = Quaternion::MakeRotationZ(targetOrientation);
+					}
+					else
+					{
+						transform->m_localRotation = Quaternion::MakeRotationZ(newOrientation);
+					}
 				}
 			}
 		}
