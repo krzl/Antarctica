@@ -9,6 +9,8 @@ Major Features:
 - Steering of entities using different behaviours to simulate crowd movement
 - Simple physics system to resolve entities overlapping with each other and non-navigable terrain
 
+[Sample video](https://www.youtube.com/watch?v=-js0Xm-ugOM)
+
 ## Running Project
 
 Prebuild executable is available in [releases page](https://github.com/krzl/Antarctica/releases)
