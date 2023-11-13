@@ -15,7 +15,7 @@ Prebuild executable is available in [releases page](https://github.com/krzl/Anta
 
 ## Building Project
 
-##### Building Visual Studio solution requires CMake [Click here to download CMake.](https://cmake.org/download/)
+##### Building Visual Studio solution requires CMake [Click here to download CMake.](https://cmake.org/download/) or [Install using Visual Studio Installer](https://learn.microsoft.com/en-us/cpp/linux/download-install-and-setup-the-linux-development-workload?view=msvc-170/) 
 
 Clone this repo, and make sure that submodules are properly initialized
 
