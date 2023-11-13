@@ -9,6 +9,10 @@ Major Features:
 - Steering of entities using different behaviours to simulate crowd movement
 - Simple physics system to resolve entities overlapping with each other and non-navigable terrain
 
+## Running Project
+
+Prebuild executable is available in [releases page](https://github.com/krzl/Antarctica/releases)
+
 ## Building Project
 
 ##### Building Visual Studio solution requires CMake [Click here to download CMake.](https://cmake.org/download/)
@@ -26,6 +30,8 @@ cmake CMakeLists.txt
 ```
 
 Open Antarctica.sln , change build configuration to Release, make sure that Game is selected as Startup Project
+
+On [releases page](https://github.com/krzl/Antarctica/releases) there is also available prebuild visual studio solution, however it requires to be unpacked in C:/Antarctica folder
 
 ## Controls
 
