@@ -33,7 +33,7 @@ cmake CMakeLists.txt
 
 Open Antarctica.sln , change build configuration to Release, make sure that Game is selected as Startup Project
 
-On [releases page](https://github.com/krzl/Antarctica/releases) there is also available prebuild visual studio solution, however it requires to be unpacked in C:/Antarctica folder
+On [releases page](https://github.com/krzl/Antarctica/releases) there is also available prebuild visual studio 2022 solution
 
 ## Controls
 
